@@ -84,7 +84,7 @@ def run_length_control(lmpptr, nevery, *argv):
 
     Note:
         Each input value throug argv can be the result of a `compute` or
-        `fix` or the evaluation of an equal-style or vector-style `variable`.
+        a `fix` or the evaluation of an equal-style or vector-style `variable`.
         In each case, the `compute`, `fix`, or `variable` must produce a
         global quantity, not a per-atom or local quantity. And the global
         quantity must be a scalar, not a vector or array.
@@ -97,7 +97,7 @@ def run_length_control(lmpptr, nevery, *argv):
         as an input here. Variables of style atom cannot be used, since they
         produce per-atom values.
 
-        Each input value throug argv following the argument `lb`, or `lbound`
+        Each input value through argv following the argument `lb`, or `lbound`
         and `ub`, or `ubound` must previously be defined in the input script
         as the evaluation of an equal-style `variable`.
 
