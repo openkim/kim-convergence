@@ -29,14 +29,7 @@ from .utils import \
     subsample
 from .equilibration_length import estimate_equilibration_length
 from .ucl import \
-    set_heidel_welch_constants, \
-    get_heidel_welch_constants, \
-    get_heidel_welch_set, \
-    get_heidel_welch_knp, \
-    get_heidel_welch_A, \
-    get_heidel_welch_C1, \
-    get_heidel_welch_C2, \
-    get_heidel_welch_tm, \
+    HeidelbergerWelch, \
     ucl
 from .timeseries import \
     run_length_control
@@ -67,14 +60,7 @@ __all__ = [
     'train_test_split',
     'subsample',
     'estimate_equilibration_length',
-    'set_heidel_welch_constants',
-    'get_heidel_welch_constants',
-    'get_heidel_welch_set',
-    'get_heidel_welch_knp',
-    'get_heidel_welch_A',
-    'get_heidel_welch_C1',
-    'get_heidel_welch_C2',
-    'get_heidel_welch_tm',
+    'HeidelbergerWelch',
     'ucl',
     'run_length_control',
 ]
