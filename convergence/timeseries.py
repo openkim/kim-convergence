@@ -13,7 +13,7 @@ from .statistical_inefficiency import \
     split_r_statistical_inefficiency, \
     split_statistical_inefficiency, \
     si_methods
-from .ucl import ucl
+from .ucl import HeidelbergerWelch, ucl
 
 __all__ = [
     'run_length_control',
@@ -182,7 +182,8 @@ def run_length_control(get_trajectory,
     if not isinstance(maximum_run_length, int):
         msg = 'maximum_run_length must be an `int`.'
         raise CVGError(msg)
-    elif maximum_run_length < 1:
+
+    if maximum_run_length < 1:
         msg = 'maximum_run_length must be a positive `int` '
         msg += 'greater than or equal 1'
         raise CVGError(msg)
@@ -194,7 +195,8 @@ def run_length_control(get_trajectory,
     if not isinstance(maximum_equilibration_step, int):
         msg = 'maximum_equilibration_step must be an `int`.'
         raise CVGError(msg)
-    elif maximum_equilibration_step < 1 or \
+
+    if maximum_equilibration_step < 1 or \
             maximum_equilibration_step >= maximum_run_length:
         msg = 'maximum_equilibration_step = '
         msg += '{} must be a positive '.format(maximum_equilibration_step)
@@ -205,7 +207,8 @@ def run_length_control(get_trajectory,
     if not isinstance(nval, int):
         msg = 'nval must be an `int`.'
         raise CVGError(msg)
-    elif nval < 1:
+
+    if nval < 1:
         msg = 'nval must be a positive `int` greater than or equal 1.'
         raise CVGError(msg)
 
@@ -238,6 +241,13 @@ def run_length_control(get_trajectory,
             msg = 'eps must be a scalar (a `float`) or a 1darray of size = '
             msg += '{}.'.format(nval)
             raise CVGError(msg)
+
+    try:
+        # Initialize the HeidelbergerWelch object
+        heidel_welch = HeidelbergerWelch(p=p, k=k)
+    except CVGError:
+        msg = "Failed to initialize the HeidelbergerWelch object."
+        raise CVGError(msg)
 
     # Initial length
     run_length = min(initial_run_length, maximum_run_length)
@@ -334,13 +344,18 @@ def run_length_control(get_trajectory,
         si_func = si_methods[si]
 
         while True:
-            # Get the upper confidence limit
-            upper_confidence_limit = ucl(t[equilibration_step:],
-                                         p=p,
-                                         k=k,
-                                         fft=fft,
-                                         test_size=test_size,
-                                         train_size=train_size)
+            try:
+                # Get the upper confidence limit
+                upper_confidence_limit = ucl(t[equilibration_step:],
+                                             p=p,
+                                             k=k,
+                                             fft=fft,
+                                             test_size=test_size,
+                                             train_size=train_size,
+                                             heidel_welch=heidel_welch)
+            except:
+                msg = "Failed to get the upper confidence limit."
+                raise CVGError(msg)
 
             # Compute the mean
             _mean = np.mean(t[equilibration_step:])
@@ -622,13 +637,19 @@ def run_length_control(get_trajectory,
 
         while True:
             for i in range(nval):
-                # Get the upper confidence limit
-                upper_confidence_limit[i] = ucl(t[i, equilibration_step[i]:],
-                                                p=p,
-                                                k=k,
-                                                fft=fft,
-                                                test_size=test_size,
-                                                train_size=train_size)
+                try:
+                    # Get the upper confidence limit
+                    upper_confidence_limit[i] = ucl(
+                        t[i, equilibration_step[i]:],
+                        p=p,
+                        k=k,
+                        fft=fft,
+                        test_size=test_size,
+                        train_size=train_size,
+                        heidel_welch=heidel_welch)
+                except CVGError:
+                    msg = "Failed to get the upper confidence limit."
+                    raise CVGError(msg)
 
             # Compute the mean
             for i in range(nval):
