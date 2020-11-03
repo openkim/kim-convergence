@@ -15,103 +15,154 @@ class TestUCLModule(unittest.TestCase):
 
     def test_set_heidel_welch_constants(self):
         """Test set_heidel_welch_constants function."""
+        try:
+            # Initialize the HeidelbergerWelch object
+            heidel_welch = cvg.HeidelbergerWelch()
+        except CVGError:
+            msg = "Failed to initialize the HeidelbergerWelch object."
+            raise CVGError(msg)
+
         heidel_welch_set, \
             heidel_welch_k, \
             heidel_welch_n, \
             heidel_welch_p, \
-            A, \
-            Aplus_1, \
-            Aplus_2, \
-            Aplus_3, \
-            heidel_welch_C1_1, \
-            heidel_welch_C1_2, \
-            heidel_welch_C1_3, \
-            heidel_welch_C2_1, \
-            heidel_welch_C2_2, \
-            heidel_welch_C2_3, \
+            a_matrix, \
+            a_matrix_1_inv, \
+            a_matrix_2_inv, \
+            a_matrix_3_inv, \
+            heidel_welch_c1_1, \
+            heidel_welch_c1_2, \
+            heidel_welch_c1_3, \
+            heidel_welch_c2_1, \
+            heidel_welch_c2_2, \
+            heidel_welch_c2_3, \
             tm_1, \
             tm_2, \
-            tm_3 = cvg.get_heidel_welch_constants()
+            tm_3 = heidel_welch.get_heidel_welch_constants()
+
+        self.assertTrue(heidel_welch_set)
+        self.assertIsNotNone(heidel_welch_k)
+        self.assertIsNotNone(heidel_welch_n)
+        self.assertIsNotNone(heidel_welch_p)
+        self.assertIsNotNone(a_matrix)
+        self.assertIsNotNone(a_matrix_1_inv)
+        self.assertIsNotNone(a_matrix_2_inv)
+        self.assertIsNotNone(a_matrix_3_inv)
+        self.assertIsNotNone(heidel_welch_c1_1)
+        self.assertIsNotNone(heidel_welch_c1_2)
+        self.assertIsNotNone(heidel_welch_c1_3)
+        self.assertIsNotNone(heidel_welch_c2_1)
+        self.assertIsNotNone(heidel_welch_c2_2)
+        self.assertIsNotNone(heidel_welch_c2_3)
+        self.assertIsNotNone(tm_1)
+        self.assertIsNotNone(tm_2)
+        self.assertIsNotNone(tm_3)
+
+        self.assertRaises(
+            CVGError, heidel_welch.set_heidel_welch_constants, p=0.0)
+        self.assertRaises(
+            CVGError, heidel_welch.set_heidel_welch_constants, p=1.0)
+
+        self.assertRaises(
+            CVGError, heidel_welch.set_heidel_welch_constants, k=0)
+        self.assertRaises(
+            CVGError, heidel_welch.set_heidel_welch_constants, k=10)
+
+        heidel_welch.unset_heidel_welch_constants()
+
+        heidel_welch_set, \
+            heidel_welch_k, \
+            heidel_welch_n, \
+            heidel_welch_p, \
+            a_matrix, \
+            a_matrix_1_inv, \
+            a_matrix_2_inv, \
+            a_matrix_3_inv, \
+            heidel_welch_c1_1, \
+            heidel_welch_c1_2, \
+            heidel_welch_c1_3, \
+            heidel_welch_c2_1, \
+            heidel_welch_c2_2, \
+            heidel_welch_c2_3, \
+            tm_1, \
+            tm_2, \
+            tm_3 = heidel_welch.get_heidel_welch_constants()
 
         self.assertFalse(heidel_welch_set)
         self.assertIsNone(heidel_welch_k)
         self.assertIsNone(heidel_welch_n)
         self.assertIsNone(heidel_welch_p)
-        self.assertIsNone(A)
-        self.assertIsNone(Aplus_1)
-        self.assertIsNone(Aplus_2)
-        self.assertIsNone(Aplus_3)
-        self.assertIsNone(heidel_welch_C1_1)
-        self.assertIsNone(heidel_welch_C1_2)
-        self.assertIsNone(heidel_welch_C1_3)
-        self.assertIsNone(heidel_welch_C2_1)
-        self.assertIsNone(heidel_welch_C2_2)
-        self.assertIsNone(heidel_welch_C2_3)
+        self.assertIsNone(a_matrix)
+        self.assertIsNone(a_matrix_1_inv)
+        self.assertIsNone(a_matrix_2_inv)
+        self.assertIsNone(a_matrix_3_inv)
+        self.assertIsNone(heidel_welch_c1_1)
+        self.assertIsNone(heidel_welch_c1_2)
+        self.assertIsNone(heidel_welch_c1_3)
+        self.assertIsNone(heidel_welch_c2_1)
+        self.assertIsNone(heidel_welch_c2_2)
+        self.assertIsNone(heidel_welch_c2_3)
         self.assertIsNone(tm_1)
         self.assertIsNone(tm_2)
         self.assertIsNone(tm_3)
 
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, p=0.0)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, p=1.0)
-        
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k=0)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k=10)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k=50.0)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k=-10.0)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k='50')
+        self.assertRaises(
+            CVGError, heidel_welch.set_heidel_welch_constants, k=50.0)
+        self.assertRaises(
+            CVGError, heidel_welch.set_heidel_welch_constants, k=-10.0)
+        self.assertRaises(
+            CVGError, heidel_welch.set_heidel_welch_constants, k='50')
 
-        cvg.set_heidel_welch_constants()
+        heidel_welch.set_heidel_welch_constants()
 
-        heidel_welch_set = cvg.get_heidel_welch_set()
-
-        self.assertTrue(heidel_welch_set)
+        self.assertTrue(heidel_welch.is_heidel_welch_set())
 
         heidel_welch_k, heidel_welch_n, \
-            heidel_welch_p = cvg.get_heidel_welch_knp()
+            heidel_welch_p = heidel_welch.get_heidel_welch_knp()
 
         self.assertTrue(heidel_welch_k == 50)
         self.assertTrue(heidel_welch_n == 200)
         self.assertTrue(heidel_welch_p == 0.975)
 
-        heidel_welch_C1_1, heidel_welch_C1_2, \
-            heidel_welch_C1_3 = cvg.get_heidel_welch_C1()
+        heidel_welch_c1_1, heidel_welch_c1_2, \
+            heidel_welch_c1_3 = heidel_welch.get_heidel_welch_c1()
 
-        self.assertAlmostEqual(heidel_welch_C1_1, 0.974, places=3)
-        self.assertAlmostEqual(heidel_welch_C1_2, 0.941, places=3)
+        self.assertAlmostEqual(heidel_welch_c1_1, 0.974, places=3)
+        self.assertAlmostEqual(heidel_welch_c1_2, 0.941, places=3)
         # In the paper it is rounded up to 0.895
-        self.assertAlmostEqual(heidel_welch_C1_3, 0.894, places=3)
+        self.assertAlmostEqual(heidel_welch_c1_3, 0.894, places=3)
 
-        heidel_welch_C2_1, heidel_welch_C2_2, \
-            heidel_welch_C2_3 = cvg.get_heidel_welch_C2()
+        heidel_welch_c2_1, heidel_welch_c2_2, \
+            heidel_welch_c2_3 = heidel_welch.get_heidel_welch_c2()
 
-        self.assertTrue(heidel_welch_C2_1 == 37)
-        self.assertTrue(heidel_welch_C2_2 == 16)
-        self.assertTrue(heidel_welch_C2_3 == 8)
+        self.assertTrue(heidel_welch_c2_1 == 37)
+        self.assertTrue(heidel_welch_c2_2 == 16)
+        self.assertTrue(heidel_welch_c2_3 == 8)
 
-        cvg.set_heidel_welch_constants(k=25)
+        heidel_welch.set_heidel_welch_constants(k=25)
 
         heidel_welch_k, heidel_welch_n, \
-            heidel_welch_p = cvg.get_heidel_welch_knp()
+            heidel_welch_p = heidel_welch.get_heidel_welch_knp()
 
         self.assertTrue(heidel_welch_k == 25)
         self.assertTrue(heidel_welch_n == 100)
         self.assertTrue(heidel_welch_p == 0.975)
 
-        heidel_welch_C1_1, heidel_welch_C1_2, \
-            heidel_welch_C1_3 = cvg.get_heidel_welch_C1()
+        heidel_welch_c1_1, heidel_welch_c1_2, \
+            heidel_welch_c1_3 = heidel_welch.get_heidel_welch_c1()
 
-        self.assertAlmostEqual(heidel_welch_C1_1, 0.948, places=3)
+        self.assertAlmostEqual(heidel_welch_c1_1, 0.948, places=3)
         # In the paper it is rounded up to 0.882
-        self.assertAlmostEqual(heidel_welch_C1_2, 0.881, places=3)
+        self.assertAlmostEqual(heidel_welch_c1_2, 0.881, places=3)
         # In the paper it is rounded up to 0.784
-        self.assertAlmostEqual(heidel_welch_C1_3, 0.783, places=3)
+        self.assertAlmostEqual(heidel_welch_c1_3, 0.783, places=3)
 
-        heidel_welch_C2_1, heidel_welch_C2_2, \
-            heidel_welch_C2_3 = cvg.get_heidel_welch_C2()
+        heidel_welch_c2_1, heidel_welch_c2_2, \
+            heidel_welch_c2_3 = heidel_welch.get_heidel_welch_c2()
 
-        self.assertTrue(heidel_welch_C2_1 == 18)
-        self.assertTrue(heidel_welch_C2_2 == 7)
-        self.assertTrue(heidel_welch_C2_3 == 3)
+        self.assertTrue(heidel_welch_c2_1 == 18)
+        self.assertTrue(heidel_welch_c2_2 == 7)
+        self.assertTrue(heidel_welch_c2_3 == 3)
 
     def test_ucl(self):
         """Test ucl function."""
