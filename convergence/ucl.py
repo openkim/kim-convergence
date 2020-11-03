@@ -10,219 +10,272 @@ from .t_dist import t_inv_cdf
 from .utils import train_test_split
 
 __all__ = [
-    'set_heidel_welch_constants',
-    'get_heidel_welch_constants',
-    'get_heidel_welch_set',
-    'get_heidel_welch_knp',
-    'get_heidel_welch_A',
-    'get_heidel_welch_C1',
-    'get_heidel_welch_C2',
-    'get_heidel_welch_tm',
+    'HeidelbergerWelch',
     'ucl',
 ]
 
 
-# Heidelberger and Welch (1981)
-#
-# Heidelberger, P. and Welch, P.D. (1981). "A Spectral Method for Confidence
-# Interval Generation and Run Length Control in Simulations". Comm. ACM., 24,
-# p. 233--245.
-heidel_welch_set = False
-"""bool: Flag indicating if the Heidelberger and Welch constants are set."""
+class HeidelbergerWelch:
+    """Heidelberger and Welch class.
 
-heidel_welch_k = None
-"""int: The number of points that are used to obtain the polynomial fit in Heidelberger and Welch's spectral method."""
-heidel_welch_n = None
-"""int: The number of time series data points or number of batches in Heidelberger and Welch's spectral method."""
-heidel_welch_p = None
-"""float: Probability."""
+    Heidelberger and Welch (1981) [2]_ Object.
 
-A = None
-"""array_2d: Auxiliary matrix."""
-
-Aplus_1 = None
-"""array_2d: The (Moore-Penrose) pseudo-inverse of a matrix for the first degree polynomial fit in Heidelberger and Welch's spectral method."""
-Aplus_2 = None
-"""array_2d: The (Moore-Penrose) pseudo-inverse of a matrix for the second degree polynomial fit in Heidelberger and Welch's spectral method."""
-Aplus_3 = None
-"""array_2d: The (Moore-Penrose) pseudo-inverse of a matrix for the third degree polynomial fit in Heidelberger and Welch's spectral method."""
-
-heidel_welch_C1_1 = None
-"""float: Heidelberger and Welch's C1 constant for the first degree polynomial fit."""
-heidel_welch_C1_2 = None
-"""float: Heidelberger and Welch's C1 constant for the second degree polynomial fit."""
-heidel_welch_C1_3 = None
-"""float: Heidelberger and Welch's C1 constant for the third degree polynomial fit."""
-
-heidel_welch_C2_1 = None
-"""int: Heidelberger and Welch's C2 constant for the first degree polynomial fit."""
-heidel_welch_C2_2 = None
-"""int: Heidelberger and Welch's C2 constant for the first degree polynomial fit."""
-heidel_welch_C2_3 = None
-"""int: Heidelberger and Welch's C2 constant for the first degree polynomial fit."""
-
-tm_1 = None
-"""float: t_distribution inverse cumulative distribution function for C2_1 degrees of freedom."""
-tm_2 = None
-"""float: t_distribution inverse cumulative distribution function for C2_2 degrees of freedom."""
-tm_3 = None
-"""float: t_distribution inverse cumulative distribution function for C2_3 degrees of freedom."""
-
-
-def set_heidel_welch_constants(p=0.975, k=50):
-    """Set Heidelberger and Welch constants globally.
-
-    Set the constants necessary for application of the Heidelberger and
-    Welch's [2]_ confidence interval generation method.
-
-    Keyword Args:
-        p (float, optional): probability (or confidence interval) and must be
-            between 0.0 and 1.0. (default: 0.975)
-        k (int, optional): the number of points in Heidelberger and Welch's
-            spectral method that are used to obtain the polynomial fit. The
-            parameter ``k`` determines the frequency range over which the fit
-            is made. (default: 50)
+    Attributes:
+        heidel_welch_set (bool): Flag indicating if the Heidelberger and Welch
+            constants are set.
+        heidel_welch_k (int) : The number of points that are used to obtain the
+            polynomial fit in Heidelberger and Welch's spectral method.
+        heidel_welch_n (int) : The number of time series data points or number
+            of batches in Heidelberger and Welch's spectral method.
+        heidel_welch_p (float) : Probability.
+        a_matrix (ndarray) : Auxiliary matrix.
+        a_matrix_1_inv (ndarray) : The (Moore-Penrose) pseudo-inverse of a
+            matrix for the first degree polynomial fit in Heidelberger and
+            Welch's spectral method.
+        a_matrix_2_inv (ndarray) : The (Moore-Penrose) pseudo-inverse of a
+            matrix for the second degree polynomial fit in Heidelberger and
+            Welch's spectral method.
+        a_matrix_3_inv (ndarray) : The (Moore-Penrose) pseudo-inverse of a
+            matrix for the third degree polynomial fit in Heidelberger and
+            Welch's spectral method.
+        heidel_welch_c1_1 (float) : Heidelberger and Welch's C1 constant for
+            the first degree polynomial fit.
+        heidel_welch_c1_2 (float) : Heidelberger and Welch's C1 constant for
+            the second degree polynomial fit.
+        heidel_welch_c1_3 (float) : Heidelberger and Welch's C1 constant for
+            the third degree polynomial fit.
+        heidel_welch_c2_1 (float) : Heidelberger and Welch's C2 constant for
+            the first degree polynomial fit.
+        heidel_welch_c2_2 (float) : Heidelberger and Welch's C2 constant for
+            the second degree polynomial fit.
+        heidel_welch_c2_3 (float) : Heidelberger and Welch's C2 constant for
+            the third degree polynomial fit.
+        tm_1 (float) : t_distribution inverse cumulative distribution function
+            for C2_1 degrees of freedom.
+        tm_2 (float) : t_distribution inverse cumulative distribution function
+            for C2_2 degrees of freedom.
+        tm_3 (float) : t_distribution inverse cumulative distribution function
+            for C2_3 degrees of freedom.
 
     """
-    global heidel_welch_set
-    global heidel_welch_k
-    global heidel_welch_n
-    global heidel_welch_p
-    global A
-    global Aplus_1
-    global Aplus_2
-    global Aplus_3
-    global heidel_welch_C1_1
-    global heidel_welch_C1_2
-    global heidel_welch_C1_3
-    global heidel_welch_C2_1
-    global heidel_welch_C2_2
-    global heidel_welch_C2_3
-    global tm_1, tm_2, tm_3
 
-    if p <= 0.0 or p >= 1.0:
-        msg = 'probability (or confidence interval) p = {} '.format(p)
-        msg += 'is not in the range (0.0 1.0).'
-        raise CVGError(msg)
+    def __init__(self, *, p=0.975, k=50):
+        """Initialize the class.
 
-    if heidel_welch_set and k == heidel_welch_k:
-        if p != heidel_welch_p:
-            tm_1 = t_inv_cdf(p, heidel_welch_C2_1)
-            tm_2 = t_inv_cdf(p, heidel_welch_C2_2)
-            tm_3 = t_inv_cdf(p, heidel_welch_C2_3)
-            heidel_welch_p = p
-        return
+        Initialize a HeidelbergerWelch object and set the constants.
 
-    if isinstance(k, int):
-        if k < 25:
-            msg = 'wrong number of points k = {} is given to '.format(k)
-            msg = 'obtain the polynomial fit. According to Heidelberger, '
-            msg += 'and Welch, (1981), this procedure at least needs to '
-            msg += 'have 25 points.'
+        Keyword Args:
+            p (float, optional): probability (or confidence interval) and
+                must be between 0.0 and 1.0. (default: 0.975)
+            k (int, optional): the number of points in Heidelberger and
+                Welch's spectral method that are used to obtain the
+                polynomial fit. The parameter ``k`` determines the
+                frequency range over which the fit is made. (default: 50)
+
+        """
+        self.heidel_welch_set = False
+        self.heidel_welch_k = None
+        self.heidel_welch_n = None
+        self.heidel_welch_p = None
+        self.a_matrix = None
+        self.a_matrix_1_inv = None
+        self.a_matrix_2_inv = None
+        self.a_matrix_3_inv = None
+        self.heidel_welch_c1_1 = None
+        self.heidel_welch_c1_2 = None
+        self.heidel_welch_c1_3 = None
+        self.heidel_welch_c2_1 = None
+        self.heidel_welch_c2_2 = None
+        self.heidel_welch_c2_3 = None
+        self.tm_1 = None
+        self.tm_2 = None
+        self.tm_3 = None
+        try:
+            self.set_heidel_welch_constants(p=p, k=k)
+        except CVGError:
+            msg = "Failed to set the Heidelberger and Welch constants."
             raise CVGError(msg)
-    else:
-        msg = 'k is the number of points and should be a positive `int`.'
-        raise CVGError(msg)
 
-    heidel_welch_k = k
-    heidel_welch_n = k * 4
-    heidel_welch_p = p
+    def set_heidel_welch_constants(self, *, p=0.975, k=50):
+        """Set Heidelberger and Welch constants globally.
 
-    # Auxiliary matrix
-    f = np.arange(1, heidel_welch_k + 1) * 4 - 1.0
-    f /= (2.0 * heidel_welch_n)
+        Set the constants necessary for application of the Heidelberger and
+        Welch's [2]_ confidence interval generation method.
 
-    A = np.empty((heidel_welch_k, 4), dtype=np.float64)
+        Keyword Args:
+            p (float, optional): probability (or confidence interval) and
+                must be between 0.0 and 1.0. (default: 0.975)
+            k (int, optional): the number of points in Heidelberger and
+                Welch's spectral method that are used to obtain the
+                polynomial fit. The parameter ``k`` determines the
+                frequency range over which the fit is made. (default: 50)
 
-    A[:, 0] = np.ones((heidel_welch_k), dtype=np.float64)
-    A[:, 1] = f
-    A[:, 2] = f * f
-    A[:, 3] = A[:, 2] * f
+        """
+        if p <= 0.0 or p >= 1.0:
+            msg = 'probability (or confidence interval) p = {} '.format(p)
+            msg += 'is not in the range (0.0 1.0).'
+            raise CVGError(msg)
 
-    # The (Moore-Penrose) pseudo-inverse of a matrix.
-    # Calculate the generalized inverse of a matrix using its singular-value
-    # decomposition (SVD) and including all large singular values.
-    Aplus_1 = pinv(A[:, :2])
-    Aplus_2 = pinv(A[:, :3])
-    Aplus_3 = pinv(A)
+        if self.heidel_welch_set and k == self.heidel_welch_k:
+            if p != self.heidel_welch_p:
+                self.tm_1 = t_inv_cdf(p, self.heidel_welch_c2_1)
+                self.tm_2 = t_inv_cdf(p, self.heidel_welch_c2_2)
+                self.tm_3 = t_inv_cdf(p, self.heidel_welch_c2_3)
+                self.heidel_welch_p = p
+            return
 
-    # Heidelberger and Welch (1981) constants Table 1
-    _sigma2 = 0.645 * inv(np.dot(np.transpose(A[:, :2]), A[:, :2]))[0, 0]
-    heidel_welch_C1_1 = np.exp(-_sigma2 / 2.)
-    # Heidelberger and Welch's C2 constant for the first degree polynomial fit.
-    heidel_welch_C2_1 = int(np.rint(2. / (np.exp(_sigma2) - 1.)))
+        if isinstance(k, int):
+            if k < 25:
+                msg = 'wrong number of points k = {} is '.format(k)
+                msg = 'given to obtain the polynomial fit. According to '
+                msg += 'Heidelberger, and Welch, (1981), this procedure '
+                msg += 'at least needs to have 25 points.'
+                raise CVGError(msg)
+        else:
+            msg = 'k = {} is the number of points '.format(k)
+            msg += 'and should be a positive `int`.'
+            raise CVGError(msg)
 
-    _sigma2 = 0.645 * inv(np.dot(np.transpose(A[:, :3]), A[:, :3]))[0, 0]
-    heidel_welch_C1_2 = np.exp(-_sigma2 / 2.)
-    # Heidelberger and Welch's C2 constant for the second degree polynomial fit.
-    heidel_welch_C2_2 = int(np.rint(2. / (np.exp(_sigma2) - 1.)))
+        self.heidel_welch_k = k
+        self.heidel_welch_n = k * 4
+        self.heidel_welch_p = p
 
-    _sigma2 = 0.645 * inv(np.dot(np.transpose(A), A))[0, 0]
-    heidel_welch_C1_3 = np.exp(-_sigma2 / 2.)
-    # Heidelberger and Welch's C2 constant for the third degree polynomial fit.
-    heidel_welch_C2_3 = int(np.rint(2. / (np.exp(_sigma2) - 1.)))
+        # Auxiliary matrix
+        aux_array = np.arange(1, self.heidel_welch_k + 1) * 4 - 1.0
+        aux_array /= (2.0 * self.heidel_welch_n)
 
-    tm_1 = t_inv_cdf(p, heidel_welch_C2_1)
-    tm_2 = t_inv_cdf(p, heidel_welch_C2_2)
-    tm_3 = t_inv_cdf(p, heidel_welch_C2_3)
+        self.a_matrix = np.empty((self.heidel_welch_k, 4), dtype=np.float64)
 
-    # Set the flag
-    heidel_welch_set = True
+        self.a_matrix[:, 0] = np.ones((self.heidel_welch_k), dtype=np.float64)
+        self.a_matrix[:, 1] = aux_array
+        self.a_matrix[:, 2] = aux_array * aux_array
+        self.a_matrix[:, 3] = self.a_matrix[:, 2] * aux_array
+
+        # The (Moore-Penrose) pseudo-inverse of a matrix.
+        # Calculate the generalized inverse of a matrix using
+        # its singular-value decomposition (SVD) and including all
+        # large singular values.
+        self.a_matrix_1_inv = pinv(self.a_matrix[:, :2])
+        self.a_matrix_2_inv = pinv(self.a_matrix[:, :3])
+        self.a_matrix_3_inv = pinv(self.a_matrix)
+
+        # Heidelberger and Welch (1981) constants Table 1
+        _sigma2 = 0.645 * \
+            inv(np.dot(np.transpose(self.a_matrix[:, :2]),
+                       self.a_matrix[:, :2]))[0, 0]
+        self.heidel_welch_c1_1 = np.exp(-_sigma2 / 2.)
+        # Heidelberger and Welch's C2 constant for
+        # the first degree polynomial fit.
+        self.heidel_welch_c2_1 = int(np.rint(2. / (np.exp(_sigma2) - 1.)))
+
+        _sigma2 = 0.645 * \
+            inv(np.dot(np.transpose(self.a_matrix[:, :3]),
+                       self.a_matrix[:, :3]))[0, 0]
+        self.heidel_welch_c1_2 = np.exp(-_sigma2 / 2.)
+        # Heidelberger and Welch's C2 constant for
+        # the second degree polynomial fit.
+        self.heidel_welch_c2_2 = int(np.rint(2. / (np.exp(_sigma2) - 1.)))
+
+        _sigma2 = 0.645 * \
+            inv(np.dot(np.transpose(self.a_matrix), self.a_matrix))[0, 0]
+        self.heidel_welch_c1_3 = np.exp(-_sigma2 / 2.)
+        # Heidelberger and Welch's C2 constant for
+        # the third degree polynomial fit.
+        self.heidel_welch_c2_3 = int(np.rint(2. / (np.exp(_sigma2) - 1.)))
+
+        self.tm_1 = t_inv_cdf(p, self.heidel_welch_c2_1)
+        self.tm_2 = t_inv_cdf(p, self.heidel_welch_c2_2)
+        self.tm_3 = t_inv_cdf(p, self.heidel_welch_c2_3)
+
+        # Set the flag
+        self.heidel_welch_set = True
+
+    def unset_heidel_welch_constants(self):
+        """Unset the Heidelberger and Welch flag."""
+        # Unset the flag
+        self.heidel_welch_set = False
+        self.heidel_welch_k = None
+        self.heidel_welch_n = None
+        self.heidel_welch_p = None
+        self.a_matrix = None
+        self.a_matrix_1_inv = None
+        self.a_matrix_2_inv = None
+        self.a_matrix_3_inv = None
+        self.heidel_welch_c1_1 = None
+        self.heidel_welch_c1_2 = None
+        self.heidel_welch_c1_3 = None
+        self.heidel_welch_c2_1 = None
+        self.heidel_welch_c2_2 = None
+        self.heidel_welch_c2_3 = None
+        self.tm_1 = None
+        self.tm_2 = None
+        self.tm_3 = None
+
+    def get_heidel_welch_constants(self):
+        """Get the Heidelberger and Welch constants."""
+        return \
+            self.heidel_welch_set, \
+            self.heidel_welch_k, \
+            self.heidel_welch_n, \
+            self.heidel_welch_p, \
+            self.a_matrix, \
+            self.a_matrix_1_inv, \
+            self.a_matrix_2_inv, \
+            self.a_matrix_3_inv, \
+            self.heidel_welch_c1_1, \
+            self.heidel_welch_c1_2, \
+            self.heidel_welch_c1_3, \
+            self.heidel_welch_c2_1, \
+            self.heidel_welch_c2_2, \
+            self.heidel_welch_c2_3, \
+            self.tm_1, \
+            self.tm_2, \
+            self.tm_3
+
+    def is_heidel_welch_set(self):
+        """Return `True` if the flag is set to `True`."""
+        return self.heidel_welch_set
+
+    def get_heidel_welch_knp(self):
+        """Get the Heidelberger and Welch k, n, and p constants."""
+        return \
+            self.heidel_welch_k, \
+            self.heidel_welch_n, \
+            self.heidel_welch_p
+
+    def get_heidel_welch_auxilary_matrices(self):
+        """Get the Heidelberger and Welch auxilary matrices."""
+        return \
+            self.a_matrix, \
+            self.a_matrix_1_inv, \
+            self.a_matrix_2_inv, \
+            self.a_matrix_3_inv
+
+    def get_heidel_welch_c1(self):
+        """Get the Heidelberger and Welch C1 constants."""
+        return \
+            self.heidel_welch_c1_1, \
+            self.heidel_welch_c1_2, \
+            self.heidel_welch_c1_3
+
+    def get_heidel_welch_c2(self):
+        """Get the Heidelberger and Welch C2 constants."""
+        return \
+            self.heidel_welch_c2_1, \
+            self.heidel_welch_c2_2, \
+            self.heidel_welch_c2_3
+
+    def get_heidel_welch_tm(self):
+        """Get the Heidelberger and Welch t_distribution ppf.
+
+        Get the Heidelberger and Welch t_distribution ppf for C2 degrees of
+        freedom.
+        """
+        return self.tm_1, self.tm_2, self.tm_3
 
 
-def get_heidel_welch_constants():
-    """Get the Heidelberger and Welch constants."""
-    return \
-        heidel_welch_set, \
-        heidel_welch_k, \
-        heidel_welch_n, \
-        heidel_welch_p, \
-        A, \
-        Aplus_1, \
-        Aplus_2, \
-        Aplus_3, \
-        heidel_welch_C1_1, \
-        heidel_welch_C1_2, \
-        heidel_welch_C1_3, \
-        heidel_welch_C2_1, \
-        heidel_welch_C2_2, \
-        heidel_welch_C2_3, \
-        tm_1, \
-        tm_2, \
-        tm_3
-
-
-def get_heidel_welch_set():
-    """Get the Heidelberger and Welch setting flag."""
-    return heidel_welch_set
-
-
-def get_heidel_welch_knp():
-    """Get the Heidelberger and Welch k, n, and p constants."""
-    return heidel_welch_k, heidel_welch_n, heidel_welch_p
-
-
-def get_heidel_welch_A():
-    """Get the Heidelberger and Welch auxilary matrices."""
-    return A, Aplus_1, Aplus_2, Aplus_3
-
-
-def get_heidel_welch_C1():
-    """Get the Heidelberger and Welch C1 constants."""
-    return heidel_welch_C1_1, heidel_welch_C1_2, heidel_welch_C1_3
-
-
-def get_heidel_welch_C2():
-    """Get the Heidelberger and Welch C2 constants."""
-    return heidel_welch_C2_1, heidel_welch_C2_2, heidel_welch_C2_3
-
-
-def get_heidel_welch_tm():
-    """Get the Heidelberger and Welch t_distribution ppf for C2 degrees of freedom."""
-    return tm_1, tm_1, tm_1
-
-
-def ucl(x, *, p=0.975, k=50, fft=True, test_size=None, train_size=None):
+def ucl(x, *, p=0.975, k=50, fft=True,
+        test_size=None, train_size=None, heidel_welch=None):
     r"""Approximate the upper confidence limit of the mean.
 
     Approximate an unbiased estimate of the upper confidence limit or
@@ -274,6 +327,8 @@ def ucl(x, *, p=0.975, k=50, fft=True, test_size=None, train_size=None):
           and 1.0 and represent the proportion of the preiodogram dataset to
           include in the train split. If ``int``, represents the absolute
           number of train samples. (default: None)
+        heidel_welch (obj, optional): An instance of the HeidelbergerWelch
+          object.
 
     Returns:
         float: upper_confidence_limit
@@ -296,105 +351,120 @@ def ucl(x, *, p=0.975, k=50, fft=True, test_size=None, train_size=None):
         msg = 'x is not an array of one-dimension.'
         raise CVGError(msg)
 
-    # We compute once and use it during iterations
-    if not heidel_welch_set or k != heidel_welch_k or p != heidel_welch_p:
-        set_heidel_welch_constants(p=p, k=k)
+    if heidel_welch is None:
+        hwl = HeidelbergerWelch(p=p, k=k)
+    else:
+        hwl = heidel_welch
 
-    batch_size = x.size // heidel_welch_n
+        # We compute once and use it during iterations
+        if not hwl.heidel_welch_set or \
+            k != hwl.heidel_welch_k or \
+                p != hwl.heidel_welch_p:
+            hwl.set_heidel_welch_constants(p=p, k=k)
+
+    batch_size = x.size // hwl.heidel_welch_n
 
     if batch_size < 1:
         msg = 'not enough data points (batching of the data is not '
         msg += 'possible).\nThe input time series has '
         msg += '{} data points which is smaller than the '.format(x.size)
         msg += 'minimum number of required points = '
-        msg += '{} for batching.'.format(heidel_welch_n)
+        msg += '{} for batching.'.format(hwl.heidel_welch_n)
         raise CVGError(msg)
 
     # Batch the data
-    z = batch(x,
-              batch_size=batch_size,
-              with_centering=False,
-              with_scaling=False)
+    x_batch = batch(x,
+                    batch_size=batch_size,
+                    with_centering=False,
+                    with_scaling=False)
 
-    n_batches = z.size
+    n_batches = x_batch.size
 
-    if n_batches != heidel_welch_n:
-        if n_batches > heidel_welch_n:
-            n_batches = heidel_welch_n
-            z = z[:n_batches]
+    if n_batches != hwl.heidel_welch_n:
+        if n_batches > hwl.heidel_welch_n:
+            n_batches = hwl.heidel_welch_n
+            x_batch = x_batch[:n_batches]
         else:
             msg = 'batching of the time series failed. (or there is not '
             msg += 'enough data points)\n'
             msg += 'Number of batches = {} '.format(n_batches)
-            msg += 'must be the same as {}.'.format(heidel_welch_n)
+            msg += 'must be the same as {}.'.format(hwl.heidel_welch_n)
             raise CVGError(msg)
 
-    # Compute the periodogram of the sequence z
-    period = periodogram(z, fft=fft, with_mean=False)
+    # Compute the periodogram of the sequence x_batch
+    period = periodogram(x_batch, fft=fft, with_mean=False)
 
-    l = range(0, period.size, 2)
-    r = range(1, period.size, 2)
+    left_range = range(0, period.size, 2)
+    right_range = range(1, period.size, 2)
 
-    # Compute the log of the average of adjacent pefiodogram values
-    g = period[l] + period[r]
-    g *= 0.5
-    g = np.log(g)
-    g += 0.27
+    # Compute the log of the average of adjacent periodogram values
+    avg_period_lg = period[left_range] + period[right_range]
+    avg_period_lg *= 0.5
+    avg_period_lg = np.log(avg_period_lg)
+    avg_period_lg += 0.27
 
     # Using ordinary least squares, and fit a polynomial to the data
 
     if test_size is None and train_size is None:
         # Least-squares solution
-        x1 = np.matmul(Aplus_1, g)
-        # Error of solution ||g - A*x||
-        eps1 = norm(g - np.matmul(A[:, :2], x1))
+        least_sqr_sol_1 = np.matmul(hwl.a_matrix_1_inv, avg_period_lg)
+        # Error of solution ||avg_period_lg - a_matrix*x||
+        eps1 = norm(avg_period_lg -
+                    np.matmul(hwl.a_matrix[:, :2], least_sqr_sol_1))
 
         # Least-squares solution
-        x2 = np.matmul(Aplus_2, g)
-        # Error of solution ||g - A*x||
-        eps2 = norm(g - np.matmul(A[:, :3], x2))
+        least_sqr_sol_2 = np.matmul(hwl.a_matrix_2_inv, avg_period_lg)
+        # Error of solution ||avg_period_lg - a_matrix*x||
+        eps2 = norm(avg_period_lg -
+                    np.matmul(hwl.a_matrix[:, :3], least_sqr_sol_2))
 
         # Least-squares solution
-        x3 = np.matmul(Aplus_3, g)
-        # Error of solution ||g - A*x||
-        eps3 = norm(g - np.matmul(A, x3))
+        least_sqr_sol_3 = np.matmul(hwl.a_matrix_3_inv, avg_period_lg)
+        # Error of solution ||avg_period_lg - a_matrix*x||
+        eps3 = norm(avg_period_lg - np.matmul(hwl.a_matrix, least_sqr_sol_3))
     else:
         ind_train, ind_test = train_test_split(
-            g, test_size=test_size, train_size=train_size)
+            avg_period_lg, test_size=test_size, train_size=train_size)
 
         # Least-squares solution
-        x1 = np.matmul(Aplus_1[:, ind_train], g[ind_train])
-        # Error of solution ||g - A*x||
-        eps1 = norm(g[ind_test] - np.matmul(A[ind_test, :2], x1))
+        least_sqr_sol_1 = np.matmul(
+            hwl.a_matrix_1_inv[:, ind_train], avg_period_lg[ind_train])
+        # Error of solution ||avg_period_lg - a_matrix*x||
+        eps1 = norm(avg_period_lg[ind_test] -
+                    np.matmul(hwl.a_matrix[ind_test, :2], least_sqr_sol_1))
 
         # Least-squares solution
-        x2 = np.matmul(Aplus_2[:, ind_train], g[ind_train])
-        # Error of solution ||g - A*x||
-        eps2 = norm(g[ind_test] - np.matmul(A[ind_test, :3], x2))
+        least_sqr_sol_2 = np.matmul(
+            hwl.a_matrix_2_inv[:, ind_train], avg_period_lg[ind_train])
+        # Error of solution ||avg_period_lg - a_matrix*x||
+        eps2 = norm(avg_period_lg[ind_test] -
+                    np.matmul(hwl.a_matrix[ind_test, :3], least_sqr_sol_2))
 
         # Least-squares solution
-        x3 = np.matmul(Aplus_3[:, ind_train], g[ind_train])
-        # Error of solution ||g - A*x||
-        eps3 = norm(g[ind_test] - np.matmul(A[ind_test, :], x3))
+        least_sqr_sol_3 = np.matmul(
+            hwl.a_matrix_3_inv[:, ind_train], avg_period_lg[ind_train])
+        # Error of solution ||avg_period_lg - a_matrix*x||
+        eps3 = norm(avg_period_lg[ind_test] -
+                    np.matmul(hwl.a_matrix[ind_test, :], least_sqr_sol_3))
 
     # Find the best fit
-    d = np.argmin((eps1, eps2, eps3))
+    best_fit_index = np.argmin((eps1, eps2, eps3))
 
-    if d == 0:
-        # get x, which is an unbiased estimate of log(p(0)).
-        x = x1[0]
-        C1 = heidel_welch_C1_1
-        tm = tm_1
-    elif d == 1:
-        # get x, which is an unbiased estimate of log(p(0)).
-        x = x2[0]
-        C1 = heidel_welch_C1_2
-        tm = tm_2
+    if best_fit_index == 0:
+        # get unbiased_estimate, which is an unbiased estimate of log(p(0)).
+        unbiased_estimate = least_sqr_sol_1[0]
+        heidel_welch_c = hwl.heidel_welch_c1_1
+        hwl_tm = hwl.tm_1
+    elif best_fit_index == 1:
+        # get unbiased_estimate, which is an unbiased estimate of log(p(0)).
+        unbiased_estimate = least_sqr_sol_2[0]
+        heidel_welch_c = hwl.heidel_welch_c1_2
+        hwl_tm = hwl.tm_2
     else:
-        # get x, which is an unbiased estimate of log(p(0)).
-        x = x3[0]
-        C1 = heidel_welch_C1_3
-        tm = tm_3
+        # get unbiased_estimate, which is an unbiased estimate of log(p(0)).
+        unbiased_estimate = least_sqr_sol_3[0]
+        heidel_welch_c = hwl.heidel_welch_c1_3
+        hwl_tm = hwl.tm_3
 
     # The variance of the sample mean of a covariance stationary sequence is
     # given approximately by p(O)/N, the spectral density at zero frequency
@@ -402,7 +472,7 @@ def ucl(x, *, p=0.975, k=50, fft=True, test_size=None, train_size=None):
 
     # Calculate the approximately unbiased estimate of variance of the sample
     # mean
-    sigma_sq = C1 * np.exp(x) / float(n_batches)
+    sigma_sq = heidel_welch_c * np.exp(unbiased_estimate) / float(n_batches)
 
-    upper_confidence_limit = tm * np.sqrt(sigma_sq)
+    upper_confidence_limit = hwl_tm * np.sqrt(sigma_sq)
     return upper_confidence_limit
