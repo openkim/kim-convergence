@@ -1,3 +1,4 @@
+"""Test s_normal_inv_cdf module."""
 import unittest
 import numpy as np
 
@@ -6,10 +7,8 @@ try:
 except:
     raise Exception('Failed to import `convergence` utility module')
 
-from convergence import CVGError
 
-
-class S_Normal_DistModule:
+class TestSNormalDistModule(unittest.TestCase):
     """Test s_normal_inv_cdf module components."""
 
     def test_s_normal_inv_cdf(self):
@@ -108,7 +107,3 @@ class S_Normal_DistModule:
         self.assertTrue(cvg.s_normal_inv_cdf(-10) is np.nan)
         self.assertTrue(cvg.s_normal_inv_cdf(1.1) is np.nan)
         self.assertTrue(cvg.s_normal_inv_cdf(10) is np.nan)
-
-
-class TestS_Normal_DistModule(S_Normal_DistModule, unittest.TestCase):
-    pass

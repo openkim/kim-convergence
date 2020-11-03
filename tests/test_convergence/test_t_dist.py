@@ -1,3 +1,4 @@
+"""Test t_dist module."""
 import unittest
 import numpy as np
 
@@ -6,10 +7,8 @@ try:
 except:
     raise Exception('Failed to import `convergence` utility module')
 
-from convergence import CVGError
 
-
-class T_DistModule:
+class TestTDistModule(unittest.TestCase):
     """Test t_dist module components."""
 
     def test_t_cdf(self):
@@ -169,7 +168,3 @@ class T_DistModule:
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=5)
-
-
-class TestT_DistModule(T_DistModule, unittest.TestCase):
-    pass

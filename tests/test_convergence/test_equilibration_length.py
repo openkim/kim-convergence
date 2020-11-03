@@ -1,3 +1,4 @@
+"""Test equilibration_length module."""
 import unittest
 import numpy as np
 
@@ -9,7 +10,7 @@ except:
 from convergence import CVGError
 
 
-class Equilibration_LengthModule:
+class TestEquilibrationLengthModule(unittest.TestCase):
     """Test equilibration_length module components."""
 
     def test_estimate_equilibration_length(self):
@@ -151,7 +152,3 @@ class Equilibration_LengthModule:
 
         self.assertRaises(CVGError,
                           cvg.estimate_equilibration_length, x)
-
-
-class TestEquilibration_LengthModule(Equilibration_LengthModule, unittest.TestCase):
-    pass

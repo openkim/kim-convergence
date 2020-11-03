@@ -1,3 +1,4 @@
+"""Test mser_m module."""
 import unittest
 import numpy as np
 
@@ -9,7 +10,7 @@ except:
 from convergence import CVGError
 
 
-class MSERModule:
+class TestMSERModule(unittest.TestCase):
     """Test mser_m module components."""
 
     def test_mser_m(self):
@@ -24,7 +25,7 @@ class MSERModule:
         # constant data sets
         x = np.ones(n)
         truncated, truncated_i = cvg.mser_m(x)
-        self.assertTrue(truncated == True)
+        self.assertTrue(truncated)
         self.assertTrue(truncated_i == 0)
 
         # nan in the input
@@ -94,9 +95,5 @@ class MSERModule:
         x = np.concatenate((x, _x))
 
         truncated, truncated_i = cvg.mser_m(x)
-        self.assertTrue(truncated == True)
+        self.assertTrue(truncated)
         self.assertTrue(truncated_i >= 10)
-
-
-class TestMSERModule(MSERModule, unittest.TestCase):
-    pass

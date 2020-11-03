@@ -1,16 +1,14 @@
+"""Test beta_dist module."""
 import unittest
-import numpy as np
-from math import gamma
+# from math import gamma
 
 try:
     import convergence as cvg
 except:
     raise Exception('Failed to import `convergence` utility module')
 
-from convergence import CVGError
 
-
-class Beta_DistModule:
+class TestBeta_DistModule(unittest.TestCase):
     """Test beta_dist module components."""
 
     def test_beta(self):
@@ -63,7 +61,3 @@ class Beta_DistModule:
 
         self.assertAlmostEqual(cvg.beta_dist.betai_cdf(
             0.5 * df, 0.5, 0.999), 0.961786078269304, places=10)
-
-
-class TestBeta_DistModule(Beta_DistModule, unittest.TestCase):
-    pass

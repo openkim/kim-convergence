@@ -1,3 +1,4 @@
+"""Test ucl module."""
 import unittest
 import numpy as np
 
@@ -9,7 +10,7 @@ except:
 from convergence import CVGError
 
 
-class UCLModule:
+class TestUCLModule(unittest.TestCase):
     """Test ucl module components."""
 
     def test_set_heidel_welch_constants(self):
@@ -32,39 +33,32 @@ class UCLModule:
             tm_2, \
             tm_3 = cvg.get_heidel_welch_constants()
 
-        self.assertTrue(not heidel_welch_set)
-        self.assertTrue(heidel_welch_k is None)
-        self.assertTrue(heidel_welch_n is None)
-        self.assertTrue(heidel_welch_p is None)
-        self.assertTrue(A is None)
-        self.assertTrue(Aplus_1 is None)
-        self.assertTrue(Aplus_2 is None)
-        self.assertTrue(Aplus_3 is None)
-        self.assertTrue(heidel_welch_C1_1 is None)
-        self.assertTrue(heidel_welch_C1_2 is None)
-        self.assertTrue(heidel_welch_C1_3 is None)
-        self.assertTrue(heidel_welch_C2_1 is None)
-        self.assertTrue(heidel_welch_C2_2 is None)
-        self.assertTrue(heidel_welch_C2_3 is None)
-        self.assertTrue(tm_1 is None)
-        self.assertTrue(tm_2 is None)
-        self.assertTrue(tm_3 is None)
+        self.assertFalse(heidel_welch_set)
+        self.assertIsNone(heidel_welch_k)
+        self.assertIsNone(heidel_welch_n)
+        self.assertIsNone(heidel_welch_p)
+        self.assertIsNone(A)
+        self.assertIsNone(Aplus_1)
+        self.assertIsNone(Aplus_2)
+        self.assertIsNone(Aplus_3)
+        self.assertIsNone(heidel_welch_C1_1)
+        self.assertIsNone(heidel_welch_C1_2)
+        self.assertIsNone(heidel_welch_C1_3)
+        self.assertIsNone(heidel_welch_C2_1)
+        self.assertIsNone(heidel_welch_C2_2)
+        self.assertIsNone(heidel_welch_C2_3)
+        self.assertIsNone(tm_1)
+        self.assertIsNone(tm_2)
+        self.assertIsNone(tm_3)
 
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants,
-                          p=0.0)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants,
-                          p=1.0)
-
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants,
-                          k=0)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants,
-                          k=10)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants,
-                          k=50.0)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants,
-                          k=-10.0)
-        self.assertRaises(CVGError, cvg.set_heidel_welch_constants,
-                          k='50')
+        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, p=0.0)
+        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, p=1.0)
+        
+        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k=0)
+        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k=10)
+        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k=50.0)
+        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k=-10.0)
+        self.assertRaises(CVGError, cvg.set_heidel_welch_constants, k='50')
 
         cvg.set_heidel_welch_constants()
 
@@ -130,7 +124,3 @@ class UCLModule:
 
         x = np.ones(1000) * 10 + (np.random.random_sample(1000) - 0.5)
         _ = cvg.ucl(x)
-
-
-class TestUCLModule(UCLModule, unittest.TestCase):
-    pass

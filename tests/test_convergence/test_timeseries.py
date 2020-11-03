@@ -1,3 +1,4 @@
+"""Test timeseries module."""
 import unittest
 import numpy as np
 
@@ -9,9 +10,9 @@ except:
 from convergence import CVGError
 
 
-class TimeseriesModule:
-    """Test timeseries module components."""
+# class TimeseriesModule(unittest.TestCase):
+#     """Test timeseries module components."""
 
-    def test_set_heidel_welch_constants(self):
-        """Test set_heidel_welch_constants function."""
-        cvg.set_heidel_welch_constants()
+#     def test_set_heidel_welch_constants(self):
+#         """Test set_heidel_welch_constants function."""
+#         cvg.set_heidel_welch_constants()

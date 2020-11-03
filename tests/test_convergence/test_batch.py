@@ -1,3 +1,4 @@
+"""Test batch module."""
 import unittest
 import numpy as np
 
@@ -9,7 +10,7 @@ except:
 from convergence import CVGError
 
 
-class BatchModule:
+class TestBatchModule(unittest.TestCase):
     """Test batch module components."""
 
     def test_batch(self):
@@ -126,7 +127,3 @@ class BatchModule:
                       with_scaling=False)
         for i in b:
             self.assertTrue(i == 0.0)
-
-
-class TestBatchModule(BatchModule, unittest.TestCase):
-    pass
