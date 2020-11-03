@@ -27,7 +27,7 @@ def statistical_inefficiency(x, y=None, *, fft=False, mct=None):
         \tau &\equiv \sum_{t=0}^n {\left( 1 - \frac{t}{n} \right) C\left(t\right)} \\
         C\left(t\right) &\equiv \frac{<x(X_{t_0})x(X_{t_0+t})> - {<x>}^2}{<x^2>-{<x>}^2}
 
-    where :math:`tau` denotes the integrated auto-correlation time and
+    where :math:`\tau` denotes the integrated auto-correlation time and
     :math:`C\left(t\right)` is the normalized fluctuation auto-correlation
     function of the observable :math:`x`
 
@@ -47,7 +47,7 @@ def statistical_inefficiency(x, y=None, *, fft=False, mct=None):
     Returns:
         float: estimated statistical inefficiency.
             :math:`si >= 1` is the estimated statistical inefficiency
-            (equal to :math:`1 + 2\tau`, where :math:`tau` denotes the
+            (equal to :math:`1 + 2\tau`, where :math:`\tau` denotes the
             integrated auto-correlation time).
 
     """
@@ -138,7 +138,7 @@ def r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
     Returns:
         float: estimated statistical inefficiency.
             :math:`si >= 1` is the estimated statistical inefficiency
-            (equal to :math:`-1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
+            (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
             :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
 
     Note:
@@ -275,7 +275,7 @@ def split_r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
     Returns:
         float: estimated statistical inefficiency.
             :math:`si >= 1` is the estimated statistical inefficiency
-            (equal to :math:`-1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
+            (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
             :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
 
     Note:
@@ -463,7 +463,7 @@ def integrated_auto_correlation_time(x, y=None, *, si=None, fft=False, mct=None)
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
     of a time series :math:`\left \{X\right \}_{t=0}^n` is formally defined as,
-    .. math:`si &\equiv 1 + 2\tau`, where :math:`tau` denotes the integrated
+    :math:`si \equiv 1 + 2\tau`, where :math:`\tau` denotes the integrated
     auto-correlation time.
 
     Args:
@@ -483,7 +483,7 @@ def integrated_auto_correlation_time(x, y=None, *, si=None, fft=False, mct=None)
 
     Returns:
         float: integrated auto-correlation time.
-            estimated :math:`tau` (the integrated auto-correlation time)
+            estimated :math:`\tau` (the integrated auto-correlation time)
 
     """
     if si is None:
