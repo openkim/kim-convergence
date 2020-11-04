@@ -19,7 +19,7 @@ scale_methods = {
 }
 
 
-def batch(x,
+def batch(time_series_data,
           *,
           batch_size=5,
           scale='translate_scale',
@@ -28,12 +28,12 @@ def batch(x,
     r"""Batch the time series data.
 
     Args:
-        x (array_like, 1d): Time series data.
+        time_series_data (array_like, 1d): Time series data.
         batch_size (int, optional): batch size. (default: {5})
         scale (str, optional): A method to standardize a dataset.
             (default: {'translate_scale'})
-        with_centering (bool, optional): If True, use x minus the scale metod
-            centering approach. (default: {False})
+        with_centering (bool, optional): If True, use time_series_data minus
+            the scale metod centering approach. (default: {False})
         with_scaling (bool, optional): If True, scale the data to scale
             metod scaling approach. (default: {False})
 
@@ -45,11 +45,11 @@ def batch(x,
         remainder of the division of data points by the batch_size.
 
     """
-    x = np.array(x, copy=False)
+    time_series_data = np.array(time_series_data, copy=False)
 
     # Check inputs
-    if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
+    if time_series_data.ndim != 1:
+        msg = 'time_series_data is not an array of one-dimension.'
         raise CVGError(msg)
 
     if not isinstance(batch_size, int):
@@ -74,30 +74,32 @@ def batch(x,
     # Initialize
 
     # Number of batches
-    n_batches = x.size // batch_size
+    n_batches = time_series_data.size // batch_size
 
     if n_batches == 0:
         msg = 'invalid number of batches = {}.\n'.format(n_batches)
-        msg += 'The number of input data points = {} are '.format(x.size)
+        msg += 'The number of input data points = '
+        msg += '{} are '.format(time_series_data.size)
         msg += 'not enough to produce batches with the batch size of '
         msg += '{} data points.'.format(batch_size)
         raise CVGError(msg)
 
     # Correct the size of data
-    n = n_batches * batch_size
+    max_size = n_batches * batch_size
 
     # Compute batch averages
 
     # The raw data is batched into non-overlapping batches of size batch_size
-    z = np.matmul(x[:n].reshape([-1, batch_size]),
-                  np.ones([batch_size], dtype=np.float64))
+    batched_time_series_data = np.matmul(
+        time_series_data[:max_size].reshape([-1, batch_size]),
+        np.ones([batch_size], dtype=np.float64))
 
     # Calculate the batch means
-    z /= np.float64(batch_size)
+    batched_time_series_data /= np.float64(batch_size)
 
     if with_centering or with_scaling:
-        z = scale_func(z,
-                       with_centering=with_centering,
-                       with_scaling=with_scaling)
+        batched_time_series_data = scale_func(batched_time_series_data,
+                                              with_centering=with_centering,
+                                              with_scaling=with_scaling)
 
-    return z
+    return batched_time_series_data
