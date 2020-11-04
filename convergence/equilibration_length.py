@@ -44,8 +44,8 @@ def estimate_equilibration_length(x, *,
             number of points. (default: None)
 
     Returns:
-        int, float: equilibration_index_estimate, statistical_inefficiency_estimate
-            equilibration index estimate, statitical inefficiency estimate of a
+        int, float: equilibration index, statistical inefficiency estimates
+            equilibration index, and statitical inefficiency estimates of a
             time series at the equilibration index estimate.
 
     References:
@@ -61,7 +61,7 @@ def estimate_equilibration_length(x, *,
         raise CVGError(msg)
 
     # Get the length of the timeseries.
-    n = x.size
+    x_size = x.size
 
     if isinstance(si, str):
         if si not in si_methods:
@@ -87,14 +87,14 @@ def estimate_equilibration_length(x, *,
 
     if not isinstance(ignore_end, int):
         if ignore_end is None:
-            ignore_end = max(1, n // 4)
+            ignore_end = max(1, x_size // 4)
         elif isinstance(ignore_end, float):
             if not 0.0 < ignore_end < 1.0:
                 msg = 'invalid ignore_end = {}. If '.format(ignore_end)
                 msg += 'ignore_end input is a `float`, it should be in a '
                 msg += '`(0, 1)` range.'
                 raise CVGError(msg)
-            ignore_end *= n
+            ignore_end *= x_size
             ignore_end = max(1, int(ignore_end))
         else:
             msg = 'invalid ignore_end = {}. '.format(ignore_end)
@@ -107,28 +107,28 @@ def estimate_equilibration_length(x, *,
 
     # Upper bound check
     if si == 'r_statistical_inefficiency':
-        if n < 4:
-            msg = '{} number of input data points is not '.format(n)
+        if x_size < 4:
+            msg = '{} number of input data points is not '.format(x_size)
             msg += 'sufficient to be used by "{}" method.'.format(si)
             raise CVGError(msg)
         ignore_end = max(3, ignore_end)
     elif si == 'split_r_statistical_inefficiency':
-        if n < 8:
-            msg = '{} number of input data points is not '.format(n)
+        if x_size < 8:
+            msg = '{} number of input data points is not '.format(x_size)
             msg += 'sufficient to be used by "{}" method.'.format(si)
             raise CVGError(msg)
         ignore_end = max(7, ignore_end)
     elif si == 'split_statistical_inefficiency':
-        if n < 8:
-            msg = '{} number of input data points is not '.format(n)
+        if x_size < 8:
+            msg = '{} number of input data points is not '.format(x_size)
             msg += 'sufficient to be used by "{}" method.'.format(si)
             raise CVGError(msg)
         ignore_end = max(7, ignore_end)
 
-    if n <= ignore_end:
+    if x_size <= ignore_end:
         msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
         msg = 'Wrong number of data points is requested to be ignored '
-        msg += 'from the total {} points.'.format(n)
+        msg += 'from the total {} points.'.format(x_size)
         raise CVGError(msg)
 
     # Special case if timeseries is constant.
@@ -136,16 +136,17 @@ def estimate_equilibration_length(x, *,
     if np.isclose(_std, 0, atol=1e-08):
         # index and si
         return 0, 1.0
-    elif not np.isfinite(_std):
+
+    if not np.isfinite(_std):
         msg = 'there is at least one value in the input array which is '
         msg += 'non-finite or not-number.'
         raise CVGError(msg)
     del _std
 
     # Upper bound check
-    nu = n - ignore_end
+    upper_bound = x_size - ignore_end
 
-    nskip = min(nskip, nu)
+    nskip = min(nskip, upper_bound)
 
     # Estimate of statistical inefficiency
     statistical_inefficiency_estimate = 1.0
@@ -156,18 +157,18 @@ def estimate_equilibration_length(x, *,
     # Equilibration estimate index
     equilibration_index_estimate = 0
 
-    for t in range(0, nu, nskip):
+    for t in range(0, upper_bound, nskip):
         # Compute the statitical inefficiency of a time series
         try:
-            si = si_func(x[t:], fft=fft, mct=mct)
+            si_value = si_func(x[t:], fft=fft, mct=mct)
         except:
-            si = float(n - t)
+            si_value = float(x_size - t)
 
-        _effective_samples_size = float(n - t) / si
+        _effective_samples_size = float(x_size - t) / si_value
 
         # Find the maximum
         if _effective_samples_size > effective_samples_size:
-            statistical_inefficiency_estimate = si
+            statistical_inefficiency_estimate = si_value
             effective_samples_size = _effective_samples_size
             equilibration_index_estimate = t
 
