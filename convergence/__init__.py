@@ -10,7 +10,8 @@ from .stats import \
     translate_scale, \
     standard_scale, \
     robust_scale, \
-    periodogram
+    periodogram, \
+    outlier_test
 from .batch import batch
 from .mser_m import mser_m
 #from .geweke import geweke
@@ -45,6 +46,7 @@ __all__ = [
     'standard_scale',
     'robust_scale',
     'periodogram',
+    'outlier_test',
     'batch',
     # 'geweke',
     'mser_m',
