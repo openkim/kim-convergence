@@ -4,6 +4,7 @@ import inspect
 
 __all__ = [
     'CVGError',
+    'cvg_warning',
 ]
 
 
@@ -30,3 +31,15 @@ class CVGError(Exception):
     def __str__(self):
         """Message string representation."""
         return self.msg
+
+
+def cvg_warning(message):
+    """Print a warning message.
+
+    Args:
+        msg (string): The warning message.
+
+    """
+    msg_ = '\nWARNING(@' + \
+        inspect.currentframe().f_back.f_code.co_name + '): ' + message
+    print(msg_)
