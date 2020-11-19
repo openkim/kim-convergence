@@ -12,11 +12,12 @@ from .beta_dist import betai_cdf_ccdf
 __all__ = [
     't_cdf_ccdf',
     't_cdf',
-    't_inv_cdf'
+    't_inv_cdf',
+    't_interval'
 ]
 
 
-def t_cdf_ccdf(t, df):
+def t_cdf_ccdf(t: float, df):
     r"""Compute the cumulative distribution of the t-distribution.
 
     The cumulative distribution of the t-distribution for t > 0, can be
@@ -45,8 +46,8 @@ def t_cdf_ccdf(t, df):
 
     """
     if df < 1:
-        msg = 'df = {} is wrong. Degrees of freedom, must be a '.format(df)
-        msg += 'positive number.'
+        msg = 'df = {} is wrong. Degrees of freedom, must be '.format(df)
+        msg += 'positive and greater than 1.'
         raise CVGError(msg)
 
     tt = t * t
@@ -172,3 +173,32 @@ def t_inv_cdf(p, df, *, _tol=1.0e-8, _atol=1.0e-50, _rtinf=1.0e100):
             fx = ccdf - q
 
         status, x = d.zero(status, x, fx)
+
+
+def t_interval(p, df):
+    r"""Compute the t_distribution confidence interval.
+
+    Compute the t_distribution confidence interval with equal areas around
+    the median.
+
+    Args:
+        p (float): Probability (must be between 0.0 and 1.0)
+        df (int): Degrees of freedom, must be > 0.
+
+    Returns:
+        float, float : lower bound, upper bound of the confidence interval
+            end-points of range that contain :math:`100 \alpha \%` of the
+            t_distribution possible values.
+
+    """
+    if p <= 0.0 or p >= 1.0:
+        msg = 'p = {} is not in the range (0.0 1.0).'.format(p)
+        raise CVGError(msg)
+
+    lower = (1.0 - p) / 2
+    upper = (1.0 + p) / 2
+
+    lower_interval = t_inv_cdf(lower, df)
+    upper_interval = t_inv_cdf(upper, df)
+
+    return lower_interval, upper_interval
