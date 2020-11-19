@@ -63,7 +63,7 @@ FFTURN = (8, 9, 10, 12, 15, 16, 18, 20,
 """tuple: FFT unique regular numbers."""
 
 
-def get_fft_optimal_size(input_size):
+def get_fft_optimal_size(input_size: int):
     """Find the optimal size for the FFT solver.
 
     Get the next regular number greater than or equal to input_size [1]_.
