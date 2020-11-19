@@ -26,12 +26,14 @@ class TestSNormalDistModule(unittest.TestCase):
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
 
-        prob = np.array([0.75, 0.975, 0.9975, 0.99975, 0.999975, 0.9999975,
-                         0.99999975, 0.999999975, 0.9999999975, 0.99999999975],
+        prob = np.array([0.75, 0.95, 0.9975, 0.99975,
+                         0.999975, 0.9999975, 0.99999975, 0.999999975,
+                         0.9999999975, 0.99999999975],
                         dtype=np.float64)
 
-        _ppf = np.array([0.674, 1.960, 2.807, 3.481, 4.056,
-                         4.565, 5.026, 5.451, 5.847, 6.219],
+        _ppf = np.array([0.67448975, 1.64485363, 2.80703377, 3.4807564,
+                         4.05562698, 4.56478773, 5.02631284, 5.45131044,
+                         5.84717215, 6.21910456],
                         dtype=np.float64)
 
         ppf = np.array(list(map(cvg.s_normal_inv_cdf, prob)), dtype=np.float64)
@@ -52,7 +54,6 @@ class TestSNormalDistModule(unittest.TestCase):
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
 
-        #
         prob = np.array([0.5, 0.05, 0.005, 0.0005, 5e-05,
                          4.9999999999999996e-06, 5e-07, 5e-08, 5e-09, 5e-10],
                         dtype=np.float64)
