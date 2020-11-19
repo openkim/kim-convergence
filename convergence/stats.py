@@ -1,5 +1,6 @@
 """Stats module."""
 
+from math import isclose
 import numpy as np
 from bisect import bisect_left
 
@@ -15,6 +16,7 @@ __all__ = [
     'standard_scale',
     'robust_scale',
     'periodogram',
+    'outlier_methods',
     'outlier_test'
 ]
 
@@ -95,7 +97,7 @@ def get_fft_optimal_size(input_size):
         return input_size
 
     # Return if it is power of 2
-    if not (input_size & (input_size - 1)):
+    if not input_size & (input_size - 1):
         return input_size
 
     # Get result quickly.
@@ -139,10 +141,27 @@ def get_fft_optimal_size(input_size):
 
 
 def auto_covariance(x, *, fft=False):
-    """Calculate auto-covariance estimates.
+    """Calculate biased auto-covariance estimates.
 
     Compute auto-covariance estimates for every lag for the input array.
     This estimator is biased.
+
+    .. math::
+
+        \gamma_k = \frac{1}{N}\sum\limits_{t=1}^{N-K}(x_t-\Bar{x})(x_{t+K}-\Bar{x})
+
+
+    Note: 
+        Some sources use the following formula for computing the
+        autocovariance:
+
+        .. math::
+
+            \gamma_k = \frac{1}{N-K}\sum\limits_{t=1}^{N-K}(x_t-\Bar{x})(x_{t+K}-\Bar{x})
+
+        This definition has less bias, than the one used here. But the
+        :math:`\frca{1}{N}` formulation has some desirable statistical
+        properties and is the most commonly used in the statistics literature.
 
     Args:
         x (array_like, 1d): Time series data.
@@ -160,9 +179,9 @@ def auto_covariance(x, *, fft=False):
         raise CVGError(msg)
 
     # Data size
-    n = x.size
+    x_size = x.size
 
-    if n < 1:
+    if x_size < 1:
         msg = 'x is empty.'
         raise CVGError(msg)
 
@@ -176,28 +195,28 @@ def auto_covariance(x, *, fft=False):
 
     if fft:
         # Find the optimal size for the FFT solver
-        optimal_size = get_fft_optimal_size(2 * n)
+        optimal_size = get_fft_optimal_size(2 * x_size)
 
         # Compute the one-dimensional discrete Fourier Transform
         dft = np.fft.rfft(dx, n=optimal_size)
         dft *= np.conjugate(dft)
 
         # Compute the one-dimensional inverse discrete Fourier Transform
-        autocov = np.fft.irfft(dft, n=optimal_size)[:n]
+        autocov = np.fft.irfft(dft, n=optimal_size)[:x_size]
 
         # Get the real part
         autocov = autocov.real
     else:
         # Auto correlation of a one-dimensional sequence
-        autocov = np.correlate(dx, dx, 'full')[n - 1:]
+        autocov = np.correlate(dx, dx, 'full')[x_size - 1:]
 
-    autocov /= float(n)
+    autocov /= float(x_size)
 
     return autocov
 
 
 def cross_covariance(x, y, *, fft=False):
-    """Calculate the cross covariance between two time series.
+    """Calculate the biased cross covariance estimate between two time series.
 
     Calculate the cross covariance between two time series for every lag for
     the input arrays. This estimator is biased.
@@ -214,8 +233,9 @@ def cross_covariance(x, y, *, fft=False):
     """
     if y is None:
         return auto_covariance(x, fft=fft)
+
     # If x and y are the same object we can save ourselves some computation.
-    elif y is x:
+    if y is x:
         return auto_covariance(x, fft=fft)
 
     x = np.array(x, copy=False)
@@ -225,9 +245,9 @@ def cross_covariance(x, y, *, fft=False):
         raise CVGError(msg)
 
     # Data size
-    n = x.size
+    x_size = x.size
 
-    if n < 1:
+    if x_size < 1:
         msg = 'x is empty.'
         raise CVGError(msg)
 
@@ -253,7 +273,7 @@ def cross_covariance(x, y, *, fft=False):
 
     if fft:
         # Find the optimal size for the FFT solver
-        optimal_size = get_fft_optimal_size(2 * n)
+        optimal_size = get_fft_optimal_size(2 * x_size)
 
         # Compute the one-dimensional discrete Fourier Transform
         dftx = np.fft.rfft(dx, n=optimal_size)
@@ -261,15 +281,15 @@ def cross_covariance(x, y, *, fft=False):
         dftx *= np.conjugate(dfty)
 
         # Compute the one-dimensional inverse discrete Fourier Transform
-        crosscov = np.fft.irfft(dftx, n=optimal_size)[:n]
+        crosscov = np.fft.irfft(dftx, n=optimal_size)[:x_size]
 
         # Get the real part
         crosscov = crosscov.real
     else:
         # Cross-correlation of two one-dimensional sequences
-        crosscov = np.correlate(dx, dy, 'full')[n - 1:]
+        crosscov = np.correlate(dx, dy, 'full')[x_size - 1:]
 
-    crosscov /= float(n)
+    crosscov /= float(x_size)
 
     return crosscov
 
@@ -296,7 +316,8 @@ def auto_correlate(x, *, nlags=None, fft=False):
     # Calculate (estimate) the auto covariances
     autocor = auto_covariance(x, fft=fft)
 
-    if np.isclose(autocor[0], 0, atol=1e-08):
+    # assures that the two values are the same within about 14 decimal digits.
+    if isclose(autocor[0], 0, rel_tol=1e-14):
         msg = 'divide by zero encountered, which means the first element of '
         msg += 'the auto covariances of x is zero (or close to zero).'
         raise CVGError(msg)
@@ -309,7 +330,8 @@ def auto_correlate(x, *, nlags=None, fft=False):
         if not isinstance(nlags, int):
             msg = 'nlags must be an `int`.'
             raise CVGError(msg)
-        elif nlags < 1:
+
+        if nlags < 1:
             msg = 'nlags must be a positive `int`.'
             raise CVGError(msg)
 
@@ -341,8 +363,9 @@ def cross_correlate(x, y, *, nlags=None, fft=False):
     """
     if y is None:
         return auto_correlate(x, nlags=nlags, fft=fft)
+
     # If x and y are the same object we can save ourselves some computation.
-    elif y is x:
+    if y is x:
         return auto_correlate(x, nlags=nlags, fft=fft)
 
     # Calculate the cross covariances
@@ -353,7 +376,8 @@ def cross_correlate(x, y, *, nlags=None, fft=False):
 
     sigma_xy = np.std(x) * np.std(y)
 
-    if np.isclose(sigma_xy, 0, atol=1e-08):
+    # assures that the two values are the same within about 14 decimal digits.
+    if isclose(sigma_xy, 0, rel_tol=1e-14):
         msg = 'Divide by zero encountered, which means the multiplication '
         msg += 'of the standard deviation of x and y is zero.'
         raise CVGError(msg)
@@ -366,7 +390,8 @@ def cross_correlate(x, y, *, nlags=None, fft=False):
         if not isinstance(nlags, int):
             msg = 'nlags must be an `int`.'
             raise CVGError(msg)
-        elif nlags < 1:
+
+        if nlags < 1:
             msg = 'nlags must be a positive `int`.'
             raise CVGError(msg)
 
@@ -416,12 +441,16 @@ def translate_scale(x, *, with_centering=True, with_scaling=True):
 
     if with_scaling:
         mean_ = np.mean(dx)
-        if not np.isclose(mean_, 0, atol=1e-08):
-            dx /= mean_
-        elif not np.isfinite(mean_):
+
+        if not np.isfinite(mean_):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
+
+        # assures that the two values are not the same
+        # within about 14 decimal digits.
+        if not isclose(mean_, 0, rel_tol=1e-14):
+            dx /= mean_
 
     return dx
 
@@ -471,24 +500,32 @@ def standard_scale(x, *, with_centering=True, with_scaling=True):
         # Numerical issues were encountered when centering the data
         # and might not be solved. Dataset may contain too large values.
         # You may need to prescale your features.
-        if not np.isclose(mean_1, 0, atol=1e-08):
-            dx -= mean_1
-        elif not np.isfinite(mean_1):
+
+        if not np.isfinite(mean_1):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
+
+        # assures that the two values are not the same
+        # within about 14 decimal digits.
+        if not isclose(mean_1, 0, rel_tol=1e-14):
+            dx -= mean_1
+
     else:
         dx = np.array(x, copy=True)
 
     if with_scaling:
         scale_ = np.std(x)
 
-        if not np.isclose(scale_, 0, atol=1e-08):
-            dx /= scale_
-        elif not np.isfinite(scale_):
+        if not np.isfinite(scale_):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
+
+        # assures that the two values are not the same
+        # within about 14 decimal digits.
+        if not isclose(scale_, 0, rel_tol=1e-14):
+            dx /= scale_
 
         if with_centering:
             mean_2 = np.mean(dx)
@@ -501,7 +538,10 @@ def standard_scale(x, *, with_centering=True, with_scaling=True):
             # Numerical issues were encountered when centering the data
             # and might not be solved. Dataset may contain too large values.
             # You may need to prescale your features.
-            if not np.isclose(mean_2, 0, atol=1e-08):
+
+            # assures that the two values are not the same
+            # within about 14 decimal digits.
+            if not isclose(mean_2, 0, rel_tol=1e-14):
                 dx -= mean_2
 
     return dx
@@ -537,7 +577,8 @@ def robust_scale(x,
             not isinstance(quantile_range, list):
         msg = 'invalid quantile range: {}.'.format(str(quantile_range))
         raise CVGError(msg)
-    elif len(quantile_range) != 2:
+
+    if len(quantile_range) != 2:
         msg = 'invalid quantile range: {}.'.format(str(quantile_range))
         raise CVGError(msg)
 
@@ -556,12 +597,15 @@ def robust_scale(x,
 
         scale_ = quantiles[1] - quantiles[0]
 
-        if not np.isclose(scale_, 0, atol=1e-08):
-            dx /= scale_
-        elif not np.isfinite(scale_):
+        if not np.isfinite(scale_):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
+
+        # assures that the two values are not the same
+        # within about 14 decimal digits.
+        if not isclose(scale_, 0, rel_tol=1e-14):
+            dx /= scale_
 
     return dx
 
@@ -614,23 +658,28 @@ def periodogram(x, *, fft=False, with_mean=False):
     if with_mean:
         # Fluctuations
         _mean = np.mean(x)
+
         if not np.isfinite(_mean):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
+
         dx = x - _mean
+
         del _mean
+
     else:
         if not np.all(np.isfinite(x)):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
+
         dx = np.array(x, copy=False)
 
     # Data size
-    n = x.size
+    x_size = x.size
 
-    scale = 1.0 / float(n)
+    scale = 1.0 / float(x_size)
     scale2 = scale * scale
 
     # Perform the fft
@@ -642,11 +691,11 @@ def periodogram(x, *, fft=False, with_mean=False):
         # The periodogram is defined in [2]_ as,
         # I(k/n) = | \sum_{j=0}^{j=n-1} {x(j) e^{-2\pi i j k / n}} |^2 / n
         # k = 1, n // 2
-        arg = np.arange(1, n // 2 + 1, dtype=np.float64)
+        arg = np.arange(1, x_size // 2 + 1, dtype=np.float64)
         arg *= scale * 2.0 * np.pi
         arg = arg * complex(0.0, 1.0)
 
-        k = np.arange(n).reshape([1, -1])
+        k = np.arange(x_size).reshape([1, -1])
         e = arg.reshape([-1, 1]) * k
         e = np.exp(e)
 
@@ -658,7 +707,7 @@ def periodogram(x, *, fft=False, with_mean=False):
 
     result *= scale2
 
-    if n % 2:
+    if x_size % 2:
         result *= 2
     else:
         # Do not double the last point since
