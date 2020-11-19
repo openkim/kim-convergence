@@ -54,11 +54,11 @@ class ZERO_RC_BOUNDS():
     """Bound zero finding class by reverse communication."""
 
     def __init__(self,
-                 small,
-                 big,
-                 abs_step,
-                 rel_step,
-                 step_mul,
+                 small: float,
+                 big: float,
+                 abs_step: float,
+                 rel_step: float,
+                 step_mul: float,
                  *,
                  abs_tol=1.0e-50,
                  rel_tol=1.0e-8):
@@ -98,7 +98,7 @@ class ZERO_RC_BOUNDS():
         self.rel_tol = deepcopy(rel_tol)
         self.z = None
 
-    def zero(self, status, x, fx):
+    def zero(self, status: int, x: float, fx: float):
         """Bounds the zero of the function.
 
         Bounds the zero of the function and finds zero of the function by
@@ -229,9 +229,7 @@ class ZERO_RC_BOUNDS():
                              abs_tol=self.abs_tol,
                              rel_tol=self.rel_tol)
 
-            status = 0
-
-            status, x, self.xlo, self.xhi = self.z.zero(status,
+            status, x, self.xlo, self.xhi = self.z.zero(0,
                                                         x, fx,
                                                         self.xlo,
                                                         self.xhi)
@@ -273,9 +271,7 @@ class ZERO_RC_BOUNDS():
                                  abs_tol=self.abs_tol,
                                  rel_tol=self.rel_tol)
 
-                status = 0
-
-                status, x, self.xlo, self.xhi = self.z.zero(status,
+                status, x, self.xlo, self.xhi = self.z.zero(0,
                                                             x, fx,
                                                             self.xlo,
                                                             self.xhi)

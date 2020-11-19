@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
 
-import numpy as np
 from copy import deepcopy
+from math import copysign
 
 from .err import CVGError
 
@@ -52,7 +52,12 @@ __all__ = [
 class ZERO_RC():
     """Zero finding class by reverse communication."""
 
-    def __init__(self, xlo, xhi, *, abs_tol=1.0e-50, rel_tol=1.0e-8):
+    def __init__(self,
+                 xlo: float,
+                 xhi: float,
+                 *,
+                 abs_tol=1.0e-50,
+                 rel_tol=1.0e-8):
         """Initialize parameters.
 
         Args:
@@ -72,8 +77,6 @@ class ZERO_RC():
         self.fb = 0.0
         self.fc = 0.0
         self.fd = 0.0
-        self.fda = 0.0
-        self.fdb = 0.0
         self.m = 0.0
         self.mb = 0.0
         self.p = 0.0
@@ -89,7 +92,7 @@ class ZERO_RC():
         self.abs_tol = abs_tol
         self.rel_tol = rel_tol
 
-    def zero(self, status, x, fx, xlo, xhi):
+    def zero(self, status: int, x: float, fx: float, xlo: float, xhi: float):
         """Perform the zero finding.
 
         Args:
@@ -121,10 +124,10 @@ class ZERO_RC():
             self.index = 2
             return 1, xhi, xhi, xhi
         elif self.index == 2:
-            if (self.fb < 0.0) and (fx < 0.0):
+            if self.fb < 0.0 and fx < 0.0:
                 return -1, x, xlo, xhi
 
-            if (self.fb > 0.0) and (fx > 0.0):
+            if self.fb > 0.0 and fx > 0.0:
                 return -1, x, xlo, xhi
 
             self.c = deepcopy(self.a)
@@ -199,21 +202,17 @@ class ZERO_RC():
             self.index = 3
             return 1, self.b, self.b, xhi
 
-        if np.sign(self.mb) >= 0.0:
-            self.tol = abs(self.tol)
-        else:
-            self.tol = -abs(self.tol)
-
+        self.tol = copysign(self.tol, self.mb)
         self.p = (self.b - self.a) * self.fb
 
         if self.first:
             self.first = False
             self.q = self.fa - self.fb
         else:
-            self.fdb = (self.fd - self.fb) / (self.d - self.b)
-            self.fda = (self.fd - self.fa) / (self.d - self.a)
-            self.p = self.fda * self.p
-            self.q = self.fdb * self.fa - self.fda * self.fb
+            fdb = (self.fd - self.fb) / (self.d - self.b)
+            fda = (self.fd - self.fa) / (self.d - self.a)
+            self.p = fda * self.p
+            self.q = fdb * self.fa - fda * self.fb
 
         if self.p < 0.0:
             self.p = -self.p
