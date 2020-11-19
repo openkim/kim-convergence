@@ -1,7 +1,7 @@
 """Beta distribution module."""
 
 import numpy as np
-from math import lgamma
+from math import lgamma, fabs
 from copy import deepcopy
 
 from .err import CVGError
@@ -42,7 +42,10 @@ def beta(a, b):
     return _beta
 
 
-def betacf(a, b, x, *,
+def betacf(a: float,
+           b: float,
+           x: float,
+           *,
            eps=np.finfo(np.float64).resolution,
            max_iteration=200,
            _fpmin=1.0e-30):
@@ -77,7 +80,7 @@ def betacf(a, b, x, *,
     d = 1.0 - qab * x / qap
     c = 1.0
 
-    if (abs(d) < _fpmin):
+    if (fabs(d) < _fpmin):
         d = deepcopy(_fpmax)
         h = deepcopy(_fpmax)
     else:
@@ -93,8 +96,8 @@ def betacf(a, b, x, *,
         d = 1.0 + aa * d
         c = 1.0 + aa / c
 
-        _d = abs(d) < _fpmin
-        _c = abs(c) < _fpmin
+        _d = fabs(d) < _fpmin
+        _c = fabs(c) < _fpmin
 
         if _d and _c:
             d = deepcopy(_fpmax)
@@ -117,8 +120,8 @@ def betacf(a, b, x, *,
         d = 1.0 + aa * d
         c = 1.0 + aa / c
 
-        _d = abs(d) < _fpmin
-        _c = abs(c) < _fpmin
+        _d = fabs(d) < _fpmin
+        _c = fabs(c) < _fpmin
 
         if _d and _c:
             d = deepcopy(_fpmax)
@@ -135,7 +138,7 @@ def betacf(a, b, x, *,
             _del = d * c
         h *= _del
 
-        if (abs(_del - 1.0) < eps):
+        if (fabs(_del - 1.0) < eps):
             return h
 
     msg = 'betacf failed with the current result = {}, '.format(h)
@@ -164,7 +167,7 @@ def betai(a, b, x):
     """
     if x < 0.0 or x > 1.0:
         return np.nan
-    
+
     if x == 0.0 or x == 1.0:
         return x
 
@@ -178,7 +181,7 @@ def betai(a, b, x):
         _beta *= betacf(a, b, x)
         _beta /= a
         return _beta
-    
+
     _beta *= betacf(b, a, 1.0 - x)
     _beta /= b
     return 1. - _beta
@@ -207,7 +210,7 @@ def betai_cdf_ccdf(a, b, x):
     """
     if x <= 0.0:
         return 0.0, 1.0
-    
+
     if x >= 1.0:
         return 1.0, 0.0
 
