@@ -164,7 +164,8 @@ def betai(a, b, x):
     """
     if x < 0.0 or x > 1.0:
         return np.nan
-    elif x == 0.0 or x == 1.0:
+    
+    if x == 0.0 or x == 1.0:
         return x
 
     _beta = lgamma(a + b) - lgamma(a) - lgamma(b) + \
@@ -177,10 +178,10 @@ def betai(a, b, x):
         _beta *= betacf(a, b, x)
         _beta /= a
         return _beta
-    else:
-        _beta *= betacf(b, a, 1.0 - x)
-        _beta /= b
-        return 1. - _beta
+    
+    _beta *= betacf(b, a, 1.0 - x)
+    _beta /= b
+    return 1. - _beta
 
 
 def betai_cdf_ccdf(a, b, x):
@@ -206,6 +207,7 @@ def betai_cdf_ccdf(a, b, x):
     """
     if x <= 0.0:
         return 0.0, 1.0
+    
     if x >= 1.0:
         return 1.0, 0.0
 
