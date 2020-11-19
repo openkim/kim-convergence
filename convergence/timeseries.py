@@ -2,7 +2,7 @@
 
 from typing import Callable
 import sys
-from math import isclose
+from math import isclose, fabs
 import numpy as np
 from inspect import isfunction
 
@@ -451,7 +451,7 @@ def run_length_control(get_trajectory,
                     upper_confidence_limit / 1e-14
             else:
                 relative_half_width_estimate = \
-                    upper_confidence_limit / abs(_mean)
+                    upper_confidence_limit / fabs(_mean)
 
             # The run stopping criteria
             if relative_half_width_estimate < relative_accuracy:
@@ -802,7 +802,7 @@ def run_length_control(get_trajectory,
                         upper_confidence_limit[i] / 1e-14
                 else:
                     relative_half_width_estimate[i] = \
-                        upper_confidence_limit[i] / abs(_mean[i])
+                        upper_confidence_limit[i] / fabs(_mean[i])
 
                 # The run stopping criteria
                 if _done[i]:
