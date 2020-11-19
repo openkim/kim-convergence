@@ -59,14 +59,22 @@ class TestUCLModule(unittest.TestCase):
         self.assertIsNotNone(tm_3)
 
         self.assertRaises(
-            CVGError, heidel_welch.set_heidel_welch_constants, p=0.0)
+            CVGError,
+            heidel_welch.set_heidel_welch_constants,
+            confidence_coefficient=0.0)
         self.assertRaises(
-            CVGError, heidel_welch.set_heidel_welch_constants, p=1.0)
+            CVGError,
+            heidel_welch.set_heidel_welch_constants,
+            confidence_coefficient=1.0)
 
         self.assertRaises(
-            CVGError, heidel_welch.set_heidel_welch_constants, k=0)
+            CVGError,
+            heidel_welch.set_heidel_welch_constants,
+            heidel_welch_number_points=0)
         self.assertRaises(
-            CVGError, heidel_welch.set_heidel_welch_constants, k=10)
+            CVGError,
+            heidel_welch.set_heidel_welch_constants,
+            heidel_welch_number_points=10)
 
         heidel_welch.unset_heidel_welch_constants()
 
@@ -107,11 +115,17 @@ class TestUCLModule(unittest.TestCase):
         self.assertIsNone(tm_3)
 
         self.assertRaises(
-            CVGError, heidel_welch.set_heidel_welch_constants, k=50.0)
+            CVGError,
+            heidel_welch.set_heidel_welch_constants,
+            heidel_welch_number_points=50.0)
         self.assertRaises(
-            CVGError, heidel_welch.set_heidel_welch_constants, k=-10.0)
+            CVGError,
+            heidel_welch.set_heidel_welch_constants,
+            heidel_welch_number_points=-10.0)
         self.assertRaises(
-            CVGError, heidel_welch.set_heidel_welch_constants, k='50')
+            CVGError,
+            heidel_welch.set_heidel_welch_constants,
+            heidel_welch_number_points='50')
 
         heidel_welch.set_heidel_welch_constants()
 
@@ -122,7 +136,7 @@ class TestUCLModule(unittest.TestCase):
 
         self.assertTrue(heidel_welch_k == 50)
         self.assertTrue(heidel_welch_n == 200)
-        self.assertTrue(heidel_welch_p == 0.975)
+        self.assertTrue(heidel_welch_p == 0.95)
 
         heidel_welch_c1_1, heidel_welch_c1_2, \
             heidel_welch_c1_3 = heidel_welch.get_heidel_welch_c1()
@@ -139,14 +153,14 @@ class TestUCLModule(unittest.TestCase):
         self.assertTrue(heidel_welch_c2_2 == 16)
         self.assertTrue(heidel_welch_c2_3 == 8)
 
-        heidel_welch.set_heidel_welch_constants(k=25)
+        heidel_welch.set_heidel_welch_constants(heidel_welch_number_points=25)
 
         heidel_welch_k, heidel_welch_n, \
             heidel_welch_p = heidel_welch.get_heidel_welch_knp()
 
         self.assertTrue(heidel_welch_k == 25)
         self.assertTrue(heidel_welch_n == 100)
-        self.assertTrue(heidel_welch_p == 0.975)
+        self.assertTrue(heidel_welch_p == 0.95)
 
         heidel_welch_c1_1, heidel_welch_c1_2, \
             heidel_welch_c1_3 = heidel_welch.get_heidel_welch_c1()
