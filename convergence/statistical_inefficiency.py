@@ -1,5 +1,10 @@
-"""Statistical inefficiency module."""
+"""Statistical inefficiency module.
 
+The statistical inefficiency is the limiting number of steps to obtain 
+uncorrelated configurations. 
+"""
+
+from math import isclose
 import numpy as np
 
 from .err import CVGError
@@ -15,7 +20,9 @@ __all__ = [
 ]
 
 
-def statistical_inefficiency(x, y=None, *, fft=False, mct=None):
+def statistical_inefficiency(x, y=None, *,
+                             fft=False,
+                             minimum_correlation_time=None):
     r"""Compute the statistical inefficiency.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
@@ -39,10 +46,10 @@ def statistical_inefficiency(x, y=None, *, fft=False, mct=None):
             auto-correlation of timeseries x. (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: False)
-        mct (int, optional): minimum amount of correlation function to compute.
-            The algorithm terminates after computing the correlation time out
-            to mct when the correlation function first goes negative.
-            (default: None)
+        minimum_correlation_time (int, optional): minimum amount of correlation 
+            function to compute. The algorithm terminates after computing the 
+            correlation time out to minimum_correlation_time when the 
+            correlation function first goes negative. (default: None)
 
     Returns:
         float: estimated statistical inefficiency.
@@ -58,55 +65,68 @@ def statistical_inefficiency(x, y=None, *, fft=False, mct=None):
         raise CVGError(msg)
 
     # Get the length of the timeseries
-    n = x.size
+    x_size = x.size
 
-    if n < 2:
-        msg = '{} number of input data points is not '.format(n)
+    if x_size < 2:
+        msg = '{} number of input data points is not '.format(x_size)
         msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
 
     # minimum amount of correlation function to compute
-    if not isinstance(mct, int):
-        if mct is None:
-            mct = 5
+    if not isinstance(minimum_correlation_time, int):
+        if minimum_correlation_time is None:
+            minimum_correlation_time = 5
         else:
-            msg = 'mct must be an `int`.'
+            msg = 'minimum_correlation_time must be an `int`.'
             raise CVGError(msg)
-    elif mct < 1:
-        msg = 'mct must be a positive `int`.'
+    elif minimum_correlation_time < 1:
+        msg = 'minimum_correlation_time must be a positive `int`.'
         raise CVGError(msg)
 
     if y is None or y is x:
         # Special case if timeseries is constant.
         _std = np.std(x)
-        if np.isclose(_std, 0, atol=1e-08):
-            return 1.0
-        elif not np.isfinite(_std):
+
+        if not np.isfinite(_std):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
+
+        # assures that the two values are the same within about 14 decimal digits.
+        if isclose(_std, 0, rel_tol=1e-14):
+            return 1.0
+
         del _std
 
         # Calculate the discrete-time normalized fluctuation
         # auto correlation function
-        corr = auto_correlate(x, fft=fft)[1:]
+        _corr = auto_correlate(x, fft=fft)[1:]
     else:
         # Calculate the discrete-time normalized fluctuation
         # cross correlation function
-        corr = cross_correlate(x, y, fft=fft)[1:]
+        _corr = cross_correlate(x, y, fft=fft)[1:]
 
-    t = np.arange(1., 0., -1.0 / float(n))[1:]
+    _time = np.arange(1., 0., -1.0 / float(x_size))[1:]
 
-    mct = 1. - min(mct, n) / float(n)
+    end_ind = min(_corr.size, _time.size)
+            
+    # slice a numpy array, the memory is shared
+    # between the slice and the original
+    corr = _corr[:end_ind]
+    time = _time[:end_ind]
+
+    minimum_correlation_time = \
+        1. - min(minimum_correlation_time, x_size) / float(x_size)
 
     try:
-        ind = np.where((corr <= 0) & (t < mct))[0][0]
+        ind = np.where((corr <= 0) & (time < minimum_correlation_time))[0][0]
     except IndexError:
-        ind = n
+        ind = end_ind
 
     # Compute the integrated auto-correlation time
-    tau_eq = corr[:ind] * t[:ind]
-    tau_eq = np.sum(tau_eq)
+    _tau_eq = corr[:ind] * time[:ind]
+
+    tau_eq = np.sum(_tau_eq)
 
     # Compute the statistical inefficiency
     si = 1.0 + 2.0 * tau_eq
@@ -119,7 +139,9 @@ def statistical_inefficiency(x, y=None, *, fft=False, mct=None):
 # .. [13] Gelman et al. BDA (2014) Formula 11.8
 
 
-def r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
+def r_statistical_inefficiency(x, y=None, *,
+                               fft=False,
+                               minimum_correlation_time=None):
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the Geyer’s [8]_, [9]_ initial
@@ -134,6 +156,10 @@ def r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
             (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: False)
+        minimum_correlation_time (int, optional): minimum amount of correlation 
+            function to compute. The algorithm terminates after computing the 
+            correlation time out to minimum_correlation_time when the 
+            correlation function first goes negative. (default: None)
 
     Returns:
         float: estimated statistical inefficiency.
@@ -180,22 +206,26 @@ def r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
         msg = 'x is not an array of one-dimension.'
         raise CVGError(msg)
 
-    n = x.size
+    x_size = x.size
 
-    if n < 4:
-        msg = '{} number of input data points is not '.format(n)
+    if x_size < 4:
+        msg = '{} number of input data points is not '.format(x_size)
         msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
 
     if y is None or y is x:
         # Special case if timeseries is constant.
         _std = np.std(x)
-        if np.isclose(_std, 0, atol=1e-08):
-            return 1.0
-        elif not np.isfinite(_std):
+
+        if not np.isfinite(_std):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
+
+        # assures that the two values are the same within about 14 decimal digits.
+        if isclose(_std, 0, rel_tol=1e-14):
+            return 1.0
+
         del _std
 
         # Calculate the discrete-time normalized fluctuation
@@ -206,14 +236,14 @@ def r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
         # cross correlation function
         corr = cross_correlate(x, y, fft=fft)
 
-    rho_hat = corr - 1.0 / (n - 1.0)
+    rho_hat = corr - 1.0 / (x_size - 1.0)
     rho_hat[0] = 1.0
 
-    rho_hat_s = np.zeros([n], dtype=np.float64)
+    rho_hat_s = np.zeros([x_size], dtype=np.float64)
     rho_hat_s[0:2] = rho_hat[0:2]
 
     # Convert estimators into Geyer's initial positive sequence. Loop only
-    # until n - 4 to leave the last pair of auto-correlations as a bias term
+    # until x_size - 4 to leave the last pair of auto-correlations as a bias term
     # that reduces variance in the case of antithetical chain.
 
     # The difficulty is that for large values of s the sample correlation is
@@ -228,7 +258,7 @@ def r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
 
     _sum = rho_hat[0] + rho_hat[1]
     s = 1
-    while s < (n - 4) and _sum > 0.0:
+    while s < (x_size - 4) and _sum > 0.0:
         _sum = rho_hat[s + 1] + rho_hat[s + 2]
         if _sum >= 0.0:
             rho_hat_s[s + 1] = rho_hat[s + 1]
@@ -259,7 +289,9 @@ def r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
     return max(1.0, si)
 
 
-def split_r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
+def split_r_statistical_inefficiency(x, y=None, *,
+                                     fft=False,
+                                     minimum_correlation_time=None):
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the split-r method of
@@ -271,6 +303,10 @@ def split_r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
             with less than eight data points.
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: False)
+        minimum_correlation_time (int, optional): minimum amount of correlation 
+            function to compute. The algorithm terminates after computing the 
+            correlation time out to minimum_correlation_time when the 
+            correlation function first goes negative. (default: None)
 
     Returns:
         float: estimated statistical inefficiency.
@@ -307,23 +343,26 @@ def split_r_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
         raise CVGError(msg)
 
     x = np.array(x, copy=False)
-    n = x.size
-    if n < 8:
-        msg = '{} number of input data points is not '.format(n)
+    x_size = x.size
+    if x_size < 8:
+        msg = '{} number of input data points is not '.format(x_size)
         msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
-    n //= 2
-    return r_statistical_inefficiency(x[:n], x[n:2 * n], fft=fft)
+    x_size //= 2
+    return r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
 
 
-def split_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
+def split_statistical_inefficiency(x, y=None, *,
+                                   fft=False,
+                                   minimum_correlation_time=None):
     r"""Compute the statistical inefficiency.
 
     Computes the effective sample size. The value returned is the minimum of
     effective sample size and the data size times log10(data size).
 
-    Note that the effective sample size can not be estimated with less than
-    four samples.
+    Note:
+        Note that the effective sample size can not be estimated with less than
+        four samples.
 
     Args:
         x (array_like, 1d): time series data.
@@ -347,32 +386,37 @@ def split_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
         msg = 'x is not an array of one-dimension.'
         raise CVGError(msg)
 
-    n = x.size
-    if n < 8:
-        msg = '{} number of input data points is not sufficient '.format(n)
+    x_size = x.size
+    if x_size < 8:
+        msg = '{} number of input data points is not sufficient '.format(
+            x_size)
         msg += 'to be used by this method.'
         raise CVGError(msg)
 
-    n //= 2
+    x_size //= 2
 
     # Special case if timeseries is constant.
     _std = np.std(x)
-    if np.isclose(_std, 0, atol=1e-08):
-        return 1.0
-    elif not np.isfinite(_std):
+
+    if not np.isfinite(_std):
         msg = 'there is at least one value in the input array which is '
         msg += 'non-finite or not-number.'
         raise CVGError(msg)
+
+    # assures that the two values are the same within about 14 decimal digits.
+    if isclose(_std, 0, rel_tol=1e-14):
+        return 1.0
+
     del _std
 
-    acov_1 = auto_covariance(x[:n], fft=True)
-    acov_2 = auto_covariance(x[n:2 * n], fft=True)
+    acov_1 = auto_covariance(x[:x_size], fft=True)
+    acov_2 = auto_covariance(x[x_size:2 * x_size], fft=True)
 
-    chain_mean_1 = np.mean(x[:n])
-    chain_mean_2 = np.mean(x[n:2 * n])
+    chain_mean_1 = np.mean(x[:x_size])
+    chain_mean_2 = np.mean(x[x_size:2 * x_size])
 
-    n_n_1 = float(n) / (n - 1.0)
-    n_1_n = (n - 1.0) / float(n)
+    n_n_1 = float(x_size) / (x_size - 1.0)
+    n_1_n = (x_size - 1.0) / float(x_size)
 
     chain_var_1 = acov_1[0] * n_n_1
     chain_var_2 = acov_2[0] * n_n_1
@@ -384,7 +428,7 @@ def split_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
 
     var_plus_inv = 1.0 / var_plus
 
-    rho_hat_s = np.zeros([n], dtype=np.float64)
+    rho_hat_s = np.zeros([x_size], dtype=np.float64)
 
     acov_s_1 = acov_1[1]
     acov_s_2 = acov_2[1]
@@ -397,14 +441,14 @@ def split_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
     rho_hat_s[1] = rho_hat_odd
 
     # Convert raw auto-covariance estimators into Geyer's initial positive
-    # sequence. Loop only until n - 4 to leave the last pair of
+    # sequence. Loop only until x_size - 4 to leave the last pair of
     # auto-correlations as a bias term that reduces variance in the case of
     # antithetical chain.
 
     _sum = rho_hat_even + rho_hat_odd
 
     s = 1
-    while s < (n - 4) and _sum > 0.0:
+    while s < (x_size - 4) and _sum > 0.0:
         acov_s_1 = acov_1[s + 1]
         acov_s_2 = acov_2[s + 1]
 
@@ -440,7 +484,7 @@ def split_statistical_inefficiency(x, y=None, *, fft=False, mct=None):
             rho_hat_s[s + 1] = _sum / 2.
             rho_hat_s[s + 2] = rho_hat_s[s + 1]
 
-    n *= 2
+    x_size *= 2
 
     # Geyer's truncated estimator for the asymptotic variance. Improved
     # estimate reduces variance in antithetic case
@@ -458,7 +502,10 @@ si_methods = {
 }
 
 
-def integrated_auto_correlation_time(x, y=None, *, si=None, fft=False, mct=None):
+def integrated_auto_correlation_time(x, y=None, *,
+                                     si=None,
+                                     fft=False,
+                                     minimum_correlation_time=None):
     r"""Estimate the integrated auto-correlation time.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
@@ -476,10 +523,10 @@ def integrated_auto_correlation_time(x, y=None, *, si=None, fft=False, mct=None)
             method of computing the statistical inefficiency. (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: {False})
-        mct (int, optional): minimum amount of correlation function to compute.
-            (default: None) The algorithm terminates after computing the
-            correlation time out to mct when the correlation function first
-            goes negative.
+        minimum_correlation_time (int, optional): minimum amount of correlation 
+            function to compute. The algorithm terminates after computing the
+            correlation time out to minimum_correlation_time when the 
+            correlation function first goes negative. (default: None)
 
     Returns:
         float: integrated auto-correlation time.
@@ -489,7 +536,9 @@ def integrated_auto_correlation_time(x, y=None, *, si=None, fft=False, mct=None)
     if si is None:
         try:
             # Compute the statistical inefficiency
-            si = statistical_inefficiency(x, y=y, fft=fft, mct=mct)
+            si = statistical_inefficiency(
+                x, y=y, fft=fft,
+                minimum_correlation_time=minimum_correlation_time)
         except:
             si = 1.0
     elif isinstance(si, str):
@@ -502,7 +551,8 @@ def integrated_auto_correlation_time(x, y=None, *, si=None, fft=False, mct=None)
         si_func = si_methods[si]
         try:
             # Compute the statistical inefficiency
-            si = si_func(x, y=y, fft=fft, mct=mct)
+            si = si_func(x, y=y, fft=fft,
+                         minimum_correlation_time=minimum_correlation_time)
         except:
             si = 1.0
     elif si < 1.0:
