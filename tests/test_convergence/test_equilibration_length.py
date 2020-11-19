@@ -122,8 +122,10 @@ class TestEquilibrationLengthModule(unittest.TestCase):
         self.assertTrue(n1 == n2)
         self.assertAlmostEqual(si1, si2, places=12)
 
-        n1, si1 = cvg.estimate_equilibration_length(x, fft=True, mct=2)
-        n2, si2 = cvg.estimate_equilibration_length(x, fft=False, mct=2)
+        n1, si1 = cvg.estimate_equilibration_length(
+            x, fft=True, minimum_correlation_time=2)
+        n2, si2 = cvg.estimate_equilibration_length(
+            x, fft=False, minimum_correlation_time=2)
 
         self.assertTrue(n1 == n2)
         self.assertAlmostEqual(si1, si2, places=12)
