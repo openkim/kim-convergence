@@ -478,27 +478,27 @@ def run_length_control(get_trajectory,
                     # It should stop
                     msg = '=' * 37
                     msg += '\n'
-                    msg += 'The equilibration happens at the step = '
-                    msg += '{}.\n'.format(equilibration_step)
-                    msg += 'Total run length = {}.'.format(total_run_length)
-                    msg += '\nThe relative half width with '
+                    msg += 'The equilibration happens at step = '
+                    msg += '{}\n'.format(equilibration_step)
+                    msg += 'Total run length = {}\n'.format(total_run_length)
+                    msg += 'The relative half width with '
                     msg += '{}% '.format(confidence_coefficient * 100)
-                    msg += 'confidence of the estimation for the mean meet '
+                    msg += 'confidence of the estimation for the mean meets '
                     msg += 'the required relative accuracy = '
-                    msg += '{}.\n'.format(relative_accuracy)
+                    msg += '{}\n'.format(relative_accuracy)
                     msg += 'The mean of the time-series data lies in: ('
-                    msg += '{} +/- {}'.format(_mean, upper_confidence_limit)
-                    msg += ').\n'
+                    msg += '{} +/- '.format(_mean)
+                    msg += '{})\n'.format(upper_confidence_limit)
                     msg += 'The standard deviation of the equilibrated part '
                     msg += 'of the time-series data = '
-                    msg += '{}.\n'.format(np.std(t[equilibration_step:]))
+                    msg += '{}\n'.format(np.std(t[equilibration_step:]))
                     msg += 'Effective sample size = '
-                    msg += '{}.\n'.format(int(effective_sample_size))
+                    msg += '{}\n'.format(int(effective_sample_size))
                     msg += '=' * 37
                     msg += '\n'
                     if fp is None:
                         return msg
-                    
+
                     print(msg, file=fp)
                     return True
 
@@ -507,30 +507,30 @@ def run_length_control(get_trajectory,
                     # It should stop
                     msg = '=' * 37
                     msg += '\n'
-                    msg += 'The equilibration happens at the step = '
-                    msg += '{}.\n'.format(equilibration_step)
+                    msg += 'The equilibration happens at step = '
+                    msg += '{}\n'.format(equilibration_step)
                     msg += 'Total run length = '
-                    msg += '{}.\n'.format(total_run_length)
+                    msg += '{}\n'.format(total_run_length)
                     msg += 'The relative half width with '
                     msg += '{}% '.format(confidence_coefficient * 100)
-                    msg += 'confidence of the estimation for the mean meet'
-                    msg += ' the required relative accuracy = '
-                    msg += '{}.\n'.format(relative_accuracy)
+                    msg += 'confidence of the estimation for the mean meets '
+                    msg += 'the required relative accuracy = '
+                    msg += '{}\n'.format(relative_accuracy)
                     msg += 'The mean of the time-series data lies in: ('
                     msg += '{} +/- '.format(_mean)
-                    msg += '{}).\n'.format(upper_confidence_limit)
+                    msg += '{})\n'.format(upper_confidence_limit)
                     msg += 'The standard deviation of the equilibrated '
                     msg += 'part of the time-series data = '
-                    msg += '{}.\n'.format(np.std(t[equilibration_step:]))
+                    msg += '{}\n'.format(np.std(t[equilibration_step:]))
                     msg += 'Effective sample size = '
                     msg += '{} > '.format(int(effective_sample_size))
                     msg += '{}, '.format(sample_size)
-                    msg += 'requested number of sample size.\n'
+                    msg += 'requested number of sample size\n'
                     msg += '=' * 37
                     msg += '\n'
                     if fp is None:
                         return msg
-                    
+
                     print(msg, file=fp)
                     return True
 
@@ -552,7 +552,7 @@ def run_length_control(get_trajectory,
                     msg += 'accuracy or enough requested sample size.\n'
                 if fp is None:
                     return msg
-                
+
                 print(msg, file=fp)
                 return False
 
@@ -583,7 +583,7 @@ def run_length_control(get_trajectory,
             msg += 'accuracy or enough requested sample size.\n'
         if fp is None:
             return msg
-        
+
         print(msg, file=fp)
         return False
     # ndim == 2
@@ -848,30 +848,29 @@ def run_length_control(get_trajectory,
                 msg += '\n'
                 for i in range(n_variables):
                     msg += 'for variable number {},\n'.format(i + 1)
-                    msg += 'The equilibration happens at the step = '
-                    msg += '{}.\n'.format(equilibration_step[i])
+                    msg += 'The equilibration happens at step = '
+                    msg += '{}\n'.format(equilibration_step[i])
                     msg += 'Total run length = '
-                    msg += '{}.\n'.format(total_run_length)
+                    msg += '{}\n'.format(total_run_length)
                     msg += 'The relative half width with '
                     msg += '{}% '.format(confidence_coefficient * 100)
-                    msg += 'confidence of the estimation for the mean meet '
+                    msg += 'confidence of the estimation for the mean meets '
                     msg += 'the required relative accuracy = '
-                    msg += '{}.\n'.format(relative_accuracy[i])
-                    msg += 'The mean of the time-series data lies in: '
-                    msg += '({} +/- '.format(_mean[i])
-                    msg += '{}).\n'.format(upper_confidence_limit[i])
+                    msg += '{}\n'.format(relative_accuracy[i])
+                    msg += 'The mean of the time-series data lies in: ('
+                    msg += '{} +/- '.format(_mean[i])
+                    msg += '{})\n'.format(upper_confidence_limit[i])
                     msg += 'The standard deviation of the equilibrated '
                     msg += 'part of the time-series data = '
-                    msg += '{}.\n'.format(np.std(t[i,
-                                                   equilibration_step[i]:]))
+                    msg += '{}\n'.format(np.std(t[i, equilibration_step[i]:]))
                     if sample_size is None:
                         msg += 'Effective sample size = '
-                        msg += '{}.\n'.format(int(effective_sample_size[i]))
+                        msg += '{}\n'.format(int(effective_sample_size[i]))
                     else:
                         msg += 'Effective sample size = '
                         msg += '{} > '.format(int(effective_sample_size[i]))
                         msg += '{}, '.format(sample_size)
-                        msg += 'requested number of sample size.\n'
+                        msg += 'requested number of sample size\n'
                     if i < n_variables - 1:
                         msg += '-' * 37
                         msg += '\n'
@@ -879,7 +878,7 @@ def run_length_control(get_trajectory,
                 msg += '\n'
                 if fp is None:
                     return msg
-                
+
                 print(msg, file=fp)
                 return True
 
@@ -901,7 +900,7 @@ def run_length_control(get_trajectory,
                     msg += 'accuracy or enough requested sample size.\n'
                 if fp is None:
                     return msg
-                
+
                 print(msg, file=fp)
                 return False
 
@@ -931,6 +930,6 @@ def run_length_control(get_trajectory,
             msg += 'accuracy or enough requested sample size.\n'
         if fp is None:
             return msg
-        
+
         print(msg, file=fp)
         return False
