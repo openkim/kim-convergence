@@ -1,6 +1,6 @@
 r"""Convergence package."""
 
-from .err import CVGError
+from .err import CVGError, cvg_warning
 from .stats import \
     get_fft_optimal_size, \
     auto_covariance, \
@@ -11,12 +11,13 @@ from .stats import \
     standard_scale, \
     robust_scale, \
     periodogram, \
+    outlier_methods, \
     outlier_test
 from .batch import batch
 from .mser_m import mser_m
 #from .geweke import geweke
 from .s_normal_dist import s_normal_inv_cdf
-from .t_dist import t_inv_cdf
+from .t_dist import t_inv_cdf, t_interval
 from .statistical_inefficiency import \
     statistical_inefficiency, \
     r_statistical_inefficiency, \
@@ -27,16 +28,21 @@ from .statistical_inefficiency import \
 from .utils import \
     validate_split, \
     train_test_split, \
-    subsample
+    subsample, \
+    subsample_index, \
+    random_subsample, \
+    block_average_subsample
 from .equilibration_length import estimate_equilibration_length
 from .ucl import \
     HeidelbergerWelch, \
-    ucl
+    ucl, \
+    subsamples_ucl
 from .timeseries import \
     run_length_control
 
 __all__ = [
     'CVGError',
+    'cvg_warning',
     'get_fft_optimal_size',
     'auto_covariance',
     'auto_correlate',
@@ -46,12 +52,14 @@ __all__ = [
     'standard_scale',
     'robust_scale',
     'periodogram',
+    'outlier_methods',
     'outlier_test',
     'batch',
     # 'geweke',
     'mser_m',
     's_normal_inv_cdf',
     't_inv_cdf',
+    't_interval',
     'statistical_inefficiency',
     'r_statistical_inefficiency',
     'split_r_statistical_inefficiency',
@@ -61,9 +69,13 @@ __all__ = [
     'validate_split',
     'train_test_split',
     'subsample',
+    'subsample_index',
+    'random_subsample',
+    'block_average_subsample',
     'estimate_equilibration_length',
     'HeidelbergerWelch',
     'ucl',
+    'subsamples_ucl',
     'run_length_control',
 ]
 
