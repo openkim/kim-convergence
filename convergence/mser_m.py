@@ -1,5 +1,6 @@
 """MSER-M module."""
 
+from math import isclose
 import numpy as np
 
 from .err import CVGError
@@ -85,20 +86,27 @@ def mser_m(x,
 
     # Special case if timeseries is constant.
     _std = np.std(x)
-    if np.isclose(_std, 0, atol=1e-08):
-        if not isinstance(batch_size, int):
-            msg = 'batch_size = {} is not an `int`.'.format(batch_size)
-            raise CVGError(msg)
-        elif batch_size < 1:
-            msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
-            raise CVGError(msg)
-        if x.size < batch_size:
-            return False, 0
-        return True, 0
-    elif not np.isfinite(_std):
+
+    if not np.isfinite(_std):
         msg = 'there is at least one value in the input array which is '
         msg += 'non-finite or not-number.'
         raise CVGError(msg)
+
+    # assures that the two values are the same within about 14 decimal digits.
+    if isclose(_std, 0, rel_tol=1e-14):
+        if not isinstance(batch_size, int):
+            msg = 'batch_size = {} is not an `int`.'.format(batch_size)
+            raise CVGError(msg)
+
+        if batch_size < 1:
+            msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
+            raise CVGError(msg)
+
+        if x.size < batch_size:
+            return False, 0
+
+        return True, 0
+
     del _std
 
     # Initialize
@@ -160,8 +168,8 @@ def mser_m(x,
     truncate_index = np.nanargmin(d[:-ignore_end_batch]) * batch_size
 
     if truncate_index > n // 2:
-        # Any truncation value > n/2 is considered an invalid value and
-        # rejected
+        # Any truncation value > n/2 is considered 
+        # an invalid value and rejected
         return False, truncate_index
-    else:
-        return True, truncate_index
+    
+    return True, truncate_index
