@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import numpy as np
 from copy import deepcopy
+from math import fabs
 
 from .err import CVGError
 from .zero_rc import ZERO_RC
@@ -151,7 +152,7 @@ class ZERO_RC_BOUNDS():
                 if self.fx_small <= 0.0:
                     if fx_big >= 0.0:
                         self.step = max(self.abs_step,
-                                        self.rel_step * abs(self.xsave))
+                                        self.rel_step * fabs(self.xsave))
                         self.index = 3
                         return 1, self.xsave
                     msg = 'Answer x = {}, appears to be higher '.format(x)
@@ -169,7 +170,7 @@ class ZERO_RC_BOUNDS():
             if self.fx_small >= 0.0:
                 if fx_big <= 0.0:
                     self.step = max(self.abs_step,
-                                    self.rel_step * abs(self.xsave))
+                                    self.rel_step * fabs(self.xsave))
                     self.index = 3
                     return 1, self.xsave
                 msg = 'Answer x = {}, appears to be higher than '.format(x)
