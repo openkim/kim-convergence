@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 from copy import deepcopy
-from math import copysign
+from math import copysign, fabs
 
 from .err import CVGError
 
@@ -153,7 +153,7 @@ class ZERO_RC():
             msg += 'first time.'
             raise CVGError(msg)
 
-        if abs(self.fc) < abs(self.fb):
+        if fabs(self.fc) < fabs(self.fb):
             if self.c != self.a:
                 self.d = deepcopy(self.a)
                 self.fd = deepcopy(self.fa)
@@ -179,11 +179,11 @@ class ZERO_RC():
         # When the true solution is zero the relative error is undefined. In
         # other words, when the solution component gets small, it needs to
         # switch to something besides relative error control.
-        self.tol = 0.5 * max(self.abs_tol, self.rel_tol * abs(xlo))
+        self.tol = 0.5 * max(self.abs_tol, self.rel_tol * fabs(xlo))
         self.m = (self.c + self.b) * 0.5
         self.mb = self.m - self.b
 
-        if abs(self.mb) <= self.tol:
+        if fabs(self.mb) <= self.tol:
             xhi = deepcopy(self.c)
             qrzero = (self.fc >= 0.0 and self.fb <= 0.0) or \
                 (self.fc < 0.0 and self.fb >= 0.0)
