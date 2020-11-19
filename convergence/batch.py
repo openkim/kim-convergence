@@ -55,7 +55,8 @@ def batch(time_series_data,
     if not isinstance(batch_size, int):
         msg = 'batch_size = {} is not an `int`.'.format(batch_size)
         raise CVGError(msg)
-    elif batch_size < 1:
+    
+    if batch_size < 1:
         msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
         raise CVGError(msg)
 
