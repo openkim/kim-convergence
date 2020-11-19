@@ -59,8 +59,8 @@ class TestTDistModule(unittest.TestCase):
 
     def test_t_inv_cdf(self):
         """Test t_inv_cdf function."""
-        prob = np.array([75e-2, 80e-2, 85e-2, 90e-2, 95e-2, 97.5e-2,
-                         99e-2, 99.5e-2, 99.75e-2, 99.9e-2, 99.95e-2],
+        prob = np.array([75.e-2, 80.e-2, 85.e-2, 90.e-2, 95.e-2, 97.5e-2,
+                         99.e-2, 99.5e-2, 99.75e-2, 99.9e-2, 99.95e-2],
                         dtype=np.float64)
 
         n = prob.size
@@ -168,3 +168,61 @@ class TestTDistModule(unittest.TestCase):
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=5)
+
+    def test_t_interval(self):
+        """Test t_interval function."""
+
+        # scipy reference value
+        ci_ref = (-12.706204736, 12.706204736)
+        ci_l, ci_u = cvg.t_interval(95.e-2, 1)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
+
+        ci_ref = (-1.983971518, 1.983971518)
+        ci_l, ci_u = cvg.t_interval(95.e-2, 100)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
+
+        ci_ref = (-1.960201239, 1.960201239)
+        ci_l, ci_u = cvg.t_interval(95.e-2, 10000)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
+
+        ci_ref = (-25.45169957, 25.451699579)
+        ci_l, ci_u = cvg.t_interval(97.5e-2, 1)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
+
+        ci_ref = (-2.633766915, 2.633766915)
+        ci_l, ci_u = cvg.t_interval(97.5e-2, 10)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
+
+        ci_ref = (-2.241740325, 2.241740325)
+        ci_l, ci_u = cvg.t_interval(97.5e-2, 10000)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
+
+        ci_ref = (-63.656741162, 63.656741162)
+        ci_l, ci_u = cvg.t_interval(99e-2, 1)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
+
+        ci_ref = (-3.169272667, 3.169272667)
+        ci_l, ci_u = cvg.t_interval(99e-2, 10)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
+
+        ci_ref = (-2.576321046, 2.576321046)
+        ci_l, ci_u = cvg.t_interval(99e-2, 10000)
+
+        self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
+        self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
