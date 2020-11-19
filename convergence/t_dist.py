@@ -1,7 +1,11 @@
-"""T distribution module."""
+"""T distribution module.
+
+This module is specilized for the ``convergence`` code and is not a general
+function to be used for other purposes.
+"""
 
 import numpy as np
-from math import lgamma
+from math import lgamma, fabs
 from copy import deepcopy
 
 from .err import CVGError
@@ -17,7 +21,7 @@ __all__ = [
 ]
 
 
-def t_cdf_ccdf(t: float, df):
+def t_cdf_ccdf(t: float, df: float):
     r"""Compute the cumulative distribution of the t-distribution.
 
     The cumulative distribution of the t-distribution for t > 0, can be
@@ -66,7 +70,7 @@ def t_cdf_ccdf(t: float, df):
     return cdf, ccdf
 
 
-def t_cdf(t, df):
+def t_cdf(t: float, df: float):
     r"""Compute the cumulative distribution of the t-distribution.
 
     The cumulative distribution of the t-distribution for t > 0, can be
@@ -96,7 +100,12 @@ def t_cdf(t, df):
     return cdf
 
 
-def t_inv_cdf(p, df, *, _tol=1.0e-8, _atol=1.0e-50, _rtinf=1.0e100):
+def t_inv_cdf(p: float,
+              df: float,
+              *,
+              _tol=1.0e-8,
+              _atol=1.0e-50,
+              _rtinf=1.0e100):
     """Compute the t_distribution inverse cumulative distribution function.
 
     Compute the inverse cumulative distribution function (percent point
@@ -107,7 +116,7 @@ def t_inv_cdf(p, df, *, _tol=1.0e-8, _atol=1.0e-50, _rtinf=1.0e100):
 
     Args:
         p (float): Probability (must be between 0.0 and 1.0)
-        df (int): Degrees of freedom, must be > 0.
+        df (float): Degrees of freedom, must be > 1.
 
     Returns:
         float: The inverse cumulative distribution function.
@@ -126,7 +135,7 @@ def t_inv_cdf(p, df, *, _tol=1.0e-8, _atol=1.0e-50, _rtinf=1.0e100):
         msg += 'positive and greater than 1.'
         raise CVGError(msg)
 
-    x = abs(s_normal_inv_cdf(p))
+    x = fabs(s_normal_inv_cdf(p))
     x_sq = x * x
 
     num = np.array(
@@ -175,7 +184,7 @@ def t_inv_cdf(p, df, *, _tol=1.0e-8, _atol=1.0e-50, _rtinf=1.0e100):
         status, x = d.zero(status, x, fx)
 
 
-def t_interval(p, df):
+def t_interval(p: float, df: float):
     r"""Compute the t_distribution confidence interval.
 
     Compute the t_distribution confidence interval with equal areas around
@@ -183,7 +192,7 @@ def t_interval(p, df):
 
     Args:
         p (float): Probability (must be between 0.0 and 1.0)
-        df (int): Degrees of freedom, must be > 0.
+        df (float): Degrees of freedom, must be > 0.
 
     Returns:
         float, float : lower bound, upper bound of the confidence interval
