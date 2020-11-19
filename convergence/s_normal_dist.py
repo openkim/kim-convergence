@@ -16,14 +16,16 @@ References:
 """
 
 import numpy as np
+
 from copy import deepcopy
+from math import fabs
 
 __all__ = [
     's_normal_inv_cdf'
 ]
 
 
-def s_normal_inv_cdf(p):
+def s_normal_inv_cdf(p: float):
     r"""Compute the standard normal distribution inverse cumulative distribution function.
 
     Compute the inverse cumulative distribution function (percent point
@@ -57,7 +59,7 @@ def s_normal_inv_cdf(p):
         return np.nan
 
     q = p - 0.5
-    if abs(q) <= 0.425:
+    if fabs(q) <= 0.425:
         r = 0.180625 - q * q
         num = (((((((2.50908_09287_30122_6727e+3 * r +
                      3.34305_75583_58812_8105e+4) * r +
