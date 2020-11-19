@@ -18,15 +18,18 @@ cvg_maximum_equilibration_step = None
 # Maximum number of independent samples.
 cvg_sample_size = None
 # A relative half-width requirement or the accuracy parameter. Target value
-# for the ratio of halfwidth to sample mean. If nval > 1, eps can be a scalar
-# to be used for all variables or a 1darray of values of size nval.
-cvg_eps = 0.01
+# for the ratio of halfwidth to sample mean. If n_variables > 1, relative_accuracy can be a
+# scalar to be used for all variables or a 1darray of values of size
+# n_variables.
+cvg_relative_accuracy = 0.01
 # Probability (or confidence interval) and must be between 0.0 and 1.0, and
 # represents the confidence for calculation of relative halfwidths
 # estimation.
-cvg_p = 0.975
-# The number of points that are used to obtain the polynomial fit. The
-# parameter k determines the frequency range over which the fit is made.
+cvg_p = 0.95
+# The heidel_welch_number_points is the number of points Heidelberger and
+# Welch's spectral method that are used to obtain the polynomial fit. The
+# parameter heidel_welch_number_points determines the frequency range over
+# which the fit is made.
 cvg_k = 50
 # If True, use FFT convolution. FFT should be preferred for long time series.
 cvg_fft = True
@@ -55,8 +58,8 @@ cvg_si = 'statistical_inefficiency'
 # The number of data points to skip in estimating ucl.
 cvg_nskip = 1
 # The minimum amount of correlation function to compute in estimating ucl.
-# The algorithm terminates after computing the correlation time out to mct
-# when the correlation function first goes negative.
+# The algorithm terminates after computing the correlation time out to
+# minimum_correlation_time when the correlation function first goes negative.
 cvg_mct = None
 # if `int`, it is the last few points that should be ignored in estimating
 # ucl. if `float`, should be in `(0, 1)` and it is the percent of number of
@@ -350,15 +353,15 @@ def run_length_control(lmpptr, nevery, *argv):
 
     try:
         msg = cvg.run_length_control(get_trajectory=get_trajectory,
-                                     nval=n_arguments - len(ctrl_map),
+                                     n_variables=n_arguments - len(ctrl_map),
                                      initial_run_length=cvg_initial_run_length,
                                      run_length_factor=cvg_run_length_factor,
                                      maximum_run_length=cvg_maximum_run_length,
                                      maximum_equilibration_step=cvg_maximum_equilibration_step,
                                      sample_size=cvg_sample_size,
-                                     eps=cvg_eps,
-                                     p=cvg_p,
-                                     k=cvg_k,
+                                     relative_accuracy=cvg_relative_accuracy,
+                                     confidence_coefficient=cvg_p,
+                                     heidel_welch_number_points=cvg_k,
                                      fft=cvg_fft,
                                      test_size=cvg_test_size,
                                      train_size=cvg_train_size,
@@ -369,7 +372,7 @@ def run_length_control(lmpptr, nevery, *argv):
                                      ignore_end_batch=cvg_ignore_end_batch,
                                      si=cvg_si,
                                      nskip=cvg_nskip,
-                                     mct=cvg_mct,
+                                     minimum_correlation_time=cvg_mct,
                                      ignore_end=cvg_ignore_end,
                                      fp='return')
     except Exception as e:
