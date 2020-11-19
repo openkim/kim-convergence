@@ -1,4 +1,6 @@
 """Equilibration_length estimation module."""
+
+from math import isclose
 import numpy as np
 
 from .err import CVGError
@@ -18,7 +20,7 @@ def estimate_equilibration_length(x, *,
                                   si='statistical_inefficiency',
                                   nskip=1,
                                   fft=False,
-                                  mct=None,
+                                  minimum_correlation_time=None,
                                   ignore_end=None):
     """Estimate the equilibration point in a time series data.
 
@@ -33,10 +35,10 @@ def estimate_equilibration_length(x, *,
             (default: 1)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: False)
-        mct (int, optional): the minimum amount of correlation function to
-            compute. The algorithm terminates after computing the correlation
-            time out to mct when the correlation function first goes negative.
-            (default: None)
+        minimum_correlation_time (int, optional): the minimum amount of 
+            correlation function to compute. The algorithm terminates after 
+            computing the correlation time out to minimum_correlation_time when 
+            the correlation function first goes negative. (default: None)
         ignore_end (int, or float, or None, optional): if ``int``, it is the
             last few points that should be ignored. if ``float``, should be in
             ``(0, 1)`` and it is the percent of number of points that should be
@@ -133,14 +135,17 @@ def estimate_equilibration_length(x, *,
 
     # Special case if timeseries is constant.
     _std = np.std(x)
-    if np.isclose(_std, 0, atol=1e-08):
-        # index and si
-        return 0, 1.0
 
     if not np.isfinite(_std):
         msg = 'there is at least one value in the input array which is '
         msg += 'non-finite or not-number.'
         raise CVGError(msg)
+
+    # assures that the two values are the same within about 14 decimal digits.
+    if isclose(_std, 0, rel_tol=1e-14):
+        # index and si
+        return 0, 1.0
+
     del _std
 
     # Upper bound check
@@ -160,8 +165,10 @@ def estimate_equilibration_length(x, *,
     for t in range(0, upper_bound, nskip):
         # Compute the statitical inefficiency of a time series
         try:
-            si_value = si_func(x[t:], fft=fft, mct=mct)
-        except:
+            si_value = si_func(
+                x[t:], fft=fft,
+                minimum_correlation_time=minimum_correlation_time)
+        except CVGError:
             si_value = float(x_size - t)
 
         _effective_samples_size = float(x_size - t) / si_value
