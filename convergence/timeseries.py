@@ -5,6 +5,8 @@ import sys
 from math import isclose, fabs
 import numpy as np
 from inspect import isfunction
+import json
+import kim_edn
 
 from .err import CVGError
 from .mser_m import mser_m
@@ -47,7 +49,8 @@ def run_length_control(get_trajectory,
                        nskip=1,
                        minimum_correlation_time=None,
                        ignore_end=None,
-                       fp=None):
+                       fp=None,
+                       fp_format='txt'):
     """Control the length of the time series data from a simulation run.
 
     At each checkpoint an upper confidence limit (UCL) is approximated. If
@@ -180,6 +183,8 @@ def run_length_control(get_trajectory,
             must be an object with write(string) method. If it is None,
             ``sys.stdout`` will be used which prints objects on the screen.
             (default: None)
+        fp_format (str): one of the ``txt``, ``json``, or ``edn`` format.
+            (default: 'txt')
 
     Returns:
         bool or str:
@@ -245,6 +250,11 @@ def run_length_control(get_trajectory,
         msg = 'Keyword argument `fp` must be either an `str` and equal '
         msg += 'to "return", or None, or an object with write(string) '
         msg += 'method.'
+        raise CVGError(msg)
+
+    if fp_format not in ('txt', 'json', 'edn'):
+        msg = 'fp format is unknown. Valid formats are:\n\t- '
+        msg += '{}'.format('\n\t- '.join(('txt', 'json', 'edn')))
         raise CVGError(msg)
 
     # Initialize
@@ -476,61 +486,107 @@ def run_length_control(get_trajectory,
 
                 if sample_size is None:
                     # It should stop
-                    msg = '=' * 37
-                    msg += '\n'
-                    msg += 'The equilibration happens at step = '
-                    msg += '{}\n'.format(equilibration_step)
-                    msg += 'Total run length = {}\n'.format(total_run_length)
-                    msg += 'The relative half width with '
-                    msg += '{}% '.format(confidence_coefficient * 100)
-                    msg += 'confidence of the estimation for the mean meets '
-                    msg += 'the required relative accuracy = '
-                    msg += '{}\n'.format(relative_accuracy)
-                    msg += 'The mean of the time-series data lies in: ('
-                    msg += '{} +/- '.format(_mean)
-                    msg += '{})\n'.format(upper_confidence_limit)
-                    msg += 'The standard deviation of the equilibrated part '
-                    msg += 'of the time-series data = '
-                    msg += '{}\n'.format(np.std(t[equilibration_step:]))
-                    msg += 'Effective sample size = '
-                    msg += '{}\n'.format(int(effective_sample_size))
-                    msg += '=' * 37
-                    msg += '\n'
+                    if fp_format == 'txt':
+                        msg = '=' * 37
+                        msg += '\n'
+                        msg += 'The equilibration happens at step = '
+                        msg += '{}\n'.format(equilibration_step)
+                        msg += 'Total run length = '
+                        msg += '{}\n'.format(total_run_length)
+                        msg += 'The relative half width with '
+                        msg += '{}% '.format(confidence_coefficient * 100)
+                        msg += 'confidence of the estimation for the mean meets '
+                        msg += 'the required relative accuracy = '
+                        msg += '{}\n'.format(relative_accuracy)
+                        msg += 'The mean of the time-series data lies in: ('
+                        msg += '{} +/- '.format(_mean)
+                        msg += '{})\n'.format(upper_confidence_limit)
+                        msg += 'The standard deviation of the equilibrated part '
+                        msg += 'of the time-series data = '
+                        msg += '{}\n'.format(np.std(time_series_data))
+                        msg += 'Effective sample size = '
+                        msg += '{}\n'.format(int(effective_sample_size))
+                        msg += '=' * 37
+                        msg += '\n'
+                    else:
+                        msg = {
+                            "converged": True,
+                            "equilibration_step": equilibration_step,
+                            "total_run_length": total_run_length,
+                            "relative_half_width": confidence_coefficient * 100,
+                            "relative_accuracy": relative_accuracy,
+                            "mean": _mean,
+                            "upper_confidence_limit": upper_confidence_limit,
+                            "standard_deviation": np.std(time_series_data),
+                            "effective_sample_size": int(effective_sample_size)
+                        }
+
                     if fp is None:
+                        if fp_format == 'json':
+                            return json.dumps(msg, indent=4)
+                        if fp_format == 'edn':
+                            return kim_edn.dumps(msg, indent=4)
                         return msg
 
+                    if fp_format == 'json':
+                        json.sump(msg, fp, indent=4)
+                    if fp_format == 'edn':
+                        kim_edn.dump(msg, fp, indent=4)
                     print(msg, file=fp)
                     return True
 
                 # We should check for enough sample size
                 if effective_sample_size >= sample_size:
                     # It should stop
-                    msg = '=' * 37
-                    msg += '\n'
-                    msg += 'The equilibration happens at step = '
-                    msg += '{}\n'.format(equilibration_step)
-                    msg += 'Total run length = '
-                    msg += '{}\n'.format(total_run_length)
-                    msg += 'The relative half width with '
-                    msg += '{}% '.format(confidence_coefficient * 100)
-                    msg += 'confidence of the estimation for the mean meets '
-                    msg += 'the required relative accuracy = '
-                    msg += '{}\n'.format(relative_accuracy)
-                    msg += 'The mean of the time-series data lies in: ('
-                    msg += '{} +/- '.format(_mean)
-                    msg += '{})\n'.format(upper_confidence_limit)
-                    msg += 'The standard deviation of the equilibrated '
-                    msg += 'part of the time-series data = '
-                    msg += '{}\n'.format(np.std(t[equilibration_step:]))
-                    msg += 'Effective sample size = '
-                    msg += '{} > '.format(int(effective_sample_size))
-                    msg += '{}, '.format(sample_size)
-                    msg += 'requested number of sample size\n'
-                    msg += '=' * 37
-                    msg += '\n'
+                    if fp_format == 'txt':
+                        msg = '=' * 37
+                        msg += '\n'
+                        msg += 'The equilibration happens at step = '
+                        msg += '{}\n'.format(equilibration_step)
+                        msg += 'Total run length = '
+                        msg += '{}\n'.format(total_run_length)
+                        msg += 'The relative half width with '
+                        msg += '{}% '.format(confidence_coefficient * 100)
+                        msg += 'confidence of the estimation for the mean '
+                        msg += 'meets the required relative accuracy = '
+                        msg += '{}\n'.format(relative_accuracy)
+                        msg += 'The mean of the time-series data lies in: ('
+                        msg += '{} +/- '.format(_mean)
+                        msg += '{})\n'.format(upper_confidence_limit)
+                        msg += 'The standard deviation of the equilibrated '
+                        msg += 'part of the time-series data = '
+                        msg += '{}\n'.format(np.std(time_series_data))
+                        msg += 'Effective sample size = '
+                        msg += '{} > '.format(int(effective_sample_size))
+                        msg += '{}, '.format(sample_size)
+                        msg += 'requested number of sample size\n'
+                        msg += '=' * 37
+                        msg += '\n'
+                    else:
+                        msg = {
+                            "converged": True,
+                            "equilibration_step": equilibration_step,
+                            "total_run_length": total_run_length,
+                            "relative_half_width": confidence_coefficient * 100,
+                            "relative_accuracy": relative_accuracy,
+                            "mean": _mean,
+                            "upper_confidence_limit": upper_confidence_limit,
+                            "standard_deviation": np.std(time_series_data),
+                            "effective_sample_size": int(effective_sample_size),
+                            "sample_size", sample_size
+                        }
+
                     if fp is None:
+                        if fp_format == 'json':
+                            return json.dumps(msg, indent=4)
+                        if fp_format == 'edn':
+                            return kim_edn.dumps(msg, indent=4)
                         return msg
 
+                    if fp_format == 'json':
+                        json.dump(msg, fp, indent=4)
+                    if fp_format == 'edn':
+                        kim_edn.dump(msg, fp, indent=4)
                     print(msg, file=fp)
                     return True
 
@@ -844,41 +900,73 @@ def run_length_control(get_trajectory,
             done = np.all(_done)
             if done:
                 # It should stop
-                msg = '=' * 37
-                msg += '\n'
-                for i in range(n_variables):
-                    msg += 'for variable number {},\n'.format(i + 1)
-                    msg += 'The equilibration happens at step = '
-                    msg += '{}\n'.format(equilibration_step[i])
-                    msg += 'Total run length = '
-                    msg += '{}\n'.format(total_run_length)
-                    msg += 'The relative half width with '
-                    msg += '{}% '.format(confidence_coefficient * 100)
-                    msg += 'confidence of the estimation for the mean meets '
-                    msg += 'the required relative accuracy = '
-                    msg += '{}\n'.format(relative_accuracy[i])
-                    msg += 'The mean of the time-series data lies in: ('
-                    msg += '{} +/- '.format(_mean[i])
-                    msg += '{})\n'.format(upper_confidence_limit[i])
-                    msg += 'The standard deviation of the equilibrated '
-                    msg += 'part of the time-series data = '
-                    msg += '{}\n'.format(np.std(t[i, equilibration_step[i]:]))
-                    if sample_size is None:
-                        msg += 'Effective sample size = '
-                        msg += '{}\n'.format(int(effective_sample_size[i]))
-                    else:
-                        msg += 'Effective sample size = '
-                        msg += '{} > '.format(int(effective_sample_size[i]))
-                        msg += '{}, '.format(sample_size)
-                        msg += 'requested number of sample size\n'
-                    if i < n_variables - 1:
-                        msg += '-' * 37
-                        msg += '\n'
-                msg += '=' * 37
-                msg += '\n'
+                if fp_format == 'txt':
+                    msg = '=' * 37
+                    msg += '\n'
+                    for i in range(n_variables):
+                        msg += 'for variable number {},\n'.format(i + 1)
+                        msg += 'The equilibration happens at step = '
+                        msg += '{}\n'.format(equilibration_step[i])
+                        msg += 'Total run length = '
+                        msg += '{}\n'.format(total_run_length)
+                        msg += 'The relative half width with '
+                        msg += '{}% '.format(confidence_coefficient * 100)
+                        msg += 'confidence of the estimation for the mean meets '
+                        msg += 'the required relative accuracy = '
+                        msg += '{}\n'.format(relative_accuracy[i])
+                        msg += 'The mean of the time-series data lies in: ('
+                        msg += '{} +/- '.format(_mean[i])
+                        msg += '{})\n'.format(upper_confidence_limit[i])
+                        msg += 'The standard deviation of the equilibrated '
+                        msg += 'part of the time-series data = '
+                        msg += '{}\n'.format(np.std(t[i,
+                                                      equilibration_step[i]:]))
+                        if sample_size is None:
+                            msg += 'Effective sample size = '
+                            msg += '{}\n'.format(int(effective_sample_size[i]))
+                        else:
+                            msg += 'Effective sample size = '
+                            msg += '{} > '.format(
+                                int(effective_sample_size[i]))
+                            msg += '{}, '.format(sample_size)
+                            msg += 'requested number of sample size\n'
+                        if i < n_variables - 1:
+                            msg += '-' * 37
+                            msg += '\n'
+                    msg += '=' * 37
+                    msg += '\n'
+                else:
+                    msg = []
+                    for i in range(n_variables):
+                        _msg = {
+                            "variable": i + 1,
+                            "converged": True,
+                            "equilibration_step": equilibration_step[i],
+                            "total_run_length": total_run_length,
+                            "relative_half_width": confidence_coefficient * 100,
+                            "relative_accuracy": relative_accuracy[i],
+                            "mean": _mean[i],
+                            "upper_confidence_limit": upper_confidence_limit[i],
+                            "standard_deviation":
+                            np.std(t[i, equilibration_step[i]:]),
+                            "effective_sample_size":
+                            int(effective_sample_size[i])
+                        }
+                        if sample_size is not None:
+                            _msg["sample_size"] = sample_size
+                        msg.append(_msg)
+
                 if fp is None:
+                    if fp_format == 'json':
+                        return json.dumps(msg, indent=4)
+                    if fp_format == 'edn':
+                        return kim_edn.dumps(msg, indent=4)
                     return msg
 
+                if fp_format == 'json':
+                    json.dump(msg, fp, indent=4)
+                if fp_format == 'edn':
+                    kim_edn.dump(msg, fp, indent=4)
                 print(msg, file=fp)
                 return True
 
@@ -921,15 +1009,27 @@ def run_length_control(get_trajectory,
             _t = np.asarray(_t, dtype=np.float64)
             t = np.concatenate((t, _t), axis=1)
 
-        msg = 'the length of the time series data = '
-        msg += '{} '.format(maximum_run_length)
-        msg += 'is not long enough to estimate the mean with sufficient '
-        if sample_size is None:
-            msg += 'accuracy.\n'
+        if fp_format == 'txt':
+            msg = 'the length of the time series data = '
+            msg += '{} '.format(maximum_run_length)
+            msg += 'is not long enough to estimate the mean with sufficient '
+            if sample_size is None:
+                msg += 'accuracy.\n'
+            else:
+                msg += 'accuracy or enough requested sample size.\n'
         else:
-            msg += 'accuracy or enough requested sample size.\n'
+            msg = {"converged": False}
+
         if fp is None:
+            if fp_format == 'json':
+                return json.dumps(msg, indent=4)
+            if fp_format == 'edn':
+                return kim_edn.dumps(msg, indent=4)
             return msg
 
+        if fp_format == 'json':
+            json.dump(msg, fp, indent=4)
+        if fp_format == 'edn':
+            kim_edn.dump(msg, fp, indent=4)
         print(msg, file=fp)
         return False
