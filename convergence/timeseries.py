@@ -25,6 +25,187 @@ __all__ = [
 ]
 
 
+def convergence_message(fp_format,
+                        converged,
+                        n_variables,
+                        total_run_length,
+                        equilibration_step,
+                        confidence_coefficient,
+                        relative_accuracy,
+                        relative_half_width_estimate
+                        mean,
+                        upper_confidence_limit,
+                        std,
+                        effective_sample_size,
+                        sample_size):
+    """Create convergence message.
+
+    Args:
+        fp_format (str): one of the ``txt``, ``json``, or ``edn`` format.
+        converged (bool): if we reached convergence or not!
+        n_variables (int): the number of variables in the corresponding 
+            time-series data.
+        total_run_length (int): the total number of steps
+        equilibration_step (int or 1darray): step number, where the
+            equilibration has been achieved
+        confidence_coefficient (float): Probability (or confidence interval)
+            and must be between 0.0 and 1.0, and represents the confidence for
+            calculation of relative halfwidths estimation.
+        relative_accuracy (float, or 1darray): a relative half-width
+            requirement or the accuracy parameter. Target value for the ratio
+            of halfwidth to sample mean.
+        relative_half_width_estimate(float, or 1darray): estimatemed relative
+            half-width from the time-series data.
+        mean (float, or 1darray): the mean of time-series data for each
+            variable.
+        upper_confidence_limit (float, or 1darray): the upper confidence limit
+            of the mean.
+        std (float, or 1darray): the std of time-series data for each variable.
+        effective_sample_size (float, or 1darray): the number of effective
+            sample size.
+        sample_size (int): the requested maximum number of independent samples.
+
+    Returns:
+        str or dict: convergence message
+            if fp_format is a `txt` it will be a string otherwise a `dict`.
+
+    """
+    if fp_format == 'txt':
+        msg = '=' * 37
+        msg += '\n\nConverged!\n\n' if converged else '\n\nNot converged!\n\n'
+        if n_variables == 1:
+            if converged:
+                msg += 'Total run length = '
+                msg += '{}.\n'.format(total_run_length)
+                msg += 'The equilibration happens at step = '
+                msg += '{}.\n'.format(equilibration_step)
+                msg += 'The relative half width with '
+                msg += '{}% '.format(round(confidence_coefficient * 100, 3))
+                msg += 'confidence of the estimation for the mean '
+                msg += 'meets the required relative accuracy = '
+                msg += '{}.\n'.format(relative_accuracy)
+                msg += 'The mean of the time-series data lies in: ('
+                msg += '{} +/- '.format(mean)
+                msg += '{}).\n'.format(upper_confidence_limit)
+                msg += 'The standard deviation of the equilibrated '
+                msg += 'part of the time-series data = '
+                msg += '{}.\n'.format(std)
+                msg += 'Effective sample size = '
+                msg += '{}'.format(int(effective_sample_size))
+                if sample_size is None:
+                    msg += '.\n'
+                else:
+                    msg += '> {}, '.format(sample_size)
+                    msg += 'requested number of sample size.\n'
+            else:
+                msg += 'The length of the time series data = '
+                msg += '{}, is not long enough '.format(total_run_length)
+                if relative_half_width_estimate < relative_accuracy:
+                    msg += 'to estimate the mean with enough requested '
+                    msg += 'sample size = {}.\n'.format(sample_size)
+                else:
+                    msg += 'to estimate the mean with sufficient accuracy.\n'
+                msg += 'The equilibration happens at step = '
+                msg += '{}.\n'.format(equilibration_step)
+                msg += 'The relative half width with '
+                msg += '{}% '.format(round(confidence_coefficient * 100, 3))
+                msg += 'confidence of the estimation for the mean '
+                if relative_half_width_estimate < relative_accuracy:
+                    msg += 'meets the required relative accuracy '
+                else:
+                    msg += 'does not meet the required relative accuracy '
+                msg += '= {}.\n'.format(relative_accuracy)
+                msg += 'The mean of the time-series data lies in: ('
+                msg += '{} +/- '.format(mean)
+                msg += '{}).\n'.format(upper_confidence_limit)
+                msg += 'The standard deviation of the equilibrated '
+                msg += 'part of the time-series data = '
+                msg += '{}.\n'.format(std)
+                if relative_half_width_estimate < relative_accuracy:
+                    msg += 'Effective sample size = '
+                    msg += '{} < '.format(int(effective_sample_size))
+                    msg += '{}, '.format(sample_size)
+                    msg += 'requested number of sample size.\n'
+        else:
+            for i in range(n_variables):
+                msg += 'for variable number {},\n'.format(i + 1)
+                if relative_half_width_estimate[i] < relative_accuracy[i]:
+                    msg += 'Total run length = '
+                    msg += '{}.\n'.format(total_run_length)
+                else:
+                    msg += 'The length of the time series data = '
+                    msg += '{}, is not long enough '.format(total_run_length)
+                    msg += 'to estimate the mean with sufficient accuracy.\n'
+                msg += 'The equilibration happens at step = '
+                msg += '{}.\n'.format(equilibration_step[i])
+                msg += 'The relative half width with '
+                msg += '{}% '.format(round(confidence_coefficient * 100, 3))
+                msg += 'confidence of the estimation for the mean '
+                if relative_half_width_estimate[i] < relative_accuracy[i]:
+                    msg += 'meets the required relative accuracy '
+                else:
+                    msg += 'does not meet the required relative accuracy '
+                msg += '= {}.\n'.format(relative_accuracy[i])
+                msg += 'The mean of the time-series data lies in: ('
+                msg += '{} +/- '.format(mean[i])
+                msg += '{}).\n'.format(upper_confidence_limit[i])
+                msg += 'The standard deviation of the equilibrated '
+                msg += 'part of the time-series data = '
+                msg += '{}.\n'.format(std[i])
+                if relative_half_width_estimate[i] < relative_accuracy[i]:
+                    msg += 'Effective sample size = '
+                    msg += '{}'.format(int(effective_sample_size[i]))
+                    if sample_size is None:
+                        msg += '.\n'
+                    else:
+                        if effective_sample_size[i] >= sample_size:
+                            msg += '> {}, '.format(sample_size)
+                        else:
+                            msg += '< {}, '.format(sample_size)
+                        msg += 'requested number of sample size.\n'
+                if i < n_variables - 1:
+                    msg += '-' * 37
+                    msg += '\n'
+        msg += '=' * 37
+        msg += '\n'
+    else:
+        if n_variables == 1:
+            msg = {
+                "converged": converged,
+                "total_run_length": total_run_length,
+                "equilibration_step": equilibration_step,
+                "confidence": round(confidence_coefficient * 100, 3),
+                "relative_accuracy": relative_accuracy,
+                "relative_half_width": relative_half_width_estimate,
+                "mean": mean,
+                "upper_confidence_limit": upper_confidence_limit,
+                "standard_deviation": std,
+            }
+            if relative_half_width_estimate < relative_accuracy:
+                msg["effective_sample_size"] = int(effective_sample_size)
+            msg["requested_sample_size"] = \
+                "" if sample_size is None else sample_size
+        else:
+            msg = {"converged": converged}
+            for i in range(n_variables):
+                msg[i] = {
+                    "total_run_length": total_run_length,
+                    "equilibration_step": equilibration_step[i],
+                    "confidence": round(confidence_coefficient * 100, 3),
+                    "relative_accuracy": relative_accuracy[i],
+                    "relative_half_width": relative_half_width_estimate[i],
+                    "mean": mean[i],
+                    "upper_confidence_limit": upper_confidence_limit[i],
+                    "standard_deviation": std[i],
+                }
+                if relative_half_width_estimate[i] < relative_accuracy[i]:
+                    msg[i]["effective_sample_size"] = \
+                        int(effective_sample_size[i])
+                msg[i]["requested_sample_size"] = \
+                    "" if sample_size is None else sample_size
+    return msg
+
+
 def run_length_control(get_trajectory,
                        *,
                        n_variables=1,
@@ -55,7 +236,7 @@ def run_length_control(get_trajectory,
 
     At each checkpoint an upper confidence limit (UCL) is approximated. If
     the relative UCL (UCL divided by the sample mean) is less than a
-    prespecified value, `r`elative_accuracy`, the simulation is terminated. 
+    prespecified value, `r`elative_accuracy`, the simulation is terminated.
     Relative accuracy is the confidence  interval  half  width  (UCL) divided
     by sample mean. The UCL is calculated as a `confidence_coefficient%`
     confidence interval for the mean, using the portion of the time series data
@@ -117,17 +298,17 @@ def run_length_control(get_trajectory,
             the maximum equilibration step. (default: None)
         sample_size (int, optional): maximum number of independent samples.
             (default: None)
-        relative_accuracy (float, or 1darray, optional): a relative half-width 
+        relative_accuracy (float, or 1darray, optional): a relative half-width
             requirement or the accuracy parameter. Target value for the ratio
             of halfwidth to sample mean. If ``n_variables > 1``,
             ``relative_accuracy`` can be a scalar to be used for all variables
             or a 1darray of values of size n_variables. (default: 0.01)
         population_standard_deviation (float, or 1darray, optional): population
             standard deviation. If ``n_variables > 1``, and
-            ``population_standard_deviation`` is given (not None), then 
+            ``population_standard_deviation`` is given (not None), then
             ``population_standard_deviation`` must be a 1darray of values of
             size n_variables (some of those can be None, where the population
-            standard deviation is not known.) 
+            standard deviation is not known.)
             E.g., [1.0, None] is given for ``n_variables = 2``, where for the
             second variable the population standard deviation is not known.
             (default: None)
@@ -166,9 +347,9 @@ def run_length_control(get_trajectory,
             (default: 'statistical_inefficiency')
         nskip (int, optional): the number of data points to skip in
             estimating ucl. (default: 1)
-        minimum_correlation_time (int, optional): The minimum amount of 
-            correlation function to compute in estimating ucl. The algorithm 
-            terminates after computing the correlation time out to 
+        minimum_correlation_time (int, optional): The minimum amount of
+            correlation function to compute in estimating ucl. The algorithm
+            terminates after computing the correlation time out to
             minimum_correlation_time when the correlation function first
             goes negative. (default: None)
         ignore_end (int, or float, or None, optional): if ``int``, it is the
@@ -216,6 +397,10 @@ def run_length_control(get_trajectory,
 
     if maximum_equilibration_step is None:
         maximum_equilibration_step = maximum_run_length // 2
+        msg = "maximum_equilibration_step is not given on input!\nThe "
+        msg = "maximum number of steps as an equilibration hard limit "
+        msg += "is set to {}".format(maximum_equilibration_step)
+        cvg_warning(msg)
 
     # Set the hard limit for the equilibration step
     if not isinstance(maximum_equilibration_step, int):
@@ -242,14 +427,12 @@ def run_length_control(get_trajectory,
         fp = sys.stdout
     elif isinstance(fp, str):
         if fp != 'return':
-            msg = 'Keyword argument `fp` is an `str` and not equal to '
-            msg += '"return".'
+            msg = 'Keyword argument `fp` is a `str` and not equal to "return".'
             raise CVGError(msg)
         fp = None
     elif not hasattr(fp, 'write'):
-        msg = 'Keyword argument `fp` must be either an `str` and equal '
-        msg += 'to "return", or None, or an object with write(string) '
-        msg += 'method.'
+        msg = 'Keyword argument `fp` must be either a `str` and equal to '
+        msg += '"return", or None, or an object with write(string) method.'
         raise CVGError(msg)
 
     if fp_format not in ('txt', 'json', 'edn'):
@@ -261,7 +444,7 @@ def run_length_control(get_trajectory,
     if n_variables == 1:
         ndim = 1
         if np.size(relative_accuracy) != 1:
-            msg = 'relative_accuracy must be a `float`.'
+            msg = 'For one variable, relative_accuracy must be a `float`.'
             raise CVGError(msg)
 
     else:
@@ -274,6 +457,8 @@ def run_length_control(get_trajectory,
             msg = 'relative_accuracy must be a scalar (a `float`) or a '
             msg += '1darray of size = {}.'.format(n_variables)
             raise CVGError(msg)
+        else:
+            relative_accuracy = np.array(relative_accuracy, copy=False)
 
         if population_standard_deviation is not None:
             if np.size(population_standard_deviation) != n_variables:
@@ -484,110 +669,34 @@ def run_length_control(get_trajectory,
                     effective_sample_size = time_series_data_size / \
                         statistical_inefficiency_estimate
 
-                if sample_size is None:
-                    # It should stop
-                    if fp_format == 'txt':
-                        msg = '=' * 37
-                        msg += '\n'
-                        msg += 'The equilibration happens at step = '
-                        msg += '{}\n'.format(equilibration_step)
-                        msg += 'Total run length = '
-                        msg += '{}\n'.format(total_run_length)
-                        msg += 'The relative half width with '
-                        msg += '{}% '.format(confidence_coefficient * 100)
-                        msg += 'confidence of the estimation for the mean meets '
-                        msg += 'the required relative accuracy = '
-                        msg += '{}\n'.format(relative_accuracy)
-                        msg += 'The mean of the time-series data lies in: ('
-                        msg += '{} +/- '.format(_mean)
-                        msg += '{})\n'.format(upper_confidence_limit)
-                        msg += 'The standard deviation of the equilibrated part '
-                        msg += 'of the time-series data = '
-                        msg += '{}\n'.format(np.std(time_series_data))
-                        msg += 'Effective sample size = '
-                        msg += '{}\n'.format(int(effective_sample_size))
-                        msg += '=' * 37
-                        msg += '\n'
-                    else:
-                        msg = {
-                            "converged": True,
-                            "equilibration_step": equilibration_step,
-                            "total_run_length": total_run_length,
-                            "relative_half_width": confidence_coefficient * 100,
-                            "relative_accuracy": relative_accuracy,
-                            "mean": _mean,
-                            "upper_confidence_limit": upper_confidence_limit,
-                            "standard_deviation": np.std(time_series_data),
-                            "effective_sample_size": int(effective_sample_size)
-                        }
-
+                # We should stop or we check for enough sample size
+                if sample_size is None or effective_sample_size >= sample_size:
+                    msg = convergence_message(fp_format,
+                                              True,
+                                              1,
+                                              maximum_run_length,
+                                              total_run_length,
+                                              equilibration_step,
+                                              confidence_coefficient,
+                                              relative_accuracy,
+                                              relative_half_width_estimate
+                                              _mean,
+                                              upper_confidence_limit,
+                                              np.std(time_series_data),
+                                              effective_sample_size,
+                                              sample_size)
                     if fp is None:
                         if fp_format == 'json':
                             return json.dumps(msg, indent=4)
                         if fp_format == 'edn':
                             return kim_edn.dumps(msg, indent=4)
                         return msg
-
-                    if fp_format == 'json':
-                        json.sump(msg, fp, indent=4)
-                    if fp_format == 'edn':
-                        kim_edn.dump(msg, fp, indent=4)
-                    print(msg, file=fp)
-                    return True
-
-                # We should check for enough sample size
-                if effective_sample_size >= sample_size:
-                    # It should stop
-                    if fp_format == 'txt':
-                        msg = '=' * 37
-                        msg += '\n'
-                        msg += 'The equilibration happens at step = '
-                        msg += '{}\n'.format(equilibration_step)
-                        msg += 'Total run length = '
-                        msg += '{}\n'.format(total_run_length)
-                        msg += 'The relative half width with '
-                        msg += '{}% '.format(confidence_coefficient * 100)
-                        msg += 'confidence of the estimation for the mean '
-                        msg += 'meets the required relative accuracy = '
-                        msg += '{}\n'.format(relative_accuracy)
-                        msg += 'The mean of the time-series data lies in: ('
-                        msg += '{} +/- '.format(_mean)
-                        msg += '{})\n'.format(upper_confidence_limit)
-                        msg += 'The standard deviation of the equilibrated '
-                        msg += 'part of the time-series data = '
-                        msg += '{}\n'.format(np.std(time_series_data))
-                        msg += 'Effective sample size = '
-                        msg += '{} > '.format(int(effective_sample_size))
-                        msg += '{}, '.format(sample_size)
-                        msg += 'requested number of sample size\n'
-                        msg += '=' * 37
-                        msg += '\n'
-                    else:
-                        msg = {
-                            "converged": True,
-                            "equilibration_step": equilibration_step,
-                            "total_run_length": total_run_length,
-                            "relative_half_width": confidence_coefficient * 100,
-                            "relative_accuracy": relative_accuracy,
-                            "mean": _mean,
-                            "upper_confidence_limit": upper_confidence_limit,
-                            "standard_deviation": np.std(time_series_data),
-                            "effective_sample_size": int(effective_sample_size),
-                            "sample_size", sample_size
-                        }
-
-                    if fp is None:
-                        if fp_format == 'json':
-                            return json.dumps(msg, indent=4)
-                        if fp_format == 'edn':
-                            return kim_edn.dumps(msg, indent=4)
-                        return msg
-
                     if fp_format == 'json':
                         json.dump(msg, fp, indent=4)
-                    if fp_format == 'edn':
+                    elif fp_format == 'edn':
                         kim_edn.dump(msg, fp, indent=4)
-                    print(msg, file=fp)
+                    else:
+                        print(msg, file=fp)
                     return True
 
             total_run_length += run_length
@@ -597,20 +706,9 @@ def run_length_control(get_trajectory,
                 run_length = maximum_run_length - total_run_length
                 total_run_length = maximum_run_length
 
+            # We have reached the maximum limit
             if run_length == 0:
-                # We have reached the maximum limit
-                msg = 'the length of the time series data = '
-                msg += '{} is not long '.format(maximum_run_length)
-                msg += 'enough to estimate the mean with sufficient '
-                if sample_size is None:
-                    msg += 'accuracy.\n'
-                else:
-                    msg += 'accuracy or enough requested sample size.\n'
-                if fp is None:
-                    return msg
-
-                print(msg, file=fp)
-                return False
+                break
 
             try:
                 _t = get_trajectory(step=run_length)
@@ -630,18 +728,37 @@ def run_length_control(get_trajectory,
             t = np.concatenate((t, _t))
 
         # We have reached the maximum limit
-        msg = 'the length of the time series data = '
-        msg += '{} is not long '.format(maximum_run_length)
-        msg += 'enough to estimate the mean with sufficient '
-        if sample_size is None:
-            msg += 'accuracy.\n'
-        else:
-            msg += 'accuracy or enough requested sample size.\n'
+        msg = convergence_message(fp_format,
+                                  False,
+                                  1,
+                                  maximum_run_length,
+                                  total_run_length,
+                                  equilibration_step,
+                                  confidence_coefficient,
+                                  relative_accuracy,
+                                  relative_half_width_estimate
+                                  _mean,
+                                  upper_confidence_limit,
+                                  np.std(time_series_data),
+                                  effective_sample_size
+                                  if relative_half_width_estimate
+                                  < relative_accuracy else
+                                  None,
+                                  sample_size)
         if fp is None:
+            if fp_format == 'json':
+                return json.dumps(msg, indent=4)
+            if fp_format == 'edn':
+                return kim_edn.dumps(msg, indent=4)
             return msg
-
-        print(msg, file=fp)
+        if fp_format == 'json':
+            json.dump(msg, fp, indent=4)
+        elif fp_format == 'edn':
+            kim_edn.dump(msg, fp, indent=4)
+        else:
+            print(msg, file=fp)
         return False
+
     # ndim == 2
     else:
         _truncated = np.array([False] * n_variables)
@@ -900,74 +1017,34 @@ def run_length_control(get_trajectory,
             done = np.all(_done)
             if done:
                 # It should stop
-                if fp_format == 'txt':
-                    msg = '=' * 37
-                    msg += '\n'
-                    for i in range(n_variables):
-                        msg += 'for variable number {},\n'.format(i + 1)
-                        msg += 'The equilibration happens at step = '
-                        msg += '{}\n'.format(equilibration_step[i])
-                        msg += 'Total run length = '
-                        msg += '{}\n'.format(total_run_length)
-                        msg += 'The relative half width with '
-                        msg += '{}% '.format(confidence_coefficient * 100)
-                        msg += 'confidence of the estimation for the mean meets '
-                        msg += 'the required relative accuracy = '
-                        msg += '{}\n'.format(relative_accuracy[i])
-                        msg += 'The mean of the time-series data lies in: ('
-                        msg += '{} +/- '.format(_mean[i])
-                        msg += '{})\n'.format(upper_confidence_limit[i])
-                        msg += 'The standard deviation of the equilibrated '
-                        msg += 'part of the time-series data = '
-                        msg += '{}\n'.format(np.std(t[i,
-                                                      equilibration_step[i]:]))
-                        if sample_size is None:
-                            msg += 'Effective sample size = '
-                            msg += '{}\n'.format(int(effective_sample_size[i]))
-                        else:
-                            msg += 'Effective sample size = '
-                            msg += '{} > '.format(
-                                int(effective_sample_size[i]))
-                            msg += '{}, '.format(sample_size)
-                            msg += 'requested number of sample size\n'
-                        if i < n_variables - 1:
-                            msg += '-' * 37
-                            msg += '\n'
-                    msg += '=' * 37
-                    msg += '\n'
-                else:
-                    msg = []
-                    for i in range(n_variables):
-                        _msg = {
-                            "variable": i + 1,
-                            "converged": True,
-                            "equilibration_step": equilibration_step[i],
-                            "total_run_length": total_run_length,
-                            "relative_half_width": confidence_coefficient * 100,
-                            "relative_accuracy": relative_accuracy[i],
-                            "mean": _mean[i],
-                            "upper_confidence_limit": upper_confidence_limit[i],
-                            "standard_deviation":
-                            np.std(t[i, equilibration_step[i]:]),
-                            "effective_sample_size":
-                            int(effective_sample_size[i])
-                        }
-                        if sample_size is not None:
-                            _msg["sample_size"] = sample_size
-                        msg.append(_msg)
-
+                _std = [np.std(t[i, equilibration_step[i]:])
+                        for i in range(n_variables)]
+                msg = convergence_message(fp_format,
+                                          True,
+                                          n_variables,
+                                          maximum_run_length,
+                                          total_run_length,
+                                          equilibration_step,
+                                          confidence_coefficient,
+                                          relative_accuracy,
+                                          relative_half_width_estimate
+                                          _mean,
+                                          upper_confidence_limit,
+                                          _std,
+                                          effective_sample_size,
+                                          sample_size)
                 if fp is None:
                     if fp_format == 'json':
                         return json.dumps(msg, indent=4)
                     if fp_format == 'edn':
                         return kim_edn.dumps(msg, indent=4)
                     return msg
-
                 if fp_format == 'json':
                     json.dump(msg, fp, indent=4)
-                if fp_format == 'edn':
+                elif fp_format == 'edn':
                     kim_edn.dump(msg, fp, indent=4)
-                print(msg, file=fp)
+                else:
+                    print(msg, file=fp)
                 return True
 
             total_run_length += run_length
@@ -978,19 +1055,7 @@ def run_length_control(get_trajectory,
                 total_run_length = maximum_run_length
 
             if run_length == 0:
-                # We have reached the maximum limit
-                msg = 'the length of the time series data = '
-                msg += '{} is not long '.format(maximum_run_length)
-                msg += 'enough to estimate the mean with sufficient '
-                if sample_size is None:
-                    msg += 'accuracy.\n'
-                else:
-                    msg += 'accuracy or enough requested sample size.\n'
-                if fp is None:
-                    return msg
-
-                print(msg, file=fp)
-                return False
+                break
 
             try:
                 _t = get_trajectory(step=run_length)
@@ -1009,27 +1074,33 @@ def run_length_control(get_trajectory,
             _t = np.asarray(_t, dtype=np.float64)
             t = np.concatenate((t, _t), axis=1)
 
-        if fp_format == 'txt':
-            msg = 'the length of the time series data = '
-            msg += '{} '.format(maximum_run_length)
-            msg += 'is not long enough to estimate the mean with sufficient '
-            if sample_size is None:
-                msg += 'accuracy.\n'
-            else:
-                msg += 'accuracy or enough requested sample size.\n'
-        else:
-            msg = {"converged": False}
-
+        # We have reached the maximum limit
+        _std = [np.std(t[i, equilibration_step[i]:])
+                for i in range(n_variables)]
+        msg = convergence_message(fp_format,
+                                  False,
+                                  n_variables,
+                                  maximum_run_length,
+                                  total_run_length,
+                                  equilibration_step,
+                                  confidence_coefficient,
+                                  relative_accuracy,
+                                  relative_half_width_estimate
+                                  _mean,
+                                  upper_confidence_limit,
+                                  _std,
+                                  effective_sample_size,
+                                  sample_size)
         if fp is None:
             if fp_format == 'json':
                 return json.dumps(msg, indent=4)
             if fp_format == 'edn':
                 return kim_edn.dumps(msg, indent=4)
             return msg
-
         if fp_format == 'json':
             json.dump(msg, fp, indent=4)
-        if fp_format == 'edn':
+        elif fp_format == 'edn':
             kim_edn.dump(msg, fp, indent=4)
-        print(msg, file=fp)
+        else:
+            print(msg, file=fp)
         return False
