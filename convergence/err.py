@@ -33,13 +33,13 @@ class CVGError(Exception):
         return self.msg
 
 
-def cvg_warning(message):
+def cvg_warning(msg):
     """Print a warning message.
 
     Args:
-        msg (string): The warning message.
+        msg (str): The warning message.
 
     """
-    msg_ = '\nWARNING(@' + \
-        inspect.currentframe().f_back.f_code.co_name + '): ' + message
-    print(msg_)
+    _msg = '\nWARNING(@' + \
+        inspect.currentframe().f_back.f_code.co_name + '): ' + msg
+    print(_msg)
