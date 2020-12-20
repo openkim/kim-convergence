@@ -46,7 +46,7 @@ def estimate_equilibration_length(x, *,
             number of points. (default: None)
 
     Returns:
-        int, float: equilibration index, statistical inefficiency estimates
+        int64, float: equilibration index, statistical inefficiency estimates
             equilibration index, and statitical inefficiency estimates of a
             time series at the equilibration index estimate.
 
