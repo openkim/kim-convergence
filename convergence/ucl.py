@@ -527,7 +527,7 @@ def subsamples_ucl(time_series_data, *,
                    subsample_indices=None,
                    si=None,
                    fft=True,
-                   minimum_correlation_time=5):
+                   minimum_correlation_time=None):
     """Approximate the upper confidence limit of the mean.
 
     - If the population standard deviation is known, and
@@ -567,7 +567,7 @@ def subsamples_ucl(time_series_data, *,
         minimum_correlation_time (int, optional): minimum amount of correlation
             function to compute. The algorithm terminates after computing the
             correlation time out to minimum_correlation_time when the
-            correlation function first goes negative. (default: 5)
+            correlation function first goes negative. (default: None)
 
     Returns:
         float: upper_confidence_limit
@@ -584,8 +584,8 @@ def subsamples_ucl(time_series_data, *,
         subsamples_size = time_series_data.size
         if subsamples_size < 11:
             if subsamples_size < 5:
-                msg = 'Restricted the use of UCL for samples of size at '
-                msg += 'least 5.'
+                msg = 'Number of samples = {}. '.format(subsamples_size)
+                msg = 'UCL is restricted to have at least 5 samples.'
                 raise CVGError(msg)
             subsample_indices = np.arange(subsamples_size)
         else:
@@ -607,11 +607,12 @@ def subsamples_ucl(time_series_data, *,
 
     if subsample_indices.size < 5:
         if subsample_indices.size < 2:
-            msg = 'There are not enough sample points.'
+            msg = 'Number of samples = {}. '.format(subsample_indices.size)
+            msg += 'There are not enough samples.'
             raise CVGError(msg)
 
         msg = 'Number of samples = {}.\n'.format(subsample_indices.size)
-        msg = 'The use of UCL is restricted for samples of size at least 5.'
+        msg = 'UCL is restricted to have at least 5 samples.'
         cvg_warning(msg)
 
     try:
