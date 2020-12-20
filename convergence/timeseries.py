@@ -8,7 +8,7 @@ from inspect import isfunction
 import json
 import kim_edn
 
-from .err import CVGError
+from .err import CVGError, cvg_warning
 from .mser_m import mser_m
 from .equilibration_length import estimate_equilibration_length
 from .statistical_inefficiency import \
@@ -32,10 +32,10 @@ def convergence_message(fp_format,
                         equilibration_step,
                         confidence_coefficient,
                         relative_accuracy,
-                        relative_half_width_estimate
-                        mean,
+                        relative_half_width_estimate,
                         upper_confidence_limit,
-                        std,
+                        time_series_data_mean,
+                        time_series_data_std,
                         effective_sample_size,
                         sample_size):
     """Create convergence message.
@@ -46,7 +46,7 @@ def convergence_message(fp_format,
         n_variables (int): the number of variables in the corresponding
             time-series data.
         total_run_length (int): the total number of steps
-        equilibration_step (int or 1darray): step number, where the
+        equilibration_step (int64 or 1darray): step number, where the
             equilibration has been achieved
         confidence_coefficient (float): Probability (or confidence interval)
             and must be between 0.0 and 1.0, and represents the confidence for
@@ -56,11 +56,12 @@ def convergence_message(fp_format,
             of halfwidth to sample mean.
         relative_half_width_estimate(float, or 1darray): estimatemed relative
             half-width from the time-series data.
-        mean (float, or 1darray): the mean of time-series data for each
-            variable.
         upper_confidence_limit (float, or 1darray): the upper confidence limit
             of the mean.
-        std (float, or 1darray): the std of time-series data for each variable.
+        time_series_data_mean (float, or 1darray): the mean of time-series data
+            for each variable.
+        time_series_data_std (float, or 1darray): the std of time-series data
+        for each variable.
         effective_sample_size (float, or 1darray): the number of effective
             sample size.
         sample_size (int): the requested maximum number of independent samples.
@@ -72,7 +73,9 @@ def convergence_message(fp_format,
     """
     if fp_format == 'txt':
         msg = '=' * 37
-        msg += '\n\nConverged!\n\n' if converged else '\n\nNot converged!\n\n'
+        msg += '\nConverged!\n\n' if converged else '\nNot converged!\n\n'
+        msg += '-' * 37
+        msg += '\n'
         if n_variables == 1:
             if converged:
                 msg += 'Total run length = '
@@ -85,11 +88,11 @@ def convergence_message(fp_format,
                 msg += 'meets the required relative accuracy = '
                 msg += '{}.\n'.format(relative_accuracy)
                 msg += 'The mean of the time-series data lies in: ('
-                msg += '{} +/- '.format(mean)
+                msg += '{} +/- '.format(time_series_data_mean)
                 msg += '{}).\n'.format(upper_confidence_limit)
                 msg += 'The standard deviation of the equilibrated '
                 msg += 'part of the time-series data = '
-                msg += '{}.\n'.format(std)
+                msg += '{}.\n'.format(time_series_data_std)
                 msg += 'Effective sample size = '
                 msg += '{}'.format(int(effective_sample_size))
                 if sample_size is None:
@@ -116,11 +119,11 @@ def convergence_message(fp_format,
                     msg += 'does not meet the required relative accuracy '
                 msg += '= {}.\n'.format(relative_accuracy)
                 msg += 'The mean of the time-series data lies in: ('
-                msg += '{} +/- '.format(mean)
+                msg += '{} +/- '.format(time_series_data_mean)
                 msg += '{}).\n'.format(upper_confidence_limit)
                 msg += 'The standard deviation of the equilibrated '
                 msg += 'part of the time-series data = '
-                msg += '{}.\n'.format(std)
+                msg += '{}.\n'.format(time_series_data_std)
                 if relative_half_width_estimate < relative_accuracy:
                     msg += 'Effective sample size = '
                     msg += '{} < '.format(int(effective_sample_size))
@@ -147,11 +150,11 @@ def convergence_message(fp_format,
                     msg += 'does not meet the required relative accuracy '
                 msg += '= {}.\n'.format(relative_accuracy[i])
                 msg += 'The mean of the time-series data lies in: ('
-                msg += '{} +/- '.format(mean[i])
+                msg += '{} +/- '.format(time_series_data_mean[i])
                 msg += '{}).\n'.format(upper_confidence_limit[i])
                 msg += 'The standard deviation of the equilibrated '
                 msg += 'part of the time-series data = '
-                msg += '{}.\n'.format(std[i])
+                msg += '{}.\n'.format(time_series_data_std[i])
                 if relative_half_width_estimate[i] < relative_accuracy[i]:
                     msg += 'Effective sample size = '
                     msg += '{}'.format(int(effective_sample_size[i]))
@@ -173,13 +176,13 @@ def convergence_message(fp_format,
             msg = {
                 "converged": converged,
                 "total_run_length": total_run_length,
-                "equilibration_step": equilibration_step,
+                "equilibration_step": int(equilibration_step),
                 "confidence": round(confidence_coefficient * 100, 3),
                 "relative_accuracy": relative_accuracy,
                 "relative_half_width": relative_half_width_estimate,
-                "mean": mean,
+                "mean": time_series_data_mean,
                 "upper_confidence_limit": upper_confidence_limit,
-                "standard_deviation": std,
+                "standard_deviation": time_series_data_std,
             }
             if relative_half_width_estimate < relative_accuracy:
                 msg["effective_sample_size"] = int(effective_sample_size)
@@ -190,13 +193,13 @@ def convergence_message(fp_format,
             for i in range(n_variables):
                 msg[i] = {
                     "total_run_length": total_run_length,
-                    "equilibration_step": equilibration_step[i],
+                    "equilibration_step": int(equilibration_step[i]),
                     "confidence": round(confidence_coefficient * 100, 3),
                     "relative_accuracy": relative_accuracy[i],
                     "relative_half_width": relative_half_width_estimate[i],
-                    "mean": mean[i],
+                    "mean": time_series_data_mean[i],
                     "upper_confidence_limit": upper_confidence_limit[i],
-                    "standard_deviation": std[i],
+                    "standard_deviation": time_series_data_std[i],
                 }
                 if relative_half_width_estimate[i] < relative_accuracy[i]:
                     msg[i]["effective_sample_size"] = \
@@ -418,7 +421,7 @@ def run_length_control(get_trajectory,
     if maximum_equilibration_step is None:
         maximum_equilibration_step = maximum_run_length // 2
         msg = "maximum_equilibration_step is not given on input!\nThe "
-        msg = "maximum number of steps as an equilibration hard limit "
+        msg += "maximum number of steps as an equilibration hard limit "
         msg += "is set to {}".format(maximum_equilibration_step)
         cvg_warning(msg)
 
@@ -655,6 +658,8 @@ def run_length_control(get_trajectory,
 
                 # Compute the mean
                 _mean = np.mean(time_series_data[subsample_indices])
+
+            # confidence_interval_approximation_method == 'heidel_welch'
             else:
                 # Get the upper confidence limit
                 try:
@@ -711,23 +716,24 @@ def run_length_control(get_trajectory,
                     msg = convergence_message(fp_format,
                                               True,
                                               1,
-                                              maximum_run_length,
                                               total_run_length,
                                               equilibration_step,
                                               confidence_coefficient,
                                               relative_accuracy,
-                                              relative_half_width_estimate
-                                              _mean,
+                                              relative_half_width_estimate,
                                               upper_confidence_limit,
+                                              _mean,
                                               _std,
                                               effective_sample_size,
                                               sample_size)
+                    # It means it should return the string
                     if fp is None:
                         if fp_format == 'json':
                             return json.dumps(msg, indent=4)
                         if fp_format == 'edn':
                             return kim_edn.dumps(msg, indent=4)
                         return msg
+                    # Otherwise it uses fp to print the message
                     if fp_format == 'json':
                         json.dump(msg, fp, indent=4)
                     elif fp_format == 'edn':
@@ -773,26 +779,27 @@ def run_length_control(get_trajectory,
         msg = convergence_message(fp_format,
                                   False,
                                   1,
-                                  maximum_run_length,
                                   total_run_length,
                                   equilibration_step,
                                   confidence_coefficient,
                                   relative_accuracy,
-                                  relative_half_width_estimate
-                                  _mean,
+                                  relative_half_width_estimate,
                                   upper_confidence_limit,
+                                  _mean,
                                   _std,
                                   effective_sample_size
                                   if relative_half_width_estimate
                                   < relative_accuracy else
                                   None,
                                   sample_size)
+        # It means it should return the string
         if fp is None:
             if fp_format == 'json':
                 return json.dumps(msg, indent=4)
             if fp_format == 'edn':
                 return kim_edn.dumps(msg, indent=4)
             return msg
+        # Otherwise it uses fp to print the message
         if fp_format == 'json':
             json.dump(msg, fp, indent=4)
         elif fp_format == 'edn':
@@ -1078,23 +1085,24 @@ def run_length_control(get_trajectory,
                 msg = convergence_message(fp_format,
                                           True,
                                           n_variables,
-                                          maximum_run_length,
                                           total_run_length,
                                           equilibration_step,
                                           confidence_coefficient,
                                           relative_accuracy,
-                                          relative_half_width_estimate
-                                          _mean,
+                                          relative_half_width_estimate,
                                           upper_confidence_limit,
+                                          _mean,
                                           _std,
                                           effective_sample_size,
                                           sample_size)
+                # It means it should return the string
                 if fp is None:
                     if fp_format == 'json':
                         return json.dumps(msg, indent=4)
                     if fp_format == 'edn':
                         return kim_edn.dumps(msg, indent=4)
                     return msg
+                # Otherwise it uses fp to print the message
                 if fp_format == 'json':
                     json.dump(msg, fp, indent=4)
                 elif fp_format == 'edn':
@@ -1145,23 +1153,24 @@ def run_length_control(get_trajectory,
         msg = convergence_message(fp_format,
                                   False,
                                   n_variables,
-                                  maximum_run_length,
                                   total_run_length,
                                   equilibration_step,
                                   confidence_coefficient,
                                   relative_accuracy,
-                                  relative_half_width_estimate
-                                  _mean,
+                                  relative_half_width_estimate,
                                   upper_confidence_limit,
+                                  _mean,
                                   _std,
                                   effective_sample_size,
                                   sample_size)
+        # It means it should return the string
         if fp is None:
             if fp_format == 'json':
                 return json.dumps(msg, indent=4)
             if fp_format == 'edn':
                 return kim_edn.dumps(msg, indent=4)
             return msg
+        # Otherwise it uses fp to print the message
         if fp_format == 'json':
             json.dump(msg, fp, indent=4)
         elif fp_format == 'edn':
