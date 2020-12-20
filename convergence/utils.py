@@ -177,7 +177,7 @@ def train_test_split(time_series_data, *,
 def subsample_index(time_series_data, *,
                     si=None,
                     fft=False,
-                    minimum_correlation_time=5):
+                    minimum_correlation_time=None):
     r"""Return indices of uncorrelated subsamples of the time series data.
 
     Return indices of the uncorrelated subsample of the time series data.
@@ -194,7 +194,7 @@ def subsample_index(time_series_data, *,
         minimum_correlation_time (int, optional): minimum amount of correlation 
             function to compute. The algorithm terminates after computing the 
             correlation time out to minimum_correlation_time when the 
-            correlation function first goes negative. (default: 5)
+            correlation function first goes negative. (default: None)
 
     Returns:
         1darray: indices array.
@@ -257,7 +257,7 @@ def subsample_index(time_series_data, *,
 def subsample(time_series_data, *,
               si=None,
               fft=False,
-              minimum_correlation_time=5):
+              minimum_correlation_time=None):
     r"""Return time series data at uncorrelated subsample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
@@ -273,7 +273,7 @@ def subsample(time_series_data, *,
         minimum_correlation_time (int, optional): minimum amount of correlation 
             function to compute. The algorithm terminates after computing the 
             correlation time out to minimum_correlation_time when the 
-            correlation function first goes negative. (default: 5)
+            correlation function first goes negative. (default: None)
 
     Returns:
         1darray: subsample of the time series data.
@@ -304,7 +304,7 @@ def subsample(time_series_data, *,
 def random_subsample(time_series_data, *,
                      si=None,
                      fft=False,
-                     minimum_correlation_time=5):
+                     minimum_correlation_time=None):
     r"""Retuen random data for each block after blocking the time series data.
 
     At first, break down the time series data into the series of blocks, where
@@ -321,7 +321,7 @@ def random_subsample(time_series_data, *,
         minimum_correlation_time (int, optional): minimum amount of correlation 
             function to compute. The algorithm terminates after computing the 
             correlation time out to minimum_correlation_time when the 
-            correlation function first goes negative. (default: 5)
+            correlation function first goes negative. (default: None)
 
     Returns:
         1darray: subsample of the time series data.
@@ -364,7 +364,7 @@ def random_subsample(time_series_data, *,
 def block_average_subsample(time_series_data, *,
                             si=None,
                             fft=False,
-                            minimum_correlation_time=5):
+                            minimum_correlation_time=None):
     """Retuen average value for each block after blocking the time series data.
 
     At first, break down the time series data into the series of blocks, where
@@ -382,7 +382,7 @@ def block_average_subsample(time_series_data, *,
         minimum_correlation_time (int, optional): minimum amount of correlation 
             function to compute. The algorithm terminates after computing the 
             correlation time out to minimum_correlation_time when the 
-            correlation function first goes negative. (default: 5)
+            correlation function first goes negative. (default: None)
 
     Returns:
         1darray: subsample of the time series data.
