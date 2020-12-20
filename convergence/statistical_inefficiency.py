@@ -75,7 +75,7 @@ def statistical_inefficiency(x, y=None, *,
     # minimum amount of correlation function to compute
     if not isinstance(minimum_correlation_time, int):
         if minimum_correlation_time is None:
-            minimum_correlation_time = 5
+            minimum_correlation_time = 3
         else:
             msg = 'minimum_correlation_time must be an `int`.'
             raise CVGError(msg)
