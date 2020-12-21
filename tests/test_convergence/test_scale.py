@@ -53,6 +53,8 @@ class TestScaleModule(unittest.TestCase):
         x = [-1., np.inf, 3., 100.]
         self.assertRaises(CVGError, mms.scale, x)
 
+        self.assertRaises(CVGError, mms.scale, self.x.reshape((2, -1)))
+
     def test_translate_scale(self):
         """Test translate_scale function."""
         x = [1., 2., 2., 2., 3.]
@@ -70,12 +72,14 @@ class TestScaleModule(unittest.TestCase):
         inverse_scaled_x = tsc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, self.x))
 
+        self.assertRaises(CVGError, tsc.scale, self.x.reshape((2, -1)))
+
     def test_standard_scale(self):
         """Test standard_scale function."""
         ssc = cvg.StandardScale()
-        
+
         scaled_x = ssc.scale(self.x)
-        
+
         mean_ = np.mean(scaled_x)
         std_ = np.std(scaled_x)
 
@@ -84,3 +88,25 @@ class TestScaleModule(unittest.TestCase):
 
         inverse_scaled_x = ssc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, self.x))
+
+        x = [4.,  1., -2.]
+        scaled_x = ssc.scale(x)
+        inverse_scaled_x = ssc.inverse(scaled_x)
+        self.assertTrue(np.allclose(inverse_scaled_x, x))
+
+        self.assertRaises(CVGError, ssc.scale, self.x.reshape((2, -1)))
+
+    def test_maxabs_scale(self):
+        """Test maxabs_scale function."""
+        msc = cvg.MaxAbsScale()
+
+        scaled_x = msc.scale(self.x)
+        inverse_scaled_x = msc.inverse(scaled_x)
+        self.assertTrue(np.allclose(inverse_scaled_x, self.x))
+
+        x = [ 4.,  1., -9.]
+        scaled_x = msc.scale(x)
+        inverse_scaled_x = msc.inverse(scaled_x)
+        self.assertTrue(np.allclose(inverse_scaled_x, x))
+
+        self.assertRaises(CVGError, msc.scale, self.x.reshape((2, -1)))
