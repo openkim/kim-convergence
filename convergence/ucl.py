@@ -403,8 +403,8 @@ def ucl(time_series_data, *,
     batch_size = time_series_data.size // hwl.heidel_welch_n
 
     if batch_size < 1:
-        msg = 'not enough data points (batching of the data is not '
-        msg += 'possible).\nThe input time series has '
+        msg = 'not enough data points (batching of the data '
+        msg += 'is not possible).\nThe input time series has '
         msg += '{} data points which is '.format(time_series_data.size)
         msg += 'smaller than the minimum number of required points = '
         msg += '{} for batching.'.format(hwl.heidel_welch_n)
@@ -420,8 +420,8 @@ def ucl(time_series_data, *,
 
     if n_batches != hwl.heidel_welch_n:
         if n_batches <= hwl.heidel_welch_n:
-            msg = 'batching of the time series failed. (or there is not '
-            msg += 'enough data points)\n'
+            msg = 'batching of the time series failed. (or '
+            msg += 'there is not enough data points)\n'
             msg += 'Number of batches = {} '.format(n_batches)
             msg += 'must be the same as {}.'.format(hwl.heidel_welch_n)
             raise CVGError(msg)
@@ -513,11 +513,16 @@ def ucl(time_series_data, *,
     # given approximately by confidence_coefficient(O)/N, the spectral density
     # at zero frequency divided by the sample size.
 
-    # Calculate the approximately unbiased estimate of variance of the sample
-    # mean
+    # Calculate the approximately unbiased estimate of the variance of the
+    # sample mean
     sigma_sq = heidel_welch_c * np.exp(unbiased_estimate) / float(n_batches)
 
-    upper_confidence_limit = hwl_tm * np.sqrt(sigma_sq)
+    # The standard deviation of the mean within the dataset. The
+    # standard_error_of_mean provides a measurement for spread. The smaller
+    # the spread the more accurate.
+    standard_error_of_mean = np.sqrt(sigma_sq)
+
+    upper_confidence_limit = hwl_tm * standard_error_of_mean
     return upper_confidence_limit
 
 
