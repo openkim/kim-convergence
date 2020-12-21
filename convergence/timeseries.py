@@ -80,7 +80,7 @@ def convergence_message(fp_format,
             if converged:
                 msg += 'Total run length = '
                 msg += '{}.\n'.format(total_run_length)
-                msg += 'The equilibration happens at step = '
+                msg += 'The equilibration detected at step = '
                 msg += '{}.\n'.format(equilibration_step)
                 msg += 'The relative half width with '
                 msg += '{}% '.format(round(confidence_coefficient * 100, 3))
@@ -97,6 +97,7 @@ def convergence_message(fp_format,
                 msg += '{}'.format(int(effective_sample_size))
                 if sample_size is None:
                     msg += '.\n'
+                    msg += 'requested number of sample size is None.\n'
                 else:
                     msg += '> {}, '.format(sample_size)
                     msg += 'requested number of sample size.\n'
@@ -108,7 +109,7 @@ def convergence_message(fp_format,
                     msg += 'sample size = {}.\n'.format(sample_size)
                 else:
                     msg += 'to estimate the mean with sufficient accuracy.\n'
-                msg += 'The equilibration happens at step = '
+                msg += 'The equilibration detected at step = '
                 msg += '{}.\n'.format(equilibration_step)
                 msg += 'The relative half width with '
                 msg += '{}% '.format(round(confidence_coefficient * 100, 3))
@@ -124,11 +125,18 @@ def convergence_message(fp_format,
                 msg += 'The standard deviation of the equilibrated '
                 msg += 'part of the time-series data = '
                 msg += '{}.\n'.format(time_series_data_std)
+                msg += 'Effective sample size = '
+                msg += '{} '.format(int(effective_sample_size))
                 if relative_half_width_estimate < relative_accuracy:
-                    msg += 'Effective sample size = '
-                    msg += '{} < '.format(int(effective_sample_size))
-                    msg += '{}, '.format(sample_size)
+                    msg += '< {}, '.format(sample_size)
                     msg += 'requested number of sample size.\n'
+                else:
+                    if sample_size is None:
+                        msg += '.\n'
+                        msg += 'requested number of sample size is None.\n'
+                    else:
+                        msg += '< {}, '.format(sample_size)
+                        msg += 'requested number of sample size.\n'
         else:
             for i in range(n_variables):
                 msg += 'for variable number {},\n'.format(i + 1)
@@ -139,7 +147,7 @@ def convergence_message(fp_format,
                     msg += 'The length of the time series data = '
                     msg += '{}, is not long enough '.format(total_run_length)
                     msg += 'to estimate the mean with sufficient accuracy.\n'
-                msg += 'The equilibration happens at step = '
+                msg += 'The equilibration detected at step = '
                 msg += '{}.\n'.format(equilibration_step[i])
                 msg += 'The relative half width with '
                 msg += '{}% '.format(round(confidence_coefficient * 100, 3))
@@ -155,14 +163,25 @@ def convergence_message(fp_format,
                 msg += 'The standard deviation of the equilibrated '
                 msg += 'part of the time-series data = '
                 msg += '{}.\n'.format(time_series_data_std[i])
+                msg += 'Effective sample size = '
+                msg += '{}'.format(int(effective_sample_size[i]))
                 if relative_half_width_estimate[i] < relative_accuracy[i]:
-                    msg += 'Effective sample size = '
-                    msg += '{}'.format(int(effective_sample_size[i]))
                     if sample_size is None:
                         msg += '.\n'
+                        msg += 'requested number of sample size is None.\n'
                     else:
                         if effective_sample_size[i] >= sample_size:
-                            msg += '> {}, '.format(sample_size)
+                            msg += '>= {}, '.format(sample_size)
+                        else:
+                            msg += '< {}, '.format(sample_size)
+                        msg += 'requested number of sample size.\n'
+                else:
+                    if sample_size is None:
+                        msg += '.\n'
+                        msg += 'requested number of sample size is None.\n'
+                    else:
+                        if effective_sample_size[i] >= sample_size:
+                            msg += '>= {}, '.format(sample_size)
                         else:
                             msg += '< {}, '.format(sample_size)
                         msg += 'requested number of sample size.\n'
@@ -184,10 +203,9 @@ def convergence_message(fp_format,
                 "upper_confidence_limit": upper_confidence_limit,
                 "standard_deviation": time_series_data_std,
             }
-            if relative_half_width_estimate < relative_accuracy:
-                msg["effective_sample_size"] = int(effective_sample_size)
+            msg["effective_sample_size"] = int(effective_sample_size)
             msg["requested_sample_size"] = \
-                "" if sample_size is None else sample_size
+                "None" if sample_size is None else sample_size
         else:
             msg = {"converged": converged}
             for i in range(n_variables):
@@ -200,12 +218,10 @@ def convergence_message(fp_format,
                     "mean": time_series_data_mean[i],
                     "upper_confidence_limit": upper_confidence_limit[i],
                     "standard_deviation": time_series_data_std[i],
+                    "effective_sample_size": int(effective_sample_size[i]),
+                    "requested_sample_size":
+                    "None" if sample_size is None else sample_size,
                 }
-                if relative_half_width_estimate[i] < relative_accuracy[i]:
-                    msg[i]["effective_sample_size"] = \
-                        int(effective_sample_size[i])
-                msg[i]["requested_sample_size"] = \
-                    "" if sample_size is None else sample_size
     return msg
 
 
@@ -376,9 +392,10 @@ def run_length_control(get_trajectory,
             minimum_correlation_time when the correlation function first
             goes negative. (default: None)
         ignore_end (int, or float, or None, optional): if ``int``, it is the
-            last few points that should be ignored in estimating ucl. if
-            ``float``, should be in ``(0, 1)`` and it is the percent of number
-            of points that should be ignored in estimating ucl. If ``None`` it
+            last few points that should be ignored in estimating the
+            equilibration point in a time series data. If ``float``, should be
+            in ``(0, 1)`` and it is the percent of number of points that should
+            be ignored in estimating the equilibration point. If ``None`` it
             would be set to the one fourth of the total number of points.
             (default: None)
         fp (str, object with a write(string) method, optional): if an ``str``
@@ -392,11 +409,11 @@ def run_length_control(get_trajectory,
 
     Returns:
         bool or str:
-            ``True`` if the length of the time series is long
-            enough to estimate the mean with sufficient accuracy and ``False``
-            otherwise. If fp is an ``str`` equals to ``'return'`` the function
-            will return string of the analysis results on the length of the
-            time series.
+            ``True`` if the length of the time series is long enough to
+            estimate the mean with sufficient accuracy or with enough requested 
+            sample size and ``False`` otherwise.
+            If fp is a ``str`` equals to ``'return'`` the function will return
+            a string of the analysis results on the length of the time series.
 
     """
     if not isfunction(get_trajectory):
@@ -582,7 +599,8 @@ def run_length_control(get_trajectory,
                     si=si,
                     nskip=nskip,
                     fft=(time_series_data_size > 30 and fft),
-                    minimum_correlation_time=minimum_correlation_time)
+                    minimum_correlation_time=minimum_correlation_time,
+                    ignore_end=ignore_end)
             equilibration_step = truncate_index + \
                 equilibration_index_estimate
         else:
@@ -592,7 +610,8 @@ def run_length_control(get_trajectory,
                     si=si,
                     nskip=nskip,
                     fft=(total_run_length > 30 and fft),
-                    minimum_correlation_time=minimum_correlation_time)
+                    minimum_correlation_time=minimum_correlation_time,
+                    ignore_end=ignore_end)
 
         # Check the hard limit
         if equilibration_step >= maximum_equilibration_step:
@@ -770,6 +789,20 @@ def run_length_control(get_trajectory,
             _t = np.asarray(_t, dtype=np.float64)
             t = np.concatenate((t, _t))
 
+        if statistical_inefficiency_estimate is None:
+            # Compute the statitical inefficiency of a time series
+            try:
+                statistical_inefficiency_estimate = si_func(
+                    time_series_data,
+                    fft=(time_series_data_size > 30 and fft),
+                    minimum_correlation_time=minimum_correlation_time)
+            except:
+                statistical_inefficiency_estimate = float(
+                    time_series_data_size)
+
+        effective_sample_size = time_series_data_size / \
+            statistical_inefficiency_estimate
+
         if subsample_indices is None:
             _std = np.std(time_series_data)
         else:
@@ -787,10 +820,7 @@ def run_length_control(get_trajectory,
                                   upper_confidence_limit,
                                   _mean,
                                   _std,
-                                  effective_sample_size
-                                  if relative_half_width_estimate
-                                  < relative_accuracy else
-                                  None,
+                                  effective_sample_size,
                                   sample_size)
         # It means it should return the string
         if fp is None:
@@ -895,7 +925,8 @@ def run_length_control(get_trajectory,
                         si=si,
                         nskip=nskip,
                         fft=(time_series_data_size > 30 and fft),
-                        minimum_correlation_time=minimum_correlation_time)
+                        minimum_correlation_time=minimum_correlation_time,
+                        ignore_end=ignore_end)
                 equilibration_step[i] = truncate_index[i] + \
                     equilibration_index_estimate
         else:
@@ -912,7 +943,8 @@ def run_length_control(get_trajectory,
                             si=si,
                             nskip=nskip,
                             fft=(time_series_data_size > 30 and fft),
-                            minimum_correlation_time=minimum_correlation_time)
+                            minimum_correlation_time=minimum_correlation_time,
+                            ignore_end=ignore_end)
                     equilibration_step[i] = truncate_index[i] + \
                         equilibration_index_estimate
                 else:
@@ -922,7 +954,8 @@ def run_length_control(get_trajectory,
                             si=si,
                             nskip=nskip,
                             fft=(total_run_length > 30 and fft),
-                            minimum_correlation_time=minimum_correlation_time)
+                            minimum_correlation_time=minimum_correlation_time,
+                            ignore_end=ignore_end)
             del(_truncated)
         del(truncate_index)
 
@@ -1075,6 +1108,23 @@ def run_length_control(get_trajectory,
                     # slice a numpy array, the memory is shared
                     # between the slice and the original
                     time_series_data = t[i, equilibration_step[i]:]
+                    time_series_data_size = time_series_data.size
+
+                    if np.isnan(statistical_inefficiency_estimate[i]):
+                        # Compute the statitical inefficiency of a time
+                        # series
+                        try:
+                            statistical_inefficiency_estimate[i] = \
+                                si_func(
+                                time_series_data,
+                                fft=(time_series_data_size > 30 and fft),
+                                minimum_correlation_time=minimum_correlation_time)
+                        except CVGError:
+                            statistical_inefficiency_estimate[i] = \
+                                float(time_series_data_size)
+
+                    effective_sample_size[i] = time_series_data_size / \
+                        statistical_inefficiency_estimate[i]
 
                     if subsample_indices[i] is None:
                         _std[i] = np.std(time_series_data)
@@ -1144,6 +1194,22 @@ def run_length_control(get_trajectory,
             # slice a numpy array, the memory is shared
             # between the slice and the original
             time_series_data = t[i, equilibration_step[i]:]
+            time_series_data_size = time_series_data.size
+
+            if np.isnan(statistical_inefficiency_estimate[i]):
+                # Compute the statitical inefficiency of a time series
+                try:
+                    statistical_inefficiency_estimate[i] = \
+                        si_func(
+                        time_series_data,
+                        fft=fft,
+                        minimum_correlation_time=minimum_correlation_time)
+                except CVGError:
+                    statistical_inefficiency_estimate[i] = \
+                        float(time_series_data_size)
+
+            effective_sample_size[i] = time_series_data_size / \
+                statistical_inefficiency_estimate[i]
 
             if subsample_indices[i] is None:
                 _std[i] = np.std(time_series_data)
