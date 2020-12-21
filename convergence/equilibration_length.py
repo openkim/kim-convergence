@@ -62,21 +62,6 @@ def estimate_equilibration_length(x, *,
         msg = 'x is not an array of one-dimension.'
         raise CVGError(msg)
 
-    # Special case if timeseries is constant.
-    _std = np.std(x)
-
-    if not np.isfinite(_std):
-        msg = 'there is at least one value in the input time series '
-        msg += 'data array which is non-finite or not-number.'
-        raise CVGError(msg)
-
-    # assures that the two values are the same within about 14 decimal digits.
-    if isclose(_std, 0, rel_tol=1e-14):
-        # index and si
-        return 0, 1.0
-
-    del _std
-
     # Get the length of the timeseries.
     x_size = x.size
 
@@ -148,6 +133,20 @@ def estimate_equilibration_length(x, *,
         msg += 'from the total {} points.'.format(x_size)
         raise CVGError(msg)
 
+    # Special case if timeseries is constant.
+    _std = np.std(x)
+
+    if not np.isfinite(_std):
+        msg = 'there is at least one value in the input array which is '
+        msg += 'non-finite or not-number.'
+        raise CVGError(msg)
+
+    if isclose(_std, 0, abs_tol=1e-14):
+        # index and si
+        return 0, 1.0
+
+    del _std
+
     # Upper bound check
     upper_bound = x_size - ignore_end
 
@@ -175,8 +174,8 @@ def estimate_equilibration_length(x, *,
 
         # Find the maximum
         if _effective_samples_size > effective_samples_size:
+            statistical_inefficiency_estimate = si_value
             effective_samples_size = _effective_samples_size
             equilibration_index_estimate = t
-            statistical_inefficiency_estimate = si_value
 
     return equilibration_index_estimate, statistical_inefficiency_estimate
