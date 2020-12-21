@@ -7,12 +7,21 @@ from .stats import \
     auto_correlate, \
     cross_covariance, \
     cross_correlate, \
-    translate_scale, \
-    standard_scale, \
-    robust_scale, \
     periodogram, \
     outlier_methods, \
     outlier_test
+from .scale import \
+    MinMaxScale, \
+    minmax_scale, \
+    TranslateScale, \
+    translate_scale, \
+    StandardScale, \
+    standard_scale, \
+    RobustScale, \
+    robust_scale, \
+    MaxAbsScale, \
+    maxabs_scale, \
+    scale_methods
 from .batch import batch
 from .mser_m import mser_m
 #from .geweke import geweke
@@ -48,12 +57,20 @@ __all__ = [
     'auto_correlate',
     'cross_covariance',
     'cross_correlate',
-    'translate_scale',
-    'standard_scale',
-    'robust_scale',
     'periodogram',
     'outlier_methods',
     'outlier_test',
+    'MinMaxScale',
+    'minmax_scale',
+    'TranslateScale',
+    'translate_scale',
+    'StandardScale',
+    'standard_scale',
+    'RobustScale',
+    'robust_scale',
+    'MaxAbsScale',
+    'maxabs_scale',
+    'scale_methods',
     'batch',
     # 'geweke',
     'mser_m',
