@@ -92,8 +92,7 @@ def mser_m(x,
         msg += 'non-finite or not-number.'
         raise CVGError(msg)
 
-    # assures that the two values are the same within about 14 decimal digits.
-    if isclose(_std, 0, rel_tol=1e-14):
+    if isclose(_std, 0, abs_tol=1e-14):
         if not isinstance(batch_size, int):
             msg = 'batch_size = {} is not an `int`.'.format(batch_size)
             raise CVGError(msg)
