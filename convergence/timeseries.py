@@ -580,8 +580,8 @@ def run_length_control(get_trajectory,
                        with_scaling=with_scaling,
                        ignore_end_batch=ignore_end_batch)
 
-            # if we reached the truncation point using marginal standard error
-            # rules or we have reached the maximum limit
+            # if we reached the truncation point using marginal standard
+            # error rules or we have reached the maximum limit
             if truncated or total_run_length == maximum_run_length:
                 break
 
@@ -900,11 +900,10 @@ def run_length_control(get_trajectory,
                                ignore_end_batch=ignore_end_batch)
 
             truncated = np.all(_truncated)
-            if truncated:
-                break
-
-            # We have reached the maximum limit
-            if total_run_length == maximum_run_length:
+            
+            # if we reached the truncation point using marginal standard
+            # error rules or we have reached the maximum limit
+            if truncated or total_run_length == maximum_run_length:
                 break
 
             run_length = _run_length
