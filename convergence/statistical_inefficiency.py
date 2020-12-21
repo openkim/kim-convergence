@@ -92,8 +92,7 @@ def statistical_inefficiency(x, y=None, *,
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
 
-        # assures that the two values are the same within about 14 decimal digits.
-        if isclose(_std, 0, rel_tol=1e-14):
+        if isclose(_std, 0, abs_tol=1e-14):
             return 1.0
 
         del _std
@@ -222,8 +221,7 @@ def r_statistical_inefficiency(x, y=None, *,
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
 
-        # assures that the two values are the same within about 14 decimal digits.
-        if isclose(_std, 0, rel_tol=1e-14):
+        if isclose(_std, 0, abs_tol=1e-14):
             return 1.0
 
         del _std
@@ -403,8 +401,7 @@ def split_statistical_inefficiency(x, y=None, *,
         msg += 'non-finite or not-number.'
         raise CVGError(msg)
 
-    # assures that the two values are the same within about 14 decimal digits.
-    if isclose(_std, 0, rel_tol=1e-14):
+    if isclose(_std, 0, abs_tol=1e-14):
         return 1.0
 
     del _std
