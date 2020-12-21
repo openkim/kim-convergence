@@ -84,7 +84,6 @@ def get_fft_optimal_size(input_size: int):
                http://www.statsmodels.org
 
     """
-
     # Check inputs
     if not isinstance(input_size, int):
         msg = 'input_size must be an `int`.'
