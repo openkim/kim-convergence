@@ -12,9 +12,6 @@ __all__ = [
     'auto_correlate',
     'cross_covariance',
     'cross_correlate',
-    'translate_scale',
-    'standard_scale',
-    'robust_scale',
     'periodogram',
     'outlier_methods',
     'outlier_test'
@@ -315,8 +312,7 @@ def auto_correlate(x, *, nlags=None, fft=False):
     # Calculate (estimate) the auto covariances
     autocor = auto_covariance(x, fft=fft)
 
-    # assures that the two values are the same within about 14 decimal digits.
-    if isclose(autocor[0], 0, rel_tol=1e-14):
+    if isclose(autocor[0], 0, abs_tol=1e-14):
         msg = 'divide by zero encountered, which means the first element of '
         msg += 'the auto covariances of x is zero (or close to zero).'
         raise CVGError(msg)
@@ -375,8 +371,7 @@ def cross_correlate(x, y, *, nlags=None, fft=False):
 
     sigma_xy = np.std(x) * np.std(y)
 
-    # assures that the two values are the same within about 14 decimal digits.
-    if isclose(sigma_xy, 0, rel_tol=1e-14):
+    if isclose(sigma_xy, 0, abs_tol=1e-14):
         msg = 'Divide by zero encountered, which means the multiplication '
         msg += 'of the standard deviation of x and y is zero.'
         raise CVGError(msg)
@@ -400,213 +395,6 @@ def cross_correlate(x, y, *, nlags=None, fft=False):
         crosscorr = crosscorr[:nlags + 1] / sigma_xy
 
     return crosscorr
-
-
-def translate_scale(x, *, with_centering=True, with_scaling=True):
-    r"""Standardize a dataset.
-
-    Standardize a dataset by translating the data set so that :math:`x[0]=0`
-    and rescaled by overall averages so that the numbers are of O(1) with a
-    good spread. (default: True)
-
-    The translate and scale of a sample `x` is calculated as:
-
-    .. math::
-
-        z = \frac{(x - x_0)}{u}
-
-    where :math:`x_0` is :math:`x[0]` or :math:`0` if `with_centering=False`,
-    and `u` is the mean of the samples or :math:`1` if `with_scaling=False`.
-
-    Args:
-        x (array_like, 1d): The data to center and scale.
-        with_centering (bool, optional): If True, use x minus its first
-            element. (default: True)
-        with_scaling (bool, optional): If True, scale the data to overall
-            averages so that the numbers are of O(1) with a good spread.
-            (default: True)
-
-    Returns:
-        1darray: Scaled dataset
-
-    """
-    x = np.array(x, copy=False)
-
-    if with_centering:
-        # Fluctuations
-        dx = x - x[0]
-    else:
-        dx = np.array(x, copy=True)
-
-    if with_scaling:
-        mean_ = np.mean(dx)
-
-        if not np.isfinite(mean_):
-            msg = 'there is at least one value in the input array which is '
-            msg += 'non-finite or not-number.'
-            raise CVGError(msg)
-
-        # assures that the two values are not the same
-        # within about 14 decimal digits.
-        if not isclose(mean_, 0, rel_tol=1e-14):
-            dx /= mean_
-
-    return dx
-
-
-def standard_scale(x, *, with_centering=True, with_scaling=True):
-    r"""Standardize a dataset.
-
-    Standardize a dataset by removing the mean and scaling to unit variance.
-    The standard score of a sample `x` is calculated as:
-
-    .. math::
-
-        z = \frac{(x - u)}{s}
-
-    where `u` is the mean of the samples or :math:`0` if `with_centering=False`
-    , and `s` is the standard deviation of the samples or :math:`1` if
-    `with_scaling=False`.
-
-    Args:
-        x (array_like, 1d): The data to center and scale.
-        with_centering (bool, optional): If True, use x minus its mean, or
-            center the data before scaling. (default: True)
-        with_scaling (bool, optional): If True, scale the data to unit
-            variance (or equivalently, unit standard deviation).
-            (default: True)
-
-    Returns:
-        1darray: scaled dataset
-
-    Notes:
-        If set explicitly `with_centering=False` (only variance scaling will
-        be performed on x). We use a biased estimator for the standard
-        deviation.
-
-    """
-    x = np.array(x, copy=False)
-
-    if with_centering:
-        # Fluctuations
-        dx = x - np.mean(x)
-
-        mean_1 = np.mean(dx)
-
-        # Verify that mean_1 is 'close to zero'. If x contains very
-        # large values, mean_1 can also be very large, due to a lack of
-        # dx is a view on the original array
-        # Numerical issues were encountered when centering the data
-        # and might not be solved. Dataset may contain too large values.
-        # You may need to prescale your features.
-
-        if not np.isfinite(mean_1):
-            msg = 'there is at least one value in the input array which is '
-            msg += 'non-finite or not-number.'
-            raise CVGError(msg)
-
-        # assures that the two values are not the same
-        # within about 14 decimal digits.
-        if not isclose(mean_1, 0, rel_tol=1e-14):
-            dx -= mean_1
-
-    else:
-        dx = np.array(x, copy=True)
-
-    if with_scaling:
-        scale_ = np.std(x)
-
-        if not np.isfinite(scale_):
-            msg = 'there is at least one value in the input array which is '
-            msg += 'non-finite or not-number.'
-            raise CVGError(msg)
-
-        # assures that the two values are not the same
-        # within about 14 decimal digits.
-        if not isclose(scale_, 0, rel_tol=1e-14):
-            dx /= scale_
-
-        if with_centering:
-            mean_2 = np.mean(dx)
-
-            # If mean_2 is not 'close to zero', it comes from the fact that
-            # scale_ is very small so that mean_2 = mean_1/scale_ > 0, even
-            # if mean_1 was close to zero. The problem is thus essentially
-            # due to the lack of precision of np.mean(x). A solution is then
-            # to subtract the mean again.
-            # Numerical issues were encountered when centering the data
-            # and might not be solved. Dataset may contain too large values.
-            # You may need to prescale your features.
-
-            # assures that the two values are not the same
-            # within about 14 decimal digits.
-            if not isclose(mean_2, 0, rel_tol=1e-14):
-                dx -= mean_2
-
-    return dx
-
-
-def robust_scale(x,
-                 *,
-                 with_centering=True,
-                 with_scaling=True,
-                 quantile_range=(25.0, 75.0)):
-    """Standardize a dataset.
-
-    Standardize a dataset by centering to the median and component wise scale
-    according to the inter-quartile range.
-
-    Args:
-        x (array_like, 1d): The data to center and scale.
-        with_centering (bool, optional): If True, center the data before
-            scaling. (default: True)
-        with_scaling (bool, optional): If True, scale the data.
-            (default: True)
-        quantile_range (tuple, or list, optional): (q_min, q_max),
-            0.0 < q_min < q_max < 100.0
-            (default: (25.0, 75.0) = (1st quantile, 3rd quantile))
-
-    Returns:
-        1darray: scaled dataset
-
-    """
-    x = np.array(x, copy=False)
-
-    if not isinstance(quantile_range, tuple) or \
-            not isinstance(quantile_range, list):
-        msg = 'invalid quantile range: {}.'.format(str(quantile_range))
-        raise CVGError(msg)
-
-    if len(quantile_range) != 2:
-        msg = 'invalid quantile range: {}.'.format(str(quantile_range))
-        raise CVGError(msg)
-
-    q_min, q_max = quantile_range
-    if not 0 <= q_min <= q_max <= 100:
-        msg = 'invalid quantile range: {}.'.format(str(quantile_range))
-        raise CVGError(msg)
-
-    if with_centering:
-        dx = x - np.median(x)
-    else:
-        dx = np.array(x, copy=True)
-
-    if with_scaling:
-        quantiles = np.percentile(x, quantile_range)
-
-        scale_ = quantiles[1] - quantiles[0]
-
-        if not np.isfinite(scale_):
-            msg = 'there is at least one value in the input array which is '
-            msg += 'non-finite or not-number.'
-            raise CVGError(msg)
-
-        # assures that the two values are not the same
-        # within about 14 decimal digits.
-        if not isclose(scale_, 0, rel_tol=1e-14):
-            dx /= scale_
-
-    return dx
 
 
 def periodogram(x, *, fft=False, with_mean=False):
