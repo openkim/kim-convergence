@@ -515,10 +515,10 @@ class RobustScale():
     >>> rsc = RobustScale()
     >>> scaled_x = rsc.scale(data)
     >>> print(scaled_x)
-
+    [ 1.22474487  0.         -1.22474487]
     >>> x = rsc.inverse(scaled_x)
     >>> print(x)
-
+    [ 4.  1. -2.]
     """
 
     def __init__(self, *,
@@ -645,14 +645,14 @@ class MaxAbsScale():
     Examples
     --------
     >>> from convergence import MaxAbsScale
-    >>> data = [ 4.,  1., -2.]
+    >>> data = [ 4.,  1., -9.]
     >>> mas = MaxAbsScale()
     >>> scaled_x = mas.scale(data)
     >>> print(scaled_x)
-
+    [ 0.44444444  0.11111111 -1.        ]
     >>> x = mas.inverse(scaled_x)
     >>> print(x)
-
+    [ 4.  1. -9.]
     """
 
     def __init__(self):
