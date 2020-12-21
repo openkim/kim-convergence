@@ -699,8 +699,8 @@ def run_length_control(get_trajectory,
                 subsample_indices = None
 
             # Estimat the relative half width
-            if isclose(_mean, 0, rel_tol=1e-14):
-                relative_half_width_estimate = upper_confidence_limit / 1e-14
+            if isclose(_mean, 0, abs_tol=1e-12):
+                relative_half_width_estimate = upper_confidence_limit / 1e-12
             else:
                 relative_half_width_estimate = \
                     upper_confidence_limit / fabs(_mean)
@@ -1058,9 +1058,9 @@ def run_length_control(get_trajectory,
                     subsample_indices[i] = None
 
                 # Estimat the relative half width
-                if isclose(_mean[i], 0, rel_tol=1e-14):
+                if isclose(_mean[i], 0, abs_tol=1e-12):
                     relative_half_width_estimate[i] = \
-                        upper_confidence_limit[i] / 1e-14
+                        upper_confidence_limit[i] / 1e-12
                 else:
                     relative_half_width_estimate[i] = \
                         upper_confidence_limit[i] / fabs(_mean[i])
