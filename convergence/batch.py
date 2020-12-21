@@ -3,20 +3,11 @@
 import numpy as np
 
 from .err import CVGError
-from .stats import \
-    translate_scale, \
-    standard_scale, \
-    robust_scale
+from .scale import scale_methods
 
 __all__ = [
     'batch',
 ]
-
-scale_methods = {
-    'translate_scale': translate_scale,
-    'standard_scale': standard_scale,
-    'robust_scale': robust_scale
-}
 
 
 def batch(time_series_data,
@@ -55,7 +46,7 @@ def batch(time_series_data,
     if not isinstance(batch_size, int):
         msg = 'batch_size = {} is not an `int`.'.format(batch_size)
         raise CVGError(msg)
-    
+
     if batch_size < 1:
         msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
         raise CVGError(msg)
