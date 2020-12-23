@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cvg
+    import convergence as cr
 except:
     raise Exception('Failed to import `convergence` utility module')
 
@@ -15,55 +15,55 @@ class TestStatsModule(unittest.TestCase):
 
     def test_get_fft_optimal_size(self):
         """Test get_fft_optimal_size function."""
-        self.assertTrue(cvg.get_fft_optimal_size(1) == 1)
-        self.assertTrue(cvg.get_fft_optimal_size(6) == 6)
-        self.assertTrue(cvg.get_fft_optimal_size(7) == 8)
-        self.assertTrue(cvg.get_fft_optimal_size(8) == 8)
-        self.assertTrue(cvg.get_fft_optimal_size(9) == 9)
-        self.assertTrue(cvg.get_fft_optimal_size(10) == 10)
-        self.assertTrue(cvg.get_fft_optimal_size(11) == 12)
+        self.assertTrue(cr.get_fft_optimal_size(1) == 1)
+        self.assertTrue(cr.get_fft_optimal_size(6) == 6)
+        self.assertTrue(cr.get_fft_optimal_size(7) == 8)
+        self.assertTrue(cr.get_fft_optimal_size(8) == 8)
+        self.assertTrue(cr.get_fft_optimal_size(9) == 9)
+        self.assertTrue(cr.get_fft_optimal_size(10) == 10)
+        self.assertTrue(cr.get_fft_optimal_size(11) == 12)
 
         for i in range(10):
             n2 = 2**i
-            self.assertTrue(cvg.get_fft_optimal_size(n2) == n2)
+            self.assertTrue(cr.get_fft_optimal_size(n2) == n2)
 
             n3 = 3**i
-            self.assertTrue(cvg.get_fft_optimal_size(n3) == n3)
+            self.assertTrue(cr.get_fft_optimal_size(n3) == n3)
 
             n5 = 5**i
-            self.assertTrue(cvg.get_fft_optimal_size(n5) == n5)
+            self.assertTrue(cr.get_fft_optimal_size(n5) == n5)
 
             n23 = n2 * n3
-            self.assertTrue(cvg.get_fft_optimal_size(n23) == n23)
+            self.assertTrue(cr.get_fft_optimal_size(n23) == n23)
 
             n25 = n2 * n5
-            self.assertTrue(cvg.get_fft_optimal_size(n25) == n25)
+            self.assertTrue(cr.get_fft_optimal_size(n25) == n25)
 
             n35 = n3 * n5
-            self.assertTrue(cvg.get_fft_optimal_size(n35) == n35)
+            self.assertTrue(cr.get_fft_optimal_size(n35) == n35)
 
             n235 = n2 * n3 * n5
-            self.assertTrue(n235 == cvg.get_fft_optimal_size(n235))
+            self.assertTrue(n235 == cr.get_fft_optimal_size(n235))
 
-        self.assertTrue(cvg.get_fft_optimal_size(162) == 162)
+        self.assertTrue(cr.get_fft_optimal_size(162) == 162)
 
         for i in range(163, 180):
-            self.assertTrue(cvg.get_fft_optimal_size(i) == 180)
+            self.assertTrue(cr.get_fft_optimal_size(i) == 180)
 
-        self.assertTrue(cvg.get_fft_optimal_size(6144) == 6144)
+        self.assertTrue(cr.get_fft_optimal_size(6144) == 6144)
 
         for i in range(6145, 6250):
-            self.assertTrue(cvg.get_fft_optimal_size(i) == 6250)
+            self.assertTrue(cr.get_fft_optimal_size(i) == 6250)
 
-        self.assertTrue(cvg.get_fft_optimal_size(90000) == 90000)
+        self.assertTrue(cr.get_fft_optimal_size(90000) == 90000)
 
         for i in range(90001, 91125):
-            self.assertTrue(cvg.get_fft_optimal_size(i) == 91125)
+            self.assertTrue(cr.get_fft_optimal_size(i) == 91125)
 
         for i in range(98416, 100000):
-            self.assertTrue(cvg.get_fft_optimal_size(i) == 100000)
+            self.assertTrue(cr.get_fft_optimal_size(i) == 100000)
 
-        self.assertTrue(cvg.get_fft_optimal_size(100000) == 100000)
+        self.assertTrue(cr.get_fft_optimal_size(100000) == 100000)
 
     def test_auto_covariance(self):
         """Test auto_covariance function."""
@@ -77,7 +77,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                a0, cvg.auto_covariance(a),
+                a0, cr.auto_covariance(a),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -86,7 +86,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                a0, cvg.auto_covariance(a, fft=True),
+                a0, cr.auto_covariance(a, fft=True),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -95,8 +95,8 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                cvg.auto_covariance(a, fft=False),
-                cvg.auto_covariance(a, fft=True),
+                cr.auto_covariance(a, fft=False),
+                cr.auto_covariance(a, fft=True),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -107,8 +107,8 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                cvg.auto_covariance(a, fft=False),
-                cvg.auto_covariance(a, fft=True),
+                cr.auto_covariance(a, fft=False),
+                cr.auto_covariance(a, fft=True),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -119,8 +119,8 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                cvg.auto_covariance(a, fft=False),
-                cvg.auto_covariance(a, fft=True),
+                cr.auto_covariance(a, fft=False),
+                cr.auto_covariance(a, fft=True),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -129,24 +129,24 @@ class TestStatsModule(unittest.TestCase):
 
         a = np.random.rand(2, 3)
 
-        self.assertRaises(CVGError, cvg.auto_covariance, a)
+        self.assertRaises(CVGError, cr.auto_covariance, a)
 
         a = []
 
-        self.assertRaises(CVGError, cvg.auto_covariance, a)
+        self.assertRaises(CVGError, cr.auto_covariance, a)
 
         a = np.random.rand(1000)
         a[100] = np.inf
 
-        self.assertRaises(CVGError, cvg.auto_covariance, a)
+        self.assertRaises(CVGError, cr.auto_covariance, a)
 
         a[100] = np.nan
 
-        self.assertRaises(CVGError, cvg.auto_covariance, a)
+        self.assertRaises(CVGError, cr.auto_covariance, a)
 
         a[100] = np.NINF
 
-        self.assertRaises(CVGError, cvg.auto_covariance, a)
+        self.assertRaises(CVGError, cr.auto_covariance, a)
 
     def test_cross_covariance(self):
         """Test cross_covariance function."""
@@ -160,7 +160,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                a0, cvg.cross_covariance(a, None),
+                a0, cr.cross_covariance(a, None),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -169,7 +169,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                a0, cvg.cross_covariance(a, a),
+                a0, cr.cross_covariance(a, a),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -179,31 +179,31 @@ class TestStatsModule(unittest.TestCase):
         a = np.random.rand(2, 3)
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, a)
+                          cr.cross_covariance, a, a)
 
         a = np.random.rand(2, 3)
         b = np.random.rand(2)
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         a = np.random.rand(3)
         b = np.random.rand(2)
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         a = np.random.rand(3, 2)
         b = np.random.rand(2)
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         a = []
         b = []
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         ab = np.array([-4.783685406261340e-03, -1.138527201306546e-02,
                        -5.809494077151546e-03, -7.156510315177644e-03,
@@ -224,7 +224,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                ab, cvg.cross_covariance(a, b),
+                ab, cr.cross_covariance(a, b),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -236,8 +236,8 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                cvg.cross_covariance(a, b, fft=False),
-                cvg.cross_covariance(a, b, fft=True),
+                cr.cross_covariance(a, b, fft=False),
+                cr.cross_covariance(a, b, fft=True),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -247,33 +247,33 @@ class TestStatsModule(unittest.TestCase):
         a[100] = np.inf
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         a[100] = np.nan
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         a[100] = np.NINF
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         a[100] = np.random.rand(1)
         b[101] = np.inf
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         b[101] = np.nan
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
         b[101] = np.NINF
 
         self.assertRaises(CVGError,
-                          cvg.cross_covariance, a, b)
+                          cr.cross_covariance, a, b)
 
     def test_auto_correlate(self):
         """Test auto_correlate function."""
@@ -288,7 +288,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                a0, cvg.auto_correlate(a, nlags=a.size + 1),
+                a0, cr.auto_correlate(a, nlags=a.size + 1),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -297,7 +297,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                a0, cvg.auto_correlate(a),
+                a0, cr.auto_correlate(a),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -308,7 +308,7 @@ class TestStatsModule(unittest.TestCase):
             try:
                 np.testing.assert_allclose(
                     a0[:lags + 1],
-                    cvg.auto_correlate(a, nlags=lags),
+                    cr.auto_correlate(a, nlags=lags),
                     rtol=1e-14, atol=1e-14)
             except AssertionError:
                 test_passed = False
@@ -316,17 +316,17 @@ class TestStatsModule(unittest.TestCase):
             self.assertTrue(test_passed)
 
         self.assertRaises(CVGError,
-                          cvg.auto_correlate, a, nlags=1.0)
+                          cr.auto_correlate, a, nlags=1.0)
 
         self.assertRaises(CVGError,
-                          cvg.auto_correlate, a, nlags=0)
+                          cr.auto_correlate, a, nlags=0)
 
         a = np.arange(-11., 11.)
 
         try:
             np.testing.assert_allclose(
-                cvg.auto_correlate(a, fft=False),
-                cvg.auto_correlate(a, fft=True),
+                cr.auto_correlate(a, fft=False),
+                cr.auto_correlate(a, fft=True),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -337,8 +337,8 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                cvg.auto_correlate(a, fft=False),
-                cvg.auto_correlate(a, fft=True),
+                cr.auto_correlate(a, fft=False),
+                cr.auto_correlate(a, fft=True),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -348,33 +348,33 @@ class TestStatsModule(unittest.TestCase):
         a = np.ones(10)
 
         self.assertRaises(CVGError,
-                          cvg.auto_correlate, a)
+                          cr.auto_correlate, a)
 
         a = np.random.rand(2, 3)
 
         self.assertRaises(CVGError,
-                          cvg.auto_correlate, a)
+                          cr.auto_correlate, a)
 
         a = []
 
         self.assertRaises(CVGError,
-                          cvg.auto_correlate, a)
+                          cr.auto_correlate, a)
 
         a = np.random.rand(1800)
         a[10] = np.inf
 
         self.assertRaises(CVGError,
-                          cvg.auto_correlate, a)
+                          cr.auto_correlate, a)
 
         a[10] = np.nan
 
         self.assertRaises(CVGError,
-                          cvg.auto_correlate, a)
+                          cr.auto_correlate, a)
 
         a[10] = np.NINF
 
         self.assertRaises(CVGError,
-                          cvg.auto_correlate, a)
+                          cr.auto_correlate, a)
 
     def test_cross_correlate(self):
         """Test cross_correlate function."""
@@ -389,7 +389,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                a0, cvg.cross_correlate(a, None),
+                a0, cr.cross_correlate(a, None),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -398,7 +398,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                a0, cvg.cross_correlate(a, a),
+                a0, cr.cross_correlate(a, a),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -408,31 +408,31 @@ class TestStatsModule(unittest.TestCase):
         a = np.random.rand(2, 3)
 
         self.assertRaises(CVGError,
-                          cvg.cross_correlate, a, a)
+                          cr.cross_correlate, a, a)
 
         a = np.random.rand(2, 3)
         b = np.random.rand(2)
 
         self.assertRaises(CVGError,
-                          cvg.cross_correlate, a, b)
+                          cr.cross_correlate, a, b)
 
         a = np.random.rand(3)
         b = np.random.rand(2)
 
         self.assertRaises(CVGError,
-                          cvg.cross_correlate, a, b)
+                          cr.cross_correlate, a, b)
 
         a = np.random.rand(3, 2)
         b = np.random.rand(2)
 
         self.assertRaises(CVGError,
-                          cvg.cross_correlate, a, b)
+                          cr.cross_correlate, a, b)
 
         a = []
         b = []
 
         self.assertRaises(CVGError,
-                          cvg.cross_correlate, a, b)
+                          cr.cross_correlate, a, b)
 
         ab = np.array([0.042606000505134, -0.329786944440556,
                        0.192637392475732, 0.155673928115373,
@@ -459,7 +459,7 @@ class TestStatsModule(unittest.TestCase):
 
         try:
             np.testing.assert_allclose(
-                ab, cvg.cross_correlate(a, b),
+                ab, cr.cross_correlate(a, b),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -470,7 +470,7 @@ class TestStatsModule(unittest.TestCase):
             try:
                 np.testing.assert_allclose(
                     ab[:lags + 1],
-                    cvg.cross_correlate(a, b, nlags=lags),
+                    cr.cross_correlate(a, b, nlags=lags),
                     rtol=1e-14, atol=1e-14)
             except AssertionError:
                 test_passed = False
@@ -478,18 +478,18 @@ class TestStatsModule(unittest.TestCase):
             self.assertTrue(test_passed)
 
         self.assertRaises(CVGError,
-                          cvg.cross_correlate, a, b, nlags=1.0)
+                          cr.cross_correlate, a, b, nlags=1.0)
 
         self.assertRaises(CVGError,
-                          cvg.cross_correlate, a, b, nlags=0)
+                          cr.cross_correlate, a, b, nlags=0)
 
         a = np.random.rand(1200)
         b = np.random.rand(1200)
 
         try:
             np.testing.assert_allclose(
-                cvg.cross_correlate(a, b, fft=False),
-                cvg.cross_correlate(a, b, fft=True),
+                cr.cross_correlate(a, b, fft=False),
+                cr.cross_correlate(a, b, fft=True),
                 rtol=1e-14, atol=1e-14)
         except AssertionError:
             test_passed = False
@@ -498,35 +498,35 @@ class TestStatsModule(unittest.TestCase):
 
         a[100] = np.inf
 
-        self.assertRaises(CVGError, cvg.cross_correlate, a, b)
+        self.assertRaises(CVGError, cr.cross_correlate, a, b)
 
         a[1000] = np.nan
 
-        self.assertRaises(CVGError, cvg.cross_correlate, a, b)
+        self.assertRaises(CVGError, cr.cross_correlate, a, b)
 
         a[1000] = np.NINF
 
-        self.assertRaises(CVGError, cvg.cross_correlate, a, b)
+        self.assertRaises(CVGError, cr.cross_correlate, a, b)
 
         a[1000] = np.random.rand(1)
         b[1001] = np.inf
 
-        self.assertRaises(CVGError, cvg.cross_correlate, a, b)
+        self.assertRaises(CVGError, cr.cross_correlate, a, b)
 
         b[1001] = np.nan
 
-        self.assertRaises(CVGError, cvg.cross_correlate, a, b)
+        self.assertRaises(CVGError, cr.cross_correlate, a, b)
 
         b[1001] = np.NINF
 
         self.assertRaises(CVGError,
-                          cvg.cross_correlate, a, b)
+                          cr.cross_correlate, a, b)
 
     def test_periodogram(self):
         """Test periodogram function."""
         x = np.arange(20.).reshape(4, 5)
 
-        self.assertRaises(CVGError, cvg.periodogram, x)
+        self.assertRaises(CVGError, cr.periodogram, x)
 
         x = np.array([-0.026194534693644133672, -0.0087625583491129695884,
                       -0.040715708436513946278, -0.0055650914136230354365,
@@ -553,26 +553,26 @@ class TestStatsModule(unittest.TestCase):
                           0.000075130150597221359858],
                          dtype=np.float64)
 
-        pdgm = cvg.periodogram(x)
+        pdgm = cr.periodogram(x)
 
         for p, _p in zip(pdgm, _pdgm):
             self.assertAlmostEqual(p, _p, places=12)
 
-        pdgm = cvg.periodogram(x, fft=True)
+        pdgm = cr.periodogram(x, fft=True)
 
         for p, _p in zip(pdgm, _pdgm):
             self.assertAlmostEqual(p, _p, places=12)
 
         x = np.arange(1., 21., 0.5)
-        _pdgm = cvg.periodogram(x, fft=True)
-        pdgm = cvg.periodogram(x, fft=False)
+        _pdgm = cr.periodogram(x, fft=True)
+        pdgm = cr.periodogram(x, fft=False)
 
         for p, _p in zip(pdgm, _pdgm):
             self.assertAlmostEqual(p, _p, places=12)
 
         x = np.arange(1., 21., 0.1)
-        _pdgm = cvg.periodogram(x, fft=True, with_mean=True)
-        pdgm = cvg.periodogram(x, fft=False, with_mean=True)
+        _pdgm = cr.periodogram(x, fft=True, with_mean=True)
+        pdgm = cr.periodogram(x, fft=False, with_mean=True)
 
         for p, _p in zip(pdgm, _pdgm):
             self.assertAlmostEqual(p, _p, places=12)
@@ -580,40 +580,12 @@ class TestStatsModule(unittest.TestCase):
         x = np.arange(1., 21., 0.5)
         x[2] = np.inf
 
-        self.assertRaises(CVGError, cvg.periodogram, x)
+        self.assertRaises(CVGError, cr.periodogram, x)
 
         x[2] = np.nan
 
-        self.assertRaises(CVGError, cvg.periodogram, x)
+        self.assertRaises(CVGError, cr.periodogram, x)
 
         x[2] = np.NINF
 
-        self.assertRaises(CVGError, cvg.periodogram, x)
-
-    def test_outlier_test(self):
-        """Test outlier_test function."""
-        x = np.array([56, 43, 51, 47, 100, 76, 56, 53, 49, 159, 13, 73, 50, 24,
-                      39, 86, 313, 42, 1, 6, 21, 48, 27, 78, 98, 60, 80, 24,
-                      91, 19, 81, 47, 43])
-
-        outlier_indices = cvg.outlier_test(x, outlier_method='iqr')
-        outlier_x = x[outlier_indices]
-        self.assertTrue(outlier_indices.size == 2)
-        self.assertTrue(outlier_x[0] == 159)
-        self.assertTrue(outlier_x[1] == 313)
-
-        outlier_indices = cvg.outlier_test(x, outlier_method='extreme_iqr')
-        outlier_x = x[outlier_indices]
-        self.assertTrue(outlier_indices.size == 1)
-        self.assertTrue(outlier_x[0] == 313)
-
-        outlier_indices = cvg.outlier_test(x, outlier_method='z_score')
-        outlier_x = x[outlier_indices]
-        self.assertTrue(outlier_indices.size == 1)
-        self.assertTrue(outlier_x[0] == 313)
-
-        outlier_indices = cvg.outlier_test(
-            x, outlier_method='modified_z_score')
-        outlier_x = x[outlier_indices]
-        self.assertTrue(outlier_indices.size == 1)
-        self.assertTrue(outlier_x[0] == 313)
+        self.assertRaises(CVGError, cr.periodogram, x)
