@@ -5,68 +5,35 @@ from lammps import lammps
 import convergence as cr
 
 # Initial run length
-cvg_initial_run_length = 1000
+INITIAL_RUN_LENGTH = 1000
 # Run length increasing factor
-cvg_run_length_factor = 1
+RUN_LENGTH_FACTOR = 1
 # The maximum run length represents a cost constraint.
-cvg_maximum_run_length = 1000 * cvg_initial_run_length
+MAX_RUN_LENGTH = 1000 * INITIAL_RUN_LENGTH
 # The maximum number of steps as an equilibration hard limit. If the
 # algorithm finds equilibration_step greater than this limit it will fail.
-# For the default None, the function is using `cvg_maximum_run_length // 2` as
+# For the default None, the function is using `maximum_run_length // 2` as
 # the maximum equilibration step.
-cvg_maximum_equilibration_step = None
+MAX_EQUILIBRATION_STEP = None
 # Maximum number of independent samples.
-cvg_sample_size = None
+SAMPLE_SIZE = None
 # A relative half-width requirement or the accuracy parameter. Target value
-# for the ratio of halfwidth to sample mean. If n_variables > 1, relative_accuracy can be a
-# scalar to be used for all variables or a 1darray of values of size
-# n_variables.
-cvg_relative_accuracy = 0.01
+# for the ratio of halfwidth to sample mean. If n_variables > 1, 
+# relative_accuracy can be a scalar to be used for all variables or a 1darray
+# of values of size n_variables.
+RELATIVE_ACCURACY = 0.01
 # Probability (or confidence interval) and must be between 0.0 and 1.0, and
-# represents the confidence for calculation of relative halfwidths
-# estimation.
-cvg_p = 0.95
-# The heidel_welch_number_points is the number of points Heidelberger and
-# Welch's spectral method that are used to obtain the polynomial fit. The
-# parameter heidel_welch_number_points determines the frequency range over
-# which the fit is made.
-cvg_k = 50
-# If True, use FFT convolution. FFT should be preferred for long time series.
-cvg_fft = True
-# If `float`, should be between 0.0 and 1.0 and represent the proportion of
-# the periodogram dataset to include in the test split. If `int`, represents
-# the absolute number of test samples.
-cvg_test_size = None
-# If `float`, should be between 0.0 and 1.0 and represent the proportion of
-# the preiodogram dataset to include in the train split. If `int`, represents
-# the absolute number of train samples.
-cvg_train_size = None
-# batch size.
-cvg_batch_size = 5
-# A method to standardize a batched dataset.
-cvg_scale = "translate_scale"
-# If True, use batched data minus the scale metod centering approach.
-cvg_with_centering = False
-# If True, scale the batched data to scale metod scaling approach.
-cvg_with_scaling = False
-# if `int`, it is the last few batch points that should be ignored. if
-# `float`, should be in `(0, 1)` and it is the percent of last batch points
-# that should be ignored. if `None` it would be set to the `batch_size`.
-cvg_ignore_end_batch = None
-# Statistical inefficiency method.
-cvg_si = 'statistical_inefficiency'
-# The number of data points to skip in estimating ucl.
-cvg_nskip = 1
-# The minimum amount of correlation function to compute in estimating ucl.
-# The algorithm terminates after computing the correlation time out to
-# minimum_correlation_time when the correlation function first goes negative.
-cvg_mct = None
-# if `int`, it is the last few points that should be ignored in estimating
-# ucl. if `float`, should be in `(0, 1)` and it is the percent of number of
-# points that should be ignored in estimating ucl. If `None` it would be
-# set to the one fourth of the total number of points.
-cvg_ignore_end = None
-
+# represents the confidence for calculation of relative halfwidths estimation.
+CONFIDENCE = 0.95
+# Method to use for approximating the upper confidence limit of the mean.
+# One of the ``subsample`` or ``heidel_welch`` aproaches.
+# In the ``subsample`` approach, independent samples in the time-series data
+# are used to approximate the confidence intervals for the mean.
+# The second approach, (``heidel_welch`` approach) requires no such
+# independence assumption. In fact, the problems of dealing with
+# dependent data are largely avoided by working in the frequency
+# domain with the sample spectrum (periodogram) of the process.
+UCL_METHOD = 'heidel_welch'
 
 start = 0
 stop = 0
@@ -352,29 +319,19 @@ def run_length_control(lmpptr, nevery, *argv):
                 return trajectory
 
     try:
-        msg = cr.run_length_control(get_trajectory=get_trajectory,
-                                     n_variables=n_arguments - len(ctrl_map),
-                                     initial_run_length=cvg_initial_run_length,
-                                     run_length_factor=cvg_run_length_factor,
-                                     maximum_run_length=cvg_maximum_run_length,
-                                     maximum_equilibration_step=cvg_maximum_equilibration_step,
-                                     sample_size=cvg_sample_size,
-                                     relative_accuracy=cvg_relative_accuracy,
-                                     confidence_coefficient=cvg_p,
-                                     heidel_welch_number_points=cvg_k,
-                                     fft=cvg_fft,
-                                     test_size=cvg_test_size,
-                                     train_size=cvg_train_size,
-                                     batch_size=cvg_batch_size,
-                                     scale=cvg_scale,
-                                     with_centering=cvg_with_centering,
-                                     with_scaling=cvg_with_scaling,
-                                     ignore_end_batch=cvg_ignore_end_batch,
-                                     si=cvg_si,
-                                     nskip=cvg_nskip,
-                                     minimum_correlation_time=cvg_mct,
-                                     ignore_end=cvg_ignore_end,
-                                     fp='return')
+        msg = cr.run_length_control(
+            get_trajectory=get_trajectory,
+            n_variables=n_arguments - len(ctrl_map),
+            initial_run_length=INITIAL_RUN_LENGTH,
+            run_length_factor=RUN_LENGTH_FACTOR,
+            maximum_run_length=MAX_RUN_LENGTH,
+            maximum_equilibration_step=MAX_EQUILIBRATION_STEP,
+            sample_size=SAMPLE_SIZE,
+            relative_accuracy=RELATIVE_ACCURACY,
+            confidence_coefficient=CONFIDENCE,
+            confidence_interval_approximation_method=UCL_METHOD,
+            fp="return",
+            fp_format='txt')
     except Exception as e:
         msg = '{}'.format(e)
         raise cr.CVGError(msg)
