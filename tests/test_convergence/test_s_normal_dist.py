@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cvg
+    import convergence as cr
 except:
     raise Exception('Failed to import `convergence` utility module')
 
@@ -21,7 +21,7 @@ class TestSNormalDistModule(unittest.TestCase):
                          4.417, 4.892, 5.327, 5.731, 6.109],
                         dtype=np.float64)
 
-        ppf = np.array(list(map(cvg.s_normal_inv_cdf, prob)), dtype=np.float64)
+        ppf = np.array(list(map(cr.s_normal_inv_cdf, prob)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
@@ -36,7 +36,7 @@ class TestSNormalDistModule(unittest.TestCase):
                          5.84717215, 6.21910456],
                         dtype=np.float64)
 
-        ppf = np.array(list(map(cvg.s_normal_inv_cdf, prob)), dtype=np.float64)
+        ppf = np.array(list(map(cr.s_normal_inv_cdf, prob)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
@@ -49,7 +49,7 @@ class TestSNormalDistModule(unittest.TestCase):
                          4.753, 5.199, 5.612, 5.998, 6.361],
                         dtype=np.float64)
 
-        ppf = np.array(list(map(cvg.s_normal_inv_cdf, prob)), dtype=np.float64)
+        ppf = np.array(list(map(cr.s_normal_inv_cdf, prob)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
@@ -62,7 +62,7 @@ class TestSNormalDistModule(unittest.TestCase):
                          4.417, 4.892, 5.327, 5.731, 6.109],
                         dtype=np.float64)
 
-        ppf = -np.array(list(map(cvg.s_normal_inv_cdf, prob)),
+        ppf = -np.array(list(map(cr.s_normal_inv_cdf, prob)),
                         dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
@@ -77,7 +77,7 @@ class TestSNormalDistModule(unittest.TestCase):
                          4.565, 5.026, 5.451, 5.847, 6.219],
                         dtype=np.float64)
 
-        ppf = -np.array(list(map(cvg.s_normal_inv_cdf, prob)),
+        ppf = -np.array(list(map(cr.s_normal_inv_cdf, prob)),
                         dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
@@ -91,20 +91,20 @@ class TestSNormalDistModule(unittest.TestCase):
                          4.753, 5.199, 5.612, 5.998, 6.361],
                         dtype=np.float64)
 
-        ppf = -np.array(list(map(cvg.s_normal_inv_cdf, prob)),
+        ppf = -np.array(list(map(cr.s_normal_inv_cdf, prob)),
                         dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
 
-        self.assertTrue(cvg.s_normal_inv_cdf(0.0) == -np.inf)
-        self.assertTrue(cvg.s_normal_inv_cdf(0) == -np.inf)
+        self.assertTrue(cr.s_normal_inv_cdf(0.0) == -np.inf)
+        self.assertTrue(cr.s_normal_inv_cdf(0) == -np.inf)
 
-        self.assertTrue(cvg.s_normal_inv_cdf(1.0) == np.inf)
-        self.assertTrue(cvg.s_normal_inv_cdf(1) == np.inf)
+        self.assertTrue(cr.s_normal_inv_cdf(1.0) == np.inf)
+        self.assertTrue(cr.s_normal_inv_cdf(1) == np.inf)
 
-        self.assertTrue(cvg.s_normal_inv_cdf(-0.1) is np.nan)
-        self.assertTrue(cvg.s_normal_inv_cdf(-1.0) is np.nan)
-        self.assertTrue(cvg.s_normal_inv_cdf(-10) is np.nan)
-        self.assertTrue(cvg.s_normal_inv_cdf(1.1) is np.nan)
-        self.assertTrue(cvg.s_normal_inv_cdf(10) is np.nan)
+        self.assertTrue(cr.s_normal_inv_cdf(-0.1) is np.nan)
+        self.assertTrue(cr.s_normal_inv_cdf(-1.0) is np.nan)
+        self.assertTrue(cr.s_normal_inv_cdf(-10) is np.nan)
+        self.assertTrue(cr.s_normal_inv_cdf(1.1) is np.nan)
+        self.assertTrue(cr.s_normal_inv_cdf(10) is np.nan)

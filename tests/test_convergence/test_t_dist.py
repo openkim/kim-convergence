@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cvg
+    import convergence as cr
 except:
     raise Exception('Failed to import `convergence` utility module')
 
@@ -15,47 +15,47 @@ class TestTDistModule(unittest.TestCase):
         """Test t_cdf function."""
         df = 2.74335149908
 
-        v = cvg.t_inv_cdf(0.001, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.001, places=3)
+        v = cr.t_inv_cdf(0.001, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.001, places=3)
 
-        v = cvg.t_inv_cdf(0.5, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.5, places=3)
+        v = cr.t_inv_cdf(0.5, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.5, places=3)
 
-        v = cvg.t_inv_cdf(0.999, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.999, places=3)
+        v = cr.t_inv_cdf(0.999, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.999, places=3)
 
         df = 5
 
-        v = cvg.t_inv_cdf(0.001, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.001, places=3)
+        v = cr.t_inv_cdf(0.001, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.001, places=3)
 
-        v = cvg.t_inv_cdf(0.5, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.5, places=3)
+        v = cr.t_inv_cdf(0.5, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.5, places=3)
 
-        v = cvg.t_inv_cdf(0.999, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.999, places=3)
+        v = cr.t_inv_cdf(0.999, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.999, places=3)
 
         df = 17.5
 
-        v = cvg.t_inv_cdf(0.001, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.001, places=3)
+        v = cr.t_inv_cdf(0.001, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.001, places=3)
 
-        v = cvg.t_inv_cdf(0.5, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.5, places=3)
+        v = cr.t_inv_cdf(0.5, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.5, places=3)
 
-        v = cvg.t_inv_cdf(0.999, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.999, places=3)
+        v = cr.t_inv_cdf(0.999, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.999, places=3)
 
         df = 25
 
-        v = cvg.t_inv_cdf(0.001, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.001, places=3)
+        v = cr.t_inv_cdf(0.001, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.001, places=3)
 
-        v = cvg.t_inv_cdf(0.5, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.5, places=3)
+        v = cr.t_inv_cdf(0.5, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.5, places=3)
 
-        v = cvg.t_inv_cdf(0.999, df)
-        self.assertAlmostEqual(cvg.t_dist.t_cdf(v, df), 0.999, places=3)
+        v = cr.t_inv_cdf(0.999, df)
+        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.999, places=3)
 
     def test_t_inv_cdf(self):
         """Test t_inv_cdf function."""
@@ -70,7 +70,7 @@ class TestTDistModule(unittest.TestCase):
                         dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [1] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [1] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=1)
@@ -80,7 +80,7 @@ class TestTDistModule(unittest.TestCase):
                         dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [7] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [7] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
@@ -90,7 +90,7 @@ class TestTDistModule(unittest.TestCase):
                         dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [20] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [20] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
@@ -100,7 +100,7 @@ class TestTDistModule(unittest.TestCase):
                         dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [29] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [29] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
@@ -110,7 +110,7 @@ class TestTDistModule(unittest.TestCase):
                         dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [60] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [60] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
@@ -120,7 +120,7 @@ class TestTDistModule(unittest.TestCase):
                         dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [100] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [100] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
@@ -132,7 +132,7 @@ class TestTDistModule(unittest.TestCase):
         _ppf = np.array([1.88562, 2.91999, 4.30265, 9.92484], dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [2] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [2] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=5)
@@ -140,7 +140,7 @@ class TestTDistModule(unittest.TestCase):
         _ppf = np.array([1.53321, 2.13185, 2.77645, 4.60409], dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [4] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [4] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=5)
@@ -148,7 +148,7 @@ class TestTDistModule(unittest.TestCase):
         _ppf = np.array([1.47588, 2.01505, 2.57058, 4.03214], dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [5] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [5] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=5)
@@ -156,7 +156,7 @@ class TestTDistModule(unittest.TestCase):
         _ppf = np.array([1.37218, 1.81246, 2.22814, 3.16927], dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [10] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [10] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=5)
@@ -164,7 +164,7 @@ class TestTDistModule(unittest.TestCase):
         _ppf = np.array([1.31042, 1.69726, 2.04227, 2.75000], dtype=np.float64)
 
         ppf = np.array(
-            list(map(cvg.t_inv_cdf, prob, [30] * n)), dtype=np.float64)
+            list(map(cr.t_inv_cdf, prob, [30] * n)), dtype=np.float64)
 
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=5)
@@ -174,55 +174,55 @@ class TestTDistModule(unittest.TestCase):
 
         # scipy reference value
         ci_ref = (-12.706204736, 12.706204736)
-        ci_l, ci_u = cvg.t_interval(95.e-2, 1)
+        ci_l, ci_u = cr.t_interval(95.e-2, 1)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
 
         ci_ref = (-1.983971518, 1.983971518)
-        ci_l, ci_u = cvg.t_interval(95.e-2, 100)
+        ci_l, ci_u = cr.t_interval(95.e-2, 100)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
 
         ci_ref = (-1.960201239, 1.960201239)
-        ci_l, ci_u = cvg.t_interval(95.e-2, 10000)
+        ci_l, ci_u = cr.t_interval(95.e-2, 10000)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
 
         ci_ref = (-25.45169957, 25.451699579)
-        ci_l, ci_u = cvg.t_interval(97.5e-2, 1)
+        ci_l, ci_u = cr.t_interval(97.5e-2, 1)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
 
         ci_ref = (-2.633766915, 2.633766915)
-        ci_l, ci_u = cvg.t_interval(97.5e-2, 10)
+        ci_l, ci_u = cr.t_interval(97.5e-2, 10)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
 
         ci_ref = (-2.241740325, 2.241740325)
-        ci_l, ci_u = cvg.t_interval(97.5e-2, 10000)
+        ci_l, ci_u = cr.t_interval(97.5e-2, 10000)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
 
         ci_ref = (-63.656741162, 63.656741162)
-        ci_l, ci_u = cvg.t_interval(99e-2, 1)
+        ci_l, ci_u = cr.t_interval(99e-2, 1)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
 
         ci_ref = (-3.169272667, 3.169272667)
-        ci_l, ci_u = cvg.t_interval(99e-2, 10)
+        ci_l, ci_u = cr.t_interval(99e-2, 10)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)
 
         ci_ref = (-2.576321046, 2.576321046)
-        ci_l, ci_u = cvg.t_interval(99e-2, 10000)
+        ci_l, ci_u = cr.t_interval(99e-2, 10000)
 
         self.assertAlmostEqual(ci_l, ci_ref[0], places=7)
         self.assertAlmostEqual(ci_u, ci_ref[1], places=7)

@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cvg
+    import convergence as cr
 except:
     raise Exception('Failed to import `convergence` utility module')
 
@@ -17,7 +17,7 @@ class TestUCLModule(unittest.TestCase):
         """Test set_heidel_welch_constants function."""
         try:
             # Initialize the HeidelbergerWelch object
-            heidel_welch = cvg.HeidelbergerWelch()
+            heidel_welch = cr.HeidelbergerWelch()
         except CVGError:
             msg = "Failed to initialize the HeidelbergerWelch object."
             raise CVGError(msg)
@@ -182,10 +182,10 @@ class TestUCLModule(unittest.TestCase):
         """Test ucl function."""
         x = np.arange(100.)
         # x is not one dimensional
-        self.assertRaises(CVGError, cvg.ucl,
+        self.assertRaises(CVGError, cr.ucl,
                           x.reshape(5, 20))
         # x does not have enough size
-        self.assertRaises(CVGError, cvg.ucl, x)
+        self.assertRaises(CVGError, cr.ucl, x)
 
         x = np.ones(1000) * 10 + (np.random.random_sample(1000) - 0.5)
-        _ = cvg.ucl(x)
+        _ = cr.ucl(x)

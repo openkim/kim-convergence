@@ -7,7 +7,7 @@ import numpy as np
 import kim_edn
 
 try:
-    import convergence as cvg
+    import convergence as cr
 except:
     raise Exception('Failed to import `convergence` utility module')
 
@@ -65,7 +65,7 @@ class TimeseriesModule(unittest.TestCase):
             # print('step={}, start={}, stop={}'.format(step, start, stop))
             return temp[start:stop]
 
-        msg = cvg.run_length_control(
+        msg = cr.run_length_control(
             get_trajectory=temp_get_trajectory,
             n_variables=1,
             initial_run_length=1000,
@@ -88,7 +88,7 @@ class TimeseriesModule(unittest.TestCase):
         start = 0
         stop = 0
 
-        msg = cvg.run_length_control(
+        msg = cr.run_length_control(
             get_trajectory=temp_get_trajectory,
             n_variables=1,
             initial_run_length=1000,
@@ -112,7 +112,7 @@ class TimeseriesModule(unittest.TestCase):
         start = 0
         stop = 0
 
-        msg = cvg.run_length_control(
+        msg = cr.run_length_control(
             get_trajectory=temp_get_trajectory,
             n_variables=1,
             initial_run_length=1000,
@@ -147,7 +147,7 @@ class TimeseriesModule(unittest.TestCase):
             stop += step
             return press[start:stop]
 
-        msg = cvg.run_length_control(
+        msg = cr.run_length_control(
             get_trajectory=press_get_trajectory,
             n_variables=1,
             initial_run_length=1000,
@@ -177,7 +177,7 @@ class TimeseriesModule(unittest.TestCase):
             # print('step={}, start={}, stop={}'.format(step, start, stop))
             return traj
 
-        msg = cvg.run_length_control(
+        msg = cr.run_length_control(
             get_trajectory=temp_press_get_trajectory,
             n_variables=2,
             initial_run_length=1000,
@@ -208,7 +208,7 @@ class TimeseriesModule(unittest.TestCase):
             # print('step={}, start={}, stop={}'.format(step, start, stop))
             return traj
 
-        msg = cvg.run_length_control(
+        msg = cr.run_length_control(
             get_trajectory=temp_press_volume_get_trajectory,
             n_variables=3,
             initial_run_length=1000,

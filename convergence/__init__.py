@@ -7,7 +7,8 @@ from .stats import \
     auto_correlate, \
     cross_covariance, \
     cross_correlate, \
-    periodogram, \
+    periodogram
+from .outlier import \
     outlier_methods, \
     outlier_test
 from .scale import \

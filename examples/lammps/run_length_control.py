@@ -2,7 +2,7 @@
 
 import numpy as np
 from lammps import lammps
-import convergence as cvg
+import convergence as cr
 
 # Initial run length
 cvg_initial_run_length = 1000
@@ -109,10 +109,10 @@ def run_length_control(lmpptr, nevery, *argv):
 
     if not isinstance(nevery, int):
         msg = 'nevery is not an `int`.'
-        raise cvg.CVGError(msg)
+        raise cr.CVGError(msg)
     elif nevery < 1:
         msg = 'nevery is not a positive `int`.'
-        raise cvg.CVGError(msg)
+        raise cr.CVGError(msg)
 
     msg = 'fix cvg_fix all vector {} '.format(nevery)
 
@@ -131,7 +131,7 @@ def run_length_control(lmpptr, nevery, *argv):
 
         if not isinstance(arg, str):
             msg = '{} is not an `str`.'.format(str(arg))
-            raise cvg.CVGError(msg)
+            raise cr.CVGError(msg)
 
         # The values following the argument `variable` must previously be
         # defined in the input script (`v_`).
@@ -156,21 +156,21 @@ def run_length_control(lmpptr, nevery, *argv):
                 ctrl_name = '{}{}'.format(prefix, argv[i - 1])
             except IndexError:
                 msg = 'the ctrl variable does not exist.'
-                raise cvg.CVGError(msg)
+                raise cr.CVGError(msg)
 
             i += 1
             try:
                 arg = argv[i]
             except IndexError:
                 msg = 'the variable\'s lower bound does not exist.'
-                raise cvg.CVGError(msg)
+                raise cr.CVGError(msg)
 
             # lb & ub must be equal-style variable
             try:
                 var_lb = lmp.extract_variable(arg, None, 0)
             except:
                 msg = 'lb must be followed by an equal-style variable.'
-                raise cvg.CVGError(msg)
+                raise cr.CVGError(msg)
             var_ub = None
 
             i += 1
@@ -186,14 +186,14 @@ def run_length_control(lmpptr, nevery, *argv):
                     arg = argv[i]
                 except IndexError:
                     msg = 'the variable\' upper bound does not exist.'
-                    raise cvg.CVGError(msg)
+                    raise cr.CVGError(msg)
 
                 # lb & ub must be equal-style variable
                 try:
                     var_ub = lmp.extract_variable(arg, None, 0)
                 except:
                     msg = 'ub must be followed by an equal-style variable.'
-                    raise cvg.CVGError(msg)
+                    raise cr.CVGError(msg)
             else:
                 i -= 1
 
@@ -205,14 +205,14 @@ def run_length_control(lmpptr, nevery, *argv):
                 ctrl_name = '{}{}'.format(prefix, argv[i - 1])
             except IndexError:
                 msg = 'the ctrl variable does not exist.'
-                raise cvg.CVGError(msg)
+                raise cr.CVGError(msg)
 
             i += 1
             try:
                 arg = argv[i]
             except IndexError:
                 msg = 'the variable\' upper bound does not exist.'
-                raise cvg.CVGError(msg)
+                raise cr.CVGError(msg)
 
             # lb & ub must be equal-style variable
             # being here means that this ctrl variable has no lower bound
@@ -221,7 +221,7 @@ def run_length_control(lmpptr, nevery, *argv):
                 var_ub = lmp.extract_variable(arg, None, 0)
             except:
                 msg = 'ub must be followed by an equal-style variable.'
-                raise cvg.CVGError(msg)
+                raise cr.CVGError(msg)
 
             ctrl_map[ctrl_name] = tuple([var_lb, var_ub])
             i += 1
@@ -242,7 +242,7 @@ def run_length_control(lmpptr, nevery, *argv):
             msg += 'controling the stability of the simulation to be '
             msg += 'bounded by lower and/or upper bound. It can not be '
             msg += 'used for the run length control at the same time.'
-            raise cvg.CVGError(msg)
+            raise cr.CVGError(msg)
         elif n_arguments == len(ctrl_map):
             var_name = arguments_map[0]
             msg = 'the variables "{}", '.format(var_name)
@@ -254,7 +254,7 @@ def run_length_control(lmpptr, nevery, *argv):
             msg += 'controling the stability of the simulation to be '
             msg += 'bounded by lower and/or upper bounds. They can not be '
             msg += 'used for the run length control at the same time.'
-            raise cvg.CVGError(msg)
+            raise cr.CVGError(msg)
 
     def get_trajectory(step):
         """Get trajectory vector or array of values.
@@ -303,7 +303,7 @@ def run_length_control(lmpptr, nevery, *argv):
                                 msg += '{} is out of bound of ('.format(val)
                                 msg += '{} {}). '.format(lb, ub)
                                 msg += 'This run is unstable.'
-                                raise cvg.CVGError(msg)
+                                raise cr.CVGError(msg)
                         continue
                     elif lb:
                         for _nstep in range(nstep, nstep + ncountmax):
@@ -313,7 +313,7 @@ def run_length_control(lmpptr, nevery, *argv):
                                 msg += '{} is out of bound of ('.format(val)
                                 msg += '{} ...). '.format(lb)
                                 msg += 'This run is unstable.'
-                                raise cvg.CVGError(msg)
+                                raise cr.CVGError(msg)
                         continue
                     elif ub:
                         for _nstep in range(nstep, nstep + ncountmax):
@@ -323,7 +323,7 @@ def run_length_control(lmpptr, nevery, *argv):
                                 msg += '{} is out of bound of ('.format(val)
                                 msg += '... {}). '.format(ub)
                                 msg += 'This run is unstable.'
-                                raise cvg.CVGError(msg)
+                                raise cr.CVGError(msg)
                         continue
                 else:
                     for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
@@ -352,7 +352,7 @@ def run_length_control(lmpptr, nevery, *argv):
                 return trajectory
 
     try:
-        msg = cvg.run_length_control(get_trajectory=get_trajectory,
+        msg = cr.run_length_control(get_trajectory=get_trajectory,
                                      n_variables=n_arguments - len(ctrl_map),
                                      initial_run_length=cvg_initial_run_length,
                                      run_length_factor=cvg_run_length_factor,
@@ -377,7 +377,7 @@ def run_length_control(lmpptr, nevery, *argv):
                                      fp='return')
     except Exception as e:
         msg = '{}'.format(e)
-        raise cvg.CVGError(msg)
+        raise cr.CVGError(msg)
 
     cmd = "variable run_var string ''"
     lmp.command(cmd)

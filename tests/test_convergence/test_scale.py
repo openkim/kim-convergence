@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cvg
+    import convergence as cr
 except:
     raise Exception('Failed to import `convergence` utility module')
 
@@ -24,10 +24,10 @@ class TestScaleModule(unittest.TestCase):
     def test_minmax_scale(self):
         """Test minmax_scale function."""
         x = np.array([0, 1, 2, 3, 4, 5, 10], dtype=np.float64)
-        scaled_x = cvg.minmax_scale(x)
+        scaled_x = cr.minmax_scale(x)
         self.assertTrue(np.allclose(scaled_x, x / 10.))
 
-        mms = cvg.MinMaxScale()
+        mms = cr.MinMaxScale()
         scaled_x = mms.scale(x)
         self.assertTrue(np.allclose(scaled_x, x / 10.))
         inverse_scaled_x = mms.inverse(scaled_x)
@@ -58,11 +58,11 @@ class TestScaleModule(unittest.TestCase):
     def test_translate_scale(self):
         """Test translate_scale function."""
         x = [1., 2., 2., 2., 3.]
-        scaled_x = cvg.translate_scale(x)
+        scaled_x = cr.translate_scale(x)
         scaled_x_ = [0., 1.0, 1.0, 1.0, 2.0]
         self.assertTrue(np.allclose(scaled_x, scaled_x_))
 
-        tsc = cvg.TranslateScale()
+        tsc = cr.TranslateScale()
         scaled_x = tsc.scale(x)
         self.assertTrue(np.allclose(scaled_x, scaled_x_))
         inverse_scaled_x = tsc.inverse(scaled_x)
@@ -76,7 +76,7 @@ class TestScaleModule(unittest.TestCase):
 
     def test_standard_scale(self):
         """Test standard_scale function."""
-        ssc = cvg.StandardScale()
+        ssc = cr.StandardScale()
 
         scaled_x = ssc.scale(self.x)
 
@@ -98,7 +98,7 @@ class TestScaleModule(unittest.TestCase):
 
     def test_maxabs_scale(self):
         """Test maxabs_scale function."""
-        msc = cvg.MaxAbsScale()
+        msc = cr.MaxAbsScale()
 
         scaled_x = msc.scale(self.x)
         inverse_scaled_x = msc.inverse(scaled_x)

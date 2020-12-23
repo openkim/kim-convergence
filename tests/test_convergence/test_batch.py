@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cvg
+    import convergence as cr
 except:
     raise Exception('Failed to import `convergence` utility module')
 
@@ -18,85 +18,85 @@ class TestBatchModule(unittest.TestCase):
         x = np.ones(10)
 
         # dimension
-        self.assertRaises(CVGError, cvg.batch, x.reshape((2, 5)))
+        self.assertRaises(CVGError, cr.batch, x.reshape((2, 5)))
 
         # batch_size
-        self.assertRaises(CVGError, cvg.batch, x, batch_size=5.0)
-        self.assertRaises(CVGError, cvg.batch, x, batch_size=-1)
-        self.assertRaises(CVGError, cvg.batch, x, batch_size=20)
-        self.assertRaises(CVGError, cvg.batch, x, batch_size='20')
-        self.assertRaises(CVGError, cvg.batch, x, batch_size=None)
+        self.assertRaises(CVGError, cr.batch, x, batch_size=5.0)
+        self.assertRaises(CVGError, cr.batch, x, batch_size=-1)
+        self.assertRaises(CVGError, cr.batch, x, batch_size=20)
+        self.assertRaises(CVGError, cr.batch, x, batch_size='20')
+        self.assertRaises(CVGError, cr.batch, x, batch_size=None)
 
         # scale method
-        self.assertRaises(CVGError, cvg.batch, x,
-                          batch_size=5, scale=cvg.translate_scale)
-        self.assertRaises(CVGError, cvg.batch, x,
+        self.assertRaises(CVGError, cr.batch, x,
+                          batch_size=5, scale=cr.translate_scale)
+        self.assertRaises(CVGError, cr.batch, x,
                           batch_size=5, scale='new_scale_metod')
-        self.assertRaises(CVGError, cvg.batch, x,
+        self.assertRaises(CVGError, cr.batch, x,
                           batch_size=5, scale=None)
 
         # n_batches
         n = 100
         x = np.ones(n) * 10 + (np.random.random_sample(n) - 0.5)
-        self.assertRaises(CVGError, cvg.batch, x, batch_size=101)
+        self.assertRaises(CVGError, cr.batch, x, batch_size=101)
 
         x = np.ones(n)
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=5,
                       with_centering=False,
                       with_scaling=False)
         for i in b:
             self.assertTrue(i == 1.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=5,
                       with_centering=False,
                       with_scaling=True)
         for i in b:
             self.assertTrue(i == 1.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=5,
                       with_centering=True,
                       with_scaling=True)
         for i in b:
             self.assertTrue(i == 0.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=5,
                       with_centering=True,
                       with_scaling=False)
         for i in b:
             self.assertTrue(i == 0.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=7,
                       with_centering=False,
                       with_scaling=False)
         for i in b:
             self.assertTrue(i == 1.0)
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=7,
                       with_centering=False,
                       with_scaling=True)
         for i in b:
             self.assertTrue(i == 1.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=7,
                       with_centering=True,
                       with_scaling=True)
         for i in b:
             self.assertTrue(i == 0.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=7,
                       with_centering=True,
                       with_scaling=False)
         for i in b:
             self.assertTrue(i == 0.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=5,
                       scale='translate_scale',
                       with_centering=False,
@@ -104,7 +104,7 @@ class TestBatchModule(unittest.TestCase):
         for i in b:
             self.assertTrue(i == 1.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=5,
                       scale='translate_scale',
                       with_centering=False,
@@ -112,7 +112,7 @@ class TestBatchModule(unittest.TestCase):
         for i in b:
             self.assertTrue(i == 1.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=5,
                       scale='translate_scale',
                       with_centering=True,
@@ -120,7 +120,7 @@ class TestBatchModule(unittest.TestCase):
         for i in b:
             self.assertTrue(i == 0.0)
 
-        b = cvg.batch(x,
+        b = cr.batch(x,
                       batch_size=5,
                       scale='translate_scale',
                       with_centering=True,
