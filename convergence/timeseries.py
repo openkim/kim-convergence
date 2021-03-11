@@ -410,7 +410,7 @@ def run_length_control(get_trajectory,
     Returns:
         bool or str:
             ``True`` if the length of the time series is long enough to
-            estimate the mean with sufficient accuracy or with enough requested 
+            estimate the mean with sufficient accuracy or with enough requested
             sample size and ``False`` otherwise.
             If fp is a ``str`` equals to ``'return'`` the function will return
             a string of the analysis results on the length of the time series.
@@ -900,7 +900,7 @@ def run_length_control(get_trajectory,
                                ignore_end_batch=ignore_end_batch)
 
             truncated = np.all(_truncated)
-            
+
             # if we reached the truncation point using marginal standard
             # error rules or we have reached the maximum limit
             if truncated or total_run_length == maximum_run_length:
