@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 from copy import deepcopy
-from math import copysign, fabs
+from math import copysign, fabs, nan
 
 from .err import CVGError
 
@@ -209,10 +209,16 @@ class ZERO_RC():
             self.first = False
             self.q = self.fa - self.fb
         else:
-            fdb = (self.fd - self.fb) / (self.d - self.b)
-            fda = (self.fd - self.fa) / (self.d - self.a)
-            self.p = fda * self.p
-            self.q = fdb * self.fa - fda * self.fb
+            db = self.d - self.b
+            fdfb = self.fd - self.fb
+            if (db != 0) or (fdfb != 0):
+                fda = (self.fd - self.fa) / (self.d - self.a)
+                fdb = fdfb / db
+                self.p = fda * self.p
+                self.q = fdb * self.fa - fda * self.fb
+            else:
+                self.p = nan
+                self.q = nan
 
         if self.p < 0.0:
             self.p = -self.p
