@@ -145,7 +145,7 @@ def auto_covariance(x, *, fft=False):
         \gamma_k = \frac{1}{N}\sum\limits_{t=1}^{N-K}(x_t-\Bar{x})(x_{t+K}-\Bar{x})
 
 
-    Note: 
+    Note:
         Some sources use the following formula for computing the
         autocovariance:
 
@@ -480,8 +480,8 @@ def periodogram(x, *, fft=False, with_mean=False):
         arg *= scale * 2.0 * np.pi
         arg = arg * complex(0.0, 1.0)
 
-        k = np.arange(x_size).reshape([1, -1])
-        e = arg.reshape([-1, 1]) * k
+        k = np.arange(x_size).reshape((1, -1))
+        e = arg.reshape((-1, 1)) * k
         e = np.exp(e)
 
         sumc = e * x

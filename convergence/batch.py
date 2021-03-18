@@ -83,7 +83,7 @@ def batch(time_series_data,
 
     # The raw data is batched into non-overlapping batches of size batch_size
     batched_time_series_data = np.matmul(
-        time_series_data[:max_size].reshape([-1, batch_size]),
+        time_series_data[:max_size].reshape((-1, batch_size)),
         np.ones([batch_size], dtype=np.float64))
 
     # Calculate the batch means
