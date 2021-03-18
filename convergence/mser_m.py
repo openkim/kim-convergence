@@ -51,7 +51,7 @@ def mser_m(x,
             the last few batch points that should be ignored. if `float`,
             should be in `(0, 1)` and it is the percent of last batch points
             that should be ignored. if `None` it would be set to the
-            `batch_size`. (default: {None})
+            :math:`Min(batch_size, n_batches / 4)`. (default: {None})
 
     Returns:
         bool, int: truncated, truncation point.
@@ -63,6 +63,8 @@ def mser_m(x,
       observations at the end of the data series that are close in value.
       Here, we avoid this artifact, by not allowing the algorithm to consider
       the standard errors calculated from the last few data points.
+
+    Note:
       If the truncation point returned by MSER-m > n/2, it is considered an
       invalid value and `truncated` will return as `False`. It means the
       method has not been provided with enough data to produce a valid
@@ -121,6 +123,7 @@ def mser_m(x,
     if not isinstance(ignore_end_batch, int):
         if ignore_end_batch is None:
             ignore_end_batch = max(1, batch_size)
+            ignore_end_batch = min(ignore_end_batch, n_batches // 4)
         elif isinstance(ignore_end_batch, float):
             if not 0.0 < ignore_end_batch < 1.0:
                 msg = 'invalid ignore_end_batch = '
@@ -167,8 +170,8 @@ def mser_m(x,
     truncate_index = np.nanargmin(d[:-ignore_end_batch]) * batch_size
 
     if truncate_index > n // 2:
-        # Any truncation value > n/2 is considered 
+        # Any truncation value > n/2 is considered
         # an invalid value and rejected
         return False, truncate_index
-    
+
     return True, truncate_index
