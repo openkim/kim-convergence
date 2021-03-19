@@ -10,8 +10,7 @@ from numpy.linalg import pinv, norm, inv
 from .err import CVGError, cvg_warning
 from .batch import batch
 from .stats import periodogram
-from .s_normal_dist import s_normal_inv_cdf
-from .t_dist import t_inv_cdf, t_interval
+from .t_dist import t_inv_cdf
 from .utils import train_test_split, subsample_index
 
 __all__ = [
@@ -129,8 +128,8 @@ class HeidelbergerWelch:
         """
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             msg = 'probability (or confidence interval) '
-            msg += 'confidence_coefficient = {} '.format(
-                confidence_coefficient)
+            msg += 'confidence_coefficient = '
+            msg += '{} '.format(confidence_coefficient)
             msg += 'is not in the range (0.0 1.0).'
             raise CVGError(msg)
 
