@@ -549,8 +549,9 @@ def subsamples_ucl(time_series_data, *,
             UCL = t_{\alpha,d} \left(\frac{\text sample\ standard\ deviation}{\sqrt{n}}\right)
 
     In both cases, the ``Student's t`` distribution is used as the critical
-    value. This value depends on the confidence_coefficient and the degrees of
-    freedom, which is found by subtracting one from the number of observations.
+    value. This value depends on the `confidence_coefficient` and the degrees
+    of freedom, which is found by subtracting one from the number of
+    observations.
 
     Args:
         time_series_data {array_like, 1d}: time series data.
@@ -622,9 +623,11 @@ def subsamples_ucl(time_series_data, *,
     try:
         uncorrelated_subsamples = time_series_data[subsample_indices]
     except IndexError:
-        msg = "Index/indices {} is/are out of bounds for ".format(
-            subsample_indices[np.where(subsample_indices
-                                       >= time_series_data.size)])
+        wrong_indices = np.where(subsample_indices >= time_series_data.size)
+        msg = "Index = " if len(wrong_indices[0]) == 1 else "Indices = "
+        msg += ",".join(map(str, subsample_indices[wrong_indices]))
+        msg += " is out " if len(wrong_indices[0]) == 1 else " are out of "
+        msg += "bound for " if len(wrong_indices[0]) == 1 else "bounds for "
         msg += "time_series_data with size {}".format(time_series_data.size)
         raise CVGError(msg)
 
