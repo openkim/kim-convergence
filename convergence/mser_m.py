@@ -70,6 +70,12 @@ def mser_m(x,
       method has not been provided with enough data to produce a valid
       result, and more data is required.
 
+    Note:
+      If the truncation obtained by MSER-m is the last index of the batched
+      data, the MSER-m returns the time series data's last index as the
+      truncation point. This index can be used as a measure that the algorithm
+      did not find any truncation point.
+
     References:
         .. [3] White, K.P., Jr. (1997). "An effective truncation heuristic
             for bias reduction in simulation output.". Simulation., 69(6),
@@ -169,9 +175,14 @@ def mser_m(x,
     # Convert truncation from batch to raw data
     truncate_index = np.nanargmin(d[:-ignore_end_batch]) * batch_size
 
+    # Any truncation value > n/2 is considered an invalid value and rejected
     if truncate_index > n // 2:
-        # Any truncation value > n/2 is considered
-        # an invalid value and rejected
+        # If the truncate_index is the last element of the batched data,
+        # do the correction and return the last index of the x array
+        ignore_end_batch += 1
+        if truncate_index == (n - ignore_end_batch * batch_size):
+            truncate_index = x.size - 1
+
         return False, truncate_index
 
     return True, truncate_index
