@@ -9,7 +9,7 @@ from numpy.linalg import pinv, norm, inv
 
 from .err import CVGError, cvg_warning
 from .batch import batch
-from .stats import periodogram
+from .stats import modified_periodogram
 from .t_dist import t_inv_cdf
 from .utils import train_test_split, subsample_index
 
@@ -313,7 +313,7 @@ def ucl(time_series_data, *,
     An estimate of the variance of the time-series mean is obtained by
     estimating the spectral density at zero frequency [12]_. We use an
     adaptive method which select the degree of the polynomial according to
-    the shape of the periodogram [2]_.
+    the shape of the modified periodogram [2]_.
 
     The estimated halfwidth of the confidence interval of time-series mean
     is computed as :math:`\frac{UCL}{\hat{\mu}}.`
@@ -429,9 +429,9 @@ def ucl(time_series_data, *,
         x_batch = x_batch[:n_batches]
 
     # Compute the periodogram of the sequence x_batch
-    period = periodogram(x_batch,
-                         fft=(n_batches > 30 and fft),
-                         with_mean=False)
+    period = modified_periodogram(x_batch,
+                                  fft=(n_batches > 30 and fft),
+                                  with_mean=False)
 
     left_range = range(0, period.size, 2)
     right_range = range(1, period.size, 2)
