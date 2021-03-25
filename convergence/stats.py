@@ -12,6 +12,7 @@ __all__ = [
     'auto_correlate',
     'cross_covariance',
     'cross_correlate',
+    'modified_periodogram',
     'periodogram',
 ]
 
@@ -395,7 +396,7 @@ def cross_correlate(x, y, *, nlags=None, fft=False):
     return crosscorr
 
 
-def periodogram(x, *, fft=False, with_mean=False):
+def modified_periodogram(x, *, fft=False, with_mean=False):
     r"""Compute a modified periodogram to estimate the power spectrum.
 
     Estimate the power spectrum using a modified periodogram.
@@ -434,13 +435,13 @@ def periodogram(x, *, fft=False, with_mean=False):
                Simulations". Comm. ACM., 24, p. 233--245.
 
     """
-    x = np.array(x, copy=False)
-
-    if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
-
     if with_mean:
+        x = np.array(x, copy=False)
+
+        if x.ndim != 1:
+            msg = 'x is not an array of one-dimension.'
+            raise CVGError(msg)
+
         # Fluctuations
         _mean = np.mean(x)
 
@@ -454,18 +455,21 @@ def periodogram(x, *, fft=False, with_mean=False):
         del _mean
 
     else:
-        if not np.all(np.isfinite(x)):
+        dx = np.array(x, copy=False)
+
+        if dx.ndim != 1:
+            msg = 'x is not an array of one-dimension.'
+            raise CVGError(msg)
+
+        if not np.all(np.isfinite(dx)):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
 
-        dx = np.array(x, copy=False)
-
     # Data size
-    x_size = x.size
+    x_size = dx.size
 
     scale = 1.0 / float(x_size)
-    scale2 = scale * scale
 
     # Perform the fft
     if fft:
@@ -484,13 +488,53 @@ def periodogram(x, *, fft=False, with_mean=False):
         e = arg.reshape((-1, 1)) * k
         e = np.exp(e)
 
-        sumc = e * x
+        sumc = e * dx
         sumc = sumc.sum(axis=1)
         result = sumc * np.conjugate(sumc)
 
     result = result.real
+    result *= scale
+    return result
 
-    result *= scale2
+
+def periodogram(x, *, fft=False, with_mean=False):
+    r"""Compute a periodogram to estimate the power spectrum.
+
+    Args:
+        x (array_like, 1d): Time series data.
+        fft (bool, optional): If True, use FFT convolution. FFT should be
+            preferred for long time series. (default: False)
+        with_mean (bool, optional): If True, use x minus its mean.
+            (default: False)
+
+    Returns:
+        1darray: Computed power spectrum array.
+
+    Note:
+        This function does not return the array of sample frequencies. In
+        case of need, one can compute it as,
+
+        .. math::
+
+            f = \left \{ \frac{k}{n} \right \}_{k = 1, \cdots, \left \lfloor \frac{n}{2} \right \rfloor + 1}
+
+        or
+
+        >>> f = np.arange(1., x.size//2 + 1) / x.size
+
+    """
+    try:
+        result = modified_periodogram(x, fft=fft, with_mean=with_mean)
+    except CVGError:
+        msg = 'Failed to compute a modified periodogram.'
+        raise CVGError(msg)
+
+    # Data size
+    x_size = np.size(x)
+
+    scale = 1.0 / float(x_size)
+
+    result *= scale
 
     if x_size % 2:
         result *= 2
@@ -506,10 +550,10 @@ def summary(x):
     """Return the summary of the time series data.
 
     Args:
-        x (array_like, 1d): Time series data.
+        x(array_like, 1d): Time series data.
 
     Returns:
-        float, float, float, float, float, float, float :
+        float, float, float, float, float, float, float:
             min, max, mean, std, median, 1stQU, 3rdQU
 
     """
