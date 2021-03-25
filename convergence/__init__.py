@@ -7,6 +7,7 @@ from .stats import \
     auto_correlate, \
     cross_covariance, \
     cross_correlate, \
+    modified_periodogram, \
     periodogram
 from .outlier import \
     outlier_methods, \
@@ -58,6 +59,7 @@ __all__ = [
     'auto_correlate',
     'cross_covariance',
     'cross_correlate',
+    'modified_periodogram',
     'periodogram',
     'outlier_methods',
     'outlier_test',
@@ -97,7 +99,7 @@ __all__ = [
     'run_length_control',
 ]
 
-__author__ = 'Yaser Afshar <yafshar@umn.edu>'
+__author__ = 'Yaser Afshar <yafshar@openkim.org>'
 
 from ._version import get_versions
 __version__ = get_versions()['version']
