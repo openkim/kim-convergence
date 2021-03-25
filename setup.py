@@ -14,7 +14,7 @@ setup(
     long_description_content_type="text/markdown",
     url='https://github.com/openkim/convergence',
     author='Yaser Afshar',
-    author_email='yafshar@umn.edu',
+    author_email='yafshar@openkim.org',
     license='CDDL-1.0',
     classifiers=[
         'Development Status :: 3 - Alpha',
