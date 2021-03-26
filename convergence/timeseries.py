@@ -17,7 +17,7 @@ from .statistical_inefficiency import \
     split_r_statistical_inefficiency, \
     split_statistical_inefficiency, \
     si_methods
-from .ucl import HeidelbergerWelch, ucl, subsamples_ucl
+from .ucl import HeidelbergerWelch, ucl, subsamples_ucl, ucl_methods
 from .utils import subsample_index
 
 __all__ = [
@@ -29,7 +29,9 @@ def convergence_message(fp_format,
                         converged,
                         n_variables,
                         total_run_length,
+                        equilibration_detected,
                         equilibration_step,
+                        maximum_equilibration_step,
                         confidence_coefficient,
                         relative_accuracy,
                         relative_half_width_estimate,
@@ -46,8 +48,11 @@ def convergence_message(fp_format,
         n_variables (int): the number of variables in the corresponding
             time-series data.
         total_run_length (int): the total number of steps
+        equilibration_detected (bool): if we reached equilibration or not!
         equilibration_step (int64 or 1darray): step number, where the
             equilibration has been achieved
+        maximum_equilibration_step (int): the maximum number of
+            steps as an equilibration hard limit.
         confidence_coefficient (float): Probability (or confidence interval)
             and must be between 0.0 and 1.0, and represents the confidence for
             calculation of relative halfwidths estimation.
@@ -109,7 +114,10 @@ def convergence_message(fp_format,
                     msg += 'sample size = {}.\n'.format(sample_size)
                 else:
                     msg += 'to estimate the mean with sufficient accuracy.\n'
-                msg += 'The equilibration detected at step = '
+                if equilibration_detected:
+                    msg += 'The equilibration detected at step = '
+                else:
+                    msg += 'The truncation point detected at step = '
                 msg += '{}.\n'.format(equilibration_step)
                 msg += 'The relative half width with '
                 msg += '{}% '.format(round(confidence_coefficient * 100, 3))
@@ -147,7 +155,11 @@ def convergence_message(fp_format,
                     msg += 'The length of the time series data = '
                     msg += '{}, is not long enough '.format(total_run_length)
                     msg += 'to estimate the mean with sufficient accuracy.\n'
-                msg += 'The equilibration detected at step = '
+                if equilibration_detected or \
+                        equilibration_step[i] < maximum_equilibration_step:
+                    msg += 'The equilibration detected at step = '
+                else:
+                    msg += 'The truncation point detected at step = '
                 msg += '{}.\n'.format(equilibration_step[i])
                 msg += 'The relative half width with '
                 msg += '{}% '.format(round(confidence_coefficient * 100, 3))
@@ -195,7 +207,9 @@ def convergence_message(fp_format,
             msg = {
                 "converged": converged,
                 "total_run_length": total_run_length,
+                "equilibration_detected": equilibration_detected,
                 "equilibration_step": int(equilibration_step),
+                "maximum_equilibration_step": int(maximum_equilibration_step),
                 "confidence": round(confidence_coefficient * 100, 3),
                 "relative_accuracy": relative_accuracy,
                 "relative_half_width": relative_half_width_estimate,
@@ -207,21 +221,45 @@ def convergence_message(fp_format,
             msg["requested_sample_size"] = \
                 "None" if sample_size is None else sample_size
         else:
-            msg = {"converged": converged}
+            msg = {
+                "converged": converged,
+                "total_run_length": total_run_length,
+                "equilibration_detected": equilibration_detected,
+            }
             for i in range(n_variables):
-                msg[i] = {
-                    "total_run_length": total_run_length,
-                    "equilibration_step": int(equilibration_step[i]),
-                    "confidence": round(confidence_coefficient * 100, 3),
-                    "relative_accuracy": relative_accuracy[i],
-                    "relative_half_width": relative_half_width_estimate[i],
-                    "mean": time_series_data_mean[i],
-                    "upper_confidence_limit": upper_confidence_limit[i],
-                    "standard_deviation": time_series_data_std[i],
-                    "effective_sample_size": int(effective_sample_size[i]),
-                    "requested_sample_size":
-                    "None" if sample_size is None else sample_size,
-                }
+                if equilibration_detected or \
+                        equilibration_step[i] < maximum_equilibration_step:
+                    msg[i] = {
+                        "equilibration_detected": True,
+                        "equilibration_step": int(equilibration_step[i]),
+                        "maximum_equilibration_step": int(maximum_equilibration_step),
+                        "confidence": round(confidence_coefficient * 100, 3),
+                        "relative_accuracy": relative_accuracy[i],
+                        "relative_half_width": relative_half_width_estimate[i],
+                        "mean": time_series_data_mean[i],
+                        "upper_confidence_limit": upper_confidence_limit[i],
+                        "standard_deviation": time_series_data_std[i],
+                        "effective_sample_size": int(effective_sample_size[i]),
+                        "requested_sample_size":
+                        "None" if sample_size is None else sample_size,
+                    }
+                else:
+                    msg[i] = {
+                        "equilibration_detected": False,
+                        "equilibration_step": int(equilibration_step[i]),
+                        "truncation_step": int(equilibration_step[i]),
+                        "maximum_equilibration_step": int(maximum_equilibration_step),
+                        "confidence": round(confidence_coefficient * 100, 3),
+                        "relative_accuracy": relative_accuracy[i],
+                        "relative_half_width": relative_half_width_estimate[i],
+                        "mean": time_series_data_mean[i],
+                        "upper_confidence_limit": upper_confidence_limit[i],
+                        "standard_deviation": time_series_data_std[i],
+                        "effective_sample_size": int(effective_sample_size[i]),
+                        "requested_sample_size":
+                        "None" if sample_size is None else sample_size,
+                    }
+
     return msg
 
 
@@ -232,6 +270,8 @@ def run_length_control(get_trajectory,
                        run_length_factor=1.5,
                        maximum_run_length=1000000,
                        maximum_equilibration_step=None,
+                       variable_known_mean=None,
+                       variable_known_standard_deviation=None,
                        sample_size=None,
                        relative_accuracy=0.01,
                        population_standard_deviation=None,
@@ -250,18 +290,20 @@ def run_length_control(get_trajectory,
                        nskip=1,
                        minimum_correlation_time=None,
                        ignore_end=None,
+                       dump_trajectory=False,
+                       dump_trajectory_fp="convergence_trajectory.edn",
                        fp=None,
                        fp_format='txt'):
     r"""Control the length of the time series data from a simulation run.
 
-    At each checkpoint an upper confidence limit (``UCL``) is approximated. If
+    At each checkpoint, an upper confidence limit (``UCL``) is approximated. If
     the relative UCL (UCL divided by the computed sample mean) is less than a
     prespecified value, `relative_accuracy`, the simulation is terminated.
 
-    ``Relative accuracy`` is the confidence interval half width or upper
+    ``Relative accuracy`` is the confidence interval half-width or upper
     confidence limit (UCL) divided by the sample mean. The UCL is calculated as
     a `confidence_coefficient%` confidence interval for the mean, using the
-    portion of the time series data which is in the stationarity region.
+    portion of the time series data, which is in the stationarity region.
 
     If the ratio is bigger than `relative_accuracy`, the length of the time
     series is deemed not long enough to estimate the mean with sufficient
@@ -271,10 +313,10 @@ def run_length_control(get_trajectory,
     calculation should not be repeated too frequently. Heidelberger and Welch
     (1981) [2]_ suggest increasing the run length by a factor of
     `run_length_factor > 1.5`, each time, so that estimate has the same,
-    reasonably large, proportion of new data.
+    reasonably large proportion of new data.
 
     The accuracy parameter `relative_accuracy` specifies the maximum relative
-    error that will be allowed in the mean value of timeseries data. In other
+    error that will be allowed in the mean value of time-series data. In other
     words, the distance from the confidence limit(s) to the mean (which is also
     known as the precision, half-width, or margin of error). A value of `0.01`
     is usually used to request two digits of accuracy, and so forth.
@@ -291,14 +333,14 @@ def run_length_control(get_trajectory,
 
     The ``maximum_run_length`` parameter places an upper bound on how long the
     simulation will run. If the specified accuracy cannot be achieved within
-    this time, the simulation will terminate and a warning message will
+    this time, the simulation will terminate, and a warning message will
     appear in the report.
 
     The ``maximum_equilibration_step`` parameter places an upper bound on how
     long the simulation will run to reach equilibration or pass the ``warm-up``
-    period. If equilibration or warm-up period cannot be detected within this
-    time, the simulation will terminate and a warning message will appear in
-    the report. By default and if not specified on input, the
+    period. If the equilibration or warm-up period cannot be detected within
+    this time, the simulation will terminate and a warning message will appear
+    in the report. By default and if not specified on input, the
     `maximum_equilibration_step` is defined as half of the `maximum_run_length`.
 
     Args:
@@ -324,6 +366,23 @@ def run_length_control(get_trajectory,
             equilibration_step greater than this limit it will fail. For the
             default None, the function is using ``maximum_run_length // 2`` as
             the maximum equilibration step. (default: None)
+        variable_known_mean (float, or 1darray, optional): variable known (true)
+            mean. ``variable_known_mean`` comes from the theory or in an
+            iterative approache, it is the targeted value. If
+            ``n_variables > 1``, and ``variable_known_mean`` is given (not
+            None,) then ``variable_known_mean`` must be a 1darray of values of
+            size ``n_variables`` (some of those can be None, where the
+            variable mean is not known.) E.g., [300.0, None] is given for
+            ``n_variables = 2``, where for the second variable the population
+            mean is not known. (default: None)
+        variable_known_standard_deviation (float, or 1darray, optional):
+            population standard deviation. If ``n_variables > 1``, and
+            ``population_standard_deviation`` is given (not None), then
+            ``population_standard_deviation`` must be a 1darray of values of
+            size ``n_variables`` (some of those can be None, where the
+            population standard deviation is not known.) E.g., [1.0, None] is
+            given for ``n_variables = 2``, where for the second variable the
+            population standard deviation is not known. (default: None)
         sample_size (int, optional): maximum number of independent samples.
             (default: None)
         relative_accuracy (float, or 1darray, optional): a relative half-width
@@ -398,6 +457,11 @@ def run_length_control(get_trajectory,
             be ignored in estimating the equilibration point. If ``None`` it
             would be set to the one fourth of the total number of points.
             (default: None)
+        dump_trajectory (bool, optional): if ``True``, dump the final trajectory
+            data to a file ``dump_trajectory_fp``. (default: False)
+        dump_trajectory_fp (str, object with a write(string) method, optional):
+            a ``.write()``-supporting file-like object or a name string to open
+            a file.
         fp (str, object with a write(string) method, optional): if an ``str``
             equals to ``'return'`` the function will return string of the
             analysis results on the length of the time series. Otherwise it
@@ -487,6 +551,23 @@ def run_length_control(get_trajectory,
             msg = 'For one variable, relative_accuracy must be a `float`.'
             raise CVGError(msg)
 
+        if variable_known_mean is not None and \
+                np.size(variable_known_mean) != 1:
+            msg = 'For one variable, variable_known_mean must be a `float`.'
+            raise CVGError(msg)
+
+        if variable_known_standard_deviation is not None and \
+                np.size(variable_known_standard_deviation) != 1:
+            msg = 'For one variable, variable_known_standard_deviation must '
+            msg += 'be a `float`.'
+            raise CVGError(msg)
+
+        if population_standard_deviation is not None and \
+                np.size(population_standard_deviation) != 1:
+            msg = 'For one variable, population_standard_deviation must be '
+            msg += 'a `float`.'
+            raise CVGError(msg)
+
     else:
         ndim = 2
 
@@ -500,6 +581,23 @@ def run_length_control(get_trajectory,
         else:
             relative_accuracy = np.array(relative_accuracy, copy=False)
 
+        if variable_known_mean is not None:
+            if np.size(variable_known_mean) != n_variables:
+                msg = 'variable_known_mean must be a 1darray of size = '
+                msg += '{}.'.format(n_variables)
+                raise CVGError(msg)
+
+            variable_known_mean = np.array(variable_known_mean, copy=False)
+
+        if variable_known_standard_deviation is not None:
+            if np.size(variable_known_standard_deviation) != n_variables:
+                msg = 'variable_known_standard_deviation must be a 1darray '
+                msg += 'of size = {}.'.format(n_variables)
+                raise CVGError(msg)
+
+            variable_known_standard_deviation = \
+                np.array(variable_known_standard_deviation, copy=False)
+
         if population_standard_deviation is not None:
             if np.size(population_standard_deviation) != n_variables:
                 msg = 'population_standard_deviation must be a 1darray of '
@@ -509,12 +607,11 @@ def run_length_control(get_trajectory,
             population_standard_deviation = \
                 np.array(population_standard_deviation, copy=False)
 
-    if confidence_interval_approximation_method not in \
-            ('subsample', 'heidel_welch'):
+    if confidence_interval_approximation_method not in ucl_methods:
         msg = 'method {} '.format(confidence_interval_approximation_method)
         msg += 'to aproximate confidence interval not found. Valid '
         msg += 'methods are:\n\t- '
-        msg += '{}'.format('\n\t- '.join('subsample', 'heidel_welch'))
+        msg += '{}'.format('\n\t- '.join(ucl_methods))
         raise CVGError(msg)
 
     if confidence_interval_approximation_method == 'heidel_welch':
@@ -583,6 +680,20 @@ def run_length_control(get_trajectory,
             # if we reached the truncation point using marginal standard
             # error rules or we have reached the maximum limit
             if truncated or total_run_length == maximum_run_length:
+                # Experimental feature to make sure of
+                # correct equilibrium or warm-up detection
+                if truncated and variable_known_mean is not None:
+                    time_series_data = t[truncate_index:]
+                    tmp_mean = np.mean(time_series_data)
+                    tmp_std = np.std(time_series_data)
+                    # Estimates further than 3 standard deviation away from the
+                    # known value can easily be flagged as not reached to the
+                    # steady state
+                    if np.abs(variable_known_mean - tmp_mean) > 3 * tmp_std:
+                        # Equilibration is detected wrongly and
+                        # the run must continue
+                        run_length = _run_length
+                        continue
                 break
 
             run_length = _run_length
@@ -601,29 +712,40 @@ def run_length_control(get_trajectory,
                     fft=(time_series_data_size > 30 and fft),
                     minimum_correlation_time=minimum_correlation_time,
                     ignore_end=ignore_end)
-            equilibration_step = truncate_index + \
-                equilibration_index_estimate
+
+            equilibration_step = truncate_index + equilibration_index_estimate
+            equilibration_detected = True
+
         else:
-            equilibration_step, _ = \
-                estimate_equilibration_length(
-                    t,
-                    si=si,
-                    nskip=nskip,
-                    fft=(total_run_length > 30 and fft),
-                    minimum_correlation_time=minimum_correlation_time,
-                    ignore_end=ignore_end)
+            equilibration_step = truncate_index
+            equilibration_detected = False
 
         # Check the hard limit
         if equilibration_step >= maximum_equilibration_step:
-            msg = 'the equilibration or "warm-up" period is detected '
-            msg += 'at step = {}, which '.format(equilibration_step)
-            msg += 'is greater than the maximum number of allowed steps '
-            msg += 'for the equilibration detection = '
-            msg += '{}.\n'.format(maximum_equilibration_step)
-            msg += 'To prevent this error, you can either request a longer '
-            msg += 'maximum number of allowed steps to reach equilibrium or '
-            msg += 'if you did not provide this limit you can increase the '
-            msg += 'maximum_run_length.'
+            if dump_trajectory:
+                kim_edn.dump(t.tolist(), dump_trajectory_fp)
+
+            if equilibration_detected:
+                msg = 'The equilibration or "warm-up" period is detected '
+                msg += 'at step = {}, which '.format(equilibration_step)
+                msg += 'is greater than the maximum number of allowed steps '
+                msg += 'for the equilibration detection = '
+                msg += '{}.\nTo prevent '.format(maximum_equilibration_step)
+                msg += 'this error, you can either request a longer maximum '
+                msg += 'number of allowed steps to reach equilibrium or if '
+                msg += 'you did not provide this limit you can increase the '
+                msg += 'maximum_run_length.'
+            else:
+                if equilibration_step == (maximum_run_length - 1):
+                    msg = 'The equilibration or "warm-up" period is '
+                    msg += 'not detected. Check the trajectory data!!!\n'
+                else:
+                    msg = 'The truncation point = '
+                    msg += '{}, returned by MSER-m '.format(equilibration_step)
+                    msg += 'is > half of the data set size and is '
+                    msg += 'invalid.\n'
+                msg += 'More data is required. To prevent this error, you can '
+                msg += 'request a longer maximum_run_length.\n'
             raise CVGError(msg)
 
         run_length = _run_length
@@ -694,9 +816,10 @@ def run_length_control(get_trajectory,
                     msg = "Failed to get the upper confidence limit."
                     raise CVGError(msg)
 
+                subsample_indices = None
+
                 # Compute the mean
                 _mean = np.mean(time_series_data)
-                subsample_indices = None
 
             # Estimat the relative half width
             if isclose(_mean, 0, abs_tol=1e-12):
@@ -705,7 +828,7 @@ def run_length_control(get_trajectory,
                 relative_half_width_estimate = \
                     upper_confidence_limit / fabs(_mean)
 
-            # The run stopping criteria
+            # Check the run stopping criteria
             if relative_half_width_estimate < relative_accuracy:
                 if statistical_inefficiency_estimate is None:
                     # Compute the statitical inefficiency of a time series
@@ -727,16 +850,27 @@ def run_length_control(get_trajectory,
                         statistical_inefficiency_estimate
 
                 # We should stop or we check for enough sample size
-                if sample_size is None or effective_sample_size >= sample_size:
+                if (sample_size is None or
+                    effective_sample_size >= sample_size) and \
+                        (variable_known_mean is None or
+                         np.abs(variable_known_mean - _mean) <
+                            3 * upper_confidence_limit):
+
                     if subsample_indices is None:
                         _std = np.std(time_series_data)
                     else:
                         _std = np.std(time_series_data[subsample_indices])
+
+                    if dump_trajectory:
+                        kim_edn.dump(t.tolist(), dump_trajectory_fp)
+
                     msg = convergence_message(fp_format,
                                               True,
                                               1,
                                               total_run_length,
+                                              equilibration_detected,
                                               equilibration_step,
+                                              maximum_equilibration_step,
                                               confidence_coefficient,
                                               relative_accuracy,
                                               relative_half_width_estimate,
@@ -745,13 +879,15 @@ def run_length_control(get_trajectory,
                                               _std,
                                               effective_sample_size,
                                               sample_size)
-                    # It means it should return the string
+
+                    # It should return the string
                     if fp is None:
                         if fp_format == 'json':
                             return json.dumps(msg, indent=4)
                         if fp_format == 'edn':
                             return kim_edn.dumps(msg, indent=4)
                         return msg
+
                     # Otherwise it uses fp to print the message
                     if fp_format == 'json':
                         json.dump(msg, fp, indent=4)
@@ -759,6 +895,7 @@ def run_length_control(get_trajectory,
                         kim_edn.dump(msg, fp, indent=4)
                     else:
                         print(msg, file=fp)
+
                     return True
 
             total_run_length += run_length
@@ -808,12 +945,17 @@ def run_length_control(get_trajectory,
         else:
             _std = np.std(time_series_data[subsample_indices])
 
+        if dump_trajectory:
+            kim_edn.dump(t.tolist(), dump_trajectory_fp)
+
         # We have reached the maximum limit
         msg = convergence_message(fp_format,
                                   False,
                                   1,
                                   total_run_length,
+                                  equilibration_detected,
                                   equilibration_step,
+                                  maximum_equilibration_step,
                                   confidence_coefficient,
                                   relative_accuracy,
                                   relative_half_width_estimate,
@@ -822,13 +964,15 @@ def run_length_control(get_trajectory,
                                   _std,
                                   effective_sample_size,
                                   sample_size)
-        # It means it should return the string
+
+        # It should return the string
         if fp is None:
             if fp_format == 'json':
                 return json.dumps(msg, indent=4)
             if fp_format == 'edn':
                 return kim_edn.dumps(msg, indent=4)
             return msg
+
         # Otherwise it uses fp to print the message
         if fp_format == 'json':
             json.dump(msg, fp, indent=4)
@@ -836,6 +980,7 @@ def run_length_control(get_trajectory,
             kim_edn.dump(msg, fp, indent=4)
         else:
             print(msg, file=fp)
+
         return False
 
     # ndim == 2
@@ -868,6 +1013,7 @@ def run_length_control(get_trajectory,
 
             if t is None:
                 t = np.array(_t, dtype=np.float64)
+
                 if t.ndim != ndim:
                     msg = 'the return of "get_trajectory" function has a '
                     msg += 'wrong dimension of {} != '.format(t.ndim)
@@ -876,6 +1022,7 @@ def run_length_control(get_trajectory,
                     msg += '"get_trajectory" function, each row corresponds '
                     msg += 'to the time series data for one variable.'
                     raise CVGError(msg)
+
                 if n_variables != np.shape(t)[0]:
                     msg = 'the return of "get_trajectory" function has a '
                     msg += 'wrong number of variables = '
@@ -904,6 +1051,30 @@ def run_length_control(get_trajectory,
             # if we reached the truncation point using marginal standard
             # error rules or we have reached the maximum limit
             if truncated or total_run_length == maximum_run_length:
+                # Experimental feature to make sure of
+                # correct equilibrium or warm-up detection
+                if truncated and variable_known_mean is not None:
+                    for i in range(n_variables):
+                        if variable_known_mean[i] is None:
+                            continue
+
+                        time_series_data = t[i, truncate_index[i]:]
+                        tmp_mean = np.mean(time_series_data)
+                        tmp_std = np.std(time_series_data)
+                        # Estimates further than 3 standard deviation away from
+                        # the known value can easily be flagged as not reached
+                        # to the steady state
+                        if np.abs(variable_known_mean[i] - tmp_mean) > \
+                                3 * tmp_std:
+                            # Equilibration is detected wrongly and
+                            # the run must continue
+                            _truncated = False
+                            break
+
+                    truncated = np.all(_truncated)
+                    if not truncated:
+                        run_length = _run_length
+                        continue
                 break
 
             run_length = _run_length
@@ -928,6 +1099,8 @@ def run_length_control(get_trajectory,
                         ignore_end=ignore_end)
                 equilibration_step[i] = truncate_index[i] + \
                     equilibration_index_estimate
+
+            equilibration_detected = True
         else:
             for i in range(n_variables):
                 if _truncated[i]:
@@ -947,32 +1120,40 @@ def run_length_control(get_trajectory,
                     equilibration_step[i] = truncate_index[i] + \
                         equilibration_index_estimate
                 else:
-                    equilibration_step[i], _ = \
-                        estimate_equilibration_length(
-                            t[i],
-                            si=si,
-                            nskip=nskip,
-                            fft=(total_run_length > 30 and fft),
-                            minimum_correlation_time=minimum_correlation_time,
-                            ignore_end=ignore_end)
+                    equilibration_step[i] = truncate_index[i]
+            equilibration_detected = False
             del(_truncated)
         del(truncate_index)
 
         # Check the hard limit
-        if np.any(equilibration_step > maximum_equilibration_step):
+        if np.any(equilibration_step >= maximum_equilibration_step):
+            if dump_trajectory:
+                kim_edn.dump(t.tolist(), dump_trajectory_fp)
+
             for i in range(n_variables):
-                msg = 'the equilibration or "warm-up" period for '
-                msg += 'variable number {} is detected at '.format(i + 1)
-                msg += 'step = {}.\n'.format(equilibration_step[i])
-                if equilibration_step[i] >= maximum_equilibration_step:
-                    msg += '\nThe detected step number is greater than the '
-                    msg += 'maximum number of allowed steps = '
-                    msg += '{} for '.format(equilibration_step)
-                    msg += 'equilibration detection.\n'
-                    msg += 'To prevent this error, you can either request '
-                    msg += 'a longer maximum number of allowed steps to reach '
-                    msg += 'equilibrium or if you did not provide this limit '
-                    msg += 'you can increase the maximum_run_length.\n'
+                if equilibration_step[i] < maximum_equilibration_step:
+                    msg = 'The equilibration or "warm-up" period for variable '
+                    msg += 'number {} is detected at step = '.format(i + 1)
+                    msg += '{}.\n'.format(equilibration_step[i])
+                else:
+                    if equilibration_step[i] == (maximum_run_length - 1):
+                        msg = 'The equilibration or "warm-up" period for '
+                        msg += 'variable number {}, is not '.format(i + 1)
+                        msg = 'detected. Check the trajectory data!!!\n'
+                    else:
+                        msg = 'The truncation point for variable number '
+                        msg += '{} = {} '.format(i + 1, equilibration_step[i])
+                        msg += ', returned by MSER-m is > half of the data '
+                        msg += 'set size and is invalid.\n'
+
+            if equilibration_detected:
+                msg += 'To prevent this error, you can either request a '
+                msg += 'longer maximum number of allowed steps to reach '
+                msg += 'equilibrium or if you did not provide this limit you '
+                msg += 'can increase the maximum_run_length.\n'
+            else:
+                msg += 'More data is required. To prevent this error, you can '
+                msg += 'request a longer maximum_run_length.\n'
             raise CVGError(msg)
 
         run_length = _run_length
@@ -1052,10 +1233,10 @@ def run_length_control(get_trajectory,
                         msg = "Failed to get the upper confidence limit."
                         raise CVGError(msg)
 
+                    subsample_indices[i] = None
+
                     # Compute the mean
                     _mean[i] = np.mean(time_series_data)
-
-                    subsample_indices[i] = None
 
                 # Estimat the relative half width
                 if isclose(_mean[i], 0, abs_tol=1e-12):
@@ -1068,10 +1249,15 @@ def run_length_control(get_trajectory,
                 # The run stopping criteria
                 if _done[i]:
                     if relative_half_width_estimate[i] > relative_accuracy[i]:
-                        msg += 'for variable number {},\n'.format(i + 1)
-                        msg += 'The time series data diverges after meeting '
-                        msg += 'the required relative accuracy.'
+                        if dump_trajectory:
+                            kim_edn.dump(t.tolist(), dump_trajectory_fp)
+
+                        msg = 'For variable number {}, '.format(i + 1)
+                        msg += 'the time series data diverges after meeting '
+                        msg += 'the required relative accuracy.\n'
+                        msg += 'Check the trajectory data!!!\n'
                         raise CVGError(msg)
+
                 elif relative_half_width_estimate[i] < relative_accuracy[i]:
                     if np.isnan(statistical_inefficiency_estimate[i]):
                         # Compute the statitical inefficiency of a
@@ -1096,8 +1282,13 @@ def run_length_control(get_trajectory,
 
                     # It should stop if sample size is not requested or
                     # we have enough enough sample size
-                    _done[i] = sample_size is None or \
-                        effective_sample_size[i] >= sample_size
+                    if (sample_size is None or
+                        effective_sample_size[i] >= sample_size) and \
+                        (variable_known_mean is None or
+                            variable_known_mean[i] is None or
+                            np.abs(variable_known_mean[i] - _mean[i]) <
+                         3 * upper_confidence_limit[i]):
+                        _done[i] = True
 
             done = np.all(_done)
             if done:
@@ -1131,11 +1322,16 @@ def run_length_control(get_trajectory,
                         _std[i] = np.std(
                             time_series_data[subsample_indices[i]])
 
+                if dump_trajectory:
+                    kim_edn.dump(t.tolist(), dump_trajectory_fp)
+
                 msg = convergence_message(fp_format,
                                           True,
                                           n_variables,
                                           total_run_length,
+                                          equilibration_detected,
                                           equilibration_step,
+                                          maximum_equilibration_step,
                                           confidence_coefficient,
                                           relative_accuracy,
                                           relative_half_width_estimate,
@@ -1144,13 +1340,15 @@ def run_length_control(get_trajectory,
                                           _std,
                                           effective_sample_size,
                                           sample_size)
-                # It means it should return the string
+
+                # It should return the string
                 if fp is None:
                     if fp_format == 'json':
                         return json.dumps(msg, indent=4)
                     if fp_format == 'edn':
                         return kim_edn.dumps(msg, indent=4)
                     return msg
+
                 # Otherwise it uses fp to print the message
                 if fp_format == 'json':
                     json.dump(msg, fp, indent=4)
@@ -1158,6 +1356,7 @@ def run_length_control(get_trajectory,
                     kim_edn.dump(msg, fp, indent=4)
                 else:
                     print(msg, file=fp)
+
                 return True
 
             total_run_length += run_length
@@ -1215,11 +1414,16 @@ def run_length_control(get_trajectory,
             else:
                 _std[i] = np.std(time_series_data[subsample_indices[i]])
 
+        if dump_trajectory:
+            kim_edn.dump(t.tolist(), dump_trajectory_fp)
+
         msg = convergence_message(fp_format,
                                   False,
                                   n_variables,
                                   total_run_length,
+                                  equilibration_detected,
                                   equilibration_step,
+                                  maximum_equilibration_step,
                                   confidence_coefficient,
                                   relative_accuracy,
                                   relative_half_width_estimate,
@@ -1228,13 +1432,15 @@ def run_length_control(get_trajectory,
                                   _std,
                                   effective_sample_size,
                                   sample_size)
-        # It means it should return the string
+
+        # It should return the string
         if fp is None:
             if fp_format == 'json':
                 return json.dumps(msg, indent=4)
             if fp_format == 'edn':
                 return kim_edn.dumps(msg, indent=4)
             return msg
+
         # Otherwise it uses fp to print the message
         if fp_format == 'json':
             json.dump(msg, fp, indent=4)
@@ -1242,4 +1448,5 @@ def run_length_control(get_trajectory,
             kim_edn.dump(msg, fp, indent=4)
         else:
             print(msg, file=fp)
+
         return False
