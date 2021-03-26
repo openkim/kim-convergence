@@ -651,8 +651,8 @@ def subsamples_ucl(time_series_data, *,
         # standard_error_of_mean provides a measurement for spread. The smaller
         # the spread the more accurate.
         standard_error_of_mean = \
-            population_standard_deviation /
-        np.sqrt(uncorrelated_subsamples_size)
+            population_standard_deviation / \
+            np.sqrt(uncorrelated_subsamples_size)
 
     # Compute the t_distribution confidence interval. When using the
     # t-distribution to compute a confidence interval, df = n - 1.
