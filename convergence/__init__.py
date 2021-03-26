@@ -47,7 +47,8 @@ from .equilibration_length import estimate_equilibration_length
 from .ucl import \
     HeidelbergerWelch, \
     ucl, \
-    subsamples_ucl
+    subsamples_ucl, \
+    ucl_methods
 from .timeseries import \
     run_length_control
 
@@ -96,6 +97,7 @@ __all__ = [
     'HeidelbergerWelch',
     'ucl',
     'subsamples_ucl',
+    'ucl_methods',
     'run_length_control',
 ]
 
