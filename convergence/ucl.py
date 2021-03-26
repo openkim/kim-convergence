@@ -17,6 +17,7 @@ __all__ = [
     'HeidelbergerWelch',
     'ucl',
     'subsamples_ucl',
+    'ucl_methods',
 ]
 
 
@@ -651,7 +652,7 @@ def subsamples_ucl(time_series_data, *,
         # the spread the more accurate.
         standard_error_of_mean = \
             population_standard_deviation /
-            np.sqrt(uncorrelated_subsamples_size)
+        np.sqrt(uncorrelated_subsamples_size)
 
     # Compute the t_distribution confidence interval. When using the
     # t-distribution to compute a confidence interval, df = n - 1.
@@ -659,3 +660,9 @@ def subsamples_ucl(time_series_data, *,
 
     upper_confidence_limit = coeff * standard_error_of_mean
     return upper_confidence_limit
+
+
+ucl_methods = {
+    'heidel_welch': ucl,
+    'subsample': subsamples_ucl,
+}
