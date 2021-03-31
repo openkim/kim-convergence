@@ -1,6 +1,7 @@
-"""standard normal distribution module.
+"""normal distribution module.
 
-This code is adapted from python statistics module [1]_ by Yaser Afshar.
+`s_normal_inv_cdf` code is adapted from python statistics module [1]_ by
+Yaser Afshar.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
@@ -21,7 +22,9 @@ from copy import deepcopy
 from math import fabs
 
 __all__ = [
-    's_normal_inv_cdf'
+    's_normal_inv_cdf',
+    'normal_inv_cdf',
+    'normal_interval'
 ]
 
 
@@ -125,3 +128,51 @@ def s_normal_inv_cdf(p: float):
     if q < 0.0:
         return -x
     return x
+
+
+def normal_inv_cdf(p: float, *, loc=0.0, scale=1.0):
+    r"""Compute the normal distribution inverse cumulative distribution function.
+
+    Ars:
+        p {float} -- Probability (must be between 0.0 and 1.0)
+        loc (float, optional): location parameter (default: 0.0)
+        scale (float, optional): scale parameter (default: 1.0)
+
+    Returns:
+        float -- the inverse cumulative distribution function.
+            the value x of the random variable X such that the probability of
+            the variable being less than or equal to that value equals the
+            given probability p. :math:`x : P(X <= x) = p`.
+
+    """
+    return s_normal_inv_cdf(p) * scale + loc
+
+
+def normal_interval(p: float, *, loc=0.0, scale=1.0):
+    r"""Compute the normal distribution confidence interval.
+
+    Compute the normal distribution confidence interval with equal
+    areas around the median.
+
+    Args:
+        p (float): Probability (must be between 0.0 and 1.0)
+        loc (float, optional): location parameter (default: 0.0)
+        scale (float, optional): scale parameter (default: 1.0)
+
+    Returns:
+        float, float : lower bound, upper bound of the confidence interval
+            end-points of range that contain :math:`100 \alpha \%` of the
+            normal distribution possible values.
+
+    """
+    if p <= 0.0 or p >= 1.0:
+        msg = 'p = {} is not in the range (0.0 1.0).'.format(p)
+        raise CVGError(msg)
+
+    lower = (1.0 - p) / 2
+    upper = (1.0 + p) / 2
+
+    lower_interval = s_normal_inv_cdf(lower) * scale + loc
+    upper_interval = s_normal_inv_cdf(upper) * scale + loc
+
+    return lower_interval, upper_interval
