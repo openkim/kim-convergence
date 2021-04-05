@@ -618,6 +618,8 @@ def int_power(x, exponent: int):
 
     if exponent == 1:
         return x
+    elif exponent == 2:
+        return x * x
 
     nn = exponent if exponent >= 0 else -exponent
     ww = x.copy()
@@ -678,8 +680,8 @@ def moment(x, *, moment=1):
         return 0.0
 
     dx = x - x.mean()
-    dx_power_k = int_power(dx, moment)
-    return dx_power_k.mean()
+    dx_power_moment = int_power(dx, moment)
+    return dx_power_moment.mean()
 
 
 def skew(x, *, bias=False):
@@ -691,7 +693,7 @@ def skew(x, *, bias=False):
             for statistical bias. (default: False)
 
     Returns:
-        1darray: The skewness
+        float: The skewness
 
     Note:
         For normally distributed data, the skewness should be about zero.
@@ -702,8 +704,8 @@ def skew(x, *, bias=False):
         The sample skewness is computed as the Fisher-Pearson coefficient
         of skewness :math:`g_1 = \frac{m_3}{m_2^{3/2}}`, where :math:`m_i` is
         the biased sample :math:`i\texttt{th}` central moment. If ``bias`` is
-        False, the calculations are corrected for bias and the value computed is
-        the adjusted Fisher-Pearson standardized moment coefficient, i.e.
+        False, the calculations are corrected for bias and the value computed
+        is the adjusted Fisher-Pearson standardized moment coefficient, i.e.
 
         .. math::
 
@@ -716,14 +718,16 @@ def skew(x, *, bias=False):
                 Hall:New York. 2000. Section 2.2.24.1
 
     """
+    x_size = np.size(x)
+    if x_size in (1, 2):
+        return 0.0
     moment_2 = moment(x, moment=2)
-    moment_3 = moment(x, moment=3)
     if moment_2 != 0:
-        vals = moment_3 / moment_2 ** 1.5
+        moment_3 = moment(x, moment=3)
+        val = moment_3 / moment_2 ** 1.5
+        if bias:
+            return val
     else:
         return 0.0
-    if bias:
-        return vals
-    x_size = np.size(x)
     fac = sqrt((x_size - 1.0) * x_size) / (x_size - 2.0)
-    return fac * vals
+    return fac * val
