@@ -13,6 +13,7 @@ __all__ = [
 def batch(time_series_data,
           *,
           batch_size=5,
+          func=np.mean,
           scale='translate_scale',
           with_centering=False,
           with_scaling=False):
@@ -21,6 +22,9 @@ def batch(time_series_data,
     Args:
         time_series_data (array_like, 1d): Time series data.
         batch_size (int, optional): batch size. (default: {5})
+        func (callable, optional): Reduction function capable of receiving a
+            single axis argument. It is called with `time_series_data` as first
+            argument. (default: {np.mean})
         scale (str, optional): A method to standardize a dataset.
             (default: {'translate_scale'})
         with_centering (bool, optional): If True, use time_series_data minus
@@ -31,9 +35,12 @@ def batch(time_series_data,
     Returns:
         1darray: Batched (, and rescaled) data.
 
-    Note:
+    Notes:
         This function will terminate the end of the data points which are
         remainder of the division of data points by the batch_size.
+
+        By default, this method is using ``np.mean`` and compute the arithmetic
+        mean.
 
     """
     time_series_data = np.array(time_series_data, copy=False)
@@ -82,12 +89,13 @@ def batch(time_series_data,
     # Compute batch averages
 
     # The raw data is batched into non-overlapping batches of size batch_size
-    batched_time_series_data = np.matmul(
-        time_series_data[:max_size].reshape((-1, batch_size)),
-        np.ones([batch_size], dtype=np.float64))
-
-    # Calculate the batch means
-    batched_time_series_data /= np.float64(batch_size)
+    try:
+        batched_time_series_data = func(
+            time_series_data[:max_size].reshape((-1, batch_size)), axis=1,
+            dtype=np.float64)
+    except TypeError:
+        batched_time_series_data = func(
+            time_series_data[:max_size].reshape((-1, batch_size)), axis=1)
 
     if with_centering or with_scaling:
         batched_time_series_data = scale_func(batched_time_series_data,
