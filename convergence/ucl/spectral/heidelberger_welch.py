@@ -329,7 +329,8 @@ class HeidelbergerWelch:
             fft=fft,
             minimum_correlation_time=minimum_correlation_time)
 
-    def get_indices(self):
+    @property
+    def indices(self):
         """Get the subsample indices."""
         return self._indices
 
@@ -362,15 +363,18 @@ class HeidelbergerWelch:
             fft=fft,
             minimum_correlation_time=minimum_correlation_time)
 
-    def get_si(self):
+    @property
+    def si(self):
         """Get the si."""
         return self._si
 
-    def get_mean(self):
+    @property
+    def mean(self):
         """Get the mean."""
         return self._mean
 
-    def get_std(self):
+    @property
+    def std(self):
         """Get the std."""
         return self._std
 
