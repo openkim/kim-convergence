@@ -30,7 +30,7 @@ def randomness_test(x, significance_level):
 
     Note:
         Given a series :math:`x` of :math:`n` data points, the Von-Neumann test
-        statistic is [14]_ [15]_
+        [14]_ [15]_ statistic is
 
         .. math::
 
@@ -65,19 +65,21 @@ def randomness_test(x, significance_level):
 
     x_size = x.size
     if x_size < 3:
-        msg = '{} number of input data points is not '.format(x_size)
+        msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by randomness_test method.'
         raise CVGError(msg)
 
-    x_diff = np.ediff1d(x)
-    x_diff *= x_diff
-    x_diff_square_mean = x_diff.mean()
+    x_diff_square = np.diff(x, n=1)
+    x_diff_square *= x_diff_square
+    x_diff_square_mean = x_diff_square.mean()
 
     von_neumann_mean = 2.0
     von_neumann_std = sqrt(4. * (x_size - 2.) / (x_size * x_size - 1.))
-    von_neumann_ratio = x_diff_square_mean / x.var()
 
     lower_interval, upper_interval = normal_interval(1.0 - significance_level,
                                                      loc=von_neumann_mean,
                                                      scale=von_neumann_std)
+
+    von_neumann_ratio = x_diff_square_mean / x.var()
+
     return lower_interval < von_neumann_ratio < upper_interval
