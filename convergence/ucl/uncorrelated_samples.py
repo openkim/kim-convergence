@@ -59,7 +59,7 @@ class UncorrelatedSamples:
             minimum_correlation_time=None,
             uncorrelated_sample_indices=None,
             sample_method=None):
-        """Approximate the upper confidence limit of the mean.
+        r"""Approximate the upper confidence limit of the mean.
 
         - If the population standard deviation is known, and
           `population_standard_deviation` is given,
@@ -82,8 +82,6 @@ class UncorrelatedSamples:
 
         Args:
             time_series_data (array_like, 1d): time series data.
-
-        Keyword Args:
             confidence_coefficient (float, optional): probability (or
                 confidence interval) and must be between 0.0 and 1.0, and
                 represents the confidence for calculation of relative
@@ -196,7 +194,7 @@ class UncorrelatedSamples:
            minimum_correlation_time=None,
            uncorrelated_sample_indices=None,
            sample_method=None):
-        """Approximate the confidence interval of the mean.
+        r"""Approximate the confidence interval of the mean.
 
         - If the population standard deviation is known, and
           `population_standard_deviation` is given,
@@ -229,8 +227,6 @@ class UncorrelatedSamples:
 
         Args:
             time_series_data (array_like, 1d): time series data.
-
-        Keyword Args:
             confidence_coefficient (float, optional): probability (or
                 confidence interval) and must be between 0.0 and 1.0, and
                 represents the confidence for calculation of relative
@@ -283,6 +279,43 @@ class UncorrelatedSamples:
                                      minimum_correlation_time=None,
                                      uncorrelated_sample_indices=None,
                                      sample_method=None):
+        r"""Get the relative half width estimate.
+
+        The relative half width estimate is the confidence interval
+        half-width or upper confidence limit (UCL) divided by the sample mean.
+
+        The UCL is calculated as a `confidence_coefficient%` confidence
+        interval for the mean, using the portion of the time series data, which
+        is in the stationarity region.
+
+        Args:
+            time_series_data (array_like, 1d): time series data.
+            confidence_coefficient (float, optional): probability (or
+                confidence interval) and must be between 0.0 and 1.0, and
+                represents the confidence for calculation of relative
+                halfwidths estimation. (default: 0.95)
+            population_standard_deviation (float, optional): population
+                standard deviation. (default: None)
+            si (float, or str, optional): estimated statistical inefficiency.
+                (default: None)
+            fft (bool, optional): if True, use FFT convolution. FFT should be
+                preferred for long time series. (default: True)
+            minimum_correlation_time (int, optional): minimum amount of
+                correlation function to compute. The algorithm terminates after
+                computing the correlation time out to minimum_correlation_time
+                when the correlation function first goes negative.
+                (default: None)
+            uncorrelated_sample_indices (array_like, 1d, optional): indices of
+                uncorrelated subsamples of the time series data.
+                (default: None)
+            sample_method (str, optional): sampling method, one of the
+            ``uncorrelated``, ``random``, or ``block_averaged``.
+            (default: None)
+
+        Returns:
+            float: the relative half width estimate
+
+        """
         upper_confidence_limit = \
             self.ucl(
                 time_series_data=time_series_data,
@@ -315,60 +348,7 @@ def uncorrelated_samples_ucl(time_series_data,
                              uncorrelated_sample_indices=None,
                              sample_method=None,
                              obj=None):
-    """Approximate the upper confidence limit of the mean.
-
-    - If the population standard deviation is known, and
-      `population_standard_deviation` is given,
-
-      .. math::
-
-            UCL = t_{\alpha,d} \left(\frac{\text population\ standard\ deviation}{\sqrt{n}}\right)
-
-    - If the population standard deviation is unknown, the sample standard
-      deviation is estimated and be used as `sample_standard_deviation`,
-
-      .. math::
-
-            UCL = t_{\alpha,d} \left(\frac{\text sample\ standard\ deviation}{\sqrt{n}}\right)
-
-    In both cases, the ``Student's t`` distribution is used as the critical
-    value. This value depends on the `confidence_coefficient` and the degrees
-    of freedom, which is found by subtracting one from the number of
-    observations.
-
-    Args:
-        time_series_data (array_like, 1d): time series data.
-
-    Keyword Args:
-        confidence_coefficient (float, optional): probability (or
-            confidence interval) and must be between 0.0 and 1.0, and
-            represents the confidence for calculation of relative
-            halfwidths estimation. (default: 0.95)
-        population_standard_deviation (float, optional): population
-            standard deviation. (default: None)
-        si (float, or str, optional): estimated statistical inefficiency.
-            (default: None)
-        fft (bool, optional): if True, use FFT convolution. FFT should be
-            preferred for long time series. (default: True)
-        minimum_correlation_time (int, optional): minimum amount of
-            correlation function to compute. The algorithm terminates after
-            computing the correlation time out to minimum_correlation_time
-            when the correlation function first goes negative.
-            (default: None)
-        uncorrelated_sample_indices (array_like, 1d, optional): indices of
-            uncorrelated subsamples of the time series data.
-            (default: None)
-        sample_method (str, optional): sampling method, one of the
-            ``uncorrelated``, ``random``, or ``block_averaged``.
-            (default: None)
-        obj (obj, optional): An instance of the UncorrelatedSamples
-            object. (default: None)
-
-    Returns:
-        float: upper_confidence_limit
-            The approximately unbiased estimate of variance of the sample mean.
-
-    """
+    """Approximate the upper confidence limit of the mean."""
     uncorrelated_samples = UncorrelatedSamples() if obj is None else obj
     upper_confidence_limit = \
         uncorrelated_samples.ucl(
@@ -393,6 +373,7 @@ def uncorrelated_samples_ci(time_series_data,
                             uncorrelated_sample_indices=None,
                             sample_method=None,
                             obj=None):
+    """Approximate the confidence interval of the mean."""
     uncorrelated_samples = UncorrelatedSamples() if obj is None else obj
     confidence_limits = uncorrelated_samples.ci(
         time_series_data,
@@ -417,6 +398,7 @@ def uncorrelated_samples_relative_half_width_estimate(
         uncorrelated_sample_indices=None,
         sample_method=None,
         obj=None):
+    """Get the relative half width estimate."""
     uncorrelated_samples = UncorrelatedSamples() if obj is None else obj
     relative_half_width_estimate = \
         uncorrelated_samples.relative_half_width_estimate(

@@ -23,7 +23,7 @@ __all__ = [
 
 
 class N_SKART:
-    """N-Skart algorithm.
+    r"""N-Skart algorithm.
 
     N-Skart is a nonsequential procedure designed to compute a half the width
     of the `confidence_coefficient%` probability interval (CI) (confidence
@@ -89,12 +89,10 @@ class N_SKART:
                     si=None,
                     fft=True,
                     minimum_correlation_time=None):
-        """Set the indices.
+        r"""Set the indices.
 
         Args:
             time_series_data (array_like, 1d): time series data.
-
-        Keyword Args:
             si (float, or str, optional): estimated statistical inefficiency.
                 (default: None)
             fft (bool, optional): if True, use FFT convolution. FFT should be
@@ -131,12 +129,10 @@ class N_SKART:
                si=None,
                fft=True,
                minimum_correlation_time=None):
-        """Set the si (statistical inefficiency).
+        r"""Set the si (statistical inefficiency).
 
         Args:
             time_series_data (array_like, 1d): time series data.
-
-        Keyword Args:
             si (float, or str, optional): estimated statistical inefficiency.
                 (default: None)
             fft (bool, optional): if True, use FFT convolution. FFT should be
@@ -170,7 +166,7 @@ class N_SKART:
         return self._std
 
     def estimate_equilibration_length(self, time_series_data):
-        """Estimate the equilibration point in a time series data.
+        r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
         N-Skart algorithm.
@@ -329,7 +325,7 @@ class N_SKART:
             equilibration_length_estimate=0,
             confidence_coefficient=0.95,
             fft=True):
-        """Approximate the upper confidence limit of the mean.
+        r"""Approximate the upper confidence limit of the mean.
 
         Args:
             time_series_data (array_like, 1d): time series data.
@@ -474,7 +470,7 @@ class N_SKART:
            equilibration_length_estimate=0,
            confidence_coefficient=0.95,
            fft=True):
-        """Approximate the confidence interval of the mean.
+        r"""Approximate the confidence interval of the mean.
 
         Args:
             time_series_data (array_like, 1d): time series data.
@@ -489,6 +485,7 @@ class N_SKART:
 
         Returns:
             [type]: [description]
+
         """
         upper_confidence_limit = \
             self.ucl(
@@ -506,6 +503,30 @@ class N_SKART:
                                      equilibration_length_estimate=0,
                                      confidence_coefficient=0.95,
                                      fft=True):
+        r"""Get the relative half width estimate.
+
+        The relative half width estimate is the confidence interval
+        half-width or upper confidence limit (UCL) divided by the sample mean.
+
+        The UCL is calculated as a `confidence_coefficient%` confidence
+        interval for the mean, using the portion of the time series data, which
+        is in the stationarity region.
+
+        Args:
+            time_series_data (array_like, 1d): time series data.
+            equilibration_length_estimate (int, optional): an estimate for the
+                equilibration length.
+            confidence_coefficient (float, optional): probability (or confidence
+                interval) and must be between 0.0 and 1.0, and represents the
+                confidence for calculation of relative halfwidths estimation.
+                (default: 0.95)
+            fft (bool, optional): if ``True``, use FFT convolution. FFT should
+                be preferred for long time series. (default: True)
+
+        Returns:
+            float: the relative half width estimate.
+
+        """
         upper_confidence_limit = \
             self.ucl(
                 time_series_data=time_series_data,
@@ -530,6 +551,7 @@ def n_skart_ucl(time_series_data,
                 confidence_coefficient=0.95,
                 fft=True,
                 obj=None):
+    """Approximate the upper confidence limit of the mean."""
     n_skart = N_SKART() if obj is None else obj
     upper_confidence_limit = \
         n_skart.ucl(
@@ -546,6 +568,7 @@ def n_skart_ci(time_series_data,
                confidence_coefficient=0.95,
                fft=True,
                obj=None):
+    """Approximate the confidence interval of the mean."""
     n_skart = N_SKART() if obj is None else obj
     confidence_limits = n_skart.ci(
         time_series_data,
@@ -562,6 +585,7 @@ def n_skart_relative_half_width_estimate(
         confidence_coefficient=0.95,
         fft=True,
         obj=None):
+    """Get the relative half width estimate."""
     n_skart = N_SKART() if obj is None else obj
     relative_half_width_estimate = \
         n_skart.relative_half_width_estimate(
