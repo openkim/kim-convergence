@@ -2,9 +2,13 @@
 
 from .heidelberger_welch import \
     HeidelbergerWelch, \
-    heidel_welch_ucl
+    heidelberger_welch_ucl, \
+    heidelberger_welch_ci, \
+    heidelberger_welch_relative_half_width_estimate
 
 __all__ = [
     'HeidelbergerWelch',
-    'heidel_welch_ucl',
+    'heidelberger_welch_ucl',
+    'heidelberger_welch_ci',
+    'heidelberger_welch_relative_half_width_estimate',
 ]
