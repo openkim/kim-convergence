@@ -1,4 +1,4 @@
-"""Time series module."""
+"""Time series run length control module."""
 
 import sys
 from math import isclose, fabs
