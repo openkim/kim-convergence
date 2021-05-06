@@ -54,7 +54,9 @@ from .statistical_inefficiency import \
     integrated_auto_correlation_time
 from .utils import \
     validate_split, \
-    train_test_split, \
+    train_test_split
+from .timeseries import \
+    run_length_control, \
     time_series_data_si, \
     uncorrelated_time_series_data_sample_indices, \
     uncorrelated_time_series_data_samples, \
@@ -75,8 +77,6 @@ from .ucl import \
     n_skart_ucl, \
     n_skart_ci, \
     n_skart_relative_half_width_estimate
-from .timeseries import \
-    run_length_control
 
 __all__ = [
     'CVGError',
@@ -130,6 +130,7 @@ __all__ = [
     'integrated_auto_correlation_time',
     'validate_split',
     'train_test_split',
+    'run_length_control',
     'time_series_data_si',
     'uncorrelated_time_series_data_sample_indices',
     'uncorrelated_time_series_data_samples',
@@ -150,7 +151,6 @@ __all__ = [
     'n_skart_ci',
     'n_skart_relative_half_width_estimate',
     'ucl_methods',
-    'run_length_control',
 ]
 
 __author__ = 'Yaser Afshar <yafshar@openkim.org>'
