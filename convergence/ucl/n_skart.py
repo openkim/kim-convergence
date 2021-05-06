@@ -11,8 +11,8 @@ from convergence import \
     randomness_test, \
     auto_correlate, \
     t_inv_cdf, \
-    uncorrelated_time_series_data_sample_indices, \
-    uncorrelated_time_series_data_samples
+    time_series_data_si, \
+    uncorrelated_time_series_data_sample_indices
 
 __all__ = [
     'N_SKART',

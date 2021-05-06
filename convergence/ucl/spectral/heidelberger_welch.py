@@ -10,8 +10,8 @@ from convergence import \
     modified_periodogram, \
     t_inv_cdf, \
     train_test_split, \
-    uncorrelated_time_series_data_sample_indices, \
-    uncorrelated_time_series_data_samples
+    time_series_data_si, \
+    uncorrelated_time_series_data_sample_indices
 
 __all__ = [
     'HeidelbergerWelch',
