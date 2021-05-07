@@ -1,7 +1,7 @@
 """Statistical inefficiency module.
 
-The statistical inefficiency is the limiting number of steps to obtain 
-uncorrelated configurations. 
+The statistical inefficiency is the limiting number of steps to obtain
+uncorrelated configurations.
 """
 
 from math import isclose
@@ -46,9 +46,9 @@ def statistical_inefficiency(x, y=None, *,
             auto-correlation of timeseries x. (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: False)
-        minimum_correlation_time (int, optional): minimum amount of correlation 
-            function to compute. The algorithm terminates after computing the 
-            correlation time out to minimum_correlation_time when the 
+        minimum_correlation_time (int, optional): minimum amount of correlation
+            function to compute. The algorithm terminates after computing the
+            correlation time out to minimum_correlation_time when the
             correlation function first goes negative. (default: None)
 
     Returns:
@@ -68,7 +68,7 @@ def statistical_inefficiency(x, y=None, *,
     x_size = x.size
 
     if x_size < 2:
-        msg = '{} number of input data points is not '.format(x_size)
+        msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
 
@@ -88,8 +88,8 @@ def statistical_inefficiency(x, y=None, *,
         _std = np.std(x)
 
         if not np.isfinite(_std):
-            msg = 'there is at least one value in the input array which is '
-            msg += 'non-finite or not-number.'
+            msg = 'there is at least one value in the input '
+            msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
         if isclose(_std, 0, abs_tol=1e-14):
@@ -108,7 +108,7 @@ def statistical_inefficiency(x, y=None, *,
     _time = np.arange(1., 0., -1.0 / float(x_size))[1:]
 
     end_ind = min(_corr.size, _time.size)
-            
+
     # slice a numpy array, the memory is shared
     # between the slice and the original
     corr = _corr[:end_ind]
@@ -155,9 +155,9 @@ def r_statistical_inefficiency(x, y=None, *,
             (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: False)
-        minimum_correlation_time (int, optional): minimum amount of correlation 
-            function to compute. The algorithm terminates after computing the 
-            correlation time out to minimum_correlation_time when the 
+        minimum_correlation_time (int, optional): minimum amount of correlation
+            function to compute. The algorithm terminates after computing the
+            correlation time out to minimum_correlation_time when the
             correlation function first goes negative. (default: None)
 
     Returns:
@@ -208,7 +208,7 @@ def r_statistical_inefficiency(x, y=None, *,
     x_size = x.size
 
     if x_size < 4:
-        msg = '{} number of input data points is not '.format(x_size)
+        msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
 
@@ -217,8 +217,8 @@ def r_statistical_inefficiency(x, y=None, *,
         _std = np.std(x)
 
         if not np.isfinite(_std):
-            msg = 'there is at least one value in the input array which is '
-            msg += 'non-finite or not-number.'
+            msg = 'there is at least one value in the input '
+            msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
         if isclose(_std, 0, abs_tol=1e-14):
@@ -301,9 +301,9 @@ def split_r_statistical_inefficiency(x, y=None, *,
             with less than eight data points.
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: False)
-        minimum_correlation_time (int, optional): minimum amount of correlation 
-            function to compute. The algorithm terminates after computing the 
-            correlation time out to minimum_correlation_time when the 
+        minimum_correlation_time (int, optional): minimum amount of correlation
+            function to compute. The algorithm terminates after computing the
+            correlation time out to minimum_correlation_time when the
             correlation function first goes negative. (default: None)
 
     Returns:
@@ -343,7 +343,7 @@ def split_r_statistical_inefficiency(x, y=None, *,
     x = np.array(x, copy=False)
     x_size = x.size
     if x_size < 8:
-        msg = '{} number of input data points is not '.format(x_size)
+        msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
     x_size //= 2
@@ -386,9 +386,8 @@ def split_statistical_inefficiency(x, y=None, *,
 
     x_size = x.size
     if x_size < 8:
-        msg = '{} number of input data points is not sufficient '.format(
-            x_size)
-        msg += 'to be used by this method.'
+        msg = '{} input data points are not '.format(x_size)
+        msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
 
     x_size //= 2
@@ -397,8 +396,8 @@ def split_statistical_inefficiency(x, y=None, *,
     _std = np.std(x)
 
     if not np.isfinite(_std):
-        msg = 'there is at least one value in the input array which is '
-        msg += 'non-finite or not-number.'
+        msg = 'there is at least one value in the input '
+        msg += 'array which is non-finite or not-number.'
         raise CVGError(msg)
 
     if isclose(_std, 0, abs_tol=1e-14):
@@ -520,9 +519,9 @@ def integrated_auto_correlation_time(x, y=None, *,
             method of computing the statistical inefficiency. (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: {False})
-        minimum_correlation_time (int, optional): minimum amount of correlation 
+        minimum_correlation_time (int, optional): minimum amount of correlation
             function to compute. The algorithm terminates after computing the
-            correlation time out to minimum_correlation_time when the 
+            correlation time out to minimum_correlation_time when the
             correlation function first goes negative. (default: None)
 
     Returns:
@@ -553,8 +552,8 @@ def integrated_auto_correlation_time(x, y=None, *,
         except:
             si = 1.0
     elif si < 1.0:
-        msg = 'statistical inefficiency (si) must be greater than '
-        msg += 'or equal one.'
+        msg = 'statistical inefficiency (si) must '
+        msg += 'be greater than or equal one.'
         raise CVGError(msg)
 
     # Compute the integrated auto-correlation time
