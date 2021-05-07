@@ -1,4 +1,11 @@
-"""Time series equilibration length estimation module."""
+r"""Time series equilibration length estimation module.
+
+This module uses a conceptually simple automated procedure developed by Chodera
+[11]_ that does not make strict assumptions about the distribution of the
+observable of interest. The equilibration is chosen to maximize the number of
+uncorrelated samples.
+
+"""
 
 from math import isclose
 import numpy as np
