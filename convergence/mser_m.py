@@ -77,10 +77,10 @@ def mser_m(x,
       did not find any truncation point.
 
     References:
-        .. [3] White, K.P., Jr. (1997). "An effective truncation heuristic
+        .. [3] White, K.P., Jr., (1997). "An effective truncation heuristic
             for bias reduction in simulation output.". Simulation., 69(6),
             p. 323--334.
-        .. [4] Spratt, S. C. (1998). "Heuristics for the startup problem."
+        .. [4] Spratt, S. C., (1998). "Heuristics for the startup problem."
             M.S. Thesis, Department OS Systems Engineering, University of
             Virginia.
 
