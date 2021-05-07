@@ -14,7 +14,7 @@ outlier_methods = ('iqr', 'boxplot',
                    'extreme_iqr', 'extreme_boxplot',
                    'z_score', 'standard_score',
                    'modified_z_score')
-"""Methods to decide what are outliers in the data.
+r"""Methods to decide what are outliers in the data.
 
 - iqr or boxplot:
   The interquartile range ('iqr') or 'boxplot' is a graphical display for
@@ -50,7 +50,7 @@ outlier_methods = ('iqr', 'boxplot',
 
 
 def outlier_test(x, outlier_method='iqr'):
-    """Test to detect what are outliers in the data.
+    r"""Test to detect what are outliers in the data.
 
     The intuitive definition for the concept of an outlier in the data is a
     point that significantly deviates from its expected value. Therefore, given
