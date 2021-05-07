@@ -53,150 +53,152 @@ class TimeseriesModule(unittest.TestCase):
         press_size = press.size
         volume = self.data[:, 7]
 
-        start = 0
-        stop = 0
+        print("\n")
 
-        def temp_get_trajectory(step):
-            global start, stop
-            start = stop
-            if temp_size < start + step:
-                step = temp_size - start
-            stop += step
-            # print('step={}, start={}, stop={}'.format(step, start, stop))
-            return temp[start:stop]
+        # start = 0
+        # stop = 0
 
-        msg = cr.run_length_control(
-            get_trajectory=temp_get_trajectory,
-            n_variables=1,
-            initial_run_length=1000,
-            run_length_factor=1.5,
-            maximum_run_length=temp_size,
-            maximum_equilibration_step=temp_size // 2,
-            sample_size=None,
-            relative_accuracy=0.01,
-            confidence_coefficient=0.95,
-            confidence_interval_approximation_method='subsample',
-            fp="return",
-            fp_format='edn')
+        # def temp_get_trajectory(step):
+        #     global start, stop
+        #     start = stop
+        #     if temp_size < start + step:
+        #         step = temp_size - start
+        #     stop += step
+        #     # print('step={}, start={}, stop={}'.format(step, start, stop))
+        #     return temp[start:stop]
 
-        kim_obj = kim_edn.loads(msg)
-        subsample_effective_sample_size = kim_obj["effective_sample_size"]
-        subsample_equilibration_step = kim_obj["equilibration_step"]
+        # msg = cr.run_length_control(
+        #     get_trajectory=temp_get_trajectory,
+        #     n_variables=1,
+        #     initial_run_length=1000,
+        #     run_length_factor=1.5,
+        #     maximum_run_length=temp_size,
+        #     maximum_equilibration_step=temp_size // 2,
+        #     sample_size=None,
+        #     relative_accuracy=0.01,
+        #     confidence_coefficient=0.95,
+        #     confidence_interval_approximation_method='subsample',
+        #     fp="return",
+        #     fp_format='edn')
 
-        self.assertTrue(kim_obj["converged"])
-        self.assertTrue(subsample_effective_sample_size < 30)
+        # kim_obj = kim_edn.loads(msg)
+        # subsample_effective_sample_size = kim_obj["effective_sample_size"]
+        # subsample_equilibration_step = kim_obj["equilibration_step"]
 
-        start = 0
-        stop = 0
+        # self.assertTrue(kim_obj["converged"])
+        # self.assertTrue(subsample_effective_sample_size < 30)
 
-        msg = cr.run_length_control(
-            get_trajectory=temp_get_trajectory,
-            n_variables=1,
-            initial_run_length=1000,
-            run_length_factor=1.5,
-            maximum_run_length=temp_size,
-            maximum_equilibration_step=temp_size // 2,
-            sample_size=30,
-            relative_accuracy=0.01,
-            confidence_coefficient=0.95,
-            confidence_interval_approximation_method='subsample',
-            fp="return",
-            fp_format='json')
+        # start = 0
+        # stop = 0
 
-        json_obj = json.loads(msg)
+        # msg = cr.run_length_control(
+        #     get_trajectory=temp_get_trajectory,
+        #     n_variables=1,
+        #     initial_run_length=1000,
+        #     run_length_factor=1.5,
+        #     maximum_run_length=temp_size,
+        #     maximum_equilibration_step=temp_size // 2,
+        #     sample_size=30,
+        #     relative_accuracy=0.01,
+        #     confidence_coefficient=0.95,
+        #     confidence_interval_approximation_method='subsample',
+        #     fp="return",
+        #     fp_format='json')
 
-        self.assertTrue(json_obj["converged"])
-        self.assertTrue(json_obj["effective_sample_size"] >= 30)
-        self.assertTrue(subsample_equilibration_step ==
-                        json_obj["equilibration_step"])
+        # json_obj = json.loads(msg)
 
-        # heidel_welch
-        start = 0
-        stop = 0
+        # self.assertTrue(json_obj["converged"])
+        # self.assertTrue(json_obj["effective_sample_size"] >= 30)
+        # self.assertTrue(subsample_equilibration_step ==
+        #                 json_obj["equilibration_step"])
 
-        msg = cr.run_length_control(
-            get_trajectory=temp_get_trajectory,
-            n_variables=1,
-            initial_run_length=1000,
-            run_length_factor=1.5,
-            maximum_run_length=temp_size,
-            maximum_equilibration_step=temp_size // 2,
-            sample_size=None,
-            relative_accuracy=0.01,
-            confidence_coefficient=0.95,
-            confidence_interval_approximation_method='heidel_welch',
-            fp="return",
-            fp_format='edn')
+        # # heidel_welch
+        # start = 0
+        # stop = 0
 
-        kim_obj = kim_edn.loads(msg)
+        # msg = cr.run_length_control(
+        #     get_trajectory=temp_get_trajectory,
+        #     n_variables=1,
+        #     initial_run_length=1000,
+        #     run_length_factor=1.5,
+        #     maximum_run_length=temp_size,
+        #     maximum_equilibration_step=temp_size // 2,
+        #     sample_size=None,
+        #     relative_accuracy=0.01,
+        #     confidence_coefficient=0.95,
+        #     confidence_interval_approximation_method='heidel_welch',
+        #     fp="return",
+        #     fp_format='edn')
 
-        heidel_welch_effective_sample_size = kim_obj["effective_sample_size"]
-        heidel_welch_equilibration_step = kim_obj["equilibration_step"]
+        # kim_obj = kim_edn.loads(msg)
 
-        self.assertTrue(kim_obj["converged"])
-        self.assertTrue(heidel_welch_effective_sample_size <
-                        subsample_effective_sample_size)
-        self.assertTrue(heidel_welch_equilibration_step ==
-                        subsample_equilibration_step)
+        # heidel_welch_effective_sample_size = kim_obj["effective_sample_size"]
+        # heidel_welch_equilibration_step = kim_obj["equilibration_step"]
 
-        start = 0
-        stop = 0
+        # self.assertTrue(kim_obj["converged"])
+        # self.assertTrue(heidel_welch_effective_sample_size ==
+        #                 subsample_effective_sample_size)
+        # self.assertTrue(heidel_welch_equilibration_step ==
+        #                 subsample_equilibration_step)
 
-        def press_get_trajectory(step):
-            global start, stop
-            start = stop
-            if press_size < start + step:
-                step = press_size - start
-            stop += step
-            return press[start:stop]
+        # start = 0
+        # stop = 0
 
-        msg = cr.run_length_control(
-            get_trajectory=press_get_trajectory,
-            n_variables=1,
-            initial_run_length=1000,
-            run_length_factor=1.5,
-            maximum_run_length=press_size,
-            maximum_equilibration_step=press_size // 2,
-            sample_size=None,
-            relative_accuracy=0.10,
-            confidence_coefficient=0.95,
-            confidence_interval_approximation_method='subsample',
-            fp="return",
-            fp_format='edn')
+        # def press_get_trajectory(step):
+        #     global start, stop
+        #     start = stop
+        #     if press_size < start + step:
+        #         step = press_size - start
+        #     stop += step
+        #     return press[start:stop]
 
-        kim_obj = kim_edn.loads(msg)
-        self.assertFalse(kim_obj["converged"])
+        # msg = cr.run_length_control(
+        #     get_trajectory=press_get_trajectory,
+        #     n_variables=1,
+        #     initial_run_length=1000,
+        #     run_length_factor=1.5,
+        #     maximum_run_length=press_size,
+        #     maximum_equilibration_step=press_size // 2,
+        #     sample_size=None,
+        #     relative_accuracy=0.10,
+        #     confidence_coefficient=0.95,
+        #     confidence_interval_approximation_method='subsample',
+        #     fp="return",
+        #     fp_format='edn')
 
-        start = 0
-        stop = 0
+        # kim_obj = kim_edn.loads(msg)
+        # self.assertFalse(kim_obj["converged"])
 
-        def temp_press_get_trajectory(step):
-            global start, stop
-            start = stop
-            if press_size < start + step:
-                step = press_size - start
-            stop += step
-            traj = np.concatenate((temp[start:stop],
-                                   press[start:stop])).reshape((2, -1))
-            # print('step={}, start={}, stop={}'.format(step, start, stop))
-            return traj
+        # start = 0
+        # stop = 0
 
-        msg = cr.run_length_control(
-            get_trajectory=temp_press_get_trajectory,
-            n_variables=2,
-            initial_run_length=1000,
-            run_length_factor=1.5,
-            maximum_run_length=press_size,
-            maximum_equilibration_step=press_size // 2,
-            sample_size=None,
-            relative_accuracy=0.10,
-            confidence_coefficient=0.95,
-            confidence_interval_approximation_method='subsample',
-            fp="return",
-            fp_format='edn')
+        # def temp_press_get_trajectory(step):
+        #     global start, stop
+        #     start = stop
+        #     if press_size < start + step:
+        #         step = press_size - start
+        #     stop += step
+        #     traj = np.concatenate((temp[start:stop],
+        #                            press[start:stop])).reshape((2, -1))
+        #     # print('step={}, start={}, stop={}'.format(step, start, stop))
+        #     return traj
 
-        kim_obj = kim_edn.loads(msg)
-        self.assertFalse(kim_obj["converged"])
+        # msg = cr.run_length_control(
+        #     get_trajectory=temp_press_get_trajectory,
+        #     n_variables=2,
+        #     initial_run_length=1000,
+        #     run_length_factor=1.5,
+        #     maximum_run_length=press_size,
+        #     maximum_equilibration_step=press_size // 2,
+        #     sample_size=None,
+        #     relative_accuracy=0.10,
+        #     confidence_coefficient=0.95,
+        #     confidence_interval_approximation_method='subsample',
+        #     fp="return",
+        #     fp_format='edn')
+
+        # kim_obj = kim_edn.loads(msg)
+        # self.assertFalse(kim_obj["converged"])
 
         start = 0
         stop = 0
@@ -210,7 +212,7 @@ class TimeseriesModule(unittest.TestCase):
             traj = np.concatenate((temp[start:stop],
                                    press[start:stop],
                                    volume[start:stop])).reshape((3, -1))
-            # print('step={}, start={}, stop={}'.format(step, start, stop))
+            print('step={}, start={}, stop={}'.format(step, start, stop))
             return traj
 
         msg = cr.run_length_control(
@@ -223,9 +225,11 @@ class TimeseriesModule(unittest.TestCase):
             sample_size=None,
             relative_accuracy=0.10,
             confidence_coefficient=0.95,
-            confidence_interval_approximation_method='heidel_welch',
+            confidence_interval_approximation_method='subsample',
             fp="return",
             fp_format='edn')
 
         kim_obj = kim_edn.loads(msg)
+
+        print(kim_edn.dumps(kim_obj, indent=4))
         self.assertTrue(kim_obj["converged"])
