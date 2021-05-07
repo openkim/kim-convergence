@@ -162,21 +162,24 @@ def estimate_equilibration_length(time_series_data,
     # Equilibration estimate index
     equilibration_index_estimate = 0
 
+    # Compute the statitical inefficiency of a time series
     for t in range(0, upper_bound, nskip):
-        # Compute the statitical inefficiency of a time series
+        # slice a numpy array, the memory is shared between the
+        # slice and the original
+        x = time_series_data[t:]
+
         try:
             si_value = si_func(
-                time_series_data[t:], fft=fft,
-                minimum_correlation_time=minimum_correlation_time)
+                x, fft=fft, minimum_correlation_time=minimum_correlation_time)
         except CVGError:
             si_value = float(time_series_data_size - t)
 
-        _effective_samples_size = float(time_series_data_size - t) / si_value
+        effective_samples_size_ = float(time_series_data_size - t) / si_value
 
         # Find the maximum
-        if _effective_samples_size > effective_samples_size:
+        if effective_samples_size_ > effective_samples_size:
             statistical_inefficiency_estimate = si_value
-            effective_samples_size = _effective_samples_size
+            effective_samples_size = effective_samples_size_
             equilibration_index_estimate = t
 
     return equilibration_index_estimate, statistical_inefficiency_estimate
