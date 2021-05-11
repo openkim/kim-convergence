@@ -24,30 +24,30 @@ SAMPLING_METHODS = ('uncorrelated', 'random', 'block_averaged')
 
 class UncorrelatedSamples:
     def __init__(self):
-        self._indices = None
-        self._si = None
-        self._mean = None
-        self._std = None
+        self.indices_ = None
+        self.si_ = None
+        self.mean_ = None
+        self.std_ = None
 
     @property
     def indices(self):
         """Get the indices."""
-        return self._indices
+        return self.indices_
 
     @property
     def si(self):
         """Get the si."""
-        return self._si
+        return self.si_
 
     @property
     def mean(self):
         """Get the mean."""
-        return self._mean
+        return self.mean_
 
     @property
     def std(self):
         """Get the std."""
-        return self._std
+        return self.std_
 
     def ucl(self,
             time_series_data,
@@ -124,27 +124,27 @@ class UncorrelatedSamples:
             msg += '"UCL" at least needs 5 data points.'
             raise CVGError(msg)
 
-        self._si = time_series_data_si(
+        self.si_ = time_series_data_si(
             time_series_data=time_series_data,
             si=si,
             fft=fft,
             minimum_correlation_time=minimum_correlation_time)
 
         if uncorrelated_sample_indices is None:
-            self._indices = uncorrelated_time_series_data_sample_indices(
+            self.indices_ = uncorrelated_time_series_data_sample_indices(
                 time_series_data=time_series_data,
-                si=self._si,
+                si=self.si_,
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
         else:
-            self._indices = np.array(uncorrelated_sample_indices, copy=True)
+            self.indices_ = np.array(uncorrelated_sample_indices, copy=True)
 
         uncorrelated_samples = uncorrelated_time_series_data_samples(
             time_series_data=time_series_data,
-            si=self._si,
+            si=self.si_,
             fft=fft,
             minimum_correlation_time=minimum_correlation_time,
-            uncorrelated_sample_indices=self._indices,
+            uncorrelated_sample_indices=self.indices_,
             sample_method=sample_method)
 
         # Degrees of freedom
@@ -161,20 +161,20 @@ class UncorrelatedSamples:
             cvg_warning(msg)
 
         # compute mean
-        self._mean = uncorrelated_samples.mean()
+        self.mean_ = uncorrelated_samples.mean()
 
         # If the population standard deviation is unknown
         if population_standard_deviation is None:
             # Compute the sample standard deviation
-            self._std = uncorrelated_samples.std()
+            self.std_ = uncorrelated_samples.std()
         # If the population standard deviation is known
         else:
-            self._std = population_standard_deviation
+            self.std_ = population_standard_deviation
 
         # Compute the standard deviation of the mean within the dataset. The
         # standard_error_of_mean provides a measurement for spread. The smaller
         # the spread the more accurate.
-        standard_error_of_mean = self._std / sqrt(uncorrelated_samples_size)
+        standard_error_of_mean = self.std_ / sqrt(uncorrelated_samples_size)
 
         # Compute the t_distribution confidence interval. When using the
         # t-distribution to compute a confidence interval, df = n - 1.
@@ -265,8 +265,8 @@ class UncorrelatedSamples:
                 minimum_correlation_time=minimum_correlation_time,
                 uncorrelated_sample_indices=uncorrelated_sample_indices,
                 sample_method=sample_method)
-        lower_interval = self._mean - upper_confidence_limit
-        upper_interval = self._mean + upper_confidence_limit
+        lower_interval = self.mean_ - upper_confidence_limit
+        upper_interval = self.mean_ + upper_confidence_limit
         return lower_interval, upper_interval
 
     def relative_half_width_estimate(self,
@@ -328,13 +328,13 @@ class UncorrelatedSamples:
                 sample_method=sample_method)
 
         # Estimat the relative half width
-        if isclose(self._mean, 0, abs_tol=1e-6):
+        if isclose(self.mean_, 0, abs_tol=1e-6):
             msg = 'It is not possible to estimate the relative half width '
-            msg += 'for the close to zero mean = {}'.format(self._mean)
+            msg += 'for the close to zero mean = {}'.format(self.mean_)
             raise CVGError(msg)
         else:
             relative_half_width_estimate = \
-                upper_confidence_limit / fabs(self._mean)
+                upper_confidence_limit / fabs(self.mean_)
         return relative_half_width_estimate
 
 

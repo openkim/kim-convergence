@@ -78,10 +78,10 @@ class N_SKART:
         # in the randomness test b <- 0
         self.randomness_test_counter = 0
 
-        self._indices = None
-        self._si = None
-        self._mean = None
-        self._std = None
+        self.indices_ = None
+        self.si_ = None
+        self.mean_ = None
+        self.std_ = None
 
     def set_indices(self,
                     time_series_data,
@@ -112,7 +112,7 @@ class N_SKART:
 
         si_value = self.get_si()
 
-        self._indices = uncorrelated_time_series_data_sample_indices(
+        self.indices_ = uncorrelated_time_series_data_sample_indices(
             time_series_data=time_series_data,
             si=si_value,
             fft=fft,
@@ -121,7 +121,7 @@ class N_SKART:
     @property
     def indices(self):
         """Get the indices."""
-        return self._indices
+        return self.indices_
 
     def set_si(self,
                time_series_data,
@@ -144,7 +144,7 @@ class N_SKART:
                 (default: None)
 
         """
-        self._si = time_series_data_si(
+        self.si_ = time_series_data_si(
             time_series_data=time_series_data,
             si=si,
             fft=fft,
@@ -153,17 +153,17 @@ class N_SKART:
     @property
     def si(self):
         """Get the si."""
-        return self._si
+        return self.si_
 
     @property
     def mean(self):
         """Get the mean."""
-        return self._mean
+        return self.mean_
 
     @property
     def std(self):
         """Get the std."""
-        return self._std
+        return self.std_
 
     def estimate_equilibration_length(self, time_series_data):
         r"""Estimate the equilibration point in a time series data.
@@ -417,8 +417,8 @@ class N_SKART:
         # Perform step 6 of the N-Skart algorithm
 
         # compute the mean to be used later in interval method
-        self._mean = x_batch.mean()
-        self._std = x_batch.std()
+        self.mean_ = x_batch.mean()
+        self.std_ = x_batch.std()
 
         # compute the sample variance
         x_batch_var = x_batch.var(ddof=1)
@@ -493,8 +493,8 @@ class N_SKART:
                 equilibration_length_estimate=equilibration_length_estimate,
                 confidence_coefficient=confidence_coefficient,
                 fft=fft)
-        lower_interval = self._mean - upper_confidence_limit
-        upper_interval = self._mean + upper_confidence_limit
+        lower_interval = self.mean_ - upper_confidence_limit
+        upper_interval = self.mean_ + upper_confidence_limit
         return lower_interval, upper_interval
 
     def relative_half_width_estimate(self,
@@ -535,13 +535,13 @@ class N_SKART:
                 fft=fft)
 
         # Estimat the relative half width
-        if isclose(self._mean, 0, abs_tol=1e-6):
+        if isclose(self.mean_, 0, abs_tol=1e-6):
             msg = 'It is not possible to estimate the relative half width '
-            msg += 'for the close to zero mean = {}'.format(self._mean)
+            msg += 'for the close to zero mean = {}'.format(self.mean_)
             raise CVGError(msg)
         else:
             relative_half_width_estimate = \
-                upper_confidence_limit / fabs(self._mean)
+                upper_confidence_limit / fabs(self.mean_)
         return relative_half_width_estimate
 
 
