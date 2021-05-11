@@ -656,27 +656,27 @@ def moment(x, *, moment=1):
         mean.
 
     """
+    x = np.array(x, copy=False)
+
+    if x.ndim != 1:
+        msg = 'x is not an array of one-dimension.'
+        raise CVGError(msg)
+
+    if x.size < 1:
+        msg = 'x is empty.'
+        raise CVGError(msg)
+
+    if not np.all(np.isfinite(x)):
+        msg = 'there is at least one value in the input array x which is '
+        msg += 'non-finite or not-number.'
+        raise CVGError(msg)
+
     if not isinstance(moment, int):
         msg = 'moment must be an `int`.'
         raise CVGError(msg)
 
-    x = np.array(x, copy=False)
-
     # The first moment about the mean is 0
     if moment == 1:
-        if x.ndim != 1:
-            msg = 'x is not an array of one-dimension.'
-            raise CVGError(msg)
-
-        if x.size < 1:
-            msg = 'x is empty.'
-            raise CVGError(msg)
-
-        if not np.all(np.isfinite(x)):
-            msg = 'there is at least one value in the input array x which is '
-            msg += 'non-finite or not-number.'
-            raise CVGError(msg)
-
         return 0.0
 
     dx = x - x.mean()
@@ -686,6 +686,9 @@ def moment(x, *, moment=1):
 
 def skew(x, *, bias=False):
     r"""Compute the time series data set skewness.
+
+    ``skewness`` is a measure of the asymmetry of the probability distribution
+    of a real-valued random variable about its mean.
 
     Args:
         x (array_like, 1d): Time series data.
