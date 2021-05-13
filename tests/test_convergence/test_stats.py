@@ -589,3 +589,50 @@ class TestStatsModule(unittest.TestCase):
         x[2] = np.NINF
 
         self.assertRaises(CVGError, cr.periodogram, x)
+
+    def test_int_power(self):
+        """Test int_power function."""
+        x = np.arange(6)
+
+        test_passed = True
+
+        try:
+            np.testing.assert_allclose(
+                np.power(x, 4), cr.int_power(x, 4),
+                rtol=1e-14, atol=1e-14)
+        except AssertionError:
+            test_passed = False
+
+        self.assertTrue(test_passed)
+
+        self.assertRaises(CVGError, cr.int_power, [np.inf], 2)
+        self.assertRaises(CVGError, cr.int_power, 2, 2)
+        self.assertRaises(CVGError, cr.int_power, x.reshape((2, 3)), 2)
+        self.assertRaises(CVGError, cr.int_power, x, 2.1)
+
+    def test_moment(self):
+        """Test moment function."""
+        x = np.arange(6)
+        self.assertRaises(CVGError, cr.moment, x.reshape((2, 3)), moment=2)
+        self.assertRaises(CVGError, cr.moment, 2, moment=2)
+        self.assertRaises(CVGError, cr.moment, [np.inf], moment=2)
+        self.assertRaises(CVGError, cr.moment, x, moment=2.1)
+
+        self.assertEqual(cr.moment(x, moment=1), 0)
+
+        x = np.arange(1, 6)
+        self.assertEqual(cr.moment(x, moment=2), 2.0)
+
+    def test_skew(self):
+        """Test skew function."""
+        x = np.arange(1, 6)
+        self.assertEqual(cr.skew(x), 0.0)
+
+        x = np.array([2, 8, 0, 4, 1, 9, 9, 0])
+        self.assertEqual(cr.skew(x, bias=True), 0.2650554122698573)
+
+        x = np.array([2])
+        self.assertEqual(cr.skew(x, bias=True), 0.0)
+
+        x = np.array([2, 2])
+        self.assertEqual(cr.skew(x, bias=True), 0.0)
