@@ -23,8 +23,7 @@ SAMPLING_METHODS = ('uncorrelated', 'random', 'block_averaged')
 
 
 class UncorrelatedSamples(UCLBase):
-    """UncorrelatedSamples class.
-    """
+    """UncorrelatedSamples class."""
 
     def __init__(self):
         UCLBase.__init__(self)
