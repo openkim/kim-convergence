@@ -180,8 +180,7 @@ def estimate_equilibration_length(time_series_data,
 
         try:
             si_value = si_func(
-                x, fft=(fft and x_size > 30),
-                minimum_correlation_time=minimum_correlation_time)
+                x, fft=fft, minimum_correlation_time=minimum_correlation_time)
         except CVGError:
             si_value = x_size
 
