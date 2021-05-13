@@ -4,7 +4,7 @@ from copy import deepcopy
 from math import lgamma, log, fabs, exp, nan
 import numpy as np
 
-from convergence.err import CVGError
+from convergence import CVGError
 
 __all__ = [
     'beta',

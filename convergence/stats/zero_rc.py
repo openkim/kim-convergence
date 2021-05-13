@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from copy import deepcopy
 from math import copysign, fabs, nan
 
-from convergence.err import CVGError
+from convergence import CVGError
 
 __all__ = [
     'ZERO_RC',

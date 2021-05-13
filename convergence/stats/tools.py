@@ -8,7 +8,7 @@ from math import isclose, pi, exp, sqrt
 import numpy as np
 
 from .normal_dist import normal_interval
-from convergence.err import CVGError
+from convergence import CVGError
 
 __all__ = [
     'get_fft_optimal_size',

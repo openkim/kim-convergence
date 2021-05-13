@@ -4,14 +4,13 @@ This module is specilized for the ``convergence`` code and is not a general
 function to be used for other purposes.
 """
 
-from copy import deepcopy
-from math import lgamma, fabs
+from math import fabs
 import numpy as np
 
 from .beta_dist import betai_cdf_ccdf
 from .normal_dist import s_normal_inv_cdf
 from .zero_rc_bounds import ZERO_RC_BOUNDS
-from convergence.err import CVGError
+from convergence import CVGError
 
 __all__ = [
     't_cdf_ccdf',

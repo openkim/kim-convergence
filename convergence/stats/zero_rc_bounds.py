@@ -43,7 +43,7 @@ from copy import deepcopy
 from math import fabs
 
 from .zero_rc import ZERO_RC
-from convergence.err import CVGError
+from convergence import CVGError
 
 __all__ = [
     'ZERO_RC_BOUNDS',
