@@ -1,5 +1,6 @@
-"""Test s_normal_inv_cdf module."""
+"""Test stats s_normal_inv_cdf module."""
 import unittest
+from math import inf, nan
 import numpy as np
 
 try:
@@ -8,8 +9,8 @@ except:
     raise Exception('Failed to import `convergence` utility module')
 
 
-class TestSNormalDistModule(unittest.TestCase):
-    """Test s_normal_inv_cdf module components."""
+class TestStatsSNormalDistModule(unittest.TestCase):
+    """Test stats s_normal_inv_cdf module components."""
 
     def test_s_normal_inv_cdf(self):
         """Test s_normal_inv_cdf function."""
@@ -97,14 +98,14 @@ class TestSNormalDistModule(unittest.TestCase):
         for p, _p in zip(ppf, _ppf):
             self.assertAlmostEqual(p, _p, places=3)
 
-        self.assertTrue(cr.s_normal_inv_cdf(0.0) == -np.inf)
-        self.assertTrue(cr.s_normal_inv_cdf(0) == -np.inf)
+        self.assertTrue(cr.s_normal_inv_cdf(0.0) == -inf)
+        self.assertTrue(cr.s_normal_inv_cdf(0) == -inf)
 
-        self.assertTrue(cr.s_normal_inv_cdf(1.0) == np.inf)
-        self.assertTrue(cr.s_normal_inv_cdf(1) == np.inf)
+        self.assertTrue(cr.s_normal_inv_cdf(1.0) == inf)
+        self.assertTrue(cr.s_normal_inv_cdf(1) == inf)
 
-        self.assertTrue(cr.s_normal_inv_cdf(-0.1) is np.nan)
-        self.assertTrue(cr.s_normal_inv_cdf(-1.0) is np.nan)
-        self.assertTrue(cr.s_normal_inv_cdf(-10) is np.nan)
-        self.assertTrue(cr.s_normal_inv_cdf(1.1) is np.nan)
-        self.assertTrue(cr.s_normal_inv_cdf(10) is np.nan)
+        self.assertTrue(cr.s_normal_inv_cdf(-0.1) is nan)
+        self.assertTrue(cr.s_normal_inv_cdf(-1.0) is nan)
+        self.assertTrue(cr.s_normal_inv_cdf(-10) is nan)
+        self.assertTrue(cr.s_normal_inv_cdf(1.1) is nan)
+        self.assertTrue(cr.s_normal_inv_cdf(10) is nan)
