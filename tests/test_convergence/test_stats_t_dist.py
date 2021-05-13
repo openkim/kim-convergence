@@ -1,4 +1,4 @@
-"""Test t_dist module."""
+"""Test stats t_dist module."""
 import unittest
 import numpy as np
 
@@ -8,54 +8,54 @@ except:
     raise Exception('Failed to import `convergence` utility module')
 
 
-class TestTDistModule(unittest.TestCase):
-    """Test t_dist module components."""
+class TestStatsTDistModule(unittest.TestCase):
+    """Test stats t_dist module components."""
 
     def test_t_cdf(self):
         """Test t_cdf function."""
         df = 2.74335149908
 
         v = cr.t_inv_cdf(0.001, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.001, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.001, places=3)
 
         v = cr.t_inv_cdf(0.5, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.5, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.5, places=3)
 
         v = cr.t_inv_cdf(0.999, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.999, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.999, places=3)
 
         df = 5
 
         v = cr.t_inv_cdf(0.001, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.001, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.001, places=3)
 
         v = cr.t_inv_cdf(0.5, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.5, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.5, places=3)
 
         v = cr.t_inv_cdf(0.999, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.999, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.999, places=3)
 
         df = 17.5
 
         v = cr.t_inv_cdf(0.001, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.001, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.001, places=3)
 
         v = cr.t_inv_cdf(0.5, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.5, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.5, places=3)
 
         v = cr.t_inv_cdf(0.999, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.999, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.999, places=3)
 
         df = 25
 
         v = cr.t_inv_cdf(0.001, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.001, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.001, places=3)
 
         v = cr.t_inv_cdf(0.5, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.5, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.5, places=3)
 
         v = cr.t_inv_cdf(0.999, df)
-        self.assertAlmostEqual(cr.t_dist.t_cdf(v, df), 0.999, places=3)
+        self.assertAlmostEqual(cr.t_cdf(v, df), 0.999, places=3)
 
     def test_t_inv_cdf(self):
         """Test t_inv_cdf function."""
