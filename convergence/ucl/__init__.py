@@ -27,6 +27,8 @@ References:
 
 """
 
+from .ucl_base import UCLBase
+
 from .spectral import \
     HeidelbergerWelch, \
     heidelberger_welch_ucl, \
@@ -45,13 +47,30 @@ from .n_skart import \
     n_skart_ci, \
     n_skart_relative_half_width_estimate
 
+from .mser_m import \
+    MSER_m, \
+    mser_m_ucl, \
+    mser_m_ci, \
+    mser_m_relative_half_width_estimate, \
+    mser_m
+
+from .mser_m_y import \
+    MSER_m_y, \
+    mser_m_y_ucl, \
+    mser_m_y_ci, \
+    mser_m_y_relative_half_width_estimate
+
 ucl_methods = {
     'heidel_welch': heidelberger_welch_ucl,
     'subsample': uncorrelated_samples_ucl,
     'n_skart': n_skart_ucl,
+    'mser_m': mser_m_ucl,
+    'mser_m_y': mser_m_y_ucl,
 }
 
+
 __all__ = [
+    'UCLBase',
     'HeidelbergerWelch',
     'heidelberger_welch_ucl',
     'heidelberger_welch_ci',
@@ -65,4 +84,13 @@ __all__ = [
     'n_skart_ci',
     'n_skart_relative_half_width_estimate',
     'ucl_methods',
+    'MSER_m',
+    'mser_m_ucl',
+    'mser_m_ci',
+    'mser_m_relative_half_width_estimate',
+    'mser_m',
+    'MSER_m_y',
+    'mser_m_y_ucl',
+    'mser_m_y_ci',
+    'mser_m_y_relative_half_width_estimate',
 ]
