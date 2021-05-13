@@ -20,8 +20,10 @@ __all__ = [
 ]
 
 
-def statistical_inefficiency(x, y=None, *,
-                             fft=False,
+def statistical_inefficiency(x,
+                             y=None,
+                             *,
+                             fft=True,
                              minimum_correlation_time=None):
     r"""Compute the statistical inefficiency.
 
@@ -45,7 +47,7 @@ def statistical_inefficiency(x, y=None, *,
             timeseries x and y will be estimated instead of the
             auto-correlation of timeseries x. (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+            preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): minimum amount of correlation
             function to compute. The algorithm terminates after computing the
             correlation time out to minimum_correlation_time when the
@@ -82,6 +84,8 @@ def statistical_inefficiency(x, y=None, *,
     elif minimum_correlation_time < 1:
         msg = 'minimum_correlation_time must be a positive `int`.'
         raise CVGError(msg)
+
+    fft = fft and x_size > 30
 
     if y is None or y is x:
         # Special case if timeseries is constant.
@@ -138,8 +142,10 @@ def statistical_inefficiency(x, y=None, *,
 # .. [13] Gelman et al. BDA (2014) Formula 11.8
 
 
-def r_statistical_inefficiency(x, y=None, *,
-                               fft=False,
+def r_statistical_inefficiency(x,
+                               y=None,
+                               *,
+                               fft=True,
                                minimum_correlation_time=None):
     r"""Compute the statistical inefficiency.
 
@@ -154,7 +160,7 @@ def r_statistical_inefficiency(x, y=None, *,
             estimated instead of the auto-correlation of timeseries x.
             (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+            preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): minimum amount of correlation
             function to compute. The algorithm terminates after computing the
             correlation time out to minimum_correlation_time when the
@@ -211,6 +217,8 @@ def r_statistical_inefficiency(x, y=None, *,
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
+
+    fft = fft and x_size > 30
 
     if y is None or y is x:
         # Special case if timeseries is constant.
@@ -288,7 +296,7 @@ def r_statistical_inefficiency(x, y=None, *,
 
 
 def split_r_statistical_inefficiency(x, y=None, *,
-                                     fft=False,
+                                     fft=True,
                                      minimum_correlation_time=None):
     r"""Compute the statistical inefficiency.
 
@@ -300,7 +308,7 @@ def split_r_statistical_inefficiency(x, y=None, *,
             Using this method, statistical inefficiency can not be estimated
             with less than eight data points.
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+            preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): minimum amount of correlation
             function to compute. The algorithm terminates after computing the
             correlation time out to minimum_correlation_time when the
@@ -351,7 +359,7 @@ def split_r_statistical_inefficiency(x, y=None, *,
 
 
 def split_statistical_inefficiency(x, y=None, *,
-                                   fft=False,
+                                   fft=True,
                                    minimum_correlation_time=None):
     r"""Compute the statistical inefficiency.
 
@@ -365,7 +373,7 @@ def split_statistical_inefficiency(x, y=None, *,
     Args:
         x (array_like, 1d): time series data.
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+            preferred for long time series. (default: True)
 
     Returns:
         float: estimated statistical inefficiency.
@@ -405,8 +413,10 @@ def split_statistical_inefficiency(x, y=None, *,
 
     del _std
 
-    acov_1 = auto_covariance(x[:x_size], fft=True)
-    acov_2 = auto_covariance(x[x_size:2 * x_size], fft=True)
+    fft = fft and x_size > 30
+
+    acov_1 = auto_covariance(x[:x_size], fft=fft)
+    acov_2 = auto_covariance(x[x_size:2 * x_size], fft=fft)
 
     chain_mean_1 = np.mean(x[:x_size])
     chain_mean_2 = np.mean(x[x_size:2 * x_size])
@@ -500,7 +510,7 @@ si_methods = {
 
 def integrated_auto_correlation_time(x, y=None, *,
                                      si=None,
-                                     fft=False,
+                                     fft=True,
                                      minimum_correlation_time=None):
     r"""Estimate the integrated auto-correlation time.
 
@@ -518,7 +528,7 @@ def integrated_auto_correlation_time(x, y=None, *,
         si (float, or str, optional): estimated statistical inefficiency, or a
             method of computing the statistical inefficiency. (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: {False})
+            preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): minimum amount of correlation
             function to compute. The algorithm terminates after computing the
             correlation time out to minimum_correlation_time when the
