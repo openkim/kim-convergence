@@ -27,7 +27,7 @@ def estimate_equilibration_length(time_series_data,
                                   *,
                                   si='statistical_inefficiency',
                                   nskip=1,
-                                  fft=False,
+                                  fft=True,
                                   minimum_correlation_time=None,
                                   ignore_end=None):
     """Estimate the equilibration point in a time series data.
@@ -42,7 +42,7 @@ def estimate_equilibration_length(time_series_data,
         nskip (int, optional): the number of data points to skip.
             (default: 1)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+            preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): the minimum amount of
             correlation function to compute. The algorithm terminates after
             computing the correlation time out to minimum_correlation_time when
@@ -60,8 +60,8 @@ def estimate_equilibration_length(time_series_data,
 
     References:
         .. [11] Chodera, J. D., (2016). "A Simple Method for Automated
-               Equilibration Detection in Molecular Simulations". J. Chem.
-               Theory and Comp., Simulation., 12(4), p. 1799--1805.
+                Equilibration Detection in Molecular Simulations". J. Chem.
+                Theory and Comp., Simulation., 12(4), p. 1799--1805.
 
     """
     time_series_data = np.array(time_series_data, copy=False)
@@ -86,11 +86,12 @@ def estimate_equilibration_length(time_series_data,
     si_func = si_methods[si]
 
     if not isinstance(nskip, int):
-        if nskip is None:
-            nskip = 1
-        else:
+        if nskip is not None:
             msg = 'nskip must be an `int`.'
             raise CVGError(msg)
+
+        nskip = 1
+
     elif nskip < 1:
         msg = 'nskip must be a positive `int`.'
         raise CVGError(msg)
@@ -142,7 +143,7 @@ def estimate_equilibration_length(time_series_data,
         raise CVGError(msg)
 
     # Special case if timeseries is constant.
-    _std = np.std(time_series_data)
+    _std = time_series_data.std()
 
     if not np.isfinite(_std):
         msg = 'there is at least one value in the input '
@@ -175,13 +176,16 @@ def estimate_equilibration_length(time_series_data,
         # slice and the original
         x = time_series_data[t:]
 
+        x_size = float(x.size)
+
         try:
             si_value = si_func(
-                x, fft=fft, minimum_correlation_time=minimum_correlation_time)
+                x, fft=(fft and x_size > 30),
+                minimum_correlation_time=minimum_correlation_time)
         except CVGError:
-            si_value = float(time_series_data_size - t)
+            si_value = x_size
 
-        effective_samples_size_ = float(time_series_data_size - t) / si_value
+        effective_samples_size_ = x_size / si_value
 
         # Find the maximum
         if effective_samples_size_ > effective_samples_size:
