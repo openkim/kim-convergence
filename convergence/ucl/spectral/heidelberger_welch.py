@@ -417,7 +417,7 @@ class HeidelbergerWelch(UCLBase):
 
         # Compute the periodogram of the sequence x_batch
         period = modified_periodogram(x_batch,
-                                      fft=(n_batches > 30 and fft),
+                                      fft=(fft and n_batches > 30),
                                       with_mean=False)
 
         left_range = range(0, period.size, 2)
