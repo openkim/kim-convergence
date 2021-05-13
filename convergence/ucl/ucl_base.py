@@ -2,6 +2,8 @@
 
 from math import fabs, isclose
 
+from numpy.core.fromnumeric import std
+
 from convergence import \
     CVGError, \
     time_series_data_si, \
@@ -30,7 +32,7 @@ class UCLBase:
         return self.indices_
 
     @indices.setter
-    def _set_indices(self, value):
+    def indices(self, value):
         """Set the indices.
 
         Args:
@@ -38,6 +40,11 @@ class UCLBase:
 
         """
         self.indices_ = value
+
+    @indices.deleter
+    def indices(self):
+        """Delete the indices."""
+        del self.indices_
 
     def set_indices(self,
                     time_series_data,
@@ -80,7 +87,7 @@ class UCLBase:
         return self.si_
 
     @si.setter
-    def _set_si(self, value):
+    def si(self, value):
         """Set the si (statistical inefficiency).
 
         Args:
@@ -88,6 +95,11 @@ class UCLBase:
 
         """
         self.si_ = value
+
+    @si.deleter
+    def si(self):
+        """Delete the si."""
+        del self.si_
 
     def set_si(self,
                time_series_data,
@@ -122,7 +134,7 @@ class UCLBase:
         return self.mean_
 
     @mean.setter
-    def set_mean(self, value):
+    def mean(self, value):
         """Set the mean.
 
         Args:
@@ -131,13 +143,18 @@ class UCLBase:
         """
         self.mean_ = value
 
+    @mean.deleter
+    def mean(self):
+        """Delete the mean."""
+        del self.mean_
+
     @property
     def std(self):
         """Get the std."""
         return self.std_
 
     @std.setter
-    def set_std(self, value):
+    def std(self, value):
         """Set the std.
 
         Args:
@@ -145,6 +162,11 @@ class UCLBase:
 
         """
         self.std_ = value
+
+    @std.deleter
+    def std(self):
+        """Delete the std."""
+        del self.std_
 
     def ucl(self,
             time_series_data,
