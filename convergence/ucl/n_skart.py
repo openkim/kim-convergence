@@ -369,7 +369,7 @@ class N_SKART(UCLBase):
         lag1_correlation = \
             auto_correlate(x_batch,
                            nlags=1,
-                           fft=(self.kp_number_batches > 30 and fft))[1]
+                           fft=(fft and self.kp_number_batches > 30))[1]
 
         # compute the correlation adjustment A <- (1 + \phi) / (1 - \phi)
         correlation_adjustment = \
