@@ -43,7 +43,6 @@ from .scale import \
     maxabs_scale, \
     scale_methods
 from .batch import batch
-from .mser_m import mser_m
 #from .geweke import geweke
 from .statistical_inefficiency import \
     statistical_inefficiency, \
@@ -132,7 +131,6 @@ __all__ = [
     'scale_methods',
     'batch',
     # 'geweke',
-    'mser_m',
     'statistical_inefficiency',
     'r_statistical_inefficiency',
     'split_r_statistical_inefficiency',
