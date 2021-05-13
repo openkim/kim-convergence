@@ -56,6 +56,7 @@ from .utils import \
     validate_split, \
     train_test_split
 from .timeseries import \
+    estimate_equilibration_length, \
     run_length_control, \
     time_series_data_si, \
     uncorrelated_time_series_data_sample_indices, \
@@ -63,7 +64,6 @@ from .timeseries import \
     time_series_data_uncorrelated_samples, \
     time_series_data_uncorrelated_random_samples, \
     time_series_data_uncorrelated_block_averaged_samples
-from .equilibration_length import estimate_equilibration_length
 from .ucl import \
     HeidelbergerWelch, \
     heidelberger_welch_ucl, \
@@ -76,11 +76,21 @@ from .ucl import \
     N_SKART, \
     n_skart_ucl, \
     n_skart_ci, \
-    n_skart_relative_half_width_estimate
+    n_skart_relative_half_width_estimate, \
+    MSER_m, \
+    mser_m_ucl, \
+    mser_m_ci, \
+    mser_m_relative_half_width_estimate, \
+    mser_m,  \
+    MSER_m_y, \
+    mser_m_y_ucl, \
+    mser_m_y_ci, \
+    mser_m_y_relative_half_width_estimate
 
 __all__ = [
     'CVGError',
     'cvg_warning',
+    # stats module
     'beta',
     'betacf',
     'betai',
@@ -106,6 +116,7 @@ __all__ = [
     't_interval',
     'ZERO_RC_BOUNDS',
     'ZERO_RC',
+    #
     'outlier_methods',
     'outlier_test',
     'MinMaxScale',
@@ -130,6 +141,8 @@ __all__ = [
     'integrated_auto_correlation_time',
     'validate_split',
     'train_test_split',
+    # time series module
+    'estimate_equilibration_length',
     'run_length_control',
     'time_series_data_si',
     'uncorrelated_time_series_data_sample_indices',
@@ -137,7 +150,7 @@ __all__ = [
     'time_series_data_uncorrelated_samples',
     'time_series_data_uncorrelated_random_samples',
     'time_series_data_uncorrelated_block_averaged_samples',
-    'estimate_equilibration_length',
+    # ucl module
     'HeidelbergerWelch',
     'heidelberger_welch_ucl',
     'heidelberger_welch_ci',
@@ -151,6 +164,15 @@ __all__ = [
     'n_skart_ci',
     'n_skart_relative_half_width_estimate',
     'ucl_methods',
+    'MSER_m',
+    'mser_m_ucl',
+    'mser_m_ci',
+    'mser_m_relative_half_width_estimate',
+    'mser_m',
+    'MSER_m_y',
+    'mser_m_y_ucl',
+    'mser_m_y_ci',
+    'mser_m_y_relative_half_width_estimate',
 ]
 
 __author__ = 'Yaser Afshar <yafshar@openkim.org>'
