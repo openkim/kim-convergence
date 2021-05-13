@@ -4,7 +4,7 @@ Helper functions for time series analysis.
 """
 
 from bisect import bisect_left
-from math import isclose, pi, exp, sqrt
+from math import isclose, pi, sqrt
 import numpy as np
 
 from .normal_dist import normal_interval
@@ -493,7 +493,7 @@ def modified_periodogram(x, *, fft=False, with_mean=False):
 
         k = np.arange(x_size).reshape((1, -1))
         e = arg.reshape((-1, 1)) * k
-        e = exp(e)
+        e = np.exp(e)
 
         sumc = e * dx
         sumc = sumc.sum(axis=1)
