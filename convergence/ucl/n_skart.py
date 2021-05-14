@@ -1,4 +1,4 @@
-"""N-SKART UCL method."""
+"""N-SKART UCL module."""
 
 from math import ceil, floor, fabs, sqrt
 import numpy as np
@@ -12,6 +12,25 @@ from convergence import \
     randomness_test, \
     auto_correlate, \
     t_inv_cdf
+from convergence._default import \
+    __CONFIDENCE_COEFFICIENT, \
+    __EQUILIBRATION_LENGTH_ESTIMATE, \
+    __HEIDEL_WELCH_NUMBER_POINTS, \
+    __BATCH_SIZE, \
+    __FFT, \
+    __SCALE_METHOD, \
+    __WITH_CENTERING, \
+    __WITH_SCALING, \
+    __TEST_SIZE, \
+    __TRAIN_SIZE, \
+    __POPULATION_STANDARD_DEVIATION, \
+    __SI, \
+    __MINIMUM_CORRELATION_TIME, \
+    __UNCORRELATED_SAMPLE_INDICES, \
+    __SAMPLE_METHOD, \
+    __NSKIP, \
+    __IGNORE_END
+
 
 __all__ = [
     'N_SKART',
@@ -88,7 +107,21 @@ class N_SKART(UCLBase):
         # UCLBase reset method
         self.reset()
 
-    def estimate_equilibration_length(self, time_series_data):
+    def estimate_equilibration_length(
+            self,
+            time_series_data,
+            *,
+            # unused input parmeters in N-SKART UCL module
+            # estimate_equilibration_length interface
+            si=__SI,
+            nskip=__NSKIP,
+            fft=__FFT,
+            minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+            ignore_end=__IGNORE_END,
+            batch_size=__BATCH_SIZE,
+            scale=__SCALE_METHOD,
+            with_centering=__WITH_CENTERING,
+            with_scaling=__WITH_SCALING):
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
@@ -246,23 +279,23 @@ class N_SKART(UCLBase):
     def ucl(self,
             time_series_data,
             *,
-            confidence_coefficient=0.95,
-            equilibration_length_estimate=0,
-            fft=True,
+            confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+            equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
+            fft=__FFT,
             # unused input parmeters in
             # N_SKART ucl interface
-            heidel_welch_number_points=None,
-            batch_size=None,
-            scale=None,
-            with_centering=None,
-            with_scaling=None,
-            test_size=None,
-            train_size=None,
-            population_standard_deviation=None,
-            si=None,
-            minimum_correlation_time=None,
-            uncorrelated_sample_indices=None,
-            sample_method=None):
+            heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
+            batch_size=__BATCH_SIZE,
+            scale=__SCALE_METHOD,
+            with_centering=__WITH_CENTERING,
+            with_scaling=__WITH_SCALING,
+            test_size=__TEST_SIZE,
+            train_size=__TRAIN_SIZE,
+            population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
+            si=__SI,
+            minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+            sample_method=__SAMPLE_METHOD):
         r"""Approximate the upper confidence limit of the mean.
 
         Args:
@@ -410,9 +443,9 @@ class N_SKART(UCLBase):
 
 def n_skart_ucl(time_series_data,
                 *,
-                confidence_coefficient=0.95,
-                equilibration_length_estimate=0,
-                fft=True,
+                confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+                equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
+                fft=__FFT,
                 obj=None):
     """Approximate the upper confidence limit of the mean."""
     n_skart = N_SKART() if obj is None else obj
@@ -426,9 +459,9 @@ def n_skart_ucl(time_series_data,
 
 def n_skart_ci(time_series_data,
                *,
-               confidence_coefficient=0.95,
-               equilibration_length_estimate=0,
-               fft=True,
+               confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+               equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
+               fft=__FFT,
                obj=None):
     r"""Approximate the confidence interval of the mean.
 
@@ -461,9 +494,9 @@ def n_skart_ci(time_series_data,
 def n_skart_relative_half_width_estimate(
         time_series_data,
         *,
-        confidence_coefficient=0.95,
-        equilibration_length_estimate=0,
-        fft=True,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
+        fft=__FFT,
         obj=None):
     r"""Get the relative half width estimate.
 
