@@ -23,7 +23,14 @@ from convergence._default import \
     __FFT, \
     __MINIMUM_CORRELATION_TIME, \
     __IGNORE_END, \
-    __NSKIP
+    __NSKIP, \
+    __BATCH_SIZE, \
+    __SCALE_METHOD, \
+    __WITH_CENTERING, \
+    __WITH_SCALING
+
+__WITH_SCALING, \
+
 
 __all__ = [
     'estimate_equilibration_length',
@@ -37,7 +44,13 @@ def estimate_equilibration_length(
         nskip=__NSKIP,
         fft=__FFT,
         minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
-        ignore_end=__IGNORE_END):
+        ignore_end=__IGNORE_END,
+        # unused input parmeters in Time series module
+        # estimate_equilibration_length interface
+        batch_size=__BATCH_SIZE,
+        scale=__SCALE_METHOD,
+        with_centering=__WITH_CENTERING,
+        with_scaling=__WITH_SCALING):
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the
