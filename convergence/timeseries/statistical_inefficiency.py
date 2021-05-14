@@ -50,10 +50,11 @@ def statistical_inefficiency(
     function of the observable :math:`x`
 
     Note:
-        if the time series data is an array of (constant) numbers with standard
-        deviation close to zero within `abs_tol=1e-18`, where
-        `abs(a) <= max(1e-9 * abs(a), abs_tol)`, this function returns the
-        statistical inefficiency as the size of the time series data array.
+        The behavior is updated. Suppose the time series data is an array of
+        (constant) numbers with standard deviation close to zero within
+        `abs_tol=1e-18`, where `abs(a) <= max(1e-9 * abs(a), abs_tol)`.
+        In that case, this function returns the statistical inefficiency as the
+        size of the time series data array.
 
     Args:
         x (array_like, 1d): time series data.
@@ -169,10 +170,11 @@ def r_statistical_inefficiency(
     monotone sequence criterion.
 
     Note:
-        if the time series data is an array of (constant) numbers with standard
-        deviation close to zero within `abs_tol=1e-18`, where
-        `abs(a) <= max(1e-9 * abs(a), abs_tol)`, this function returns the
-        statistical inefficiency as the size of the time series data array.
+        The behavior is updated. Suppose the time series data is an array of
+        (constant) numbers with standard deviation close to zero within
+        `abs_tol=1e-18`, where `abs(a) <= max(1e-9 * abs(a), abs_tol)`.
+        In that case, this function returns the statistical inefficiency as the
+        size of the time series data array.
 
     Note:
         The effective sample size is computed by:
@@ -399,10 +401,11 @@ def split_statistical_inefficiency(
         four samples.
 
     Note:
-        if the time series data is an array of (constant) numbers with standard
-        deviation close to zero within `abs_tol=1e-18`, where
-        `abs(a) <= max(1e-9 * abs(a), abs_tol)`, this function returns the
-        statistical inefficiency as the size of the time series data array.
+        The behavior is updated. Suppose the time series data is an array of
+        (constant) numbers with standard deviation close to zero within
+        `abs_tol=1e-18`, where `abs(a) <= max(1e-9 * abs(a), abs_tol)`.
+        In that case, this function returns the statistical inefficiency as the
+        size of the time series data array.
 
     Args:
         x (array_like, 1d): time series data.
