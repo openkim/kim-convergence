@@ -1,4 +1,4 @@
-"""Heidelberger and Welch UCL method."""
+"""Heidelberger and Welch UCL module."""
 
 from math import sqrt
 import numpy as np
@@ -11,6 +11,23 @@ from convergence import \
     modified_periodogram, \
     t_inv_cdf, \
     train_test_split
+from convergence._default import \
+    __CONFIDENCE_COEFFICIENT, \
+    __EQUILIBRATION_LENGTH_ESTIMATE, \
+    __HEIDEL_WELCH_NUMBER_POINTS, \
+    __BATCH_SIZE, \
+    __FFT, \
+    __SCALE_METHOD, \
+    __WITH_CENTERING, \
+    __WITH_SCALING, \
+    __TEST_SIZE, \
+    __TRAIN_SIZE, \
+    __POPULATION_STANDARD_DEVIATION, \
+    __SI, \
+    __MINIMUM_CORRELATION_TIME, \
+    __UNCORRELATED_SAMPLE_INDICES, \
+    __SAMPLE_METHOD
+
 
 __all__ = [
     'HeidelbergerWelch',
@@ -90,10 +107,11 @@ class HeidelbergerWelch(UCLBase):
 
         UCLBase.__init__(self)
 
-    def set_heidel_welch_constants(self,
-                                   *,
-                                   confidence_coefficient,
-                                   heidel_welch_number_points):
+    def set_heidel_welch_constants(
+            self,
+            *,
+            confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+            heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS):
         r"""Set Heidelberger and Welch constants globally.
 
         Set the constants necessary for application of the Heidelberger and
@@ -101,12 +119,12 @@ class HeidelbergerWelch(UCLBase):
 
         Args:
             confidence_coefficient (float): probability (or confidence
-                interval) and must be between 0.0 and 1.0.
+                interval) and must be between 0.0 and 1.0. (default: 0.95)
             heidel_welch_number_points (int): the number of points in
                 Heidelberger and Welch's spectral method that are used to
                 obtain the polynomial fit. The parameter
                 ``heidel_welch_number_points`` determines the frequency range
-                over which the fit is made.
+                over which the fit is made. (default: 50)
 
         """
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
@@ -286,28 +304,29 @@ class HeidelbergerWelch(UCLBase):
     def ucl(self,
             time_series_data,
             *,
-            confidence_coefficient=0.95,
-            heidel_welch_number_points=50,
-            fft=True,
-            test_size=None,
-            train_size=None,
+            confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+            heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
+            fft=__FFT,
+            test_size=__TEST_SIZE,
+            train_size=__TRAIN_SIZE,
             # unused input parmeters in
             # Heidelberger and Welch ucl interface
-            batch_size=None,
-            equilibration_length_estimate=None,
-            scale=None,
-            with_centering=None,
-            with_scaling=None,
-            population_standard_deviation=None,
-            si=None,
-            minimum_correlation_time=None,
-            uncorrelated_sample_indices=None,
-            sample_method=None):
+            batch_size=__BATCH_SIZE,
+            equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
+            scale=__SCALE_METHOD,
+            with_centering=__WITH_CENTERING,
+            with_scaling=__WITH_SCALING,
+            population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
+            si=__SI,
+            minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+            sample_method=__SAMPLE_METHOD):
         r"""Approximate the upper confidence limit of the mean.
 
         Approximate an unbiased estimate of the upper confidence limit or
         half the width of the `confidence_coefficient%` probability interval
-        (confidence interval, or credible interval) around the time-series mean.
+        (confidence interval, or credible interval) around the time-series
+        mean.
 
         An estimate of the variance of the time-series mean is obtained by
         estimating the spectral density at zero frequency [12]_. We use an
@@ -513,14 +532,15 @@ class HeidelbergerWelch(UCLBase):
         return upper_confidence_limit
 
 
-def heidelberger_welch_ucl(time_series_data,
-                           *,
-                           confidence_coefficient=0.95,
-                           heidel_welch_number_points=50,
-                           fft=True,
-                           test_size=None,
-                           train_size=None,
-                           obj=None):
+def heidelberger_welch_ucl(
+        time_series_data,
+        *,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
+        fft=__FFT,
+        test_size=__TEST_SIZE,
+        train_size=__TRAIN_SIZE,
+        obj=None):
     """Approximate the upper confidence limit of the mean."""
     heidelberger_welch = HeidelbergerWelch() if obj is None else obj
     upper_confidence_limit = heidelberger_welch.ucl(
@@ -534,14 +554,15 @@ def heidelberger_welch_ucl(time_series_data,
     return upper_confidence_limit
 
 
-def heidelberger_welch_ci(time_series_data,
-                          *,
-                          confidence_coefficient=0.95,
-                          heidel_welch_number_points=50,
-                          fft=True,
-                          test_size=None,
-                          train_size=None,
-                          obj=None):
+def heidelberger_welch_ci(
+        time_series_data,
+        *,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
+        fft=__FFT,
+        test_size=__TEST_SIZE,
+        train_size=__TRAIN_SIZE,
+        obj=None):
     r"""Approximate the confidence interval of the mean.
 
     Args:
@@ -587,11 +608,11 @@ def heidelberger_welch_ci(time_series_data,
 def heidelberger_welch_relative_half_width_estimate(
         time_series_data,
         *,
-        confidence_coefficient=0.95,
-        heidel_welch_number_points=50,
-        fft=True,
-        test_size=None,
-        train_size=None,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
+        fft=__FFT,
+        test_size=__TEST_SIZE,
+        train_size=__TRAIN_SIZE,
         obj=None):
     r"""Get the relative half width estimate.
 
