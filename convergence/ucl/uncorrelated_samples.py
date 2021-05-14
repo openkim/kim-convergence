@@ -1,4 +1,4 @@
-"""UncorrelatedSamples UCL method."""
+"""UncorrelatedSamples UCL module."""
 
 from math import sqrt
 import numpy as np
@@ -11,6 +11,23 @@ from convergence import \
     time_series_data_si, \
     uncorrelated_time_series_data_sample_indices, \
     uncorrelated_time_series_data_samples
+from convergence._default import \
+    __CONFIDENCE_COEFFICIENT, \
+    __EQUILIBRATION_LENGTH_ESTIMATE, \
+    __HEIDEL_WELCH_NUMBER_POINTS, \
+    __BATCH_SIZE, \
+    __FFT, \
+    __SCALE_METHOD, \
+    __WITH_CENTERING, \
+    __WITH_SCALING, \
+    __TEST_SIZE, \
+    __TRAIN_SIZE, \
+    __POPULATION_STANDARD_DEVIATION, \
+    __SI, \
+    __MINIMUM_CORRELATION_TIME, \
+    __UNCORRELATED_SAMPLE_INDICES, \
+    __SAMPLE_METHOD
+
 
 __all__ = [
     'UncorrelatedSamples',
@@ -31,23 +48,23 @@ class UncorrelatedSamples(UCLBase):
     def ucl(self,
             time_series_data,
             *,
-            confidence_coefficient=0.95,
-            population_standard_deviation=None,
-            si=None,
-            fft=True,
-            minimum_correlation_time=None,
-            uncorrelated_sample_indices=None,
-            sample_method=None,
+            confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+            population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
+            si=__SI,
+            fft=__FFT,
+            minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+            sample_method=__SAMPLE_METHOD,
             # unused input parmeters in
             # UncorrelatedSamples ucl interface
-            equilibration_length_estimate=None,
-            heidel_welch_number_points=None,
-            batch_size=None,
-            scale=None,
-            with_centering=None,
-            with_scaling=None,
-            test_size=None,
-            train_size=None):
+            equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
+            heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
+            batch_size=__BATCH_SIZE,
+            scale=__SCALE_METHOD,
+            with_centering=__WITH_CENTERING,
+            with_scaling=__WITH_SCALING,
+            test_size=__TEST_SIZE,
+            train_size=__TRAIN_SIZE):
         r"""Approximate the upper confidence limit of the mean.
 
         - If the population standard deviation is known, and
@@ -118,20 +135,20 @@ class UncorrelatedSamples(UCLBase):
             msg += 'is not in the range (0.0 1.0).'
             raise CVGError(msg)
 
-        self.si_ = time_series_data_si(
+        self.si = time_series_data_si(
             time_series_data=time_series_data,
             si=si,
             fft=fft,
             minimum_correlation_time=minimum_correlation_time)
 
         if uncorrelated_sample_indices is None:
-            self.indices_ = uncorrelated_time_series_data_sample_indices(
+            self.indices = uncorrelated_time_series_data_sample_indices(
                 time_series_data=time_series_data,
                 si=self.si,
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
         else:
-            self.indices_ = np.array(uncorrelated_sample_indices, copy=True)
+            self.indices = np.array(uncorrelated_sample_indices, copy=True)
 
         uncorrelated_samples = uncorrelated_time_series_data_samples(
             time_series_data=time_series_data,
@@ -179,16 +196,17 @@ class UncorrelatedSamples(UCLBase):
         return upper_confidence_limit
 
 
-def uncorrelated_samples_ucl(time_series_data,
-                             *,
-                             confidence_coefficient=0.95,
-                             population_standard_deviation=None,
-                             si=None,
-                             fft=True,
-                             minimum_correlation_time=None,
-                             uncorrelated_sample_indices=None,
-                             sample_method=None,
-                             obj=None):
+def uncorrelated_samples_ucl(
+        time_series_data,
+        *,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
+        si=__SI,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+        sample_method=__SAMPLE_METHOD,
+        obj=None):
     """Approximate the upper confidence limit of the mean."""
     uncorrelated_samples = UncorrelatedSamples() if obj is None else obj
     upper_confidence_limit = uncorrelated_samples.ucl(
@@ -203,16 +221,17 @@ def uncorrelated_samples_ucl(time_series_data,
     return upper_confidence_limit
 
 
-def uncorrelated_samples_ci(time_series_data,
-                            *,
-                            confidence_coefficient=0.95,
-                            population_standard_deviation=None,
-                            si=None,
-                            fft=True,
-                            minimum_correlation_time=None,
-                            uncorrelated_sample_indices=None,
-                            sample_method=None,
-                            obj=None):
+def uncorrelated_samples_ci(
+        time_series_data,
+        *,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
+        si=__SI,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+        sample_method=__SAMPLE_METHOD,
+        obj=None):
     r"""Approximate the confidence interval of the mean.
 
     - If the population standard deviation is known, and
@@ -292,13 +311,13 @@ def uncorrelated_samples_ci(time_series_data,
 def uncorrelated_samples_relative_half_width_estimate(
         time_series_data,
         *,
-        confidence_coefficient=0.95,
-        population_standard_deviation=None,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None,
-        sample_method=None,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
+        si=__SI,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+        sample_method=__SAMPLE_METHOD,
         obj=None):
     r"""Get the relative half width estimate.
 
