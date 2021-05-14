@@ -25,7 +25,8 @@ from convergence._default import \
     __MINIMUM_CORRELATION_TIME, \
     __UNCORRELATED_SAMPLE_INDICES, \
     __SAMPLE_METHOD, \
-    __IGNORE_END
+    __IGNORE_END, \
+    __NSKIP
 
 
 __all__ = [
@@ -71,14 +72,21 @@ class MSER_m(UCLBase):
     def __init__(self):
         UCLBase.__init__(self)
 
-    def estimate_equilibration_length(self,
-                                      time_series_data,
-                                      *,
-                                      batch_size=__BATCH_SIZE,
-                                      scale=__SAMPLE_METHOD,
-                                      with_centering=__WITH_SCALING,
-                                      with_scaling=__WITH_SCALING,
-                                      ignore_end=__IGNORE_END):
+    def estimate_equilibration_length(
+        self,
+        time_series_data,
+        *,
+        batch_size=__BATCH_SIZE,
+        scale=__SCALE_METHOD,
+        with_centering=__WITH_CENTERING,
+        with_scaling=__WITH_SCALING,
+        ignore_end=__IGNORE_END,
+        # unused input parmeters in MSER-m UCL module
+        # estimate_equilibration_length interface
+        si=__SI,
+        nskip=__NSKIP,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME):
         r"""Estimate the equilibration point in a time series data.
 
         Determine the truncation point using marginal standard error rules
