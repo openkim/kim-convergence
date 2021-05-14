@@ -1,10 +1,10 @@
 """Scale module to standardize a dataset."""
 
-from math import isclose
+from math import isclose, fabs, log10
 import numpy as np
 
 from .err import CVGError
-
+from ._default import __ABS_TOL
 
 __all__ = [
     'MinMaxScale',
@@ -98,9 +98,9 @@ class MinMaxScale():
         self.data_max = np.max(x)
         self.data_range = self.data_max - self.data_min
 
-        if isclose(self.data_range, 0, abs_tol=1e-14):
-            msg = 'the data_range of the input array is '
-            msg += 'almost zero within 14 precision numbers.'
+        if isclose(self.data_range, 0, abs_tol=__ABS_TOL):
+            msg = 'the data_range of the input array is almost zero within '
+            msg += '{} precision numbers.'.format(int(fabs(log10(__ABS_TOL))))
             raise CVGError(msg)
 
         self.scale_ = \
@@ -235,7 +235,7 @@ class TranslateScale():
         if self.with_scaling:
             self.scale_ = np.mean(scaled_x)
 
-            if not isclose(self.scale_, 0, abs_tol=1e-14):
+            if not isclose(self.scale_, 0, abs_tol=__ABS_TOL):
                 scaled_x /= self.scale_
 
         return scaled_x
@@ -255,7 +255,7 @@ class TranslateScale():
             msg += "to scale an array before trying to inverse it."
             raise CVGError(msg)
 
-        if self.with_scaling and not isclose(self.scale_, 0, abs_tol=1e-14):
+        if self.with_scaling and not isclose(self.scale_, 0, abs_tol=__ABS_TOL):
             x = np.array(x, copy=False)
             inverse_scaled_x = x * self.scale_
         else:
@@ -385,7 +385,7 @@ class StandardScale():
                 msg += 'non-finite or not-number.'
                 raise CVGError(msg)
 
-            if not isclose(self.mean_1, 0, abs_tol=1e-14):
+            if not isclose(self.mean_1, 0, abs_tol=__ABS_TOL):
                 scaled_x -= self.mean_1
 
         else:
@@ -399,7 +399,7 @@ class StandardScale():
                 msg += 'non-finite or not-number.'
                 raise CVGError(msg)
 
-            if not isclose(self.std_, 0, abs_tol=1e-14):
+            if not isclose(self.std_, 0, abs_tol=__ABS_TOL):
                 scaled_x /= self.std_
 
             if self.with_centering:
@@ -414,7 +414,7 @@ class StandardScale():
                 # and might not be solved. Dataset may contain too large values.
                 # You may need to prescale your features.
 
-                if not isclose(self.mean_2, 0, abs_tol=1e-14):
+                if not isclose(self.mean_2, 0, abs_tol=__ABS_TOL):
                     scaled_x -= self.mean_2
 
         return scaled_x
@@ -443,7 +443,7 @@ class StandardScale():
             inverse_scaled_x = np.array(x, copy=True)
 
         if self.with_centering:
-            if not isclose(self.mean_1, 0, abs_tol=1e-14):
+            if not isclose(self.mean_1, 0, abs_tol=__ABS_TOL):
                 inverse_scaled_x += self.mean_1
             inverse_scaled_x += self.mean_
 
@@ -577,7 +577,7 @@ class RobustScale():
 
             self.scale_ = quantiles[1] - quantiles[0]
 
-            if not isclose(self.scale_, 0, abs_tol=1e-14):
+            if not isclose(self.scale_, 0, abs_tol=__ABS_TOL):
                 scaled_x /= self.scale_
 
         return scaled_x
@@ -597,7 +597,7 @@ class RobustScale():
             msg += "to scale an array before trying to inverse it."
             raise CVGError(msg)
 
-        if self.with_scaling and not isclose(self.scale_, 0, abs_tol=1e-14):
+        if self.with_scaling and not isclose(self.scale_, 0, abs_tol=__ABS_TOL):
             x = np.array(x, copy=False)
             inverse_scaled_x = x * self.scale_
         else:
@@ -693,7 +693,7 @@ class MaxAbsScale():
 
         self.scale_ = np.max(np.abs(x))
 
-        if not isclose(self.scale_, 0, abs_tol=1e-14):
+        if not isclose(self.scale_, 0, abs_tol=__ABS_TOL):
             scaled_x = x / self.scale_
         else:
             scaled_x = np.array(x, copy=True)
@@ -715,7 +715,7 @@ class MaxAbsScale():
             msg += "to scale an array before trying to inverse it."
             raise CVGError(msg)
 
-        if not isclose(self.scale_, 0, abs_tol=1e-14):
+        if not isclose(self.scale_, 0, abs_tol=__ABS_TOL):
             x = np.array(x, copy=False)
             inverse_scaled_x = x * self.scale_
         else:
