@@ -3,6 +3,10 @@
 import numpy as np
 
 from convergence import CVGError
+from ._default import \
+    __TEST_SIZE, \
+    __TRAIN_SIZE, \
+    __SEED
 
 __all__ = [
     'validate_split',
@@ -110,9 +114,9 @@ def validate_split(*, n_samples, train_size, test_size, default_test_size=None):
 
 
 def train_test_split(time_series_data, *,
-                     train_size=None,
-                     test_size=None,
-                     seed=None,
+                     train_size=__TRAIN_SIZE,
+                     test_size=__TEST_SIZE,
+                     seed=__SEED,
                      default_test_size=0.1):
     r"""Split time_series_data into random train and test indices.
 
@@ -125,7 +129,7 @@ def train_test_split(time_series_data, *,
             include in the test split. If ``int``, represents the absolute
             number of test samples. If ``None``, the value is set to the
             complement of the train size. If ``train_size`` is also None, it
-            will be set to ``default_test_size``. (default: None)
+            will be set to ``default_test_size``. (default: 0.1)
         train_size (int, float, or None, optional): if ``float``, should be
             between 0.0 and 1.0 and represent the proportion of the dataset to
             include in the train split. If ``int``, represents the absolute
