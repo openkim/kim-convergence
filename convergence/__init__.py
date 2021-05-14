@@ -44,25 +44,25 @@ from .scale import \
     scale_methods
 from .batch import batch
 #from .geweke import geweke
-from .statistical_inefficiency import \
-    statistical_inefficiency, \
-    r_statistical_inefficiency, \
-    split_r_statistical_inefficiency,\
-    split_statistical_inefficiency, \
-    si_methods, \
-    integrated_auto_correlation_time
 from .utils import \
     validate_split, \
     train_test_split
 from .timeseries import \
     estimate_equilibration_length, \
-    run_length_control, \
+    statistical_inefficiency, \
+    r_statistical_inefficiency, \
+    split_r_statistical_inefficiency,\
+    split_statistical_inefficiency, \
+    si_methods, \
+    integrated_auto_correlation_time, \
     time_series_data_si, \
     uncorrelated_time_series_data_sample_indices, \
     uncorrelated_time_series_data_samples, \
     time_series_data_uncorrelated_samples, \
     time_series_data_uncorrelated_random_samples, \
     time_series_data_uncorrelated_block_averaged_samples
+    # run_length_control, \
+
 from .ucl import \
     HeidelbergerWelch, \
     heidelberger_welch_ucl, \
@@ -141,7 +141,7 @@ __all__ = [
     'train_test_split',
     # time series module
     'estimate_equilibration_length',
-    'run_length_control',
+    # 'run_length_control',
     'time_series_data_si',
     'uncorrelated_time_series_data_sample_indices',
     'uncorrelated_time_series_data_samples',
