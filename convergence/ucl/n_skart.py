@@ -13,23 +13,23 @@ from convergence import \
     auto_correlate, \
     t_inv_cdf
 from convergence._default import \
-    __CONFIDENCE_COEFFICIENT, \
-    __EQUILIBRATION_LENGTH_ESTIMATE, \
-    __HEIDEL_WELCH_NUMBER_POINTS, \
-    __BATCH_SIZE, \
-    __FFT, \
-    __SCALE_METHOD, \
-    __WITH_CENTERING, \
-    __WITH_SCALING, \
-    __TEST_SIZE, \
-    __TRAIN_SIZE, \
-    __POPULATION_STANDARD_DEVIATION, \
-    __SI, \
-    __MINIMUM_CORRELATION_TIME, \
-    __UNCORRELATED_SAMPLE_INDICES, \
-    __SAMPLE_METHOD, \
-    __NSKIP, \
-    __IGNORE_END
+    _DEFAULT_CONFIDENCE_COEFFICIENT, \
+    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
+    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
+    _DEFAULT_BATCH_SIZE, \
+    _DEFAULT_FFT, \
+    _DEFAULT_SCALE_METHOD, \
+    _DEFAULT_WITH_CENTERING, \
+    _DEFAULT_WITH_SCALING, \
+    _DEFAULT_TEST_SIZE, \
+    _DEFAULT_TRAIN_SIZE, \
+    _DEFAULT_POPULATION_STANDARD_DEVIATION, \
+    _DEFAULT_SI, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
+    _DEFAULT_SAMPLE_METHOD, \
+    _DEFAULT_NSKIP, \
+    _DEFAULT_IGNORE_END
 
 
 __all__ = [
@@ -113,15 +113,15 @@ class N_SKART(UCLBase):
             *,
             # unused input parmeters in N-SKART UCL module
             # estimate_equilibration_length interface
-            si=__SI,
-            nskip=__NSKIP,
-            fft=__FFT,
-            minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
-            ignore_end=__IGNORE_END,
-            batch_size=__BATCH_SIZE,
-            scale=__SCALE_METHOD,
-            with_centering=__WITH_CENTERING,
-            with_scaling=__WITH_SCALING):
+            si=_DEFAULT_SI,
+            nskip=_DEFAULT_NSKIP,
+            fft=_DEFAULT_FFT,
+            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
+            ignore_end=_DEFAULT_IGNORE_END,
+            batch_size=_DEFAULT_BATCH_SIZE,
+            scale=_DEFAULT_SCALE_METHOD,
+            with_centering=_DEFAULT_WITH_CENTERING,
+            with_scaling=_DEFAULT_WITH_SCALING):
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
@@ -279,23 +279,23 @@ class N_SKART(UCLBase):
     def ucl(self,
             time_series_data,
             *,
-            confidence_coefficient=__CONFIDENCE_COEFFICIENT,
-            equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
-            fft=__FFT,
+            confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+            equilibration_length_estimate=_DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+            fft=_DEFAULT_FFT,
             # unused input parmeters in
             # N_SKART ucl interface
-            heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
-            batch_size=__BATCH_SIZE,
-            scale=__SCALE_METHOD,
-            with_centering=__WITH_CENTERING,
-            with_scaling=__WITH_SCALING,
-            test_size=__TEST_SIZE,
-            train_size=__TRAIN_SIZE,
-            population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
-            si=__SI,
-            minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
-            sample_method=__SAMPLE_METHOD):
+            heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+            batch_size=_DEFAULT_BATCH_SIZE,
+            scale=_DEFAULT_SCALE_METHOD,
+            with_centering=_DEFAULT_WITH_CENTERING,
+            with_scaling=_DEFAULT_WITH_SCALING,
+            test_size=_DEFAULT_TEST_SIZE,
+            train_size=_DEFAULT_TRAIN_SIZE,
+            population_standard_deviation=_DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si=_DEFAULT_SI,
+            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method=_DEFAULT_SAMPLE_METHOD):
         r"""Approximate the upper confidence limit of the mean.
 
         Args:
@@ -443,9 +443,9 @@ class N_SKART(UCLBase):
 
 def n_skart_ucl(time_series_data,
                 *,
-                confidence_coefficient=__CONFIDENCE_COEFFICIENT,
-                equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
-                fft=__FFT,
+                confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+                equilibration_length_estimate=_DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+                fft=_DEFAULT_FFT,
                 obj=None):
     """Approximate the upper confidence limit of the mean."""
     n_skart = N_SKART() if obj is None else obj
@@ -459,9 +459,9 @@ def n_skart_ucl(time_series_data,
 
 def n_skart_ci(time_series_data,
                *,
-               confidence_coefficient=__CONFIDENCE_COEFFICIENT,
-               equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
-               fft=__FFT,
+               confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+               equilibration_length_estimate=_DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+               fft=_DEFAULT_FFT,
                obj=None):
     r"""Approximate the confidence interval of the mean.
 
@@ -494,9 +494,9 @@ def n_skart_ci(time_series_data,
 def n_skart_relative_half_width_estimate(
         time_series_data,
         *,
-        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
-        equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
-        fft=__FFT,
+        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+        equilibration_length_estimate=_DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+        fft=_DEFAULT_FFT,
         obj=None):
     r"""Get the relative half width estimate.
 
