@@ -4,6 +4,11 @@ import numpy as np
 
 from .err import CVGError
 from .scale import scale_methods
+from ._default import \
+    __BATCH_SIZE, \
+    __SCALE_METHOD, \
+    __WITH_CENTERING, \
+    __WITH_SCALING
 
 __all__ = [
     'batch',
@@ -12,25 +17,25 @@ __all__ = [
 
 def batch(time_series_data,
           *,
-          batch_size=5,
+          batch_size=__BATCH_SIZE,
           func=np.mean,
-          scale='translate_scale',
-          with_centering=False,
-          with_scaling=False):
+          scale=__SCALE_METHOD,
+          with_centering=__WITH_CENTERING,
+          with_scaling=__WITH_SCALING):
     r"""Batch the time series data.
 
     Args:
         time_series_data (array_like, 1d): Time series data.
-        batch_size (int, optional): batch size. (default: {5})
+        batch_size (int, optional): batch size. (default: 5)
         func (callable, optional): Reduction function capable of receiving a
             single axis argument. It is called with `time_series_data` as first
-            argument. (default: {np.mean})
+            argument. (default: np.mean)
         scale (str, optional): A method to standardize a dataset.
-            (default: {'translate_scale'})
+            (default: 'translate_scale')
         with_centering (bool, optional): If True, use time_series_data minus
-            the scale metod centering approach. (default: {False})
+            the scale metod centering approach. (default: False)
         with_scaling (bool, optional): If True, scale the data to scale
-            metod scaling approach. (default: {False})
+            metod scaling approach. (default: False)
 
     Returns:
         1darray: Batched (, and rescaled) data.
