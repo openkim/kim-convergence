@@ -1,4 +1,4 @@
-"""MSER-m module."""
+"""MSER-m UCL module."""
 
 from math import isclose, sqrt
 import numpy as np
@@ -8,6 +8,25 @@ from convergence import \
     batch, \
     CVGError, \
     t_inv_cdf
+from convergence._default import \
+    __ABS_TOL, \
+    __CONFIDENCE_COEFFICIENT, \
+    __EQUILIBRATION_LENGTH_ESTIMATE, \
+    __HEIDEL_WELCH_NUMBER_POINTS, \
+    __BATCH_SIZE, \
+    __FFT, \
+    __SCALE_METHOD, \
+    __WITH_CENTERING, \
+    __WITH_SCALING, \
+    __TEST_SIZE, \
+    __TRAIN_SIZE, \
+    __POPULATION_STANDARD_DEVIATION, \
+    __SI, \
+    __MINIMUM_CORRELATION_TIME, \
+    __UNCORRELATED_SAMPLE_INDICES, \
+    __SAMPLE_METHOD, \
+    __IGNORE_END
+
 
 __all__ = [
     'MSER_m',
@@ -55,11 +74,11 @@ class MSER_m(UCLBase):
     def estimate_equilibration_length(self,
                                       time_series_data,
                                       *,
-                                      batch_size=5,
-                                      scale='translate_scale',
-                                      with_centering=False,
-                                      with_scaling=False,
-                                      ignore_end_batch=None):
+                                      batch_size=__BATCH_SIZE,
+                                      scale=__SAMPLE_METHOD,
+                                      with_centering=__WITH_SCALING,
+                                      with_scaling=__WITH_SCALING,
+                                      ignore_end=__IGNORE_END):
         r"""Estimate the equilibration point in a time series data.
 
         Determine the truncation point using marginal standard error rules
@@ -89,7 +108,7 @@ class MSER_m(UCLBase):
                 minus the scale metod centering approach. (default: False)
             with_scaling (bool, optional): If True, scale the data to scale
                 metod scaling approach. (default: False)
-            ignore_end_batch (int, or float, or None, optional): if `int`, it
+            ignore_end (int, or float, or None, optional): if `int`, it
                 is the last few batch points that should be ignored. if
                 `float`, should be in `(0, 1)` and it is the percent of last
                 batch points that should be ignored. if `None` it would be set
@@ -136,7 +155,7 @@ class MSER_m(UCLBase):
             msg += 'non-finite or not-number.'
             raise CVGError(msg)
 
-        if isclose(_std, 0, abs_tol=1e-14):
+        if isclose(_std, 0, abs_tol=__ABS_TOL):
             if not isinstance(batch_size, int):
                 msg = 'batch_size = {} is not an `int`.'.format(batch_size)
                 raise CVGError(msg)
@@ -162,31 +181,31 @@ class MSER_m(UCLBase):
         # Number of batches
         n_batches = z.size
 
-        if not isinstance(ignore_end_batch, int):
-            if ignore_end_batch is None:
-                ignore_end_batch = max(1, batch_size)
-                ignore_end_batch = min(ignore_end_batch, n_batches // 4)
-            elif isinstance(ignore_end_batch, float):
-                if not 0.0 < ignore_end_batch < 1.0:
-                    msg = 'invalid ignore_end_batch = '
-                    msg += '{}. If ignore_end_batch '.format(ignore_end_batch)
+        if not isinstance(ignore_end, int):
+            if ignore_end is None:
+                ignore_end = max(1, batch_size)
+                ignore_end = min(ignore_end, n_batches // 4)
+            elif isinstance(ignore_end, float):
+                if not 0.0 < ignore_end < 1.0:
+                    msg = 'invalid ignore_end = '
+                    msg += '{}. If ignore_end '.format(ignore_end)
                     msg += 'input is a `float`, it should be in a `(0, 1)` '
                     msg += 'range.'
                     raise CVGError(msg)
-                ignore_end_batch *= n_batches
-                ignore_end_batch = max(1, int(ignore_end_batch))
+                ignore_end *= n_batches
+                ignore_end = max(1, int(ignore_end))
             else:
-                msg = 'invalid ignore_end_batch = {}. '.format(
-                    ignore_end_batch)
-                msg += 'ignore_end_batch is not an `int`, `float`, or `None`.'
+                msg = 'invalid ignore_end = {}. '.format(
+                    ignore_end)
+                msg += 'ignore_end is not an `int`, `float`, or `None`.'
                 raise CVGError(msg)
-        elif ignore_end_batch < 1:
-            msg = 'invalid ignore_end_batch = {}. '.format(ignore_end_batch)
-            msg += 'ignore_end_batch should be a positive `int`.'
+        elif ignore_end < 1:
+            msg = 'invalid ignore_end = {}. '.format(ignore_end)
+            msg += 'ignore_end should be a positive `int`.'
             raise CVGError(msg)
 
-        if n_batches <= ignore_end_batch:
-            msg = 'invalid ignore_end_batch = {}.\n'.format(ignore_end_batch)
+        if n_batches <= ignore_end:
+            msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
             msg += 'Wrong number of batches is requested to be ignored '
             msg += 'from the total {} batches.'.format(n_batches)
             raise CVGError(msg)
@@ -210,14 +229,14 @@ class MSER_m(UCLBase):
         d = n_batches_minus_d_inv * (sum_zsq - sum_z_sq)
 
         # Convert truncation from batch to raw data
-        truncate_index = np.nanargmin(d[:-ignore_end_batch]) * batch_size
+        truncate_index = np.nanargmin(d[:-ignore_end]) * batch_size
 
         # Any truncation value > n/2 is considered an invalid value and rejected
         if truncate_index > n // 2:
             # If the truncate_index is the last element of the batched data,
             # do the correction and return the last index of the time_series_data array
-            ignore_end_batch += 1
-            if truncate_index == (n - ignore_end_batch * batch_size):
+            ignore_end += 1
+            if truncate_index == (n - ignore_end * batch_size):
                 truncate_index = time_series_data.size - 1
 
             return False, truncate_index
@@ -227,23 +246,23 @@ class MSER_m(UCLBase):
     def ucl(self,
             time_series_data,
             *,
-            confidence_coefficient=0.95,
-            batch_size=5,
-            scale='translate_scale',
-            with_centering=False,
-            with_scaling=False,
+            confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+            batch_size=__BATCH_SIZE,
+            scale=__SCALE_METHOD,
+            with_centering=__WITH_CENTERING,
+            with_scaling=__WITH_SCALING,
             # unused input parmeters in
             # MSER_m ucl interface
-            equilibration_length_estimate=None,
-            heidel_welch_number_points=None,
-            fft=None,
-            test_size=None,
-            train_size=None,
-            population_standard_deviation=None,
-            si=None,
-            minimum_correlation_time=None,
-            uncorrelated_sample_indices=None,
-            sample_method=None):
+            equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
+            heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
+            fft=__FFT,
+            test_size=__TEST_SIZE,
+            train_size=__TRAIN_SIZE,
+            population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
+            si=__SI,
+            minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+            sample_method=__SAMPLE_METHOD):
         r"""Approximate the upper confidence limit of the mean [20]_.
 
         Args:
@@ -317,11 +336,11 @@ class MSER_m(UCLBase):
 
 def mser_m_ucl(time_series_data,
                *,
-               confidence_coefficient=0.95,
-               batch_size=5,
-               scale='translate_scale',
-               with_centering=False,
-               with_scaling=False,
+               confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+               batch_size=__BATCH_SIZE,
+               scale=__SCALE_METHOD,
+               with_centering=__WITH_CENTERING,
+               with_scaling=__WITH_SCALING,
                obj=None):
     """Approximate the upper confidence limit of the mean."""
     mser = MSER_m() if obj is None else obj
@@ -337,11 +356,11 @@ def mser_m_ucl(time_series_data,
 
 def mser_m_ci(time_series_data,
               *,
-              confidence_coefficient=0.95,
-              batch_size=5,
-              scale='translate_scale',
-              with_centering=False,
-              with_scaling=False,
+              confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+              batch_size=__BATCH_SIZE,
+              scale=__SCALE_METHOD,
+              with_centering=__WITH_CENTERING,
+              with_scaling=__WITH_SCALING,
               obj=None):
     r"""Approximate the confidence interval of the mean [20]_.
 
@@ -375,14 +394,15 @@ def mser_m_ci(time_series_data,
     return confidence_limits
 
 
-def mser_m_relative_half_width_estimate(time_series_data,
-                                        *,
-                                        confidence_coefficient=0.95,
-                                        batch_size=5,
-                                        scale='translate_scale',
-                                        with_centering=False,
-                                        with_scaling=False,
-                                        obj=None):
+def mser_m_relative_half_width_estimate(
+        time_series_data,
+        *,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        batch_size=__BATCH_SIZE,
+        scale=__SCALE_METHOD,
+        with_centering=__WITH_CENTERING,
+        with_scaling=__WITH_SCALING,
+        obj=None):
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval
@@ -425,11 +445,11 @@ def mser_m_relative_half_width_estimate(time_series_data,
 
 def mser_m(time_series_data,
            *,
-           batch_size=5,
-           scale='translate_scale',
-           with_centering=False,
-           with_scaling=False,
-           ignore_end_batch=None):
+           batch_size=__BATCH_SIZE,
+           scale=__SCALE_METHOD,
+           with_centering=__WITH_CENTERING,
+           with_scaling=__WITH_SCALING,
+           ignore_end=__IGNORE_END):
     r"""Determine the truncation point using marginal standard error rules.
 
     Determine the truncation point using marginal standard error rules
@@ -459,7 +479,7 @@ def mser_m(time_series_data,
             centering approach. (default: {False})
         with_scaling (bool, optional): If True, scale the data to scale metod
             scaling approach. (default: {False})
-        ignore_end_batch (int, or float, or None, optional): if `int`, it is
+        ignore_end (int, or float, or None, optional): if `int`, it is
             the last few batch points that should be ignored. if `float`,
             should be in `(0, 1)` and it is the percent of last batch points
             that should be ignored. if `None` it would be set to the
@@ -504,7 +524,7 @@ def mser_m(time_series_data,
         msg += 'non-finite or not-number.'
         raise CVGError(msg)
 
-    if isclose(_std, 0, abs_tol=1e-14):
+    if isclose(_std, 0, abs_tol=__ABS_TOL):
         if not isinstance(batch_size, int):
             msg = 'batch_size = {} is not an `int`.'.format(batch_size)
             raise CVGError(msg)
@@ -530,30 +550,30 @@ def mser_m(time_series_data,
     # Number of batches
     n_batches = z.size
 
-    if not isinstance(ignore_end_batch, int):
-        if ignore_end_batch is None:
-            ignore_end_batch = max(1, batch_size)
-            ignore_end_batch = min(ignore_end_batch, n_batches // 4)
-        elif isinstance(ignore_end_batch, float):
-            if not 0.0 < ignore_end_batch < 1.0:
-                msg = 'invalid ignore_end_batch = '
-                msg += '{}. If ignore_end_batch '.format(ignore_end_batch)
+    if not isinstance(ignore_end, int):
+        if ignore_end is None:
+            ignore_end = max(1, batch_size)
+            ignore_end = min(ignore_end, n_batches // 4)
+        elif isinstance(ignore_end, float):
+            if not 0.0 < ignore_end < 1.0:
+                msg = 'invalid ignore_end = '
+                msg += '{}. If ignore_end '.format(ignore_end)
                 msg += 'input is a `float`, it should be in a `(0, 1)` '
                 msg += 'range.'
                 raise CVGError(msg)
-            ignore_end_batch *= n_batches
-            ignore_end_batch = max(1, int(ignore_end_batch))
+            ignore_end *= n_batches
+            ignore_end = max(1, int(ignore_end))
         else:
-            msg = 'invalid ignore_end_batch = {}. '.format(ignore_end_batch)
-            msg += 'ignore_end_batch is not an `int`, `float`, or `None`.'
+            msg = 'invalid ignore_end = {}. '.format(ignore_end)
+            msg += 'ignore_end is not an `int`, `float`, or `None`.'
             raise CVGError(msg)
-    elif ignore_end_batch < 1:
-        msg = 'invalid ignore_end_batch = {}. '.format(ignore_end_batch)
-        msg += 'ignore_end_batch should be a positive `int`.'
+    elif ignore_end < 1:
+        msg = 'invalid ignore_end = {}. '.format(ignore_end)
+        msg += 'ignore_end should be a positive `int`.'
         raise CVGError(msg)
 
-    if n_batches <= ignore_end_batch:
-        msg = 'invalid ignore_end_batch = {}.\n'.format(ignore_end_batch)
+    if n_batches <= ignore_end:
+        msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
         msg += 'Wrong number of batches is requested to be ignored '
         msg += 'from the total {} batches.'.format(n_batches)
         raise CVGError(msg)
@@ -577,14 +597,14 @@ def mser_m(time_series_data,
     d = n_batches_minus_d_inv * (sum_zsq - sum_z_sq)
 
     # Convert truncation from batch to raw data
-    truncate_index = np.nanargmin(d[:-ignore_end_batch]) * batch_size
+    truncate_index = np.nanargmin(d[:-ignore_end]) * batch_size
 
     # Any truncation value > n/2 is considered an invalid value and rejected
     if truncate_index > n // 2:
         # If the truncate_index is the last element of the batched data,
         # do the correction and return the last index of the time_series_data array
-        ignore_end_batch += 1
-        if truncate_index == (n - ignore_end_batch * batch_size):
+        ignore_end += 1
+        if truncate_index == (n - ignore_end * batch_size):
             truncate_index = time_series_data.size - 1
 
         return False, truncate_index
