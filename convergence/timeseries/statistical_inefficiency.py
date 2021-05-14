@@ -7,13 +7,16 @@ uncorrelated configurations.
 from math import isclose
 import numpy as np
 
-from ._default import \
+from convergence import \
+    auto_covariance, \
+    auto_correlate, \
+    cross_correlate, \
+    CVGError
+from convergence._default import \
     __ABS_TOL, \
     __FFT, \
     __MINIMUM_CORRELATION_TIME, \
     __SI
-from .err import CVGError
-from .stats import auto_covariance, auto_correlate, cross_correlate
 
 __all__ = [
     'statistical_inefficiency',
