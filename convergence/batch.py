@@ -5,10 +5,10 @@ import numpy as np
 from .err import CVGError
 from .scale import scale_methods
 from ._default import \
-    __BATCH_SIZE, \
-    __SCALE_METHOD, \
-    __WITH_CENTERING, \
-    __WITH_SCALING
+    _DEFAULT_BATCH_SIZE, \
+    _DEFAULT_SCALE_METHOD, \
+    _DEFAULT_WITH_CENTERING, \
+    _DEFAULT_WITH_SCALING
 
 __all__ = [
     'batch',
@@ -17,11 +17,11 @@ __all__ = [
 
 def batch(time_series_data,
           *,
-          batch_size=__BATCH_SIZE,
+          batch_size=_DEFAULT_BATCH_SIZE,
           func=np.mean,
-          scale=__SCALE_METHOD,
-          with_centering=__WITH_CENTERING,
-          with_scaling=__WITH_SCALING):
+          scale=_DEFAULT_SCALE_METHOD,
+          with_centering=_DEFAULT_WITH_CENTERING,
+          with_scaling=_DEFAULT_WITH_SCALING):
     r"""Batch the time series data.
 
     Args:

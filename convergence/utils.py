@@ -4,9 +4,9 @@ import numpy as np
 
 from convergence import CVGError
 from ._default import \
-    __TEST_SIZE, \
-    __TRAIN_SIZE, \
-    __SEED
+    _DEFAULT_TEST_SIZE, \
+    _DEFAULT_TRAIN_SIZE, \
+    _DEFAULT_SEED
 
 __all__ = [
     'validate_split',
@@ -114,9 +114,9 @@ def validate_split(*, n_samples, train_size, test_size, default_test_size=None):
 
 
 def train_test_split(time_series_data, *,
-                     train_size=__TRAIN_SIZE,
-                     test_size=__TEST_SIZE,
-                     seed=__SEED,
+                     train_size=_DEFAULT_TRAIN_SIZE,
+                     test_size=_DEFAULT_TEST_SIZE,
+                     seed=_DEFAULT_SEED,
                      default_test_size=0.1):
     r"""Split time_series_data into random train and test indices.
 
