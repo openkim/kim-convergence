@@ -9,7 +9,7 @@ import numpy as np
 
 from .normal_dist import normal_interval
 from convergence import CVGError
-from convergence._default import __ABS_TOL
+from convergence._default import _DEFAULT_ABS_TOL
 
 __all__ = [
     'get_fft_optimal_size',
@@ -319,7 +319,7 @@ def auto_correlate(x, *, nlags=None, fft=False):
     # Calculate (estimate) the auto covariances
     autocor = auto_covariance(x, fft=fft)
 
-    if isclose(autocor[0], 0, abs_tol=__ABS_TOL):
+    if isclose(autocor[0], 0, abs_tol=_DEFAULT_ABS_TOL):
         msg = 'divide by zero encountered, which means the first element of '
         msg += 'the auto covariances of x is zero (or close to zero).'
         raise CVGError(msg)
@@ -378,7 +378,7 @@ def cross_correlate(x, y, *, nlags=None, fft=False):
 
     sigma_xy = np.std(x) * np.std(y)
 
-    if isclose(sigma_xy, 0, abs_tol=__ABS_TOL):
+    if isclose(sigma_xy, 0, abs_tol=_DEFAULT_ABS_TOL):
         msg = 'Divide by zero encountered, which means the multiplication '
         msg += 'of the standard deviation of x and y is zero.'
         raise CVGError(msg)
