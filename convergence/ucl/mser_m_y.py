@@ -1,4 +1,4 @@
-"""MSER-m_y module."""
+"""MSER-m_y UCL module."""
 
 from math import ceil, sqrt
 import numpy as np
@@ -9,6 +9,23 @@ from convergence import \
     CVGError, \
     randomness_test, \
     t_inv_cdf
+from convergence._default import \
+    __CONFIDENCE_COEFFICIENT, \
+    __EQUILIBRATION_LENGTH_ESTIMATE, \
+    __HEIDEL_WELCH_NUMBER_POINTS, \
+    __BATCH_SIZE, \
+    __FFT, \
+    __SCALE_METHOD, \
+    __WITH_CENTERING, \
+    __WITH_SCALING, \
+    __TEST_SIZE, \
+    __TRAIN_SIZE, \
+    __POPULATION_STANDARD_DEVIATION, \
+    __SI, \
+    __MINIMUM_CORRELATION_TIME, \
+    __UNCORRELATED_SAMPLE_INDICES, \
+    __SAMPLE_METHOD
+
 
 __all__ = [
     'MSER_m_y',
@@ -53,23 +70,23 @@ class MSER_m_y(MSER_m):
     def ucl(self,
             time_series_data,
             *,
-            confidence_coefficient=0.95,
-            batch_size=5,
-            scale='translate_scale',
-            with_centering=False,
-            with_scaling=False,
+            confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+            batch_size=__BATCH_SIZE,
+            scale=__SCALE_METHOD,
+            with_centering=__WITH_CENTERING,
+            with_scaling=__WITH_SCALING,
             # unused input parmeters in
             # MSER_m ucl interface
-            equilibration_length_estimate=None,
-            heidel_welch_number_points=None,
-            fft=None,
-            test_size=None,
-            train_size=None,
-            population_standard_deviation=None,
-            si=None,
-            minimum_correlation_time=None,
-            uncorrelated_sample_indices=None,
-            sample_method=None):
+            equilibration_length_estimate=__EQUILIBRATION_LENGTH_ESTIMATE,
+            heidel_welch_number_points=__HEIDEL_WELCH_NUMBER_POINTS,
+            fft=__FFT,
+            test_size=__TEST_SIZE,
+            train_size=__TRAIN_SIZE,
+            population_standard_deviation=__POPULATION_STANDARD_DEVIATION,
+            si=__SI,
+            minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+            sample_method=__SAMPLE_METHOD):
         r"""Approximate the upper confidence limit of the mean [20]_.
 
         Args:
@@ -176,11 +193,11 @@ class MSER_m_y(MSER_m):
 
 def mser_m_y_ucl(time_series_data,
                  *,
-                 confidence_coefficient=0.95,
-                 batch_size=5,
-                 scale='translate_scale',
-                 with_centering=False,
-                 with_scaling=False,
+                 confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+                 batch_size=__BATCH_SIZE,
+                 scale=__SCALE_METHOD,
+                 with_centering=__WITH_CENTERING,
+                 with_scaling=__WITH_SCALING,
                  obj=None):
     """Approximate the upper confidence limit of the mean."""
     mser = MSER_m_y() if obj is None else obj
@@ -196,11 +213,11 @@ def mser_m_y_ucl(time_series_data,
 
 def mser_m_y_ci(time_series_data,
                 *,
-                confidence_coefficient=0.95,
-                batch_size=5,
-                scale='translate_scale',
-                with_centering=False,
-                with_scaling=False,
+                confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+                batch_size=__BATCH_SIZE,
+                scale=__SCALE_METHOD,
+                with_centering=__WITH_CENTERING,
+                with_scaling=__WITH_SCALING,
                 obj=None):
     r"""Approximate the confidence interval of the mean [20]_.
 
@@ -234,14 +251,15 @@ def mser_m_y_ci(time_series_data,
     return confidence_limits
 
 
-def mser_m_y_relative_half_width_estimate(time_series_data,
-                                          *,
-                                          confidence_coefficient=0.95,
-                                          batch_size=5,
-                                          scale='translate_scale',
-                                          with_centering=False,
-                                          with_scaling=False,
-                                          obj=None):
+def mser_m_y_relative_half_width_estimate(
+        time_series_data,
+        *,
+        confidence_coefficient=__CONFIDENCE_COEFFICIENT,
+        batch_size=__BATCH_SIZE,
+        scale=__SCALE_METHOD,
+        with_centering=__WITH_CENTERING,
+        with_scaling=__WITH_SCALING,
+        obj=None):
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval
