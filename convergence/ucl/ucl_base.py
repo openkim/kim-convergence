@@ -197,7 +197,7 @@ class UCLBase:
         fft=__FFT,
         minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
         ignore_end=__IGNORE_END,
-        # unused input parmeters in Time series module
+        # unused input parmeters in
         # estimate_equilibration_length interface
         batch_size=__BATCH_SIZE,
         scale=__SCALE_METHOD,
