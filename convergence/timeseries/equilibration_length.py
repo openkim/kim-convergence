@@ -19,18 +19,18 @@ from .statistical_inefficiency import \
 
 from convergence import CVGError
 from convergence._default import \
-    __ABS_TOL, \
-    __SI, \
-    __FFT, \
-    __MINIMUM_CORRELATION_TIME, \
-    __IGNORE_END, \
-    __NSKIP, \
-    __BATCH_SIZE, \
-    __SCALE_METHOD, \
-    __WITH_CENTERING, \
-    __WITH_SCALING
+    _DEFAULT_ABS_TOL, \
+    _DEFAULT_SI, \
+    _DEFAULT_FFT, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_IGNORE_END, \
+    _DEFAULT_NSKIP, \
+    _DEFAULT_BATCH_SIZE, \
+    _DEFAULT_SCALE_METHOD, \
+    _DEFAULT_WITH_CENTERING, \
+    _DEFAULT_WITH_SCALING
 
-__WITH_SCALING, \
+_DEFAULT_WITH_SCALING, \
 
 
 __all__ = [
@@ -41,17 +41,17 @@ __all__ = [
 def estimate_equilibration_length(
         time_series_data,
         *,
-        si=__SI,
-        nskip=__NSKIP,
-        fft=__FFT,
-        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
-        ignore_end=__IGNORE_END,
+        si=_DEFAULT_SI,
+        nskip=_DEFAULT_NSKIP,
+        fft=_DEFAULT_FFT,
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
+        ignore_end=_DEFAULT_IGNORE_END,
         # unused input parmeters in Time series module
         # estimate_equilibration_length interface
-        batch_size=__BATCH_SIZE,
-        scale=__SCALE_METHOD,
-        with_centering=__WITH_CENTERING,
-        with_scaling=__WITH_SCALING):
+        batch_size=_DEFAULT_BATCH_SIZE,
+        scale=_DEFAULT_SCALE_METHOD,
+        with_centering=_DEFAULT_WITH_CENTERING,
+        with_scaling=_DEFAULT_WITH_SCALING):
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the
@@ -173,7 +173,7 @@ def estimate_equilibration_length(
         msg += 'array which is non-finite or not-number.'
         raise CVGError(msg)
 
-    if isclose(_std, 0, abs_tol=__ABS_TOL):
+    if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         # index and si
         return 0, time_series_data_size
 

@@ -13,10 +13,10 @@ from convergence import \
     cross_correlate, \
     CVGError
 from convergence._default import \
-    __ABS_TOL, \
-    __FFT, \
-    __MINIMUM_CORRELATION_TIME, \
-    __SI
+    _DEFAULT_ABS_TOL, \
+    _DEFAULT_FFT, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_SI
 
 __all__ = [
     'statistical_inefficiency',
@@ -32,8 +32,8 @@ def statistical_inefficiency(
         x,
         y=None,
         *,
-        fft=__FFT,
-        minimum_correlation_time=__MINIMUM_CORRELATION_TIME):
+        fft=_DEFAULT_FFT,
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
     r"""Compute the statistical inefficiency.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
@@ -112,7 +112,7 @@ def statistical_inefficiency(
             msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
-        if isclose(_std, 0, abs_tol=__ABS_TOL):
+        if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
             return x_size
 
         del _std
@@ -162,8 +162,8 @@ def r_statistical_inefficiency(
         x,
         y=None,
         *,
-        fft=__FFT,
-        minimum_correlation_time=__MINIMUM_CORRELATION_TIME):
+        fft=_DEFAULT_FFT,
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the Geyer’s [8]_, [9]_ initial
@@ -253,7 +253,7 @@ def r_statistical_inefficiency(
             msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
-        if isclose(_std, 0, abs_tol=__ABS_TOL):
+        if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
             return x_size
 
         del _std
@@ -323,8 +323,8 @@ def split_r_statistical_inefficiency(
         x,
         y=None,
         *,
-        fft=__FFT,
-        minimum_correlation_time=__MINIMUM_CORRELATION_TIME):
+        fft=_DEFAULT_FFT,
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the split-r method of
@@ -389,8 +389,8 @@ def split_statistical_inefficiency(
         x,
         y=None,
         *,
-        fft=__FFT,
-        minimum_correlation_time=__MINIMUM_CORRELATION_TIME):
+        fft=_DEFAULT_FFT,
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
     r"""Compute the statistical inefficiency.
 
     Computes the effective sample size. The value returned is the minimum of
@@ -443,7 +443,7 @@ def split_statistical_inefficiency(
         msg += 'array which is non-finite or not-number.'
         raise CVGError(msg)
 
-    if isclose(_std, 0, abs_tol=__ABS_TOL):
+    if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         return x_size
 
     del _std
@@ -549,9 +549,9 @@ def integrated_auto_correlation_time(
         x,
         y=None,
         *,
-        si=__SI,
-        fft=__FFT,
-        minimum_correlation_time=__MINIMUM_CORRELATION_TIME):
+        si=_DEFAULT_SI,
+        fft=_DEFAULT_FFT,
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
     r"""Estimate the integrated auto-correlation time.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
