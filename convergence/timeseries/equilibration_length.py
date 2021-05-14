@@ -17,19 +17,27 @@ from convergence import \
     split_r_statistical_inefficiency, \
     split_statistical_inefficiency, \
     si_methods
+from convergence._default import \
+    __ABS_TOL, \
+    __SI, \
+    __FFT, \
+    __MINIMUM_CORRELATION_TIME, \
+    __IGNORE_END, \
+    __NSKIP
 
 __all__ = [
     'estimate_equilibration_length',
 ]
 
 
-def estimate_equilibration_length(time_series_data,
-                                  *,
-                                  si='statistical_inefficiency',
-                                  nskip=1,
-                                  fft=True,
-                                  minimum_correlation_time=None,
-                                  ignore_end=None):
+def estimate_equilibration_length(
+        time_series_data,
+        *,
+        si=__SI,
+        nskip=__NSKIP,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+        ignore_end=__IGNORE_END):
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the
@@ -37,8 +45,7 @@ def estimate_equilibration_length(time_series_data,
 
     Args:
         time_series_data (array_like, 1d): time series data.
-        si (str, optional): statistical inefficiency method.
-            (default: 'statistical_inefficiency')
+        si (str, optional): statistical inefficiency method. (default: None)
         nskip (int, optional): the number of data points to skip.
             (default: 1)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
@@ -79,8 +86,10 @@ def estimate_equilibration_length(time_series_data,
             msg += 'inefficiency (si) methods are:\n\t- '
             msg += '{}'.format('\n\t- '.join(si_methods))
             raise CVGError(msg)
+    elif si is None:
+        si = 'statistical_inefficiency'
     else:
-        msg = 'si is not a `str`.'
+        msg = 'si is not a `str` or `None`.'
         raise CVGError(msg)
 
     si_func = si_methods[si]
@@ -150,9 +159,9 @@ def estimate_equilibration_length(time_series_data,
         msg += 'array which is non-finite or not-number.'
         raise CVGError(msg)
 
-    if isclose(_std, 0, abs_tol=1e-14):
+    if isclose(_std, 0, abs_tol=__ABS_TOL):
         # index and si
-        return 0, 1.0
+        return 0, time_series_data_size
 
     del _std
 
