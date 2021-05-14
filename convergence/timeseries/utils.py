@@ -10,6 +10,12 @@ from convergence import \
     split_r_statistical_inefficiency, \
     split_statistical_inefficiency, \
     si_methods
+from convergence._default import \
+    __SI, \
+    __FFT, \
+    __MINIMUM_CORRELATION_TIME, \
+    __UNCORRELATED_SAMPLE_INDICES, \
+    __SAMPLE_METHOD
 
 __all__ = [
     'time_series_data_si',
@@ -25,9 +31,9 @@ SAMPLING_METHODS = ('uncorrelated', 'random', 'block_averaged')
 
 def time_series_data_si(time_series_data,
                         *,
-                        si=None,
-                        fft=True,
-                        minimum_correlation_time=None):
+                        si=__SI,
+                        fft=__FFT,
+                        minimum_correlation_time=__MINIMUM_CORRELATION_TIME):
     """Helper method to compute or return the statistical inefficiency value.
 
     Args:
@@ -88,9 +94,9 @@ def time_series_data_si(time_series_data,
 def uncorrelated_time_series_data_sample_indices(
         time_series_data,
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None):
+        si=__SI,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME):
     r"""Return indices of uncorrelated subsamples of the time series data.
 
     Return indices of the uncorrelated subsample of the time series data.
@@ -139,11 +145,11 @@ def uncorrelated_time_series_data_sample_indices(
 def uncorrelated_time_series_data_samples(
         time_series_data,
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None,
-        sample_method=None):
+        si=__SI,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES,
+        sample_method=__SAMPLE_METHOD):
     r"""Get time series data at the sample_method subsample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
@@ -212,10 +218,10 @@ def uncorrelated_time_series_data_samples(
 def time_series_data_uncorrelated_samples(
         time_series_data,
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None):
+        si=__SI,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES):
     r"""Return time series data at uncorrelated subsample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
@@ -292,10 +298,10 @@ def time_series_data_uncorrelated_samples(
 def time_series_data_uncorrelated_random_samples(
         time_series_data,
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None):
+        si=__SI,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES):
     r"""Retuen random data for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
@@ -380,10 +386,10 @@ def time_series_data_uncorrelated_random_samples(
 def time_series_data_uncorrelated_block_averaged_samples(
         time_series_data,
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None):
+        si=__SI,
+        fft=__FFT,
+        minimum_correlation_time=__MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices=__UNCORRELATED_SAMPLE_INDICES):
     """Retuen average value for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
