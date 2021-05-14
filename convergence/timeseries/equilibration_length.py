@@ -10,13 +10,14 @@ uncorrelated samples.
 from math import isclose
 import numpy as np
 
-from convergence import \
-    CVGError, \
-    statistical_inefficiency,\
+from .statistical_inefficiency import \
+    statistical_inefficiency, \
     r_statistical_inefficiency, \
     split_r_statistical_inefficiency, \
     split_statistical_inefficiency, \
     si_methods
+
+from convergence import CVGError
 from convergence._default import \
     __ABS_TOL, \
     __SI, \

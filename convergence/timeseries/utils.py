@@ -3,13 +3,14 @@
 import numpy as np
 from random import randint
 
-from convergence import \
-    CVGError, \
+from .statistical_inefficiency import \
     statistical_inefficiency, \
     r_statistical_inefficiency, \
     split_r_statistical_inefficiency, \
     split_statistical_inefficiency, \
     si_methods
+
+from convergence import CVGError
 from convergence._default import \
     __SI, \
     __FFT, \

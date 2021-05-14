@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .err import CVGError
+from convergence import CVGError
 
 __all__ = [
     'geweke',
