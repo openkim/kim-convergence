@@ -3,12 +3,7 @@
 import numpy as np
 from random import randint
 
-from .statistical_inefficiency import \
-    statistical_inefficiency, \
-    r_statistical_inefficiency, \
-    split_r_statistical_inefficiency, \
-    split_statistical_inefficiency, \
-    si_methods
+from .statistical_inefficiency import si_methods
 
 from convergence import CVGError
 from convergence._default import \
@@ -30,11 +25,12 @@ __all__ = [
 SAMPLING_METHODS = ('uncorrelated', 'random', 'block_averaged')
 
 
-def time_series_data_si(time_series_data,
-                        *,
-                        si=_DEFAULT_SI,
-                        fft=_DEFAULT_FFT,
-                        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
+def time_series_data_si(
+        time_series_data,
+        *,
+        si=_DEFAULT_SI,
+        fft=_DEFAULT_FFT,
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
     """Helper method to compute or return the statistical inefficiency value.
 
     Args:
