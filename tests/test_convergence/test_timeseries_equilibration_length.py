@@ -10,7 +10,7 @@ except:
 from convergence import CVGError
 
 
-class TestEquilibrationLengthModule(unittest.TestCase):
+class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
     """Test Time series equilibration_length module components."""
 
     def test_estimate_equilibration_length(self):
