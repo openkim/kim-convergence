@@ -1,4 +1,4 @@
-"""Statistical inefficiency module.
+"""Time series statistical inefficiency module.
 
 The statistical inefficiency is the limiting number of steps to obtain
 uncorrelated configurations.
