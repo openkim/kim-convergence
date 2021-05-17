@@ -8,9 +8,9 @@ from .equilibration_length import \
 
 from .statistical_inefficiency import \
     statistical_inefficiency, \
-    r_statistical_inefficiency, \
-    split_r_statistical_inefficiency,\
-    split_statistical_inefficiency, \
+    geyer_r_statistical_inefficiency, \
+    geyer_split_r_statistical_inefficiency,\
+    geyer_split_statistical_inefficiency, \
     si_methods, \
     integrated_auto_correlation_time
 
@@ -26,9 +26,9 @@ __all__ = [
     'estimate_equilibration_length',
     # 'run_length_control',
     'statistical_inefficiency',
-    'r_statistical_inefficiency',
-    'split_r_statistical_inefficiency',
-    'split_statistical_inefficiency',
+    'geyer_r_statistical_inefficiency',
+    'geyer_split_r_statistical_inefficiency',
+    'geyer_split_statistical_inefficiency',
     'si_methods',
     'integrated_auto_correlation_time',
     'time_series_data_si',
