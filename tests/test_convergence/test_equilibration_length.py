@@ -21,7 +21,13 @@ class TestEquilibrationLengthModule(unittest.TestCase):
                           x, si=cr.statistical_inefficiency)
 
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
-                          x, si=None)
+                          x, si=1.0)
+
+        self.assertRaises(CVGError, cr.estimate_equilibration_length,
+                          x, si=1)
+
+        self.assertRaises(CVGError, cr.estimate_equilibration_length,
+                          x, si=True)
 
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
                           x, si='si')
@@ -34,9 +40,11 @@ class TestEquilibrationLengthModule(unittest.TestCase):
         x = np.ones(100)
         n, si = cr.estimate_equilibration_length(x)
         self.assertTrue(n == 0)
-        self.assertTrue(si == 1.0)
+        self.assertTrue(si == x.size)
 
-        x = np.ones(100) * 10 + (np.random.random_sample(100) - 0.5)
+        rng = np.random.RandomState(12345)
+
+        x = np.ones(100) * 10 + (rng.random_sample(100) - 0.5)
 
         # invalid int ignore_end
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
@@ -68,34 +76,34 @@ class TestEquilibrationLengthModule(unittest.TestCase):
 
         # insufficient data points
         n = 1
-        x = np.ones(n) * 10 + (np.random.random_sample(n) - 0.5)
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
         self.assertRaises(CVGError, cr.estimate_equilibration_length, x)
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
-                          x, si='r_statistical_inefficiency')
+                          x, si='geyer_r_statistical_inefficiency')
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
-                          x, si='split_r_statistical_inefficiency')
+                          x, si='geyer_split_r_statistical_inefficiency')
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
-                          x, si='split_statistical_inefficiency')
+                          x, si='geyer_split_statistical_inefficiency')
 
         n = 3
-        x = np.ones(n) * 10 + (np.random.random_sample(n) - 0.5)
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
-                          x, si='r_statistical_inefficiency')
+                          x, si='geyer_r_statistical_inefficiency')
 
         n = 7
-        x = np.ones(n) * 10 + (np.random.random_sample(n) - 0.5)
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
-                          x, si='split_r_statistical_inefficiency')
+                          x, si='geyer_split_r_statistical_inefficiency')
 
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
-                          x, si='split_statistical_inefficiency')
+                          x, si='geyer_split_statistical_inefficiency')
 
         # invalid nskip
         n = 100
-        x = np.ones(n) * 10 + (np.random.random_sample(n) - 0.5)
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
                           x, nskip=1.0)
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
@@ -107,8 +115,14 @@ class TestEquilibrationLengthModule(unittest.TestCase):
         self.assertRaises(CVGError, cr.estimate_equilibration_length,
                           x, nskip=-1)
 
+        rng = np.random.RandomState(12345)
         n = 1000
-        x = np.ones(n) * 10 + (np.random.random_sample(n) - 0.5)
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
+        y = np.concatenate(
+            (np.arange(n // 10)[::-1] / float(n // 10),
+             np.zeros(n - n // 10)))
+
+        x += y
 
         n1, si1 = cr.estimate_equilibration_length(x, fft=True)
         n2, si2 = cr.estimate_equilibration_length(x, fft=False)
@@ -137,8 +151,34 @@ class TestEquilibrationLengthModule(unittest.TestCase):
         self.assertTrue(n1 == n2)
         self.assertAlmostEqual(si1, si2, places=12)
 
+        n1, si1 = cr.estimate_equilibration_length(
+            x, si='geyer_r_statistical_inefficiency', fft=True)
+        n2, si2 = cr.estimate_equilibration_length(
+            x, si='geyer_r_statistical_inefficiency', fft=False)
+
+        self.assertTrue(n1 == n2)
+        self.assertAlmostEqual(si1, si2, places=12)
+
+        n1, si1 = cr.estimate_equilibration_length(
+            x, si='geyer_split_r_statistical_inefficiency', fft=True)
+        n2, si2 = cr.estimate_equilibration_length(
+            x, si='geyer_split_r_statistical_inefficiency', fft=False)
+
+        self.assertTrue(n1 == n2)
+        self.assertAlmostEqual(si1, si2, places=12)
+
+        n1, si1 = cr.estimate_equilibration_length(
+            x, si='geyer_split_statistical_inefficiency', fft=True)
+        n2, si2 = cr.estimate_equilibration_length(
+            x, si='geyer_split_statistical_inefficiency', fft=False)
+
+        self.assertTrue(n1 == n2)
+        self.assertAlmostEqual(si1, si2, places=12)
+
+        # there is at least one value in the input array
+        # which is non-finite or not-number
         n = 1000
-        x = np.ones(n) * 10 + (np.random.random_sample(n) - 0.5)
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
         x[2] = np.inf
 
