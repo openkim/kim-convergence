@@ -10,12 +10,7 @@ uncorrelated samples.
 from math import isclose
 import numpy as np
 
-from .statistical_inefficiency import \
-    statistical_inefficiency, \
-    r_statistical_inefficiency, \
-    split_r_statistical_inefficiency, \
-    split_statistical_inefficiency, \
-    si_methods
+from .statistical_inefficiency import si_methods
 
 from convergence import CVGError
 from convergence._default import \
@@ -29,8 +24,6 @@ from convergence._default import \
     _DEFAULT_SCALE_METHOD, \
     _DEFAULT_WITH_CENTERING, \
     _DEFAULT_WITH_SCALING
-
-_DEFAULT_WITH_SCALING, \
 
 
 __all__ = [
