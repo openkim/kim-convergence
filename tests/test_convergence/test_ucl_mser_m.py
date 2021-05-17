@@ -111,3 +111,37 @@ class TestUCLMSERModule(unittest.TestCase):
         self.assertTrue(truncated)
         self.assertTrue(truncated_i >= 10)
 
+        x = np.arange(100)
+        truncated, truncated_i = cr.mser_m(x)
+        self.assertFalse(truncated)
+
+        rng = np.random.RandomState(12345)
+
+        x = np.arange(n) / n * 10 + (rng.random_sample(n) - 0.5)
+        y = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
+        x = np.concatenate((x, y))
+        truncated, truncated_i = cr.mser_m(x)
+
+        self.assertFalse(truncated)
+        self.assertTrue(truncated_i >= n)
+
+    def test_MSER_m(self):
+        """Test MSER_m class."""
+        mser = cr.MSER_m()
+
+        self.assertIsNone(mser.indices)
+        self.assertIsNone(mser.si)
+        self.assertIsNone(mser.mean)
+        self.assertIsNone(mser.std)
+
+        rng = np.random.RandomState(12345)
+
+        n = 1000
+        x = np.arange(10.)
+        y = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
+        x = np.concatenate((x, y))
+
+        truncated, truncated_i = mser.estimate_equilibration_length(x)
+        self.assertTrue(truncated)
+        self.assertTrue(truncated_i >= 10)
+        self.assertAlmostEqual(mser.si, 1.0)
