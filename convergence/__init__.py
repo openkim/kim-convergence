@@ -50,9 +50,9 @@ from .utils import \
 from .timeseries import \
     estimate_equilibration_length, \
     statistical_inefficiency, \
-    r_statistical_inefficiency, \
-    split_r_statistical_inefficiency,\
-    split_statistical_inefficiency, \
+    geyer_r_statistical_inefficiency, \
+    geyer_split_r_statistical_inefficiency,\
+    geyer_split_statistical_inefficiency, \
     si_methods, \
     integrated_auto_correlation_time, \
     time_series_data_si, \
@@ -132,9 +132,9 @@ __all__ = [
     'batch',
     # 'geweke',
     'statistical_inefficiency',
-    'r_statistical_inefficiency',
-    'split_r_statistical_inefficiency',
-    'split_statistical_inefficiency',
+    'geyer_r_statistical_inefficiency',
+    'geyer_split_r_statistical_inefficiency',
+    'geyer_split_statistical_inefficiency',
     'si_methods',
     'integrated_auto_correlation_time',
     'validate_split',
