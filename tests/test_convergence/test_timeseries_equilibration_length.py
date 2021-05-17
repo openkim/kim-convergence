@@ -1,4 +1,4 @@
-"""Test equilibration_length module."""
+"""Test Time series equilibration_length module."""
 import unittest
 import numpy as np
 
@@ -11,7 +11,7 @@ from convergence import CVGError
 
 
 class TestEquilibrationLengthModule(unittest.TestCase):
-    """Test equilibration_length module components."""
+    """Test Time series equilibration_length module components."""
 
     def test_estimate_equilibration_length(self):
         """Test estimate_equilibration_length function."""
