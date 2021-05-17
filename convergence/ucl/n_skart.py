@@ -264,6 +264,7 @@ class N_SKART(UCLBase):
                     msg += '{} = '.format(processed_sample_size)
                     msg += '{} x {}'.format(k_number_batches, batch_size)
                     msg += ' data points.\n'
+                    cvg_warning(msg)
 
                     sufficient_data = False
 
@@ -271,10 +272,17 @@ class N_SKART(UCLBase):
             # Perform step 5 of the N-Skart algorithm
             # w <- d * m
             truncate_index = self.number_batches_per_spacer * self.batch_size
+
+            self.set_si(
+                time_series_data=time_series_data[truncate_index:],
+                si=si,
+                fft=fft,
+                minimum_correlation_time=minimum_correlation_time)
+
             return True, truncate_index
 
-        cvg_warning(msg)
-        return False, time_series_data_size - 1
+        self.si = None
+        return False, time_series_data_size
 
     def ucl(self,
             time_series_data,
