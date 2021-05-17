@@ -133,19 +133,19 @@ def estimate_equilibration_length(
         raise CVGError(msg)
 
     # Upper bound check
-    if si == 'r_statistical_inefficiency':
+    if si == 'geyer_r_statistical_inefficiency':
         if time_series_data_size < 4:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
             raise CVGError(msg)
         ignore_end = max(3, ignore_end)
-    elif si == 'split_r_statistical_inefficiency':
+    elif si == 'geyer_split_r_statistical_inefficiency':
         if time_series_data_size < 8:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
             raise CVGError(msg)
         ignore_end = max(7, ignore_end)
-    elif si == 'split_statistical_inefficiency':
+    elif si == 'geyer_split_statistical_inefficiency':
         if time_series_data_size < 8:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
