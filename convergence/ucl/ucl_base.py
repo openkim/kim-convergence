@@ -204,13 +204,20 @@ class UCLBase:
         with_centering=_DEFAULT_WITH_CENTERING,
             with_scaling=_DEFAULT_WITH_SCALING):
         """Estimate the equilibration point in a time series data."""
-        return estimate_equilibration_length(
+        equilibration_index_estimate, si_value = estimate_equilibration_length(
             time_series_data=time_series_data,
             si=si,
             nskip=nskip,
             fft=fft,
             minimum_correlation_time=minimum_correlation_time,
             ignore_end=ignore_end)
+
+        if equilibration_index_estimate < len(time_series_data) - 1:
+            self.si = si_value
+            return True, equilibration_index_estimate
+
+        self.si = None
+        return False, equilibration_index_estimate
 
     def ucl(self,
             time_series_data,
