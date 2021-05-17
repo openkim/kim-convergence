@@ -342,14 +342,49 @@ class TestUCLModule(unittest.TestCase):
         test_passed = True
 
         try:
-            # Initialize the HeidelbergerWelch object
+            # Initialize the UncorrelatedSamples object
             usamples = cr.UncorrelatedSamples()
         except CVGError:
             test_passed = False
 
-        self.assertTrue(test_passed)
+        # self.assertTrue(test_passed)
 
-        self.assertIsNone(usamples.mean)
-        self.assertIsNone(usamples.std)
-        self.assertIsNone(usamples.si)
-        self.assertIsNone(usamples.indices)
+        # self.assertIsNone(usamples.mean)
+        # self.assertIsNone(usamples.std)
+        # self.assertIsNone(usamples.si)
+        # self.assertIsNone(usamples.indices)
+
+        # x = np.arange(100.)
+
+        # self.assertRaises(CVGError, usamples.ucl, x.reshape(5, 20))
+
+        # self.assertRaises(CVGError, usamples.ucl, x, confidence_coefficient=0)
+        # self.assertRaises(CVGError, usamples.ucl, x, confidence_coefficient=1)
+
+        # # input data points are not sufficient
+        # x = np.arange(4.)
+
+        # self.assertRaises(CVGError, usamples.ucl, x)
+
+        rng = np.random.RandomState(12345)
+
+        x = np.ones(1000) * 10 + (rng.random_sample(1000) - 0.5)
+
+        # test_passed = True
+
+        # try:
+        #     upper_confidence_limit_1 = usamples.ucl(x)
+        # except CVGError:
+        #     test_passed = False
+
+        # self.assertTrue(test_passed)
+
+        # self.assertAlmostEqual(usamples.mean, x.mean(), places=15)
+        # self.assertAlmostEqual(usamples.std, x.std(), places=15)
+        # self.assertTrue(np.size(usamples.indices) == 1000)
+
+
+        y = np.array((x[0], x[0], x[0], x[0], x[0]))
+        # self.assertRaises(CVGError, usamples.ucl, x[0:1])
+        # print(usamples.ucl(y))
+
