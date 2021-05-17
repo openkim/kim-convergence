@@ -20,9 +20,9 @@ from convergence._default import \
 
 __all__ = [
     'statistical_inefficiency',
-    'r_statistical_inefficiency',
-    'split_r_statistical_inefficiency',
-    'split_statistical_inefficiency',
+    'geyer_r_statistical_inefficiency',
+    'geyer_split_r_statistical_inefficiency',
+    'geyer_split_statistical_inefficiency',
     'integrated_auto_correlation_time',
     'si_methods',
 ]
@@ -158,7 +158,7 @@ def statistical_inefficiency(
 # .. [13] Gelman et al. BDA (2014) Formula 11.8
 
 
-def r_statistical_inefficiency(
+def geyer_r_statistical_inefficiency(
         x,
         y=None,
         *,
@@ -319,7 +319,7 @@ def r_statistical_inefficiency(
     return max(1.0, si)
 
 
-def split_r_statistical_inefficiency(
+def geyer_split_r_statistical_inefficiency(
         x,
         y=None,
         *,
@@ -382,10 +382,10 @@ def split_r_statistical_inefficiency(
         msg += 'sufficient to be used by this method.'
         raise CVGError(msg)
     x_size //= 2
-    return r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
+    return geyer_r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
 
 
-def split_statistical_inefficiency(
+def geyer_split_statistical_inefficiency(
         x,
         y=None,
         *,
@@ -539,9 +539,9 @@ def split_statistical_inefficiency(
 
 si_methods = {
     'statistical_inefficiency': statistical_inefficiency,
-    'r_statistical_inefficiency': r_statistical_inefficiency,
-    'split_r_statistical_inefficiency': split_r_statistical_inefficiency,
-    'split_statistical_inefficiency': split_statistical_inefficiency,
+    'geyer_r_statistical_inefficiency': geyer_r_statistical_inefficiency,
+    'geyer_split_r_statistical_inefficiency': geyer_split_r_statistical_inefficiency,
+    'geyer_split_statistical_inefficiency': geyer_split_statistical_inefficiency,
 }
 
 
