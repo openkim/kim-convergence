@@ -134,6 +134,15 @@ class TestBatchModule(unittest.TestCase):
         for i in b:
             self.assertTrue(i == 0.0)
 
+        x[0] = np.nan
+        self.assertRaises(CVGError, cr.batch, x)
+
+        x[0] = np.inf
+        self.assertRaises(CVGError, cr.batch, x)
+
+        x[0] = np.NaN
+        self.assertRaises(CVGError, cr.batch, x)
+
         rng = np.random.RandomState(12345)
 
         n = 1000
