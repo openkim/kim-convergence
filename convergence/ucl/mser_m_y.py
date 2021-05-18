@@ -169,6 +169,8 @@ class MSER_m_y(MSER_m):
                             with_centering=with_centering,
                             with_scaling=with_scaling)
 
+        number_batches = x_batch.size
+
         # Compute and set the sample mean of all observations
         # in the truncated data set
         self.mean = time_series_data.mean()
