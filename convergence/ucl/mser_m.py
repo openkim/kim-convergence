@@ -67,41 +67,41 @@ def mser_m(time_series_data,
 
     Args:
         time_series_data (array_like, 1d): Time series data.
-        batch_size (int, optional): batch size. (default: {5})
+        batch_size (int, optional): batch size. (default: 5)
         scale (str, optional): A method to standardize a dataset.
-            (default: {'translate_scale'})
+            (default: 'translate_scale')
         with_centering (bool, optional): If True, use time_series_data minus the scale metod
-            centering approach. (default: {False})
+            centering approach. (default: False)
         with_scaling (bool, optional): If True, scale the data to scale metod
-            scaling approach. (default: {False})
+            scaling approach. (default: False)
         ignore_end (int, or float, or None, optional): if `int`, it is
             the last few batch points that should be ignored. if `float`,
             should be in `(0, 1)` and it is the percent of last batch points
             that should be ignored. if `None` it would be set to the
-            :math:`Min(batch_size, n_batches / 4)`. (default: {None})
+            :math:`Min(batch_size, number_batches / 4)`. (default: None)
 
     Returns:
         bool, int: truncated, truncation point.
             Truncation point is the index to truncate.
 
     Note:
-      MSER-m sometimes erroneously reports a truncation point at the end of
-      the data series. This is because the method can be overly sensitive to
-      observations at the end of the data series that are close in value.
-      Here, we avoid this artifact, by not allowing the algorithm to consider
-      the standard errors calculated from the last few data points.
+        MSER-m sometimes erroneously reports a truncation point at the end of
+        the data series. This is because the method can be overly sensitive to
+        observations at the end of the data series that are close in value.
+        Here, we avoid this artifact, by not allowing the algorithm to consider
+        the standard errors calculated from the last few data points.
 
     Note:
-      If the truncation point returned by MSER-m > n/2, it is considered an
-      invalid value and `truncated` will return as `False`. It means the
-      method has not been provided with enough data to produce a valid
-      result, and more data is required.
+        If the truncation point returned by MSER-m > n/2, it is considered an
+        invalid value and `truncated` will return as `False`. It means the
+        method has not been provided with enough data to produce a valid
+        result, and more data is required.
 
     Note:
-      If the truncation obtained by MSER-m is the last index of the batched
-      data, the MSER-m returns the time series data's last index as the
-      truncation point. This index can be used as a measure that the algorithm
-      did not find any truncation point.
+        If the truncation obtained by MSER-m is the last index of the batched
+        data, the MSER-m returns the time series data's last index as the
+        truncation point. This index can be used as a measure that the
+        algorithm did not find any truncation point.
 
     """
     time_series_data = np.array(time_series_data, copy=False)
@@ -136,27 +136,26 @@ def mser_m(time_series_data,
     del _std
 
     # Initialize
-    z = batch(time_series_data,
-              batch_size=batch_size,
-              scale=scale,
-              with_centering=with_centering,
-              with_scaling=with_scaling)
+    x_batch = batch(time_series_data,
+                    batch_size=batch_size,
+                    scale=scale,
+                    with_centering=with_centering,
+                    with_scaling=with_scaling)
 
     # Number of batches
-    n_batches = z.size
+    number_batches = x_batch.size
 
     if not isinstance(ignore_end, int):
         if ignore_end is None:
             ignore_end = max(1, batch_size)
-            ignore_end = min(ignore_end, n_batches // 4)
+            ignore_end = min(ignore_end, number_batches // 4)
         elif isinstance(ignore_end, float):
             if not 0.0 < ignore_end < 1.0:
-                msg = 'invalid ignore_end = '
-                msg += '{}. If ignore_end '.format(ignore_end)
-                msg += 'input is a `float`, it should be in a `(0, 1)` '
-                msg += 'range.'
+                msg = 'invalid ignore_end = {}. If '.format(ignore_end)
+                msg += 'ignore_end input is a `float`, it should be in a '
+                msg += '`(0, 1)` range.'
                 raise CVGError(msg)
-            ignore_end *= n_batches
+            ignore_end *= number_batches
             ignore_end = max(1, int(ignore_end))
         else:
             msg = 'invalid ignore_end = {}. '.format(ignore_end)
@@ -167,39 +166,41 @@ def mser_m(time_series_data,
         msg += 'ignore_end should be a positive `int`.'
         raise CVGError(msg)
 
-    if n_batches <= ignore_end:
+    if number_batches <= ignore_end:
         msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
         msg += 'Wrong number of batches is requested to be ignored '
-        msg += 'from the total {} batches.'.format(n_batches)
+        msg += 'from the total {} batches.'.format(number_batches)
         raise CVGError(msg)
-
-    # Correct the size of data
-    n = n_batches * batch_size
 
     # To find the optimal truncation point in MSER-m
 
-    n_batches_minus_d_inv = 1. / np.arange(n_batches, 0, -1)
+    number_batches_minus_d_inv = 1. / np.arange(number_batches, 0, -1)
 
-    sum_z = np.add.accumulate(z[::-1])[::-1]
-    sum_z_sq = sum_z * sum_z
-    sum_z_sq *= n_batches_minus_d_inv
+    x_batch_sum = np.add.accumulate(x_batch[::-1])[::-1]
+    x_batch_sum_sq = x_batch_sum * x_batch_sum
+    x_batch_sum_sq *= number_batches_minus_d_inv
 
-    n_batches_minus_d_inv *= n_batches_minus_d_inv
+    number_batches_minus_d_inv *= number_batches_minus_d_inv
 
-    zsq = z * z
-    sum_zsq = np.add.accumulate(zsq[::-1])[::-1]
+    x_batch_sq = x_batch * x_batch
+    x_batch_sq_sum = np.add.accumulate(x_batch_sq[::-1])[::-1]
 
-    d = n_batches_minus_d_inv * (sum_zsq - sum_z_sq)
+    d = number_batches_minus_d_inv * (x_batch_sq_sum - x_batch_sum_sq)
 
     # Convert truncation from batch to raw data
     truncate_index = np.nanargmin(d[:-ignore_end]) * batch_size
 
-    # Any truncation value > n/2 is considered an invalid value and rejected
-    if truncate_index > n // 2:
+    # Correct the size of data
+    processed_sample_size = number_batches * batch_size
+
+    # Any truncation value > processed_sample_size / 2
+    # is considered an invalid value and rejected
+    if truncate_index > processed_sample_size // 2:
         # If the truncate_index is the last element of the batched data,
-        # do the correction and return the last index of the time_series_data array
+        # do the correction and return the last index of the
+        # time_series_data array
         ignore_end += 1
-        if truncate_index == (n - ignore_end * batch_size):
+        if truncate_index == (processed_sample_size - ignore_end * batch_size):
             truncate_index = time_series_data.size
 
         return False, truncate_index
@@ -339,32 +340,32 @@ class MSER_m(UCLBase):
             raise CVGError(msg)
 
         # Initialize
-        z = batch(time_series_data,
-                  batch_size=batch_size,
-                  scale=scale,
-                  with_centering=with_centering,
-                  with_scaling=with_scaling)
+        x_batch = batch(time_series_data,
+                        batch_size=batch_size,
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling)
 
         # Number of batches
-        n_batches = z.size
+        number_batches = x_batch.size
 
         # compute and set the mean (grand average of the truncated batch means)
-        self.mean = z.mean()
+        self.mean = x_batch.mean()
 
         # compute and set the sample standard deviation (sample variance of the
         # truncated batch means)
-        self.std = z.std()
+        self.std = x_batch.std()
 
         # Compute the standard deviation of the mean within the dataset. The
         # standard_error_of_mean provides a measurement for spread. The smaller
         # the spread the more accurate. Please see ref [20]_
-        standard_error_of_mean = self.std / sqrt(n_batches)
+        standard_error_of_mean = self.std / sqrt(number_batches)
 
         # Compute the t_distribution confidence interval. When using the
         # t-distribution to compute a confidence interval, df = n - 1.
         p_up = (1 + confidence_coefficient) / 2
         # Please see ref [20]_
-        upper = t_inv_cdf(p_up, n_batches - 1)
+        upper = t_inv_cdf(p_up, number_batches - 1)
 
         upper_confidence_limit = upper * standard_error_of_mean
         return upper_confidence_limit
