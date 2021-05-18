@@ -426,8 +426,9 @@ class HeidelbergerWelch(UCLBase):
         # Batch the data
         x_batch = batch(time_series_data[:processed_sample_size],
                         batch_size=batch_size,
-                        with_centering=False,
-                        with_scaling=False)
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling)
 
         # Compute the mean & std of the batched data
         # to be used later in the CI method
