@@ -63,6 +63,11 @@ def batch(time_series_data,
         msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
         raise CVGError(msg)
 
+    if not np.all(np.isfinite(time_series_data)):
+        msg = 'there is at least one value in the input '
+        msg += 'array which is non-finite or not-number.'
+        raise CVGError(msg)
+
     # Initialize
 
     # Number of batches
