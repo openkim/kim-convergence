@@ -63,25 +63,13 @@ def batch(time_series_data,
         msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
         raise CVGError(msg)
 
-    if isinstance(scale, str):
-        if scale not in scale_methods:
-            msg = 'method "{}" not found. Valid methods '.format(scale)
-            msg += 'to scale and standardize a dataset are:\n\t- '
-            msg += '{}'.format('\n\t- '.join(scale_methods))
-            raise CVGError(msg)
-        scale_func = scale_methods[scale]
-    else:
-        msg = 'scale is not a `str`.\nScale = {} is not '.format(scale)
-        msg += 'a valid method to scale and standardize a dataset.'
-        raise CVGError(msg)
-
     # Initialize
 
     # Number of batches
-    n_batches = time_series_data.size // batch_size
+    number_batches = time_series_data.size // batch_size
 
-    if n_batches == 0:
-        msg = 'invalid number of batches = {}.\n'.format(n_batches)
+    if number_batches == 0:
+        msg = 'invalid number of batches = {}.\n'.format(number_batches)
         msg += 'The number of input data points = '
         msg += '{} are '.format(time_series_data.size)
         msg += 'not enough to produce batches with the batch size of '
@@ -89,20 +77,35 @@ def batch(time_series_data,
         raise CVGError(msg)
 
     # Correct the size of data
-    max_size = n_batches * batch_size
+    processed_sample_size = number_batches * batch_size
 
     # Compute batch averages
 
     # The raw data is batched into non-overlapping batches of size batch_size
     try:
         batched_time_series_data = func(
-            time_series_data[:max_size].reshape((-1, batch_size)), axis=1,
-            dtype=np.float64)
+            time_series_data[:processed_sample_size].reshape((-1, batch_size)),
+            axis=1, dtype=np.float64)
+    # Reduction function like median has no dtype args
     except TypeError:
         batched_time_series_data = func(
-            time_series_data[:max_size].reshape((-1, batch_size)), axis=1)
+            time_series_data[:processed_sample_size].reshape((-1, batch_size)),
+            axis=1)
 
     if with_centering or with_scaling:
+        if not isinstance(scale, str):
+            msg = 'scale is not a `str`.\nScale = {} is not '.format(scale)
+            msg += 'a valid method to scale and standardize a dataset.'
+            raise CVGError(msg)
+
+        if scale not in scale_methods:
+            msg = 'method "{}" not found. Valid methods '.format(scale)
+            msg += 'to scale and standardize a dataset are:\n\t- '
+            msg += '{}'.format('\n\t- '.join(scale_methods))
+            raise CVGError(msg)
+
+        scale_func = scale_methods[scale]
+
         batched_time_series_data = scale_func(batched_time_series_data,
                                               with_centering=with_centering,
                                               with_scaling=with_scaling)
