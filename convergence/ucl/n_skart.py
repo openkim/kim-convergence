@@ -108,19 +108,19 @@ class N_SKART(UCLBase):
         self.reset()
 
     def estimate_equilibration_length(
-            self,
-            time_series_data,
-            *,
-            # unused input parmeters in N-SKART UCL module
-            # estimate_equilibration_length interface
-            si=_DEFAULT_SI,
-            nskip=_DEFAULT_NSKIP,
-            fft=_DEFAULT_FFT,
-            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-            ignore_end=_DEFAULT_IGNORE_END,
-            batch_size=_DEFAULT_BATCH_SIZE,
-            scale=_DEFAULT_SCALE_METHOD,
-            with_centering=_DEFAULT_WITH_CENTERING,
+        self,
+        time_series_data,
+        *,
+        # unused input parmeters in N-SKART UCL module
+        # estimate_equilibration_length interface
+        si=_DEFAULT_SI,
+        nskip=_DEFAULT_NSKIP,
+        fft=_DEFAULT_FFT,
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
+        ignore_end=_DEFAULT_IGNORE_END,
+        batch_size=_DEFAULT_BATCH_SIZE,
+        scale=_DEFAULT_SCALE_METHOD,
+        with_centering=_DEFAULT_WITH_CENTERING,
             with_scaling=_DEFAULT_WITH_SCALING):
         r"""Estimate the equilibration point in a time series data.
 
@@ -180,8 +180,9 @@ class N_SKART(UCLBase):
         # Batch the data, Y_j(m) : j = 1 ... k
         x_batch = batch(time_series_data[:processed_sample_size],
                         batch_size=self.batch_size,
-                        with_centering=False,
-                        with_scaling=False)
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling)
 
         dependent_data = True
         sufficient_data = True
@@ -256,7 +257,10 @@ class N_SKART(UCLBase):
 
                     # Rebatch the data
                     x_batch = batch(time_series_data[:processed_sample_size],
-                                    batch_size=self.batch_size)
+                                    batch_size=self.batch_size,
+                                    scale=scale,
+                                    with_centering=with_centering,
+                                    with_scaling=with_scaling)
                 else:
                     msg = '{} number of input '.format(time_series_data_size)
                     msg += 'data points is not sufficient to be used by '
@@ -395,7 +399,11 @@ class N_SKART(UCLBase):
         sliced_time = time_series_data[idx:]
 
         # Batch the data
-        x_batch = batch(sliced_time, batch_size=self.batch_size)
+        x_batch = batch(sliced_time,
+                        batch_size=self.batch_size,
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling)
 
         # Perform step 6 of the N-Skart algorithm
 
@@ -407,10 +415,8 @@ class N_SKART(UCLBase):
         x_batch_var = x_batch.var(ddof=1)
 
         # compute the sample estimator of the lag-one correlation
-        lag1_correlation = \
-            auto_correlate(x_batch,
-                           nlags=1,
-                           fft=(fft and self.kp_number_batches > 30))[1]
+        lag1_correlation = auto_correlate(
+            x_batch, nlags=1, fft=(fft and x_batch.size > 30))[1]
 
         # compute the correlation adjustment A <- (1 + \phi) / (1 - \phi)
         correlation_adjustment = \
