@@ -61,7 +61,7 @@ def first_order_autoregressive_process(*,
             (default: np.random.RandomState(12345))
 
     Returns:
-        1darray: x
+        1darray: x (first-order autoregressive process array)
 
     """
     x = np.ones(n) * mu
