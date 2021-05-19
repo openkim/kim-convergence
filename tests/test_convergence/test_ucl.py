@@ -13,6 +13,64 @@ except:
 from convergence import CVGError
 
 
+def first_order_autoregressive_process(*,
+                                       mu=100,
+                                       rho=0.995,
+                                       x0=0,
+                                       n=10000,
+                                       rng=np.random.RandomState(12345)):
+    r"""Return the first-order autoregressive process array of n samples.
+
+    The first-order autoregressive process defined via the relation,
+
+    .. math::
+
+        X_k = \mu + \rho (X_{k-1} - \mu) + \epsilon_k,~~\text{for~}k = 1,2,\cdots,
+
+    where :math:`\mu=100`, :math:`\rho=0.995`, and the error
+    :math:`\{\epsilon_k\}` are i.i.d. standard normal random variables, and the
+    initial state is :math:`X_0=0`. The steady-state distribution of this
+    process is normal with mean :math:`\mu` and standard deviation
+    :math:`\sigma = \frac{1}{\sqrt{1-\rho^2}} = 10.0125`.
+    The initial state is located about 10 standard deviations below the steady
+    state mean.
+
+    For 3.75% Precision and Nominal 95% CIs
+
+    SPSTS
+        Avg. sample size = 85,857
+        Avg. CI half-length = 1.507
+        St.Dev. CI half-length = 0.472
+
+    Skart
+        Avg. sample size = 21,947
+        Avg. CI half-length = 3.172
+        St.Dev. CI half-length = 0.363
+
+    ASAP3
+        Avg. sample size = 41,208
+        Avg. CI half-length = 2.820
+        St.Dev. CI half-length = 0.507
+
+    Args:
+        mu (float, optional): mean mu. (default: 100)
+        rho (float, optional): rho. (default: 0.995)
+        x0 (float, optional): the initial state. (default: 0.0)
+        n (int, optional): number of samples. (default: 10000)
+        rng (`np.random.RandomState()`, optional): random number generator.
+            (default: np.random.RandomState(12345))
+
+    Returns:
+        1darray: x
+
+    """
+    x = np.ones(n) * mu
+    x[0] = x0
+    for k in range(1, n):
+        x[k] += rho * (x[k - 1] - mu) + rng.randn()
+    return x
+
+
 class TestUCLModule(unittest.TestCase):
     """Test ucl module components."""
 
@@ -649,3 +707,67 @@ class TestUCLModule(unittest.TestCase):
 
         self.assertTrue(test_passed)
         self.assertAlmostEqual(skart.mean, 10, places=1)
+
+    def test_comparison(self):
+        """Test comparison."""
+        x = first_order_autoregressive_process()
+
+        print()
+
+        truncated, truncated_index = cr.mser_m(x)
+        self.assertTrue(truncated)
+
+        print()
+        print('truncated={}, truncated_index={}'.format(
+            truncated, truncated_index))
+
+        y = x[truncated_index:]
+
+        equilibration_index, si_value = cr.estimate_equilibration_length(y)
+
+        print()
+        print('equilibration_index={}, si_value={}'.format(
+            equilibration_index, si_value))
+
+        z = y[equilibration_index:]
+
+        heidel_welch = cr.HeidelbergerWelch()
+        heidel_welch.set_heidel_welch_constants()
+        ucl_heidel_welch = heidel_welch.ucl(z)
+
+        print()
+        print('ucl_heidel_welch={}'.format(ucl_heidel_welch))
+        print('mean={}'.format(heidel_welch.mean))
+        print('std={}'.format(heidel_welch.std))
+
+        usamples = cr.UncorrelatedSamples()
+        ucl_usamples = usamples.ucl(z)
+
+        print()
+        print('ucl_usamples={}'.format(ucl_usamples))
+        print('mean={}'.format(usamples.mean))
+        print('std={}'.format(usamples.std))
+
+        mser = cr.MSER_m()
+        ucl_mser = mser.ucl(z)
+
+        print()
+        print('ucl_mser={}'.format(ucl_mser))
+        print('mean={}'.format(mser.mean))
+        print('std={}'.format(mser.std))
+
+        mser_y = cr.MSER_m_y()
+        ucl_mser_y = mser_y.ucl(z)
+
+        print()
+        print('ucl_mser_y={}'.format(ucl_mser_y))
+        print('mean={}'.format(mser_y.mean))
+        print('std={}'.format(mser_y.std))
+
+        skart = cr.N_SKART()
+        ucl_skart = skart.ucl(z)
+
+        print()
+        print('ucl_skart={}'.format(ucl_skart))
+        print('mean={}'.format(skart.mean))
+        print('std={}'.format(skart.std))
