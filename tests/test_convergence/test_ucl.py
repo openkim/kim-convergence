@@ -17,7 +17,7 @@ def first_order_autoregressive_process(*,
                                        mu=100,
                                        rho=0.995,
                                        x0=0,
-                                       n=10000,
+                                       n=25000,
                                        rng=np.random.RandomState(12345)):
     r"""Return the first-order autoregressive process array of n samples.
 
@@ -56,7 +56,7 @@ def first_order_autoregressive_process(*,
         mu (float, optional): mean mu. (default: 100)
         rho (float, optional): rho. (default: 0.995)
         x0 (float, optional): the initial state. (default: 0.0)
-        n (int, optional): number of samples. (default: 10000)
+        n (int, optional): number of samples. (default: 25000)
         rng (`np.random.RandomState()`, optional): random number generator.
             (default: np.random.RandomState(12345))
 
