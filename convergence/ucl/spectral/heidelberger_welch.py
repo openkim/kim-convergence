@@ -652,12 +652,15 @@ def heidelberger_welch_relative_half_width_estimate(
 
     """
     heidelberger_welch = HeidelbergerWelch() if obj is None else obj
-    relative_half_width_estimate = \
-        heidelberger_welch.relative_half_width_estimate(
-            time_series_data=time_series_data,
-            confidence_coefficient=confidence_coefficient,
-            heidel_welch_number_points=heidel_welch_number_points,
-            fft=fft,
-            test_size=test_size,
-            train_size=train_size)
+    try:
+        relative_half_width_estimate = \
+            heidelberger_welch.relative_half_width_estimate(
+                time_series_data=time_series_data,
+                confidence_coefficient=confidence_coefficient,
+                heidel_welch_number_points=heidel_welch_number_points,
+                fft=fft,
+                test_size=test_size,
+                train_size=train_size)
+    except CVGError:
+        raise CVGError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

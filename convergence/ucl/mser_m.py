@@ -469,12 +469,15 @@ def mser_m_relative_half_width_estimate(
 
     """
     mser = MSER_m() if obj is None else obj
-    relative_half_width_estimate = \
-        mser.relative_half_width_estimate(
-            time_series_data=time_series_data,
-            confidence_coefficient=confidence_coefficient,
-            batch_size=batch_size,
-            scale=scale,
-            with_centering=with_centering,
-            with_scaling=with_scaling)
+    try:
+        relative_half_width_estimate = \
+            mser.relative_half_width_estimate(
+                time_series_data=time_series_data,
+                confidence_coefficient=confidence_coefficient,
+                batch_size=batch_size,
+                scale=scale,
+                with_centering=with_centering,
+                with_scaling=with_scaling)
+    except CVGError:
+        raise CVGError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

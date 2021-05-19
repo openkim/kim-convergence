@@ -359,14 +359,17 @@ def uncorrelated_samples_relative_half_width_estimate(
 
     """
     uncorrelated_samples = UncorrelatedSamples() if obj is None else obj
-    relative_half_width_estimate = \
-        uncorrelated_samples.relative_half_width_estimate(
-            time_series_data=time_series_data,
-            confidence_coefficient=confidence_coefficient,
-            population_standard_deviation=population_standard_deviation,
-            si=si,
-            fft=fft,
-            minimum_correlation_time=minimum_correlation_time,
-            uncorrelated_sample_indices=uncorrelated_sample_indices,
-            sample_method=sample_method)
+    try:
+        relative_half_width_estimate = \
+            uncorrelated_samples.relative_half_width_estimate(
+                time_series_data=time_series_data,
+                confidence_coefficient=confidence_coefficient,
+                population_standard_deviation=population_standard_deviation,
+                si=si,
+                fft=fft,
+                minimum_correlation_time=minimum_correlation_time,
+                uncorrelated_sample_indices=uncorrelated_sample_indices,
+                sample_method=sample_method)
+    except CVGError:
+        raise CVGError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

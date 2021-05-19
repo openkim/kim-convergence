@@ -538,9 +538,12 @@ def n_skart_relative_half_width_estimate(
 
     """
     n_skart = N_SKART() if obj is None else obj
-    relative_half_width_estimate = n_skart.relative_half_width_estimate(
-        time_series_data=time_series_data,
-        equilibration_length_estimate=equilibration_length_estimate,
-        confidence_coefficient=confidence_coefficient,
-        fft=fft)
+    try:
+        relative_half_width_estimate = n_skart.relative_half_width_estimate(
+            time_series_data=time_series_data,
+            equilibration_length_estimate=equilibration_length_estimate,
+            confidence_coefficient=confidence_coefficient,
+            fft=fft)
+    except CVGError:
+        raise CVGError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate
