@@ -357,6 +357,7 @@ class MSER_m(UCLBase):
         # compute and set the sample standard deviation (sample variance of the
         # truncated batch means)
         self.std = x_batch.std()
+        self.sample_size = number_batches
 
         # Compute the standard deviation of the mean within the dataset. The
         # standard_error_of_mean provides a measurement for spread. The smaller

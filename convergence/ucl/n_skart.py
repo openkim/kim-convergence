@@ -412,6 +412,7 @@ class N_SKART(UCLBase):
         # compute and set the mean to be used later in interval method
         self.mean = x_batch.mean()
         self.std = x_batch.std()
+        self.sample_size = x_batch.size
 
         # compute the sample variance
         x_batch_var = x_batch.var(ddof=1)

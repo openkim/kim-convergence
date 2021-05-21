@@ -420,10 +420,10 @@ class HeidelbergerWelch(UCLBase):
             msg += 'at least needs {} data points.'.format(self.heidel_welch_n)
             raise CVGError(msg)
 
-        n_batches = self.heidel_welch_n
-        batch_size = time_series_data_size // n_batches
+        number_batches = self.heidel_welch_n
+        batch_size = time_series_data_size // number_batches
 
-        processed_sample_size = n_batches * batch_size
+        processed_sample_size = number_batches * batch_size
 
         # Batch the data
         x_batch = batch(time_series_data[:processed_sample_size],
@@ -436,10 +436,11 @@ class HeidelbergerWelch(UCLBase):
         # to be used later in the CI method
         self.mean = time_series_data.mean()
         self.std = x_batch.std()
+        self.sample_size = number_batches
 
         # Compute the periodogram of the sequence x_batch
         period = modified_periodogram(x_batch,
-                                      fft=(fft and n_batches > 30),
+                                      fft=(fft and number_batches > 30),
                                       with_mean=False)
 
         left_range = range(0, period.size, 2)
@@ -524,7 +525,7 @@ class HeidelbergerWelch(UCLBase):
 
         # Calculate the approximately unbiased estimate of the variance of the
         # sample mean
-        sigma_sq = heidel_welch_c * np.exp(unbiased_estimate) / n_batches
+        sigma_sq = heidel_welch_c * np.exp(unbiased_estimate) / number_batches
 
         # The standard deviation of the mean within the dataset. The
         # standard_error_of_mean provides a measurement for spread. The smaller
