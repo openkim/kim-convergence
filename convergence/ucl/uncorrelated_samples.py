@@ -176,18 +176,21 @@ class UncorrelatedSamples(UCLBase):
         # compute mean
         self.mean = uncorrelated_samples.mean()
 
+        # Compute the sample standard deviation
+        self.std = uncorrelated_samples.std()
+        self.sample_size = uncorrelated_samples_size
+
         # If the population standard deviation is unknown
         if population_standard_deviation is None:
-            # Compute the sample standard deviation
-            self.std = uncorrelated_samples.std()
+            # Compute the standard deviation of the mean within the dataset.
+            # The standard_error_of_mean provides a measurement for spread.
+            # The smaller the spread the more accurate.
+            standard_error_of_mean = self.std / sqrt(uncorrelated_samples_size)
+
         # If the population standard deviation is known
         else:
-            self.std = population_standard_deviation
-
-        # Compute the standard deviation of the mean within the dataset. The
-        # standard_error_of_mean provides a measurement for spread. The smaller
-        # the spread the more accurate.
-        standard_error_of_mean = self.std / sqrt(uncorrelated_samples_size)
+            standard_error_of_mean = \
+                population_standard_deviation / sqrt(uncorrelated_samples_size)
 
         # Compute the t_distribution confidence interval. When using the
         # t-distribution to compute a confidence interval, df = n - 1.
