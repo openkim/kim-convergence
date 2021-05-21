@@ -14,7 +14,7 @@ def t_test(sample_mean: float,
            sample_std: float,
            sample_size: int,
            population_mean: float,
-           significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT):
+           significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """T-test for the mean.
 
     Calculate the T-test for the mean. This is a two-sided test for the null
