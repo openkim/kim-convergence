@@ -6,6 +6,7 @@ import numpy as np
 from .ucl_base import UCLBase
 from convergence import \
     CVGError, \
+    CVGSampleSizeError, \
     cvg_warning, \
     t_inv_cdf, \
     time_series_data_si, \
@@ -130,7 +131,7 @@ class UncorrelatedSamples(UCLBase):
             msg = '{} input data points '.format(time_series_data_size)
             msg += 'are not sufficient to be used by "UCL".\n'
             msg += '"UCL" at least needs 5 data points.'
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
@@ -167,7 +168,7 @@ class UncorrelatedSamples(UCLBase):
             if uncorrelated_samples_size < 2:
                 msg = '{} uncorrelated '.format(uncorrelated_samples_size)
                 msg += 'sample points are not sufficient to be used by "UCL".'
-                raise CVGError(msg)
+                raise CVGSampleSizeError(msg)
 
             msg = '{} uncorrelated sample '.format(uncorrelated_samples_size)
             msg += 'points are not sufficient to be used by "UCL".'

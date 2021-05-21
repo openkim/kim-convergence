@@ -7,6 +7,7 @@ from .ucl_base import UCLBase
 from convergence import \
     batch, \
     CVGError, \
+    CVGSampleSizeError, \
     t_inv_cdf
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
@@ -171,7 +172,7 @@ def mser_m(time_series_data,
         msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
         msg += 'Wrong number of batches is requested to be ignored '
         msg += 'from the total {} batches.'.format(number_batches)
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
 
     # To find the optimal truncation point in MSER-m
 

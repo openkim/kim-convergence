@@ -7,6 +7,7 @@ from .mser_m import MSER_m
 from convergence import \
     batch, \
     CVGError, \
+    CVGSampleSizeError, \
     randomness_test, \
     t_inv_cdf
 from convergence._default import \
@@ -121,7 +122,7 @@ class MSER_m_y(MSER_m):
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "MSER_m_y".\n"MSER_m_y" at '
             msg += 'least needs 10 data points.'
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             msg = 'confidence_coefficient = {} '.format(confidence_coefficient)

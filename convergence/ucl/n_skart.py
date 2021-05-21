@@ -7,6 +7,7 @@ from .ucl_base import UCLBase
 from convergence import \
     batch, \
     CVGError, \
+    CVGSampleSizeError, \
     cvg_warning, \
     skew, \
     randomness_test, \
@@ -156,7 +157,7 @@ class N_SKART(UCLBase):
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "N-Skart".\n"N-Skart" at '
             msg += 'least needs {} data points.'.format(self.k_number_batches)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
 
         # Reset the parameters for run-length control
         # cases, where we call this function in a loop
@@ -390,7 +391,7 @@ class N_SKART(UCLBase):
             msg = '{} input data points are '.format(time_series_data_size)
             msg += 'not sufficient to be used by "N-Skart".\n"N-Skart" at '
             msg += 'least needs {} data points.'.format(processed_sample_size)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
 
         # step 5b
 

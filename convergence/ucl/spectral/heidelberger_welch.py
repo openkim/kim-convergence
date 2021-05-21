@@ -8,6 +8,7 @@ from convergence.ucl import UCLBase
 from convergence import \
     batch, \
     CVGError, \
+    CVGSampleSizeError, \
     modified_periodogram, \
     t_inv_cdf, \
     train_test_split
@@ -418,7 +419,7 @@ class HeidelbergerWelch(UCLBase):
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by this method.\n"HeidelbergerWelch" '
             msg += 'at least needs {} data points.'.format(self.heidel_welch_n)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
 
         number_batches = self.heidel_welch_n
         batch_size = time_series_data_size // number_batches
