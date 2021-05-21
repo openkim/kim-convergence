@@ -6,6 +6,7 @@ from .beta_dist import \
     betai, \
     betai_cdf_ccdf, \
     betai_cdf
+from .chi_square_test import chi_square_test
 from .normal_dist import \
     s_normal_inv_cdf, \
     normal_inv_cdf, \
@@ -38,6 +39,7 @@ __all__ = [
     'betai',
     'betai_cdf_ccdf',
     'betai_cdf',
+    'chi_square_test',
     's_normal_inv_cdf',
     'normal_inv_cdf',
     'normal_interval',
