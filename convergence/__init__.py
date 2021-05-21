@@ -1,6 +1,6 @@
 r"""Convergence package."""
 
-from .err import CVGError, cvg_warning
+from .err import CVGError, cvg_warning, cvg_check
 from .stats import \
     beta, \
     betacf, \
@@ -84,11 +84,13 @@ from .ucl import \
     MSER_m_y, \
     mser_m_y_ucl, \
     mser_m_y_ci, \
-    mser_m_y_relative_half_width_estimate
+    mser_m_y_relative_half_width_estimate, \
+    ucl_methods
 
 __all__ = [
     'CVGError',
     'cvg_warning',
+    'cvg_check',
     # stats module
     'beta',
     'betacf',
@@ -161,7 +163,6 @@ __all__ = [
     'n_skart_ucl',
     'n_skart_ci',
     'n_skart_relative_half_width_estimate',
-    'ucl_methods',
     'MSER_m',
     'mser_m_ucl',
     'mser_m_ci',
@@ -171,6 +172,7 @@ __all__ = [
     'mser_m_y_ucl',
     'mser_m_y_ci',
     'mser_m_y_relative_half_width_estimate',
+    'ucl_methods',
 ]
 
 __author__ = 'Yaser Afshar <yafshar@openkim.org>'
