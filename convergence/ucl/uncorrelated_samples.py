@@ -43,6 +43,8 @@ class UncorrelatedSamples(UCLBase):
     """UncorrelatedSamples class."""
 
     def __init__(self):
+        self.name = 'uncorrelated_sample'
+
         UCLBase.__init__(self)
 
     def ucl(self,

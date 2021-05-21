@@ -38,13 +38,36 @@ class UCLBase:
     """Upper Confidence Limit base class."""
 
     def __init__(self):
+        """Constructor."""
         self.reset()
 
     def reset(self):
+        self.name_ = 'base'
         self.indices_ = None
         self.si_ = None
         self.mean_ = None
         self.std_ = None
+        self.upper_confidence_limit = None
+
+    @property
+    def name(self):
+        """Get the name."""
+        return self.name_
+
+    @name.setter
+    def name(self, value):
+        """Set the name.
+
+        Args:
+            value (str): name.
+
+        """
+        self.name_ = value
+
+    @name.deleter
+    def name(self):
+        """Delete the name."""
+        del self.name_
 
     @property
     def indices(self):
@@ -66,12 +89,13 @@ class UCLBase:
         """Delete the indices."""
         del self.indices_
 
-    def set_indices(self,
-                    time_series_data,
-                    *,
-                    si=_DEFAULT_SI,
-                    fft=_DEFAULT_FFT,
-                    minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
+    def set_indices(
+            self,
+            time_series_data,
+            *,
+            si=_DEFAULT_SI,
+            fft=_DEFAULT_FFT,
+            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
         r"""Set the indices.
 
         Args:
@@ -95,7 +119,7 @@ class UCLBase:
 
         si_value = self.si
 
-        self.indices_ = uncorrelated_time_series_data_sample_indices(
+        self.indices = uncorrelated_time_series_data_sample_indices(
             time_series_data=time_series_data,
             si=si_value,
             fft=fft,
@@ -121,12 +145,13 @@ class UCLBase:
         """Delete the si."""
         del self.si_
 
-    def set_si(self,
-               time_series_data,
-               *,
-               si=_DEFAULT_SI,
-               fft=_DEFAULT_FFT,
-               minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
+    def set_si(
+            self,
+            time_series_data,
+            *,
+            si=_DEFAULT_SI,
+            fft=_DEFAULT_FFT,
+            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
         r"""Set the si (statistical inefficiency).
 
         Args:
@@ -142,7 +167,7 @@ class UCLBase:
                 (default: None)
 
         """
-        self.si_ = time_series_data_si(
+        self.si = time_series_data_si(
             time_series_data=time_series_data,
             si=si,
             fft=fft,
@@ -189,19 +214,19 @@ class UCLBase:
         del self.std_
 
     def estimate_equilibration_length(
-        self,
-        time_series_data,
-        *,
-        si=_DEFAULT_SI,
-        nskip=_DEFAULT_NSKIP,
-        fft=_DEFAULT_FFT,
-        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-        ignore_end=_DEFAULT_IGNORE_END,
-        # unused input parmeters in
-        # estimate_equilibration_length interface
-        batch_size=_DEFAULT_BATCH_SIZE,
-        scale=_DEFAULT_SCALE_METHOD,
-        with_centering=_DEFAULT_WITH_CENTERING,
+            self,
+            time_series_data,
+            *,
+            si=_DEFAULT_SI,
+            nskip=_DEFAULT_NSKIP,
+            fft=_DEFAULT_FFT,
+            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
+            ignore_end=_DEFAULT_IGNORE_END,
+            # unused input parmeters in
+            # estimate_equilibration_length interface
+            batch_size=_DEFAULT_BATCH_SIZE,
+            scale=_DEFAULT_SCALE_METHOD,
+            with_centering=_DEFAULT_WITH_CENTERING,
             with_scaling=_DEFAULT_WITH_SCALING):
         """Estimate the equilibration point in a time series data."""
         equilibration_index_estimate, si_value = estimate_equilibration_length(
@@ -259,7 +284,7 @@ class UCLBase:
            uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
            sample_method=_DEFAULT_SAMPLE_METHOD):
         """Approximate the confidence interval of the mean."""
-        upper_confidence_limit = self.ucl(
+        self.upper_confidence_limit = self.ucl(
             time_series_data=time_series_data,
             confidence_coefficient=confidence_coefficient,
             equilibration_length_estimate=equilibration_length_estimate,
@@ -276,8 +301,8 @@ class UCLBase:
             minimum_correlation_time=minimum_correlation_time,
             uncorrelated_sample_indices=uncorrelated_sample_indices,
             sample_method=sample_method)
-        lower_interval = self.mean - upper_confidence_limit
-        upper_interval = self.mean + upper_confidence_limit
+        lower_interval = self.mean - self.upper_confidence_limit
+        upper_interval = self.mean + self.upper_confidence_limit
         return lower_interval, upper_interval
 
     def relative_half_width_estimate(
@@ -300,7 +325,7 @@ class UCLBase:
             uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
             sample_method=_DEFAULT_SAMPLE_METHOD):
         """Get the relative half width estimate."""
-        upper_confidence_limit = self.ucl(
+        self.upper_confidence_limit = self.ucl(
             time_series_data=time_series_data,
             confidence_coefficient=confidence_coefficient,
             equilibration_length_estimate=equilibration_length_estimate,
@@ -325,5 +350,6 @@ class UCLBase:
             msg += 'for the close to zero mean = {}'.format(self.mean)
             raise CVGError(msg)
 
-        relative_half_width_estimate = upper_confidence_limit / fabs(self.mean)
+        relative_half_width_estimate = \
+            self.upper_confidence_limit / fabs(self.mean)
         return relative_half_width_estimate

@@ -240,6 +240,8 @@ class MSER_m(UCLBase):
     """
 
     def __init__(self):
+        self.name = 'mser_m'
+
         UCLBase.__init__(self)
 
     def estimate_equilibration_length(

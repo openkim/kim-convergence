@@ -62,6 +62,8 @@ class MSER_m_y(MSER_m):
     """
 
     def __init__(self):
+        self.name = 'mser_m_y'
+
         MSER_m.__init__(self)
 
         # randomness test significance level \alpha = 0.2
