@@ -47,6 +47,7 @@ class UCLBase:
         self.si_ = None
         self.mean_ = None
         self.std_ = None
+        self.sample_size_ = None
         self.upper_confidence_limit = None
 
     @property
@@ -212,6 +213,26 @@ class UCLBase:
     def std(self):
         """Delete the std."""
         del self.std_
+
+    @property
+    def sample_size(self):
+        """Get the sample_size."""
+        return self.sample_size_
+
+    @sample_size.setter
+    def sample_size(self, value):
+        """Set the sample_size.
+
+        Args:
+            value (int): sample_size value.
+
+        """
+        self.sample_size_ = value
+
+    @sample_size.deleter
+    def sample_size(self):
+        """Delete the sample_size."""
+        del self.sample_size_
 
     def estimate_equilibration_length(
             self,
