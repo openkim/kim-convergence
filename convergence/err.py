@@ -66,7 +66,11 @@ def _check_isfinite(func):
     return wrapper
 
 
-def cvg_check(var, var_name, var_type=None, var_lower_bound=0):
+def cvg_check(var,
+              var_name,
+              var_type=None,
+              var_lower_bound=0,
+              var_upper_bound=None):
     """Check the variable type and lower bound.
 
     Args:
@@ -75,19 +79,47 @@ def cvg_check(var, var_name, var_type=None, var_lower_bound=0):
         var_type (type, optional): variable type. (default: None)
         var_lower_bound (var_type, optional): variable lower bound.
             (default: 0)
+        var_upper_bound (var_type, optional): variable upper bound.
+            (default: None)
 
     """
-    if var_type is None:
-        if var < var_lower_bound:
-            msg = '"{}" must be '.format(var_name)
-            msg += 'greater than or equal {}.'.format(var_lower_bound)
-            raise CVGError(msg)
-    else:
-        if not isinstance(var, var_type):
-            msg = '"{}" must be a `{}`.'.format(var_name, var_type)
-            raise CVGError(msg)
+    if var_upper_bound is None:
+        if var_type is None:
+            if var < var_lower_bound:
+                msg = '"{}" must be '.format(var_name)
+                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                raise CVGError(msg)
+        else:
+            if not isinstance(var, var_type):
+                msg = '"{}" must be a `{}`.'.format(var_name, var_type)
+                raise CVGError(msg)
 
-        if var < var_lower_bound:
-            msg = '"{}" must be a `{}` '.format(var_name, var_type)
-            msg += 'greater than or equal {}.'.format(var_lower_bound)
-            raise CVGError(msg)
+            if var < var_lower_bound:
+                msg = '"{}" must be a `{}` '.format(var_name, var_type)
+                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                raise CVGError(msg)
+    else:
+        if var_type is None:
+            if var < var_lower_bound:
+                msg = '"{}" must be '.format(var_name)
+                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                raise CVGError(msg)
+
+            if var > var_upper_bound:
+                msg = '"{}" must be '.format(var_name)
+                msg += 'smaller than or equal {}.'.format(var_upper_bound)
+                raise CVGError(msg)
+        else:
+            if not isinstance(var, var_type):
+                msg = '"{}" must be a `{}`.'.format(var_name, var_type)
+                raise CVGError(msg)
+
+            if var < var_lower_bound:
+                msg = '"{}" must be a `{}` '.format(var_name, var_type)
+                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                raise CVGError(msg)
+
+            if var > var_upper_bound:
+                msg = '"{}" must be a `{}` '.format(var_name, var_type)
+                msg += 'smaller than or equal {}.'.format(var_upper_bound)
+                raise CVGError(msg)
