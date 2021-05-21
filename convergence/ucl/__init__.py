@@ -62,7 +62,7 @@ from .mser_m_y import \
 
 ucl_methods = {
     'heidel_welch': heidelberger_welch_ucl,
-    'subsample': uncorrelated_samples_ucl,
+    'uncorrelated_sample': uncorrelated_samples_ucl,
     'n_skart': n_skart_ucl,
     'mser_m': mser_m_ucl,
     'mser_m_y': mser_m_y_ucl,
@@ -83,7 +83,6 @@ __all__ = [
     'n_skart_ucl',
     'n_skart_ci',
     'n_skart_relative_half_width_estimate',
-    'ucl_methods',
     'MSER_m',
     'mser_m_ucl',
     'mser_m_ci',
@@ -93,4 +92,5 @@ __all__ = [
     'mser_m_y_ucl',
     'mser_m_y_ci',
     'mser_m_y_relative_half_width_estimate',
+    'ucl_methods',
 ]
