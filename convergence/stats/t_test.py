@@ -30,7 +30,7 @@ def t_test(sample_mean: float,
             below which the null hypothesis will be rejected.
 
     Returns:
-        bool: True for the the expected value (mean) of a sample of independent
+        bool: True for the expected value (mean) of a sample of independent
             observations `x` is equal to the given population mean,
             `population_mean`.
 
