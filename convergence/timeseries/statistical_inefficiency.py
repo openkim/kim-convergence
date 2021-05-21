@@ -11,7 +11,8 @@ from convergence import \
     auto_covariance, \
     auto_correlate, \
     cross_correlate, \
-    CVGError
+    CVGError, \
+    CVGSampleSizeError
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_FFT, \
@@ -88,7 +89,7 @@ def statistical_inefficiency(
     if x_size < 2:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
 
     # minimum amount of correlation function to compute
     if not isinstance(minimum_correlation_time, int):
@@ -240,7 +241,7 @@ def geyer_r_statistical_inefficiency(
     if x_size < 4:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
 
     fft = fft and x_size > 30
 
@@ -380,7 +381,7 @@ def geyer_split_r_statistical_inefficiency(
     if x_size < 8:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
     x_size //= 2
     return geyer_r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
 
@@ -433,7 +434,7 @@ def geyer_split_statistical_inefficiency(
     if x_size < 8:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
 
     # Special case if timeseries is constant.
     _std = np.std(x)

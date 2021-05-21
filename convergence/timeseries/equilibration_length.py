@@ -13,7 +13,7 @@ import numpy as np
 
 from .statistical_inefficiency import si_methods
 
-from convergence import CVGError, cvg_check
+from convergence import CVGError, CVGSampleSizeError #, cvg_check
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_SI, \
@@ -140,26 +140,26 @@ def estimate_equilibration_length(
         if time_series_data_size < 4:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
         ignore_end = max(3, ignore_end)
     elif si == 'geyer_split_r_statistical_inefficiency':
         if time_series_data_size < 8:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
         ignore_end = max(7, ignore_end)
     elif si == 'geyer_split_statistical_inefficiency':
         if time_series_data_size < 8:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
         ignore_end = max(7, ignore_end)
 
     if time_series_data_size <= ignore_end:
         msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
         msg = 'Wrong number of data points is requested to be '
         msg += 'ignored from {} total points.'.format(time_series_data_size)
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
 
     # cvg_check(number_of_cores, 'number_of_cores', int, 1,
     #           multiprocessing.cpu_count())
