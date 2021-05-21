@@ -8,11 +8,12 @@ uncorrelated samples.
 """
 
 from math import isclose
+# import multiprocessing
 import numpy as np
 
 from .statistical_inefficiency import si_methods
 
-from convergence import CVGError
+from convergence import CVGError, cvg_check
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_SI, \
@@ -23,7 +24,8 @@ from convergence._default import \
     _DEFAULT_BATCH_SIZE, \
     _DEFAULT_SCALE_METHOD, \
     _DEFAULT_WITH_CENTERING, \
-    _DEFAULT_WITH_SCALING
+    _DEFAULT_WITH_SCALING, \
+    _DEFAULT_NUMBER_OF_CORES
 
 
 __all__ = [
@@ -44,7 +46,8 @@ def estimate_equilibration_length(
         batch_size=_DEFAULT_BATCH_SIZE,
         scale=_DEFAULT_SCALE_METHOD,
         with_centering=_DEFAULT_WITH_CENTERING,
-        with_scaling=_DEFAULT_WITH_SCALING):
+        with_scaling=_DEFAULT_WITH_SCALING,
+        number_of_cores=_DEFAULT_NUMBER_OF_CORES):
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the
@@ -157,6 +160,9 @@ def estimate_equilibration_length(
         msg = 'Wrong number of data points is requested to be '
         msg += 'ignored from {} total points.'.format(time_series_data_size)
         raise CVGError(msg)
+
+    # cvg_check(number_of_cores, 'number_of_cores', int, 1,
+    #           multiprocessing.cpu_count())
 
     # Special case if timeseries is constant.
     _std = time_series_data.std()

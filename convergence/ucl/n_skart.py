@@ -29,7 +29,8 @@ from convergence._default import \
     _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
     _DEFAULT_SAMPLE_METHOD, \
     _DEFAULT_NSKIP, \
-    _DEFAULT_IGNORE_END
+    _DEFAULT_IGNORE_END, \
+    _DEFAULT_NUMBER_OF_CORES
 
 
 __all__ = [
@@ -123,7 +124,8 @@ class N_SKART(UCLBase):
         batch_size=_DEFAULT_BATCH_SIZE,
         scale=_DEFAULT_SCALE_METHOD,
         with_centering=_DEFAULT_WITH_CENTERING,
-            with_scaling=_DEFAULT_WITH_SCALING):
+        with_scaling=_DEFAULT_WITH_SCALING,
+        number_of_cores=_DEFAULT_NUMBER_OF_CORES):
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the

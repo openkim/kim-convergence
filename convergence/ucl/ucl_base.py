@@ -27,7 +27,8 @@ from convergence._default import \
     _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
     _DEFAULT_SAMPLE_METHOD, \
     _DEFAULT_NSKIP, \
-    _DEFAULT_IGNORE_END
+    _DEFAULT_IGNORE_END, \
+    _DEFAULT_NUMBER_OF_CORES
 
 __all__ = [
     'UCLBase',
@@ -248,7 +249,8 @@ class UCLBase:
             batch_size=_DEFAULT_BATCH_SIZE,
             scale=_DEFAULT_SCALE_METHOD,
             with_centering=_DEFAULT_WITH_CENTERING,
-            with_scaling=_DEFAULT_WITH_SCALING):
+            with_scaling=_DEFAULT_WITH_SCALING,
+            number_of_cores=_DEFAULT_NUMBER_OF_CORES):
         """Estimate the equilibration point in a time series data."""
         equilibration_index_estimate, si_value = estimate_equilibration_length(
             time_series_data=time_series_data,
