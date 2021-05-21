@@ -77,7 +77,7 @@ class TimeseriesModule(unittest.TestCase):
         #     sample_size=None,
         #     relative_accuracy=0.01,
         #     confidence_coefficient=0.95,
-        #     confidence_interval_approximation_method='subsample',
+        #     confidence_interval_approximation_method='uncorrelated_sample',
         #     fp="return",
         #     fp_format='edn')
 
@@ -101,7 +101,7 @@ class TimeseriesModule(unittest.TestCase):
         #     sample_size=30,
         #     relative_accuracy=0.01,
         #     confidence_coefficient=0.95,
-        #     confidence_interval_approximation_method='subsample',
+        #     confidence_interval_approximation_method='uncorrelated_sample',
         #     fp="return",
         #     fp_format='json')
 
@@ -162,7 +162,7 @@ class TimeseriesModule(unittest.TestCase):
         #     sample_size=None,
         #     relative_accuracy=0.10,
         #     confidence_coefficient=0.95,
-        #     confidence_interval_approximation_method='subsample',
+        #     confidence_interval_approximation_method='uncorrelated_sample',
         #     fp="return",
         #     fp_format='edn')
 
@@ -193,7 +193,7 @@ class TimeseriesModule(unittest.TestCase):
         #     sample_size=None,
         #     relative_accuracy=0.10,
         #     confidence_coefficient=0.95,
-        #     confidence_interval_approximation_method='subsample',
+        #     confidence_interval_approximation_method='uncorrelated_sample',
         #     fp="return",
         #     fp_format='edn')
 
@@ -225,7 +225,7 @@ class TimeseriesModule(unittest.TestCase):
             sample_size=None,
             relative_accuracy=0.10,
             confidence_coefficient=0.95,
-            confidence_interval_approximation_method='subsample',
+            confidence_interval_approximation_method='uncorrelated_sample',
             fp="return",
             fp_format='edn')
 
