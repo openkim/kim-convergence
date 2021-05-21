@@ -16,6 +16,7 @@ from .t_dist import \
     t_cdf, \
     t_inv_cdf, \
     t_interval
+from .t_test import t_test
 from .tools import \
     get_fft_optimal_size, \
     auto_covariance, \
@@ -45,6 +46,7 @@ __all__ = [
     't_cdf',
     't_inv_cdf',
     't_interval',
+    't_test',
     'get_fft_optimal_size',
     'auto_covariance',
     'auto_correlate',
