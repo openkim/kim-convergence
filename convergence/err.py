@@ -5,6 +5,7 @@ import numpy as np
 
 __all__ = [
     'CVGError',
+    'CVGSampleSizeError',
     'cvg_warning',
     'cvg_check'
 ]
@@ -33,6 +34,11 @@ class CVGError(Exception):
     def __str__(self):
         """Message string representation."""
         return self.msg
+
+
+class CVGSampleSizeError(CVGError):
+    """Raise an exception if there is not enough samples."""
+    pass
 
 
 def cvg_warning(msg):

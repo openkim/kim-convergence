@@ -1,6 +1,10 @@
 r"""Convergence package."""
 
-from .err import CVGError, cvg_warning, cvg_check
+from .err import \
+    CVGError, \
+    CVGSampleSizeError, \
+    cvg_warning, \
+    cvg_check
 from .stats import \
     beta, \
     betacf, \
@@ -91,6 +95,7 @@ from .ucl import \
 
 __all__ = [
     'CVGError',
+    'CVGSampleSizeError',
     'cvg_warning',
     'cvg_check',
     # stats module
