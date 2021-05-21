@@ -96,7 +96,7 @@ def uncorrelated_time_series_data_sample_indices(
         minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
     r"""Return indices of uncorrelated subsamples of the time series data.
 
-    Return indices of the uncorrelated subsample of the time series data.
+    Return indices of the uncorrelated uncorrelated_sample of the time series data.
     Subsample a correlated timeseries to extract an effectively
     uncorrelated dataset. If si (statistical inefficiency) is not provided
     it will be computed.
@@ -147,7 +147,7 @@ def uncorrelated_time_series_data_samples(
         minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
         uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method=_DEFAULT_SAMPLE_METHOD):
-    r"""Get time series data at the sample_method subsample indices.
+    r"""Get time series data at the sample_method uncorrelated_sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
     dataset. If si (statistical inefficiency) is not provided it will be
@@ -171,8 +171,8 @@ def uncorrelated_time_series_data_samples(
             (default: None)
 
     Returns:
-        1darray: subsample of the time series data.
-            time series data at uncorrelated subsample indices.
+        1darray: uncorrelated_sample of the time series data.
+            time series data at uncorrelated uncorrelated_sample indices.
 
     """
     if sample_method is None:
@@ -219,7 +219,7 @@ def time_series_data_uncorrelated_samples(
         fft=_DEFAULT_FFT,
         minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
         uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES):
-    r"""Return time series data at uncorrelated subsample indices.
+    r"""Return time series data at uncorrelated uncorrelated_sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
     dataset. If si (statistical inefficiency) is not provided it will be
@@ -244,8 +244,8 @@ def time_series_data_uncorrelated_samples(
             (default: None)
 
     Returns:
-        1darray: subsample of the time series data.
-            time series data at uncorrelated subsample indices.
+        1darray: uncorrelated_sample of the time series data.
+            time series data at uncorrelated uncorrelated_sample indices.
 
     """
     time_series_data = np.array(time_series_data, copy=False)
@@ -322,7 +322,7 @@ def time_series_data_uncorrelated_random_samples(
             (default: None)
 
     Returns:
-        1darray: subsample of the time series data.
+        1darray: uncorrelated_sample of the time series data.
             random data for each block after blocking the time series data.
 
     """
@@ -411,7 +411,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
             (default: None)
 
     Returns:
-        1darray: subsample of the time series data.
+        1darray: uncorrelated_sample of the time series data.
             average value for each block after blocking the time series
             data.
 
