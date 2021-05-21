@@ -4,7 +4,7 @@ from math import sqrt
 import numpy as np
 
 from .normal_dist import normal_interval
-from convergence import CVGError
+from convergence import CVGError, CVGSampleSizeError
 
 __all__ = [
     'randomness_test',
@@ -67,7 +67,7 @@ def randomness_test(x, significance_level: float) -> bool:
     if x_size < 3:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by randomness_test method.'
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
 
     x_diff_square = np.diff(x, n=1)
     x_diff_square *= x_diff_square
