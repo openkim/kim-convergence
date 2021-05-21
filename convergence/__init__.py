@@ -25,6 +25,7 @@ from .stats import \
     t_cdf, \
     t_inv_cdf, \
     t_interval, \
+    t_test, \
     ZERO_RC_BOUNDS, \
     ZERO_RC
 from .outlier import \
@@ -115,6 +116,7 @@ __all__ = [
     't_cdf',
     't_inv_cdf',
     't_interval',
+    't_test',
     'ZERO_RC_BOUNDS',
     'ZERO_RC',
     #
