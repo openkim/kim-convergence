@@ -6,6 +6,7 @@ import numpy as np
 __all__ = [
     'CVGError',
     'cvg_warning',
+    'cvg_check'
 ]
 
 
@@ -63,3 +64,30 @@ def _check_isfinite(func):
             raise CVGError(msg)
         return func(x, *args, **kwargs)
     return wrapper
+
+
+def cvg_check(var, var_name, var_type=None, var_lower_bound=0):
+    """Check the variable type and lower bound.
+
+    Args:
+        var (var_type): variable
+        var_name (str): variable name
+        var_type (type, optional): variable type. (default: None)
+        var_lower_bound (var_type, optional): variable lower bound.
+            (default: 0)
+
+    """
+    if var_type is None:
+        if var < var_lower_bound:
+            msg = '"{}" must be '.format(var_name)
+            msg += 'greater than or equal {}.'.format(var_lower_bound)
+            raise CVGError(msg)
+    else:
+        if not isinstance(var, var_type):
+            msg = '"{}" must be a `{}`.'.format(var_name, var_type)
+            raise CVGError(msg)
+
+        if var < var_lower_bound:
+            msg = '"{}" must be a `{}` '.format(var_name, var_type)
+            msg += 'greater than or equal {}.'.format(var_lower_bound)
+            raise CVGError(msg)
