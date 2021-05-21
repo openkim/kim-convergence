@@ -7,6 +7,7 @@ from .stats import \
     betai, \
     betai_cdf_ccdf, \
     betai_cdf, \
+    chi_square_test, \
     randomness_test, \
     s_normal_inv_cdf, \
     normal_inv_cdf, \
@@ -62,7 +63,7 @@ from .timeseries import \
     time_series_data_uncorrelated_samples, \
     time_series_data_uncorrelated_random_samples, \
     time_series_data_uncorrelated_block_averaged_samples
-    # run_length_control, \
+# run_length_control, \
 
 from .ucl import \
     HeidelbergerWelch, \
@@ -98,6 +99,7 @@ __all__ = [
     'betai',
     'betai_cdf_ccdf',
     'betai_cdf',
+    'chi_square_test',
     'randomness_test',
     's_normal_inv_cdf',
     'normal_inv_cdf',
