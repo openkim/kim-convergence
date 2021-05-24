@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 
-def s_normal_inv_cdf(p: float):
+def s_normal_inv_cdf(p: float) -> float:
     r"""Compute the standard normal distribution inverse cumulative distribution function.
 
     Compute the inverse cumulative distribution function (percent point
@@ -130,7 +130,7 @@ def s_normal_inv_cdf(p: float):
     return x
 
 
-def normal_inv_cdf(p: float, *, loc=0.0, scale=1.0):
+def normal_inv_cdf(p: float, *, loc=0.0, scale=1.0) -> float:
     r"""Compute the normal distribution inverse cumulative distribution function.
 
     Ars:
@@ -148,7 +148,7 @@ def normal_inv_cdf(p: float, *, loc=0.0, scale=1.0):
     return s_normal_inv_cdf(p) * scale + loc
 
 
-def normal_interval(confidence_level: float, *, loc=0.0, scale=1.0):
+def normal_interval(confidence_level: float, *, loc=0.0, scale=1.0) -> tuple:
     r"""Compute the normal distribution confidence interval.
 
     Compute the normal-distribution confidence interval with equal areas around
