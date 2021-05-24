@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-def beta(a, b):
+def beta(a: float, b: float) -> float:
     r"""Beta function.
 
     Beta function [7]_ is defined as,
@@ -48,7 +48,7 @@ def betacf(a: float,
            *,
            eps=np.finfo(np.float64).resolution,
            max_iteration=200,
-           _fpmin=1.0e-30):
+           _fpmin=1.0e-30) -> float:
     """Continued fraction for incomplete beta function by modified Lentz’s method.
 
     Evaluates continued fraction for incomplete beta function by modified
@@ -147,7 +147,7 @@ def betacf(a: float,
     raise CVGError(msg)
 
 
-def betai(a, b, x):
+def betai(a: float, b: float, x: float) -> float:
     r"""Incomplete beta function.
 
     Incomplete beta function [7]_ is defined as,
@@ -187,7 +187,7 @@ def betai(a, b, x):
     return 1. - _beta
 
 
-def betai_cdf_ccdf(a, b, x):
+def betai_cdf_ccdf(a: float, b: float, x: float) -> tuple:
     r"""Calculate the cumulative distribution of the incomplete beta distribution.
 
     Calculate the cumulative distribution of the incomplete beta
@@ -219,7 +219,7 @@ def betai_cdf_ccdf(a, b, x):
     return cdf, ccdf
 
 
-def betai_cdf(a, b, x):
+def betai_cdf(a: float, b: float, x: float) -> float:
     r"""Calculate the cumulative distribution of the incomplete beta distribution.
 
     Calculate the cumulative distribution of the incomplete beta
