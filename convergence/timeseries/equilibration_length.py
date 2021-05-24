@@ -7,13 +7,13 @@ uncorrelated samples.
 
 """
 
+from joblib import Parallel, delayed
 from math import isclose
-# import multiprocessing
 import numpy as np
 
 from .statistical_inefficiency import si_methods
 
-from convergence import CVGError, CVGSampleSizeError #, cvg_check
+from convergence import CVGError, CVGSampleSizeError
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_SI, \
@@ -33,6 +33,25 @@ __all__ = [
 ]
 
 
+def _estimate_equilibration_length(
+        time_series_data,
+        t,
+        si_func,
+        fft,
+        minimum_correlation_time):
+    # slice a numpy array, the memory is shared
+    # between the slice and the original
+    x = time_series_data[t:]
+    x_size = float(x.size)
+    try:
+        si_value = si_func(
+            x, fft=fft, minimum_correlation_time=minimum_correlation_time)
+    except CVGError:
+        si_value = x_size
+    effective_samples_size = x_size / si_value
+    return effective_samples_size, si_value, t
+
+
 def estimate_equilibration_length(
         time_series_data,
         *,
@@ -41,13 +60,13 @@ def estimate_equilibration_length(
         fft=_DEFAULT_FFT,
         minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
         ignore_end=_DEFAULT_IGNORE_END,
+        number_of_cores=_DEFAULT_NUMBER_OF_CORES,
         # unused input parmeters in Time series module
         # estimate_equilibration_length interface
         batch_size=_DEFAULT_BATCH_SIZE,
         scale=_DEFAULT_SCALE_METHOD,
         with_centering=_DEFAULT_WITH_CENTERING,
-        with_scaling=_DEFAULT_WITH_SCALING,
-        number_of_cores=_DEFAULT_NUMBER_OF_CORES):
+        with_scaling=_DEFAULT_WITH_SCALING):
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the
@@ -69,6 +88,12 @@ def estimate_equilibration_length(
             ``(0, 1)`` and it is the percent of number of points that should be
             ignored. If ``None`` it would be set to the one fourth of the total
             number of points. (default: None)
+        number_of_cores (int, optional): The maximum number of concurrently
+            running jobs, such as the number of Python worker processes or the
+            size of the thread-pool. If -1 all CPUs are used. If 1 is given, no
+            parallel computing code is used at all. For n_jobs below -1,
+            (n_cpus + 1 + n_jobs) are used. Thus for n_jobs = -2, all CPUs but
+            one are used. (default: 1)
 
     Returns:
         int, float: equilibration index, statistical inefficiency estimates
@@ -161,9 +186,6 @@ def estimate_equilibration_length(
         msg += 'ignored from {} total points.'.format(time_series_data_size)
         raise CVGSampleSizeError(msg)
 
-    # cvg_check(number_of_cores, 'number_of_cores', int, 1,
-    #           multiprocessing.cpu_count())
-
     # Special case if timeseries is constant.
     _std = time_series_data.std()
 
@@ -182,6 +204,27 @@ def estimate_equilibration_length(
     upper_bound = time_series_data_size - ignore_end
 
     nskip = min(nskip, upper_bound)
+
+    if number_of_cores != 1:
+        # Compute the statitical inefficiency of a time series
+        results = Parallel(n_jobs=number_of_cores)(
+            delayed(_estimate_equilibration_length)(
+                time_series_data,
+                t,
+                si_func,
+                fft,
+                minimum_correlation_time)
+            for t in range(0, upper_bound, nskip))
+
+        results_array = np.array(results, copy=False)
+
+        # Find the maximum
+        max_index = np.argmax(results_array[:, 0])
+
+        equilibration_index_estimate = results_array[max_index, 1]
+        statistical_inefficiency_estimate = results_array[max_index, 2]
+
+        return equilibration_index_estimate, statistical_inefficiency_estimate
 
     # Estimate of statistical inefficiency
     statistical_inefficiency_estimate = 1.0
@@ -202,7 +245,8 @@ def estimate_equilibration_length(
 
         try:
             si_value = si_func(
-                x, fft=fft, minimum_correlation_time=minimum_correlation_time)
+                x, fft=fft,
+                minimum_correlation_time=minimum_correlation_time)
         except CVGError:
             si_value = x_size
 
