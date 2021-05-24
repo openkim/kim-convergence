@@ -221,8 +221,8 @@ def estimate_equilibration_length(
         # Find the maximum
         max_index = np.argmax(results_array[:, 0])
 
-        equilibration_index_estimate = results_array[max_index, 1]
-        statistical_inefficiency_estimate = results_array[max_index, 2]
+        equilibration_index_estimate = results_array[max_index, 2]
+        statistical_inefficiency_estimate = results_array[max_index, 1]
 
         return equilibration_index_estimate, statistical_inefficiency_estimate
 
