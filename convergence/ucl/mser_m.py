@@ -373,8 +373,8 @@ class MSER_m(UCLBase):
         # Please see ref [20]_
         upper = t_inv_cdf(p_up, number_batches - 1)
 
-        upper_confidence_limit = upper * standard_error_of_mean
-        return upper_confidence_limit
+        self.upper_confidence_limit = upper * standard_error_of_mean
+        return self.upper_confidence_limit
 
 
 def mser_m_ucl(time_series_data,

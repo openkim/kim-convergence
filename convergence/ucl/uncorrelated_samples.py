@@ -198,8 +198,8 @@ class UncorrelatedSamples(UCLBase):
         p_up = (1 + confidence_coefficient) / 2
         upper = t_inv_cdf(p_up, uncorrelated_samples_size - 1)
 
-        upper_confidence_limit = upper * standard_error_of_mean
-        return upper_confidence_limit
+        self.upper_confidence_limit = upper * standard_error_of_mean
+        return self.upper_confidence_limit
 
 
 def uncorrelated_samples_ucl(

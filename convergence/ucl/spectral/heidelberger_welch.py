@@ -533,8 +533,8 @@ class HeidelbergerWelch(UCLBase):
         # the spread the more accurate.
         standard_error_of_mean = sqrt(sigma_sq)
 
-        upper_confidence_limit = hwl_tm * standard_error_of_mean
-        return upper_confidence_limit
+        self.upper_confidence_limit = hwl_tm * standard_error_of_mean
+        return self.upper_confidence_limit
 
 
 def heidelberger_welch_ucl(

@@ -456,9 +456,9 @@ class N_SKART(UCLBase):
         skewness_adjustment = (
             (1 + 6 * beta * (upper - beta))**(1 / 3) - 1) / (2 * beta)
 
-        upper_confidence_limit = skewness_adjustment * \
+        self.upper_confidence_limit = skewness_adjustment * \
             sqrt(correlation_adjustment * x_batch_var / self.kp_number_batches)
-        return upper_confidence_limit
+        return self.upper_confidence_limit
 
 
 def n_skart_ucl(time_series_data,
