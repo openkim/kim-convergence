@@ -21,6 +21,9 @@ def chi_square_test(
     observations `x` is equal to the given population variance,
     `population_var`.
 
+    The null hypothesis is that the sample variance equals the population
+    variance.
+
     Args:
         sample_var (float): Sample variance.
         sample_size (int): Number of samples.
