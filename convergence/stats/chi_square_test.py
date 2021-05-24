@@ -16,13 +16,11 @@ def chi_square_test(
         significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Chi-square test for the variance.
 
-    Calculate the chi-square test for the variance. This is a two-sided test
-    for the null hypothesis that the variance of a sample of independent
+    Calculate the chi-square test for the variance. This is a two-sided test.
+
+    The null hypothesis is that the variance of a sample of independent
     observations `x` is equal to the given population variance,
     `population_var`.
-
-    The null hypothesis is that the sample variance equals the population
-    variance.
 
     Args:
         sample_var (float): Sample variance.
