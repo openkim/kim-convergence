@@ -257,11 +257,11 @@ class MSER_m(UCLBase):
         ignore_end=_DEFAULT_IGNORE_END,
         # unused input parmeters in MSER-m UCL module
         # estimate_equilibration_length interface
+        number_of_cores=_DEFAULT_NUMBER_OF_CORES,
         si=_DEFAULT_SI,
         nskip=_DEFAULT_NSKIP,
         fft=_DEFAULT_FFT,
-        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-        number_of_cores=_DEFAULT_NUMBER_OF_CORES):
+        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
         """Estimate the equilibration point in a time series data."""
         truncated, truncate_index = mser_m(
             time_series_data=time_series_data,

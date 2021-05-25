@@ -122,11 +122,11 @@ class N_SKART(UCLBase):
         fft=_DEFAULT_FFT,
         minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
         ignore_end=_DEFAULT_IGNORE_END,
+        number_of_cores=_DEFAULT_NUMBER_OF_CORES,
         batch_size=_DEFAULT_BATCH_SIZE,
         scale=_DEFAULT_SCALE_METHOD,
         with_centering=_DEFAULT_WITH_CENTERING,
-        with_scaling=_DEFAULT_WITH_SCALING,
-        number_of_cores=_DEFAULT_NUMBER_OF_CORES):
+        with_scaling=_DEFAULT_WITH_SCALING):
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
