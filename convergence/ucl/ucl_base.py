@@ -244,13 +244,13 @@ class UCLBase:
             fft=_DEFAULT_FFT,
             minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
             ignore_end=_DEFAULT_IGNORE_END,
+            number_of_cores=_DEFAULT_NUMBER_OF_CORES,
             # unused input parmeters in
             # estimate_equilibration_length interface
             batch_size=_DEFAULT_BATCH_SIZE,
             scale=_DEFAULT_SCALE_METHOD,
             with_centering=_DEFAULT_WITH_CENTERING,
-            with_scaling=_DEFAULT_WITH_SCALING,
-            number_of_cores=_DEFAULT_NUMBER_OF_CORES):
+            with_scaling=_DEFAULT_WITH_SCALING):
         """Estimate the equilibration point in a time series data."""
         equilibration_index_estimate, si_value = estimate_equilibration_length(
             time_series_data=time_series_data,
@@ -258,7 +258,8 @@ class UCLBase:
             nskip=nskip,
             fft=fft,
             minimum_correlation_time=minimum_correlation_time,
-            ignore_end=ignore_end)
+            ignore_end=ignore_end,
+            number_of_cores=number_of_cores)
 
         if equilibration_index_estimate < len(time_series_data) - 1:
             self.si = si_value
