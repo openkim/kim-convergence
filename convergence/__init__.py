@@ -12,6 +12,11 @@ from .stats import \
     betai_cdf_ccdf, \
     betai_cdf, \
     chi_square_test, \
+    ContinuousDistributions, \
+    ContinuousDistributionsNumberOfRequiredArguments, \
+    ContinuousDistributionsArgumentRequirement, \
+    check_population_cdf_args, \
+    ks_test, \
     randomness_test, \
     s_normal_inv_cdf, \
     normal_inv_cdf, \
@@ -105,6 +110,11 @@ __all__ = [
     'betai_cdf_ccdf',
     'betai_cdf',
     'chi_square_test',
+    'ContinuousDistributions',
+    'ContinuousDistributionsNumberOfRequiredArguments',
+    'ContinuousDistributionsArgumentRequirement',
+    'check_population_cdf_args',
+    'ks_test',
     'randomness_test',
     's_normal_inv_cdf',
     'normal_inv_cdf',
