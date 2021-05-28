@@ -27,7 +27,7 @@ def t_test(sample_mean: float,
         sample_size (int): Number of samples.
         population_mean (float): Expected value in the null hypothesis.
         significance_level (float): Significance level. A probability threshold
-            below which the null hypothesis will be rejected.
+            below which the null hypothesis will be rejected. (default: 0.05)
 
     Returns:
         bool: True for the expected value (mean) of a sample of independent
