@@ -7,6 +7,12 @@ from .beta_dist import \
     betai_cdf_ccdf, \
     betai_cdf
 from .chi_square_test import chi_square_test
+from .ks_test import \
+    ContinuousDistributions, \
+    ContinuousDistributionsNumberOfRequiredArguments, \
+    ContinuousDistributionsArgumentRequirement, \
+    check_population_cdf_args, \
+    ks_test
 from .normal_dist import \
     s_normal_inv_cdf, \
     normal_inv_cdf, \
@@ -40,6 +46,11 @@ __all__ = [
     'betai_cdf_ccdf',
     'betai_cdf',
     'chi_square_test',
+    'ContinuousDistributions',
+    'ContinuousDistributionsNumberOfRequiredArguments',
+    'ContinuousDistributionsArgumentRequirement',
+    'check_population_cdf_args',
+    'ks_test',
     's_normal_inv_cdf',
     'normal_inv_cdf',
     'normal_interval',
