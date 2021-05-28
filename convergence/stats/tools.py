@@ -67,7 +67,7 @@ FFTURN = (8, 9, 10, 12, 15, 16, 18, 20,
 """tuple: FFT unique regular numbers."""
 
 
-def get_fft_optimal_size(input_size: int):
+def get_fft_optimal_size(input_size: int) -> int:
     """Find the optimal size for the FFT solver.
 
     Get the next regular number greater than or equal to input_size [1]_.
@@ -143,7 +143,7 @@ def get_fft_optimal_size(input_size: int):
     return optimal_size
 
 
-def auto_covariance(x, *, fft=False):
+def auto_covariance(x, *, fft=False) -> np.ndarray:
     """Calculate biased auto-covariance estimates.
 
     Compute auto-covariance estimates for every lag for the input array.
@@ -218,7 +218,7 @@ def auto_covariance(x, *, fft=False):
     return autocov
 
 
-def cross_covariance(x, y, *, fft=False):
+def cross_covariance(x, y, *, fft=False) -> np.ndarray:
     """Calculate the biased cross covariance estimate between two time series.
 
     Calculate the cross covariance between two time series for every lag for
@@ -297,7 +297,7 @@ def cross_covariance(x, y, *, fft=False):
     return crosscov
 
 
-def auto_correlate(x, *, nlags=None, fft=False):
+def auto_correlate(x, *, nlags=None, fft=False) -> np.ndarray:
     """Calculate the auto-correlation function.
 
     Calculate the auto-correlation function for `nlags` lag for the input
@@ -345,7 +345,7 @@ def auto_correlate(x, *, nlags=None, fft=False):
     return autocor
 
 
-def cross_correlate(x, y, *, nlags=None, fft=False):
+def cross_correlate(x, y, *, nlags=None, fft=False) -> np.ndarray:
     """Calculate the cross-correlation function.
 
     Calculate the cross-correlation function for `nlags` lag for the input
@@ -404,7 +404,7 @@ def cross_correlate(x, y, *, nlags=None, fft=False):
     return crosscorr
 
 
-def modified_periodogram(x, *, fft=False, with_mean=False):
+def modified_periodogram(x, *, fft=False, with_mean=False) -> np.ndarray:
     r"""Compute a modified periodogram to estimate the power spectrum.
 
     Estimate the power spectrum using a modified periodogram.
@@ -505,7 +505,7 @@ def modified_periodogram(x, *, fft=False, with_mean=False):
     return result
 
 
-def periodogram(x, *, fft=False, with_mean=False):
+def periodogram(x, *, fft=False, with_mean=False) -> np.ndarray:
     r"""Compute a periodogram to estimate the power spectrum.
 
     Args:
@@ -587,7 +587,7 @@ def summary(x):
         x_3rd_quartile
 
 
-def int_power(x, exponent: int):
+def int_power(x, exponent: int) -> np.ndarray:
     """Array elements raised to the power exponent.
 
     Args:
@@ -635,7 +635,7 @@ def int_power(x, exponent: int):
     return 1.0 / yy
 
 
-def moment(x, *, moment=1):
+def moment(x, *, moment=1) -> float:
     r"""Calculates the nth moment about the mean for a sample.
 
     Args:
@@ -685,7 +685,7 @@ def moment(x, *, moment=1):
     return dx_power_moment.mean()
 
 
-def skew(x, *, bias=False):
+def skew(x, *, bias=False) -> float:
     r"""Compute the time series data set skewness.
 
     ``skewness`` is a measure of the asymmetry of the probability distribution
