@@ -27,7 +27,7 @@ def chi_square_test(
         sample_size (int): Number of samples.
         population_var (float): population variance.
         significance_level (float): Significance level. A probability threshold
-            below which the null hypothesis will be rejected.
+            below which the null hypothesis will be rejected. (default: 0.05)
 
     Returns:
         bool: True for the variance of a sample of independent observations `x`
