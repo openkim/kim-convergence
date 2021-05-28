@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-def randomness_test(x, significance_level: float) -> bool:
+def randomness_test(x: np.ndarray, significance_level: float) -> bool:
     """Testing for independence of observations.
 
     The von-Neumann ratio test of independence of variables is a test designed
