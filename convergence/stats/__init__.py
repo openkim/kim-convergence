@@ -20,7 +20,8 @@ from .nonnormal_test import \
     check_population_cdf_args, \
     ks_test, \
     levene_test, \
-    wilcoxon_test
+    wilcoxon_test, \
+    kruskal_test
 from .randomness_test import randomness_test
 from .t_dist import \
     t_cdf_ccdf, \
@@ -53,6 +54,7 @@ __all__ = [
     'ContinuousDistributionsNumberOfRequiredArguments',
     'ContinuousDistributionsArgumentRequirement',
     'check_population_cdf_args',
+    'kruskal_test',
     'ks_test',
     'levene_test',
     's_normal_inv_cdf',
