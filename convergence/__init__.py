@@ -17,6 +17,7 @@ from .stats import \
     ContinuousDistributionsArgumentRequirement, \
     check_population_cdf_args, \
     ks_test, \
+    levene_test, \
     randomness_test, \
     s_normal_inv_cdf, \
     normal_inv_cdf, \
@@ -37,7 +38,8 @@ from .stats import \
     t_interval, \
     t_test, \
     ZERO_RC_BOUNDS, \
-    ZERO_RC
+    ZERO_RC, \
+    wilcoxon_test
 from .outlier import \
     outlier_methods, \
     outlier_test
@@ -115,6 +117,7 @@ __all__ = [
     'ContinuousDistributionsArgumentRequirement',
     'check_population_cdf_args',
     'ks_test',
+    'levene_test',
     'randomness_test',
     's_normal_inv_cdf',
     'normal_inv_cdf',
@@ -136,6 +139,7 @@ __all__ = [
     't_test',
     'ZERO_RC_BOUNDS',
     'ZERO_RC',
+    'wilcoxon_test',
     #
     'outlier_methods',
     'outlier_test',
