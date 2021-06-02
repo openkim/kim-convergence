@@ -1,5 +1,9 @@
 """Test module for normal distributed data.
 
+Note:
+    The tests in this module are modified and fixed for the convergence
+    package use.
+
 """
 from math import sqrt, fabs
 import numpy as np
