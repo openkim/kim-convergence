@@ -1,11 +1,15 @@
 """Test module for non-normally distributed data.
 
+Note:
+    The tests in this module are modified and fixed for the convergence
+    package use.
+
 """
 import numpy as np
-from scipy.stats import distributions, kstest, levene, wilcoxon
+from scipy.stats import distributions, kruskal, kstest, levene, wilcoxon
 
 from convergence._default import _DEFAULT_CONFIDENCE_COEFFICIENT
-from convergence import CVGError, cvg_check
+from convergence import CVGError, CVGSampleSizeError, cvg_check
 
 
 __all__ = [
@@ -16,6 +20,7 @@ __all__ = [
     'ks_test',
     'levene_test',
     'wilcoxon_test',
+    'kruskal_test',
 ]
 
 """Continuous distributions.
@@ -634,6 +639,14 @@ def wilcoxon_test(
                       population_loc=0,
                       population_scale=scale,
                       significance_level=0.05)
+    True
+    >>> wilcoxon_test(x,
+                      population_cdf='gamma',
+                      population_args=(shape,),
+                      population_loc=0,
+                      population_scale=1,
+                      significance_level=0.05)
+    False
 
     """
     if population_cdf in ('default', None):
@@ -672,5 +685,98 @@ def wilcoxon_test(
     _, pvalue = wilcoxon(x, y,
                          zero_method='wilcox',
                          alternative='two-sided')
+
+    return significance_level < pvalue
+
+
+def kruskal_test(
+        time_series_data: np.ndarray,
+        population_cdf: str,
+        population_args: tuple,
+        population_loc: float,
+        population_scale: float,
+        significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+    """Kruskal-Wallis H-test for independent samples.
+
+    The Kruskal-Wallis H-test tests the null hypothesis that the median of
+    the time series data is the same as the one from population_cdf.
+
+    It is a non-parametric version of ANOVA.
+
+    Args:
+        time_series_data (np.ndarray): time series data.
+        population_cdf (str, or None): The name of a distribution.
+        population_args (tuple): Distribution parameter.
+        population_loc (float, or None): location of the distribution.
+        population_scale (float, or None): scale of the distribution.
+        significance_level (float, optional): Significance level. A
+            probability threshold below which the null hypothesis will be
+            rejected. (default: 0.05)
+
+    Returns:
+        bool: True
+            if the median of the time series data is the same as the one
+            from population_cdf.
+
+    Examples:
+
+    >>> import numpy as np
+    >>> from scipy.stats import gamma
+    >>> rng = np.random.RandomState(12345)
+    >>> a = 1.99
+    >>> x = rng.gamma(a, 1, size=20)
+    >>> kruskal_test(x,
+                     population_cdf='gamma',
+                     population_args=(shape,),
+                     population_loc=0,
+                     population_scale=1,
+                     significance_level=0.05)
+    True
+
+    """
+    if population_cdf in ('default', None):
+        return False
+
+    x = np.array(time_series_data, copy=False)
+
+    if x.ndim != 1:
+        msg = 'time_series_data is not an array of one-dimension.'
+        raise CVGError(msg)
+
+    x_size = x.size
+
+    # Due to the assumption that H has a chi square distribution, the number
+    # of samples must not be too small. A typical rule is that time_series_data
+    # must have at least 5 data.
+    if x_size < 5:
+        msg = 'time_series_data must have at least 5 data.'
+        raise CVGSampleSizeError(msg)
+
+    cvg_check(significance_level,
+              var_name='significance_level',
+              var_lower_bound=np.finfo(np.float64).resolution)
+
+    args = [arg for arg in population_args]
+    args.append(population_loc if population_loc else 0)
+    args.append(population_scale if population_scale else 1)
+
+    rvs = getattr(distributions, population_cdf).rvs
+
+    pvalue = 0.0
+    while significance_level > pvalue:
+        y = rvs(*args, size=x_size)
+
+        try:
+            _, pvalue = kstest(y,
+                               cdf=population_cdf,
+                               args=args,
+                               alternative='two-sided')
+        except:
+            raise CVGError('Kolmogorov-Smirnov test failed.')
+
+    try:
+        _, pvalue = kruskal(x, y)
+    except:
+        raise CVGError('Levene test failed.')
 
     return significance_level < pvalue
