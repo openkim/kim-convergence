@@ -6,24 +6,27 @@ from .beta_dist import \
     betai, \
     betai_cdf_ccdf, \
     betai_cdf
-from .chi_square_test import chi_square_test
-from .ks_test import \
-    ContinuousDistributions, \
-    ContinuousDistributionsNumberOfRequiredArguments, \
-    ContinuousDistributionsArgumentRequirement, \
-    check_population_cdf_args, \
-    ks_test
 from .normal_dist import \
     s_normal_inv_cdf, \
     normal_inv_cdf, \
     normal_interval
+from .normal_test import \
+    t_test, \
+    chi_square_test
+from .nonnormal_test import \
+    ContinuousDistributions, \
+    ContinuousDistributionsNumberOfRequiredArguments, \
+    ContinuousDistributionsArgumentRequirement, \
+    check_population_cdf_args, \
+    ks_test, \
+    levene_test, \
+    wilcoxon_test
 from .randomness_test import randomness_test
 from .t_dist import \
     t_cdf_ccdf, \
     t_cdf, \
     t_inv_cdf, \
     t_interval
-from .t_test import t_test
 from .tools import \
     get_fft_optimal_size, \
     auto_covariance, \
@@ -51,6 +54,7 @@ __all__ = [
     'ContinuousDistributionsArgumentRequirement',
     'check_population_cdf_args',
     'ks_test',
+    'levene_test',
     's_normal_inv_cdf',
     'normal_inv_cdf',
     'normal_interval',
@@ -72,4 +76,5 @@ __all__ = [
     'skew',
     'ZERO_RC_BOUNDS',
     'ZERO_RC',
+    'wilcoxon_test'
 ]
