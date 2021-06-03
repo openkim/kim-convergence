@@ -1,328 +1,585 @@
 """Time series run length control module."""
-
-import sys
-from math import isclose, fabs
-import numpy as np
 from inspect import isfunction
 import json
 import kim_edn
+from math import isclose, fabs
+import numpy as np
+import sys
 
+from convergence._default import \
+    _DEFAULT_CONFIDENCE_COEFFICIENT, \
+    _DEFAULT_CONFIDENCE_INTERVAL_APPROXIMATION_METHOD, \
+    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
+    _DEFAULT_FFT, \
+    _DEFAULT_TEST_SIZE, \
+    _DEFAULT_TRAIN_SIZE, \
+    _DEFAULT_BATCH_SIZE, \
+    _DEFAULT_SCALE_METHOD, \
+    _DEFAULT_WITH_CENTERING, \
+    _DEFAULT_WITH_SCALING, \
+    _DEFAULT_IGNORE_END, \
+    _DEFAULT_NUMBER_OF_CORES, \
+    _DEFAULT_SI, \
+    _DEFAULT_NSKIP, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_MIN_ABSOLUTE_ACCURACY, \
+    _DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL
 from convergence import \
+    check_population_cdf_args, \
     CVGError, \
+    CVGSampleSizeError, \
     cvg_warning, \
-    mser_m, \
+    cvg_check, \
+    chi_square_test, \
     estimate_equilibration_length, \
-    statistical_inefficiency,\
-    r_statistical_inefficiency, \
-    split_r_statistical_inefficiency, \
-    split_statistical_inefficiency, \
-    si_methods, \
-    HeidelbergerWelch, \
-    heidelberger_welch_ucl, \
-    heidelberger_welch_ci, \
-    heidelberger_welch_relative_half_width_estimate, \
-    UncorrelatedSamples, \
-    uncorrelated_samples_ucl, \
-    uncorrelated_samples_ci, \
-    uncorrelated_samples_relative_half_width_estimate, \
-    N_SKART, \
-    n_skart_ucl, \
-    n_skart_ci, \
-    n_skart_relative_half_width_estimate, \
+    get_distribution_stats, \
+    levene_test, \
+    mser_m, \
+    t_test, \
     ucl_methods
+
 
 __all__ = [
     'run_length_control',
 ]
 
 
-def convergence_message(fp_format,
-                        converged,
-                        n_variables,
-                        total_run_length,
-                        equilibration_detected,
-                        equilibration_step,
-                        maximum_equilibration_step,
-                        confidence_coefficient,
-                        relative_accuracy,
-                        relative_half_width_estimate,
-                        upper_confidence_limit,
-                        time_series_data_mean,
-                        time_series_data_std,
-                        effective_sample_size,
-                        sample_size):
+def _convergence_message(number_of_variables: int,
+                         converged: bool,
+                         total_run_length: int,
+                         maximum_equilibration_step: int,
+                         equilibration_detected: bool,
+                         equilibration_step,
+                         confidence_coefficient: float,
+                         relative_accuracy: list,
+                         absolute_accuracy: list,
+                         upper_confidence_limit: list,
+                         relative_half_width_estimate: list,
+                         time_series_data_mean: list,
+                         time_series_data_std: list,
+                         effective_sample_size: list,
+                         minimum_number_of_independent_samples: int) -> dict:
     """Create convergence message.
 
     Args:
-        fp_format (str): one of the ``txt``, ``json``, or ``edn`` format.
-        converged (bool): if we reached convergence or not!
-        n_variables (int): the number of variables in the corresponding
+        number_of_variables (int): the number of variables in the corresponding
             time-series data.
+        converged (bool): if we reached convergence or not.
         total_run_length (int): the total number of steps
+        maximum_equilibration_step (int): the maximum number of steps as an
+            equilibration hard limit.
         equilibration_detected (bool): if we reached equilibration or not!
-        equilibration_step (int64 or 1darray): step number, where the
+        equilibration_step (int or 1darray): step number, where the
             equilibration has been achieved
-        maximum_equilibration_step (int): the maximum number of
-            steps as an equilibration hard limit.
         confidence_coefficient (float): Probability (or confidence interval)
             and must be between 0.0 and 1.0, and represents the confidence for
             calculation of relative halfwidths estimation.
         relative_accuracy (float, or 1darray): a relative half-width
             requirement or the accuracy parameter. Target value for the ratio
             of halfwidth to sample mean.
-        relative_half_width_estimate(float, or 1darray): estimatemed relative
-            half-width from the time-series data.
+        absolute_accuracy (float, or 1darray): a half-width
+            requirement or the accuracy parameter. Target value for the ratio
+            of halfwidth to sample mean. If ``number_of_variables > 1``,
+            ``relative_accuracy`` can be a scalar to be used for all variables
+            or a 1darray of values of size number_of_variables.
         upper_confidence_limit (float, or 1darray): the upper confidence limit
             of the mean.
+        relative_half_width_estimate(float, or 1darray): estimatemed relative
+            half-width from the time-series data.
         time_series_data_mean (float, or 1darray): the mean of time-series data
             for each variable.
         time_series_data_std (float, or 1darray): the std of time-series data
-        for each variable.
+            for each variable.
         effective_sample_size (float, or 1darray): the number of effective
             sample size.
-        sample_size (int): the requested maximum number of independent samples.
+        minimum_number_of_independent_samples (int): the requested maximum
+            number of independent samples.
 
     Returns:
-        str or dict: convergence message
-            if fp_format is a `txt` it will be a string otherwise a `dict`.
+        dict: convergence message
 
     """
-    if fp_format == 'txt':
-        msg = '=' * 37
-        msg += '\nConverged!\n\n' if converged else '\nNot converged!\n\n'
-        msg += '-' * 37
-        msg += '\n'
-        if n_variables == 1:
-            if converged:
-                msg += 'Total run length = '
-                msg += '{}.\n'.format(total_run_length)
-                msg += 'The equilibration detected at step = '
-                msg += '{}.\n'.format(equilibration_step)
-                msg += 'The relative half width with '
-                msg += '{}% '.format(round(confidence_coefficient * 100, 3))
-                msg += 'confidence of the estimation for the mean '
-                msg += 'meets the required relative accuracy = '
-                msg += '{}.\n'.format(relative_accuracy)
-                msg += 'The mean of the time-series data lies in: ('
-                msg += '{} +/- '.format(time_series_data_mean)
-                msg += '{}).\n'.format(upper_confidence_limit)
-                msg += 'The standard deviation of the equilibrated '
-                msg += 'part of the time-series data = '
-                msg += '{}.\n'.format(time_series_data_std)
-                msg += 'Effective sample size = '
-                msg += '{}'.format(int(effective_sample_size))
-                if sample_size is None:
-                    msg += '.\n'
-                    msg += 'requested number of sample size is None.\n'
-                else:
-                    msg += '> {}, '.format(sample_size)
-                    msg += 'requested number of sample size.\n'
-            else:
-                msg += 'The length of the time series data = '
-                msg += '{}, is not long enough '.format(total_run_length)
-                if relative_half_width_estimate < relative_accuracy:
-                    msg += 'to estimate the mean with enough requested '
-                    msg += 'sample size = {}.\n'.format(sample_size)
-                else:
-                    msg += 'to estimate the mean with sufficient accuracy.\n'
-                if equilibration_detected:
-                    msg += 'The equilibration detected at step = '
-                else:
-                    msg += 'The truncation point detected at step = '
-                msg += '{}.\n'.format(equilibration_step)
-                msg += 'The relative half width with '
-                msg += '{}% '.format(round(confidence_coefficient * 100, 3))
-                msg += 'confidence of the estimation for the mean '
-                if relative_half_width_estimate < relative_accuracy:
-                    msg += 'meets the required relative accuracy '
-                else:
-                    msg += 'does not meet the required relative accuracy '
-                msg += '= {}.\n'.format(relative_accuracy)
-                msg += 'The mean of the time-series data lies in: ('
-                msg += '{} +/- '.format(time_series_data_mean)
-                msg += '{}).\n'.format(upper_confidence_limit)
-                msg += 'The standard deviation of the equilibrated '
-                msg += 'part of the time-series data = '
-                msg += '{}.\n'.format(time_series_data_std)
-                msg += 'Effective sample size = '
-                msg += '{} '.format(int(effective_sample_size))
-                if relative_half_width_estimate < relative_accuracy:
-                    msg += '< {}, '.format(sample_size)
-                    msg += 'requested number of sample size.\n'
-                else:
-                    if sample_size is None:
-                        msg += '.\n'
-                        msg += 'requested number of sample size is None.\n'
-                    else:
-                        msg += '< {}, '.format(sample_size)
-                        msg += 'requested number of sample size.\n'
+    if number_of_variables == 1:
+        if relative_accuracy is None:
+            relative_accuracy_ = 'None'
+            relative_half_width_estimate_ = 'None'
         else:
-            for i in range(n_variables):
-                msg += 'for variable number {},\n'.format(i + 1)
-                if relative_half_width_estimate[i] < relative_accuracy[i]:
-                    msg += 'Total run length = '
-                    msg += '{}.\n'.format(total_run_length)
-                else:
-                    msg += 'The length of the time series data = '
-                    msg += '{}, is not long enough '.format(total_run_length)
-                    msg += 'to estimate the mean with sufficient accuracy.\n'
-                if equilibration_detected or \
-                        equilibration_step[i] < maximum_equilibration_step:
-                    msg += 'The equilibration detected at step = '
-                else:
-                    msg += 'The truncation point detected at step = '
-                msg += '{}.\n'.format(equilibration_step[i])
-                msg += 'The relative half width with '
-                msg += '{}% '.format(round(confidence_coefficient * 100, 3))
-                msg += 'confidence of the estimation for the mean '
-                if relative_half_width_estimate[i] < relative_accuracy[i]:
-                    msg += 'meets the required relative accuracy '
-                else:
-                    msg += 'does not meet the required relative accuracy '
-                msg += '= {}.\n'.format(relative_accuracy[i])
-                msg += 'The mean of the time-series data lies in: ('
-                msg += '{} +/- '.format(time_series_data_mean[i])
-                msg += '{}).\n'.format(upper_confidence_limit[i])
-                msg += 'The standard deviation of the equilibrated '
-                msg += 'part of the time-series data = '
-                msg += '{}.\n'.format(time_series_data_std[i])
-                msg += 'Effective sample size = '
-                msg += '{}'.format(int(effective_sample_size[i]))
-                if relative_half_width_estimate[i] < relative_accuracy[i]:
-                    if sample_size is None:
-                        msg += '.\n'
-                        msg += 'requested number of sample size is None.\n'
-                    else:
-                        if effective_sample_size[i] >= sample_size:
-                            msg += '>= {}, '.format(sample_size)
-                        else:
-                            msg += '< {}, '.format(sample_size)
-                        msg += 'requested number of sample size.\n'
-                else:
-                    if sample_size is None:
-                        msg += '.\n'
-                        msg += 'requested number of sample size is None.\n'
-                    else:
-                        if effective_sample_size[i] >= sample_size:
-                            msg += '>= {}, '.format(sample_size)
-                        else:
-                            msg += '< {}, '.format(sample_size)
-                        msg += 'requested number of sample size.\n'
-                if i < n_variables - 1:
-                    msg += '-' * 37
-                    msg += '\n'
-        msg += '=' * 37
-        msg += '\n'
-    else:
-        if n_variables == 1:
-            msg = {
-                "converged": converged,
-                "total_run_length": total_run_length,
-                "equilibration_detected": equilibration_detected,
-                "equilibration_step": int(equilibration_step),
-                "maximum_equilibration_step": int(maximum_equilibration_step),
-                "confidence": round(confidence_coefficient * 100, 3),
-                "relative_accuracy": relative_accuracy,
-                "relative_half_width": relative_half_width_estimate,
-                "mean": time_series_data_mean,
-                "upper_confidence_limit": upper_confidence_limit,
-                "standard_deviation": time_series_data_std,
-            }
-            msg["effective_sample_size"] = int(effective_sample_size)
-            msg["requested_sample_size"] = \
-                "None" if sample_size is None else sample_size
-        else:
-            msg = {
-                "converged": converged,
-                "total_run_length": total_run_length,
-                "equilibration_detected": equilibration_detected,
-            }
-            for i in range(n_variables):
-                if equilibration_detected or \
-                        equilibration_step[i] < maximum_equilibration_step:
-                    msg[i] = {
-                        "equilibration_detected": True,
-                        "equilibration_step": int(equilibration_step[i]),
-                        "maximum_equilibration_step": int(maximum_equilibration_step),
-                        "confidence": round(confidence_coefficient * 100, 3),
-                        "relative_accuracy": relative_accuracy[i],
-                        "relative_half_width": relative_half_width_estimate[i],
-                        "mean": time_series_data_mean[i],
-                        "upper_confidence_limit": upper_confidence_limit[i],
-                        "standard_deviation": time_series_data_std[i],
-                        "effective_sample_size": int(effective_sample_size[i]),
-                        "requested_sample_size":
-                        "None" if sample_size is None else sample_size,
-                    }
-                else:
-                    msg[i] = {
-                        "equilibration_detected": False,
-                        "equilibration_step": int(equilibration_step[i]),
-                        "truncation_step": int(equilibration_step[i]),
-                        "maximum_equilibration_step": int(maximum_equilibration_step),
-                        "confidence": round(confidence_coefficient * 100, 3),
-                        "relative_accuracy": relative_accuracy[i],
-                        "relative_half_width": relative_half_width_estimate[i],
-                        "mean": time_series_data_mean[i],
-                        "upper_confidence_limit": upper_confidence_limit[i],
-                        "standard_deviation": time_series_data_std[i],
-                        "effective_sample_size": int(effective_sample_size[i]),
-                        "requested_sample_size":
-                        "None" if sample_size is None else sample_size,
-                    }
+            relative_accuracy_ = relative_accuracy
+            relative_half_width_estimate_ = relative_half_width_estimate
 
+        if absolute_accuracy is None:
+            absolute_accuracy_ = 'None'
+        else:
+            absolute_accuracy_ = absolute_accuracy
+
+        if minimum_number_of_independent_samples is None:
+            minimum_number_of_independent_samples_ = 'None'
+        else:
+            minimum_number_of_independent_samples_ = int(
+                minimum_number_of_independent_samples)
+
+        msg = {
+            "converged": converged,
+            "total_run_length": total_run_length,
+            "maximum_equilibration_step": maximum_equilibration_step,
+            "equilibration_detected": equilibration_detected,
+            "equilibration_step": equilibration_step,
+            "confidence": round(confidence_coefficient * 100, 3),
+            "relative_accuracy": relative_accuracy_,
+            "absolute_accuracy": absolute_accuracy_,
+            "relative_half_width": relative_half_width_estimate_,
+            "upper_confidence_limit": upper_confidence_limit,
+            "mean": time_series_data_mean,
+            "standard_deviation": time_series_data_std,
+            "effective_sample_size": effective_sample_size,
+            "requested_sample_size": minimum_number_of_independent_samples_,
+        }
+    else:
+        msg = {
+            "converged": converged,
+            "total_run_length": total_run_length,
+            "maximum_equilibration_step": maximum_equilibration_step,
+            "equilibration_detected": equilibration_detected,
+        }
+        for i in range(number_of_variables):
+            equilibration_detected_ = equilibration_detected or \
+                equilibration_step[i] < maximum_equilibration_step
+
+            if relative_accuracy[i] is None:
+                relative_accuracy_ = 'None'
+                relative_half_width_estimate_ = 'None'
+            else:
+                relative_accuracy_ = relative_accuracy[i]
+                relative_half_width_estimate_ = relative_half_width_estimate[i]
+
+            if absolute_accuracy[i] is None:
+                absolute_accuracy_ = 'None'
+            else:
+                absolute_accuracy_ = absolute_accuracy[i]
+
+            if minimum_number_of_independent_samples is None:
+                minimum_number_of_independent_samples_ = 'None'
+            else:
+                minimum_number_of_independent_samples_ = \
+                    minimum_number_of_independent_samples
+
+            msg[i] = {
+                "equilibration_detected": equilibration_detected_,
+                "equilibration_step": equilibration_step[i],
+                "confidence": round(confidence_coefficient * 100, 3),
+                "relative_accuracy": relative_accuracy_,
+                "absolute_accuracy": absolute_accuracy_,
+                "relative_half_width": relative_half_width_estimate_,
+                "upper_confidence_limit": upper_confidence_limit[i],
+                "mean": time_series_data_mean[i],
+                "standard_deviation": time_series_data_std[i],
+                "effective_sample_size": effective_sample_size[i],
+                "requested_sample_size": minimum_number_of_independent_samples_
+            }
     return msg
 
 
-def run_length_control(get_trajectory,
-                       *,
-                       n_variables=1,
-                       initial_run_length=2000,
-                       run_length_factor=1.5,
-                       maximum_run_length=1000000,
-                       maximum_equilibration_step=None,
-                       variable_known_mean=None,
-                       variable_known_standard_deviation=None,
-                       sample_size=None,
-                       relative_accuracy=0.01,
-                       population_standard_deviation=None,
-                       confidence_coefficient=0.95,
-                       confidence_interval_approximation_method='subsample',
-                       heidel_welch_number_points=50,
-                       fft=True,
-                       test_size=None,
-                       train_size=None,
-                       batch_size=5,
-                       scale='translate_scale',
-                       with_centering=False,
-                       with_scaling=False,
-                       ignore_end_batch=None,
-                       si='statistical_inefficiency',
-                       nskip=1,
-                       minimum_correlation_time=None,
-                       ignore_end=None,
-                       dump_trajectory=False,
-                       dump_trajectory_fp="convergence_trajectory.edn",
-                       fp=None,
-                       fp_format='txt'):
+def _check_get_trajectory(get_trajectory: callable):
+    if not isfunction(get_trajectory):
+        msg = 'the "get_trajectory" input is not a callback function.\n'
+        msg += 'One has to provide the "get_trajectory" function as an '
+        msg += 'input. It expects to have a specific signature:\n'
+        msg += 'get_trajectory(nstep: int) -> 1darray,\n'
+        msg += 'where nstep is the number of steps and the function '
+        msg += 'should return a time-series data with the requested '
+        msg += 'length equals to the number of steps.'
+        raise CVGError(msg)
+
+
+def _get_trajectory(get_trajectory: callable,
+                    run_length: int,
+                    ndim: int,
+                    number_of_variables=1) -> np.ndarray:
+    if run_length == 0:
+        return np.array([], dtype=np.float64)
+
+    try:
+        tsd = get_trajectory(step=run_length)
+    except:
+        msg = 'failed to get the time-series data or do the simulation '
+        msg += 'for {} number of steps.'.format(run_length)
+        raise CVGError(msg)
+
+    tsd = np.array(tsd, dtype=np.float64, copy=False)
+
+    # Extra check
+    if not np.all(np.isfinite(tsd)):
+        msg = 'there is/are value/s in the input which is/are non-finite or '
+        msg += 'not number.'
+        raise CVGError(msg)
+
+    if np.ndim(tsd) != ndim:
+        msg = 'the return from the "get_trajectory" function has a wrong '
+        msg += 'dimension of {} != 1.'.format(tsd.ndim)
+        raise CVGError(msg)
+
+    if ndim == 2 and number_of_variables != np.shape(tsd)[0]:
+        msg = 'the return of "get_trajectory" function has a wrong number '
+        msg += 'of variables = {} != '.format(np.shape(tsd)[0])
+        msg += '{}.\n'.format(number_of_variables)
+        msg += 'In a two-dimensional return array of "get_trajectory" '
+        msg += 'function, each row corresponds to the time series data '
+        msg += 'for one variable.'
+        raise CVGError(msg)
+
+    return tsd
+
+
+def _get_run_length(run_length: int,
+                    run_length_factor: float,
+                    total_run_length: int,
+                    maximum_run_length: int) -> int:
+    if 0 in (run_length, total_run_length):
+        return run_length
+
+    run_length = min(int(run_length * run_length_factor), maximum_run_length)
+    run_length = max(1, run_length)
+
+    total_run_length += run_length
+
+    if total_run_length >= maximum_run_length:
+        total_run_length -= run_length
+        run_length = maximum_run_length - total_run_length
+
+    return run_length
+
+
+def _check_accuracy(number_of_variables: int,
+                    relative_accuracy: list,
+                    absolute_accuracy: list) -> None:
+    if number_of_variables == 1:
+        if np.size(relative_accuracy) != 1:
+            msg = 'For one variable, "relative_accuracy" must be a scalar '
+            msg += '(a `float`).'
+            raise CVGError(msg)
+
+        if np.size(absolute_accuracy) != 1:
+            msg = 'For one variable, "absolute_accuracy" must be a scalar '
+            msg += '(a `float`).'
+            raise CVGError(msg)
+
+        if relative_accuracy is None:
+            cvg_check(absolute_accuracy, 'absolute_accuracy',
+                      var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY)
+
+    else:
+        if np.size(relative_accuracy) != number_of_variables:
+            msg = '"relative_accuracy" must be a list of '
+            msg += '{} floats.'.format(number_of_variables)
+            raise CVGError(msg)
+
+        if np.size(absolute_accuracy) != number_of_variables:
+            msg = '"absolute_accuracy" must be a list of '
+            msg += '{} floats.'.format(number_of_variables)
+            raise CVGError(msg)
+
+        for index, rel_acc in enumerate(relative_accuracy):
+            if rel_acc is None:
+                cvg_check(absolute_accuracy[index],
+                          'absolute_accuracy[{}]'.format(index),
+                          var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY)
+
+
+def _check_equilibration_step(equilibration_step,
+                              maximum_equilibration_step: int,
+                              maximum_run_length: int,
+                              equilibration_detected: bool,
+                              time_series_data: np.ndarray,
+                              dump_trajectory: bool,
+                              dump_trajectory_fp) -> None:
+    hard_limit_crossed = np.any(
+        equilibration_step >= maximum_equilibration_step)
+    if not hard_limit_crossed:
+        return
+
+    if dump_trajectory:
+        kim_edn.dump(time_series_data.tolist(), dump_trajectory_fp)
+
+    number_of_variables = np.size(equilibration_step)
+    if number_of_variables == 1:
+        if equilibration_detected:
+            msg = 'The equilibration or "warm-up" period is detected '
+            msg += 'at step = {}, which '.format(equilibration_step)
+            msg += 'is greater than the maximum number of allowed steps '
+            msg += 'for the equilibration detection = '
+            msg += '{}.\n'.format(maximum_equilibration_step)
+        else:
+            if equilibration_step == (maximum_run_length - 1):
+                msg = 'The equilibration or "warm-up" period is not detected. '
+                msg += 'Check the trajectory data!\n'
+            else:
+                msg = 'The truncation point = {}, '.format(equilibration_step)
+                msg += 'returned by MSER is > half of the data set size and '
+                msg += 'is invalid.\n'
+    else:
+        for i in range(number_of_variables):
+            if equilibration_step[i] < maximum_equilibration_step:
+                msg = 'The equilibration or "warm-up" period for variable '
+                msg += 'number {} is detected at step = '.format(i + 1)
+                msg += '{}.\n'.format(equilibration_step[i])
+            else:
+                if equilibration_step[i] == (maximum_run_length - 1):
+                    msg = 'The equilibration or "warm-up" period for variable '
+                    msg += 'number {}, is not detected. '.format(i + 1)
+                    msg = 'Check the trajectory data!\n'
+                else:
+                    msg = 'The truncation point for variable number '
+                    msg += '{} = {}, '.format(i + 1, equilibration_step[i])
+                    msg += 'returned by MSER is > half of the data set '
+                    msg += 'size and is invalid.\n'
+
+    if equilibration_detected:
+        msg += 'To prevent this error, you can either request a '
+        msg += 'longer maximum number of allowed steps to reach '
+        msg += 'equilibrium or if you did not provide this limit you '
+        msg += 'can increase the maximum_run_length.\n'
+    else:
+        msg += 'More data is required. To prevent this error, you can '
+        msg += 'request a longer maximum_run_length.\n'
+
+    raise CVGError(msg)
+
+
+def _check_population(number_of_variables: int,
+                      population_mean,
+                      population_standard_deviation,
+                      population_cdf,
+                      population_args,
+                      population_loc,
+                      population_scale):
+
+    # Initialize
+    if number_of_variables == 1:
+        if population_mean is not None and np.size(population_mean) != 1:
+            msg = 'For one variable, "population_mean" must be a scalar '
+            msg += '(a `float`).'
+            raise CVGError(msg)
+
+        if population_standard_deviation is not None and \
+                np.size(population_standard_deviation) != 1:
+            msg = 'For one variable, "population_standard_deviation" must '
+            msg += 'be a scalar (a `float`).'
+            raise CVGError(msg)
+
+        if population_cdf is not None:
+            if np.size(population_cdf) != 1:
+                msg = 'For one variable, "population_cdf" must be a name '
+                msg += '(a `str`).'
+                raise CVGError(msg)
+
+            check_population_cdf_args(population_cdf=population_cdf,
+                                      population_args=population_args)
+
+            if population_mean is not None:
+                msg = 'For the non-normally distributed data '
+                msg += '"population_mean" should not be provided.\n'
+                msg += 'To shift and/or scale the distribution use the '
+                msg += '"population_loc" and "population_scale" parameters.'
+                raise CVGError(msg)
+
+            if population_standard_deviation is not None:
+                msg = 'For the non-normally distributed data '
+                msg += '"population_standard_deviation" should not '
+                msg += 'be provided.\n'
+                msg += 'To shift and/or scale the distribution use the '
+                msg += '"population_loc" and "population_scale" parameters.'
+                raise CVGError(msg)
+
+            if population_loc is not None and np.size(population_loc) != 1:
+                msg = 'For one variable, "population_loc" must be a scalar '
+                msg += '(a `float`).'
+                raise CVGError(msg)
+
+            if population_scale is not None and np.size(population_scale) != 1:
+                msg = 'For one variable, "population_scale" must be a scalar '
+                msg += '(a `float`).'
+                raise CVGError(msg)
+
+    else:
+        if population_mean is not None:
+            if np.size(population_mean) != number_of_variables:
+                msg = '"population_mean" must be a 1darray/list of size = '
+                msg += '{}.'.format(number_of_variables)
+                raise CVGError(msg)
+
+        if population_standard_deviation is not None:
+            if np.size(population_standard_deviation) != number_of_variables:
+                msg = '"population_standard_deviation" must be a 1darray/list '
+                msg += 'of size = {}.'.format(number_of_variables)
+                raise CVGError(msg)
+
+        if population_cdf is not None:
+            if np.size(population_cdf) != number_of_variables:
+                msg = '"population_cdf" must be a 1darray/list of size = '
+                msg += '{}.'.format(number_of_variables)
+                raise CVGError(msg)
+
+            if population_args is not None and \
+                    len(population_args) != number_of_variables:
+                msg = '"population_args" must be a list of size = '
+                msg += '{}.'.format(number_of_variables)
+                raise CVGError(msg)
+
+            if population_args is None:
+                msg = '"population_args" must be a list of size = '
+                msg += '{}.'.format(number_of_variables)
+                raise CVGError(msg)
+
+            if population_loc is not None and \
+                    np.size(population_loc) != number_of_variables:
+                msg = '"population_loc" must be a 1darray/list '
+                msg += 'of size = {}.'.format(number_of_variables)
+                raise CVGError(msg)
+
+            if population_scale is not None and \
+                    np.size(population_scale) != number_of_variables:
+                msg = '"population_scale" must be a 1darray/list '
+                msg += 'of size = {}.'.format(number_of_variables)
+                raise CVGError(msg)
+
+            index = -1
+
+            for pop_cdf, pop_args in zip(population_cdf, population_args):
+                index += 1
+
+                check_population_cdf_args(population_cdf=pop_cdf,
+                                          population_args=pop_args)
+
+                if pop_cdf is not None:
+                    if population_mean is not None and \
+                            population_mean[index] is not None:
+                        msg = 'For the non-normally distributed data at '
+                        msg += 'index = {}, '.format(index + 1)
+                        msg += '"population_mean" should not be provided.'
+                        msg += '\nTo shift and/or scale the distribution '
+                        msg += 'use the "population_loc" and '
+                        msg += '"population_scale" parameters.'
+                        raise CVGError(msg)
+
+                    if population_standard_deviation is not None and \
+                            population_standard_deviation[index] is not None:
+                        msg = 'For the non-normally distributed data at '
+                        msg += 'index = {}, '.format(index + 1)
+                        msg += '"population_standard_deviation" should '
+                        msg += 'not be provided.\nTo shift and/or scale '
+                        msg += 'the distribution use the "population_loc" '
+                        msg += 'and "population_scale" parameters.'
+                        raise CVGError(msg)
+
+
+def _get_array_tolist(input_array) -> list:
+    if input_array is not None:
+        if isinstance(input_array, np.ndarray):
+            input_array = input_array.tolist()
+
+        if type(input_array) in (list, tuple):
+            for index, value in enumerate(input_array):
+                if value is not None and not np.isfinite(value):
+                    input_array[index] = None
+        elif not np.isfinite(input_array):
+            input_array = None
+    return input_array
+
+
+def run_length_control(
+    get_trajectory: callable,
+    *,
+    number_of_variables=1,
+    initial_run_length=10000,
+    run_length_factor=1.0,
+    maximum_run_length=1000000,
+    maximum_equilibration_step=None,
+    minimum_number_of_independent_samples=None,
+    relative_accuracy=0.1,
+    absolute_accuracy=0.1,
+    population_mean=None,
+    population_standard_deviation=None,
+    population_cdf=None,
+    population_args=None,
+    population_loc=None,
+    population_scale=None,
+    # arguments used by different components
+    confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+    confidence_interval_approximation_method=_DEFAULT_CONFIDENCE_INTERVAL_APPROXIMATION_METHOD,
+    heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+    fft=_DEFAULT_FFT,
+    test_size=_DEFAULT_TEST_SIZE,
+    train_size=_DEFAULT_TRAIN_SIZE,
+    batch_size=_DEFAULT_BATCH_SIZE,
+    scale=_DEFAULT_SCALE_METHOD,
+    with_centering=_DEFAULT_WITH_CENTERING,
+    with_scaling=_DEFAULT_WITH_SCALING,
+    ignore_end=_DEFAULT_IGNORE_END,
+    number_of_cores=_DEFAULT_NUMBER_OF_CORES,
+    si=_DEFAULT_SI,
+    nskip=_DEFAULT_NSKIP,
+    minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
+    dump_trajectory=False,
+    dump_trajectory_fp='convergence_trajectory.edn',
+    fp=None,
+    fp_format='txt'
+):
     r"""Control the length of the time series data from a simulation run.
 
-    At each checkpoint, an upper confidence limit (``UCL``) is approximated. If
-    the relative UCL (UCL divided by the computed sample mean) is less than a
-    prespecified value, `relative_accuracy`, the simulation is terminated.
+    It starts drawing ``initial_run_length`` number of observations (samples)
+    by calling the ``get_trajectory`` function in a loop to reach equilibration
+    or pass the ``warm-up`` period.
 
-    ``Relative accuracy`` is the confidence interval half-width or upper
-    confidence limit (UCL) divided by the sample mean. The UCL is calculated as
-    a `confidence_coefficient%` confidence interval for the mean, using the
-    portion of the time series data, which is in the stationarity region.
+    Note:
+        ``get_trajectory`` is a callback function with a specific signature of
+        ``get_trajectory(nstep: int) -> 1darray`` if we only have one variable
+        or ``get_trajectory(nstep: int) -> 2darray`` with the shape of
+        (number_of_variables, nstep)
 
-    If the ratio is bigger than `relative_accuracy`, the length of the time
-    series is deemed not long enough to estimate the mean with sufficient
-    accuracy, which means the run should be extended.
+        All the values returned from this function should be finite values,
+        otherwise the code will stop wih error message explaining the issue.
+
+        Examples:
+
+        >>> rng = np.random.RandomState(12345)
+        >>> n = 100000
+        >>> data = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
+        >>> data_size = data.size
+        >>> start = 0
+        >>> stop = 0
+        >>> def get_trajectory(step):
+                global start, stop
+                start = stop
+                if data_size < start + step:
+                    step = data_size - start
+                stop += step
+                return data[start:stop]
+
+    Then it continues drawing observations until some pre-specified level of
+    absolute or relative precision has been reached.
+
+    The ``precision`` is defined as a half-width of the confidence interval
+    (CI) of the estimator.
+
+    At each checkpoint, an upper confidence limit (``UCL``) is approximated.
+    The drawing of observations is terminated, if UCL is less than the
+    pre-specified absolute precision ``absolute_accuracy`` or if the relative
+    UCL (UCL divided by the computed sample mean) is less than a pre-specified
+    value, ``relative_accuracy``.
+
+    The UCL is calculated as a `confidence_coefficient%` confidence interval
+    for the mean, using the portion of the time series data, which is in the
+    stationarity region.
+
+    The ``Relative accuracy`` is the confidence interval half-width or UCL
+    divided by the sample mean. If the ratio is bigger than
+    `relative_accuracy`, the length of the time series is deemed not long
+    enough to estimate the mean with sufficient accuracy, which means the run
+    should be extended.
 
     In order to avoid problems caused by sequential UCL evaluation cost, this
     calculation should not be repeated too frequently. Heidelberger and Welch
-    (1981) [2]_ suggest increasing the run length by a factor of
+    (1981) [2]_ suggested increasing the run length by a factor of
     `run_length_factor > 1.5`, each time, so that estimate has the same,
     reasonably large proportion of new data.
 
@@ -333,7 +590,7 @@ def run_length_control(get_trajectory,
     is usually used to request two digits of accuracy, and so forth.
 
     The parameter ``confidence_coefficient`` is the confidence coefficient and
-    often, the values 0.95 or 0.99 are used.
+    often, the values 0.95 is used.
     For the confidence coefficient, `confidence_coefficient`, we can use the
     following interpretation,
 
@@ -351,25 +608,94 @@ def run_length_control(get_trajectory,
     long the simulation will run to reach equilibration or pass the ``warm-up``
     period. If the equilibration or warm-up period cannot be detected within
     this time, the simulation will terminate and a warning message will appear
-    in the report. By default and if not specified on input, the
-    `maximum_equilibration_step` is defined as half of the `maximum_run_length`.
+    in the report.
+
+    Note:
+        By default and if not specified on input, the
+        ``maximum_equilibration_step`` is defined as half of the
+        ``maximum_run_length``.
+
+    Notes:
+        By default, the algorithm will use ``relative_accuracy`` as a
+        termination criterion, and in case of failure, it switches to use the
+        ``absolute_accuracy``.
+
+        If using the ``absolute_accuracy`` is desired, one should set the
+        ``relative_accuracy`` to None.
+
+        Examples:
+
+        >>> run_length_control(get_trajectory,
+                               number_of_variables=1,
+                               relative_accuracy=None
+                               absolute_accuracy=0.1)
+
+        The algorithm converts ``relative_accuracy``and ``absolute_accuracy``
+        floating numbers to arrays with the shape of (number_of_variables, ),
+        when the ``number_of_variables`` bigger than one. By default, it uses
+        ``relative_accuracy`` as a termination criterion for the corresponding
+        variable number, and in case of failure, it switches to use the
+        ``absolute_accuracy``.
+
+        If the ``absolute_accuracy`` is desired for one or some variables, one
+        should provide both ``relative_accuracy``and ``absolute_accuracy`` as
+        an array. Then it must set the corresponding ``relative_accuracy`` in
+        the array to None and set the correct `absolute_accuracy`` at the right
+        place in the collection.
+
+        E.g.,
+        >>> run_length_control(get_trajectory,
+                               number_of_variables=3,
+                               relative_accuracy=[0.1, 0.05, None]
+                               absolute_accuracy=[0.1, 0.05, 0.1])
+
+        or,
+        >>> run_length_control(get_trajectory,
+                               number_of_variables=3,
+                               relative_accuracy=[None, 0.05, None]
+                               absolute_accuracy=[0.1,  0.05, 0.1])
+
+    Note:
+        confidence_interval_approximation_method is set to a method to use for
+        approximating the upper confidence limit of the mean.
+
+        By default, (``uncorrelated_sample`` approach) uses the independent samples in
+        the time-series data to approximate the confidence intervals for the
+        mean. The other methods have different approaches.
+
+        E.g., in the ``heidel_welch`` method, it requires no such
+        independence assumption. In this spectral approach, the problem of
+        dealing with dependent data are largely avoided by working in the
+        frequency domain with the sample spectrum (periodogram) of the process.
+
+    Note:
+        ``population_mean`` is a variable known (true) mean. Expected value in
+        null hypothesis. It is an extra information for normally distributed
+        data.
+
+    Note:
+        for non-normally distributed data, and as an extra check on the
+        convergence one should provide the population info using
+        ``population_cdf``, ``population_args``, ``population_loc``, and
+        ``population_scale`` for a specific distribution.
 
     Args:
         get_trajectory (callback function): A callback function with a
             specific signature of ``get_trajectory(nstep: int) -> 1darray``
             if we only have one variable or
             ``get_trajectory(nstep: int) -> 2darray`` with the shape of
-            (n_variables, nstep)
+            (number_of_variables, nstep)
             Note:
-            all the values returned from this function should be finite values,
-            otherwise the code will stop wih error message explaining the issue.
-        n_variables (int, optional): number of variables in the corresponding
-            time-series data from get_trajectory callback function.
-            (default: 1)
+                all the values returned from this function should be finite
+                values, otherwise the code will stop wih error message
+                explaining the issue.
+        number_of_variables (int, optional): number of variables in the
+            corresponding time-series data from get_trajectory callback
+            function. (default: 1)
         initial_run_length (int, optional): initial run length.
             (default: 2000)
         run_length_factor (float, optional): run length increasing factor.
-            (default: 1.5)
+            (default: 1.0)
         maximum_run_length (int, optional): the maximum run length represents
             a cost constraint. (default: 1000000)
         maximum_equilibration_step (int, optional): the maximum number of
@@ -377,53 +703,91 @@ def run_length_control(get_trajectory,
             equilibration_step greater than this limit it will fail. For the
             default None, the function is using ``maximum_run_length // 2`` as
             the maximum equilibration step. (default: None)
-        variable_known_mean (float, or 1darray, optional): variable known (true)
-            mean. ``variable_known_mean`` comes from the theory or in an
-            iterative approache, it is the targeted value. If
-            ``n_variables > 1``, and ``variable_known_mean`` is given (not
-            None,) then ``variable_known_mean`` must be a 1darray of values of
-            size ``n_variables`` (some of those can be None, where the
-            variable mean is not known.) E.g., [300.0, None] is given for
-            ``n_variables = 2``, where for the second variable the population
-            mean is not known. (default: None)
-        variable_known_standard_deviation (float, or 1darray, optional):
-            population standard deviation. If ``n_variables > 1``, and
-            ``population_standard_deviation`` is given (not None), then
-            ``population_standard_deviation`` must be a 1darray of values of
-            size ``n_variables`` (some of those can be None, where the
-            population standard deviation is not known.) E.g., [1.0, None] is
-            given for ``n_variables = 2``, where for the second variable the
-            population standard deviation is not known. (default: None)
-        sample_size (int, optional): maximum number of independent samples.
-            (default: None)
+        minimum_number_of_independent_samples (int, optional): minimum number
+            of independent samples. This is an extra parameter to terminate the
+            run after the pre-specified level of absolute or relative precision
+            has been reached and there are minimum number of independent
+            samples available for further analysis. (default: None)
         relative_accuracy (float, or 1darray, optional): a relative half-width
             requirement or the accuracy parameter. Target value for the ratio
-            of halfwidth to sample mean. If ``n_variables > 1``,
+            of halfwidth to sample mean. If ``number_of_variables > 1``,
             ``relative_accuracy`` can be a scalar to be used for all variables
-            or a 1darray of values of size n_variables. (default: 0.01)
+            or a 1darray of values of size number_of_variables. (default: 0.1)
+        absolute_accuracy (float, or 1darray, optional): a half-width
+            requirement or the accuracy parameter. Target value for the ratio
+            of halfwidth to sample mean. If ``number_of_variables > 1``,
+            ``relative_accuracy`` can be a scalar to be used for all variables
+            or a 1darray of values of size number_of_variables. (default: 0.1)
+
+        population_mean (float, or 1darray, optional): variable known (true)
+            mean. Expected value in null hypothesis. (default: None)
+
+            Note:
+                For ``number_of_variables > 1``, and if ``population_mean``
+                is provided, it should be a list or array of values. It should
+                be set to None for variables which we do not intend to use this
+                extra measure.
+
+                Examples:
+
+                >>> run_length_control(get_trajectory,
+                                       number_of_variables=3,
+                                       population_mean=[None, 297., None])
+
         population_standard_deviation (float, or 1darray, optional): population
-            standard deviation. If ``n_variables > 1``, and
-            ``population_standard_deviation`` is given (not None), then
-            ``population_standard_deviation`` must be a 1darray of values of
-            size n_variables (some of those can be None, where the population
-            standard deviation is not known.)
-            E.g., [1.0, None] is given for ``n_variables = 2``, where for the
-            second variable the population standard deviation is not known.
+            standard deviation. (default: None)
+
+            Note:
+                For ``number_of_variables > 1``, and if
+                ``population_standard_deviation`` is provided, it should be a
+                list or array of values. It should be set to None for variables
+                which we do not intend to use this extra measure.
+
+                Examples:
+
+                >>> run_length_control(
+                        get_trajectory,
+                        number_of_variables=3,
+                        population_mean=[None, 297., None],
+                        population_standard_deviation=[None, 10., None])
+
+        population_cdf (str, or 1darray, optional): The name of a distribution.
             (default: None)
-        confidence_coefficient (float, optional): (or confidence level) and must
-            be between 0.0 and 1.0, and represents the confidence for
+
+            Examples:
+            >>> run_length_control(
+                    get_trajectory,
+                    number_of_variables=2,
+                    population_cdf=[None, 'gamma'],
+                    population_args=[None, (1.99,)],
+                    population_loc=[None, None],
+                    population_scale=[None, None])
+
+            or,
+
+            >>> run_length_control(
+                    get_trajectory,
+                    number_of_variables=2,
+                    population_mean=[297., None],
+                    population_standard_deviation=[10., None],
+                    population_cdf=[None, 'gamma'],
+                    population_args=[None, (1.99,)],
+                    population_loc=[None, None],
+                    population_scale=[None, None])
+
+        population_args (tuple, or list of tuples, optional): Distribution
+            parameter. (default: None)
+        population_loc (float, or 1darray, or None): location of the
+            distribution. (default: None)
+        population_scale (float, or 1darray, or None): scale of the
+            distribution. (default: None)
+
+        confidence_coefficient (float, optional): (or confidence level) and
+            must be between 0.0 and 1.0, and represents the confidence for
             calculation of relative halfwidths estimation. (default: 0.95)
         confidence_interval_approximation_method (str, optional) : Method to
             use for approximating the upper confidence limit of the mean.
-            One of the ``subsample`` or ``heidel_welch`` aproaches.
-            (default: 'subsample')
-            By default, (``subsample`` approach) the independent samples in the
-            time-series data are used to approximate the confidence intervals
-            for the mean.
-            The second approach, (``heidel_welch`` approach) requires no such
-            independence assumption. In fact, the problems of dealing with
-            dependent data are largely avoided by working in the frequency
-            domain with the sample spectrum (periodogram) of the process.
+            One of the ``ucl_methods`` aproaches. (default: 'uncorrelated_sample')
         heidel_welch_number_points (int, optional): the number of points in
             Heidelberger and Welch's spectral method that are used to obtain
             the polynomial fit. The parameter ``heidel_welch_number_points``
@@ -446,32 +810,32 @@ def run_length_control(get_trajectory,
             the scale metod centering approach. (default: False)
         with_scaling (bool, optional): if ``True``, scale the batched data to
             scale metod scaling approach. (default: False)
-        ignore_end_batch (int, or float, or None, optional): if ``int``, it
-            is the last few batch points that should be ignored. if ``float``,
-            should be in ``(0, 1)`` and it is the percent of last batch points
-            that should be ignored. if `None` it would be set to the
-            ``batch_size``. (default: None)
+        ignore_end (int, or float, or None, optional): if ``int``, it is the
+            last few (batch) points that should be ignored. if ``float``,
+            should be in ``(0, 1)`` and it is the percent of last (batch)
+            points that should be ignored. if `None` it would be set to the
+            ``batch_size`` in bacth method and to the one fourth of the total
+            number of points elsewhere. (default: None)
+        number_of_cores (int, optional): The maximum number of concurrently
+            running jobs, such as the number of Python worker processes or the
+            size of the thread-pool. If -1 all CPUs are used. If 1 is given, no
+            parallel computing code is used at all. For n_jobs below -1,
+            (n_cpus + 1 + n_jobs) are used. Thus for n_jobs = -2, all CPUs but
+            one are used. (default: 1)
         si (str, optional): statistical inefficiency method.
             (default: 'statistical_inefficiency')
-        nskip (int, optional): the number of data points to skip in
-            estimating ucl. (default: 1)
+        nskip (int, optional): the number of data points to skip in estimating
+            ucl. (default: 1)
         minimum_correlation_time (int, optional): The minimum amount of
             correlation function to compute in estimating ucl. The algorithm
             terminates after computing the correlation time out to
             minimum_correlation_time when the correlation function first
             goes negative. (default: None)
-        ignore_end (int, or float, or None, optional): if ``int``, it is the
-            last few points that should be ignored in estimating the
-            equilibration point in a time series data. If ``float``, should be
-            in ``(0, 1)`` and it is the percent of number of points that should
-            be ignored in estimating the equilibration point. If ``None`` it
-            would be set to the one fourth of the total number of points.
-            (default: None)
         dump_trajectory (bool, optional): if ``True``, dump the final trajectory
             data to a file ``dump_trajectory_fp``. (default: False)
         dump_trajectory_fp (str, object with a write(string) method, optional):
             a ``.write()``-supporting file-like object or a name string to open
-            a file.
+            a file. (default: 'convergence_trajectory.edn')
         fp (str, object with a write(string) method, optional): if an ``str``
             equals to ``'return'`` the function will return string of the
             analysis results on the length of the time series. Otherwise it
@@ -490,52 +854,30 @@ def run_length_control(get_trajectory,
             a string of the analysis results on the length of the time series.
 
     """
-    if not isfunction(get_trajectory):
-        msg = 'the "get_trajectory" input is not a callback function.\n'
-        msg += 'One has to provide the "get_trajectory" function as an '
-        msg += 'input. It expects to have a specific signature:\n'
-        msg += 'get_trajectory(nstep: int) -> 1darray,\n'
-        msg += 'where nstep is the number of steps and the function '
-        msg += 'should return a time-series data with the requested '
-        msg += 'length equals to the number of steps.'
-        raise CVGError(msg)
-
-    if not isinstance(maximum_run_length, int):
-        msg = 'maximum_run_length must be an `int`.'
-        raise CVGError(msg)
-
-    if maximum_run_length < 1:
-        msg = 'maximum_run_length must be a positive `int` '
-        msg += 'greater than or equal 1'
-        raise CVGError(msg)
+    _check_get_trajectory(get_trajectory)
+    cvg_check(number_of_variables, 'number_of_variables', int, 1)
+    cvg_check(initial_run_length, 'initial_run_length', int, 1)
+    cvg_check(run_length_factor, 'run_length_factor', None, 0)
+    cvg_check(maximum_run_length, 'maximum_run_length', int, 1)
 
     if maximum_equilibration_step is None:
         maximum_equilibration_step = maximum_run_length // 2
-        msg = "maximum_equilibration_step is not given on input!\nThe "
-        msg += "maximum number of steps as an equilibration hard limit "
-        msg += "is set to {}".format(maximum_equilibration_step)
+        msg = '"maximum_equilibration_step" is not given on input!\nThe '
+        msg += 'maximum number of steps as an equilibration hard limit '
+        msg += 'is set to {}.'.format(maximum_equilibration_step)
         cvg_warning(msg)
 
     # Set the hard limit for the equilibration step
-    if not isinstance(maximum_equilibration_step, int):
-        msg = 'maximum_equilibration_step must be an `int`.'
+    cvg_check(maximum_equilibration_step, 'maximum_equilibration_step', int, 1)
+    if maximum_equilibration_step >= maximum_run_length:
+        msg = '"maximum_equilibration_step" = '
+        msg += '{} must be '.format(maximum_equilibration_step)
+        msg += 'less than maximum_run_length = {}.'.format(maximum_run_length)
         raise CVGError(msg)
 
-    if maximum_equilibration_step < 1 or \
-            maximum_equilibration_step >= maximum_run_length:
-        msg = 'maximum_equilibration_step = '
-        msg += '{} must be a positive '.format(maximum_equilibration_step)
-        msg += '`int` greater than or equal 1 and less than '
-        msg += 'maximum_run_length = {}.'.format(maximum_run_length)
-        raise CVGError(msg)
-
-    if not isinstance(n_variables, int):
-        msg = 'n_variables must be an `int`.'
-        raise CVGError(msg)
-
-    if n_variables < 1:
-        msg = 'n_variables must be a positive `int` greater than or equal 1.'
-        raise CVGError(msg)
+    if minimum_number_of_independent_samples is not None:
+        cvg_check(minimum_number_of_independent_samples,
+                  'minimum_number_of_independent_samples', int, 1)
 
     if fp is None:
         fp = sys.stdout
@@ -555,908 +897,740 @@ def run_length_control(get_trajectory,
         raise CVGError(msg)
 
     # Initialize
-    if n_variables == 1:
+    if number_of_variables == 1:
         ndim = 1
-        if np.size(relative_accuracy) != 1:
-            msg = 'For one variable, relative_accuracy must be a `float`.'
-            raise CVGError(msg)
-
-        if variable_known_mean is not None and \
-                np.size(variable_known_mean) != 1:
-            msg = 'For one variable, variable_known_mean must be a `float`.'
-            raise CVGError(msg)
-
-        if variable_known_standard_deviation is not None and \
-                np.size(variable_known_standard_deviation) != 1:
-            msg = 'For one variable, variable_known_standard_deviation must '
-            msg += 'be a `float`.'
-            raise CVGError(msg)
-
-        if population_standard_deviation is not None and \
-                np.size(population_standard_deviation) != 1:
-            msg = 'For one variable, population_standard_deviation must be '
-            msg += 'a `float`.'
-            raise CVGError(msg)
-
     else:
         ndim = 2
-
         if np.size(relative_accuracy) == 1:
-            relative_accuracy = \
-                np.array([relative_accuracy] * n_variables, dtype=np.float64)
-        elif np.size(relative_accuracy) != n_variables:
-            msg = 'relative_accuracy must be a scalar (a `float`) or a '
-            msg += '1darray of size = {}.'.format(n_variables)
-            raise CVGError(msg)
-        else:
-            relative_accuracy = np.array(relative_accuracy, copy=False)
+            relative_accuracy = [relative_accuracy] * number_of_variables
+        relative_accuracy = _get_array_tolist(relative_accuracy)
+        if np.size(absolute_accuracy) == 1:
+            absolute_accuracy = [absolute_accuracy] * number_of_variables
+        absolute_accuracy = _get_array_tolist(absolute_accuracy)
+        population_mean = _get_array_tolist(population_mean)
+        population_standard_deviation = \
+            _get_array_tolist(population_standard_deviation)
+        population_cdf = _get_array_tolist(population_cdf)
+        population_args = _get_array_tolist(population_args)
+        if population_args is None:
+            population_args = [None] * number_of_variables
+        population_loc = _get_array_tolist(population_loc)
+        population_scale = _get_array_tolist(population_scale)
 
-        if variable_known_mean is not None:
-            if np.size(variable_known_mean) != n_variables:
-                msg = 'variable_known_mean must be a 1darray of size = '
-                msg += '{}.'.format(n_variables)
-                raise CVGError(msg)
-
-            variable_known_mean = np.array(variable_known_mean, copy=False)
-
-        if variable_known_standard_deviation is not None:
-            if np.size(variable_known_standard_deviation) != n_variables:
-                msg = 'variable_known_standard_deviation must be a 1darray '
-                msg += 'of size = {}.'.format(n_variables)
-                raise CVGError(msg)
-
-            variable_known_standard_deviation = \
-                np.array(variable_known_standard_deviation, copy=False)
-
-        if population_standard_deviation is not None:
-            if np.size(population_standard_deviation) != n_variables:
-                msg = 'population_standard_deviation must be a 1darray of '
-                msg += 'size = {}.'.format(n_variables)
-                raise CVGError(msg)
-
-            population_standard_deviation = \
-                np.array(population_standard_deviation, copy=False)
+    _check_accuracy(number_of_variables, relative_accuracy, absolute_accuracy)
+    _check_population(number_of_variables,
+                      population_mean,
+                      population_standard_deviation,
+                      population_cdf,
+                      population_args,
+                      population_loc,
+                      population_scale)
 
     if confidence_interval_approximation_method not in ucl_methods:
-        msg = 'method {} '.format(confidence_interval_approximation_method)
+        msg = 'method "{}" '.format(confidence_interval_approximation_method)
         msg += 'to aproximate confidence interval not found. Valid '
         msg += 'methods are:\n\t- '
         msg += '{}'.format('\n\t- '.join(ucl_methods))
         raise CVGError(msg)
 
-    if confidence_interval_approximation_method == 'heidel_welch':
-        try:
-            # Initialize the HeidelbergerWelch object
-            heidel_welch = HeidelbergerWelch()
-        except CVGError:
-            msg = "Failed to initialize the HeidelbergerWelch object."
-            raise CVGError(msg)
+    try:
+        ucl_obj = ucl_methods[confidence_interval_approximation_method]()
+    except CVGError:
+        msg = "Failed to initialize the UCL object."
+        raise CVGError(msg)
 
-    # Initial length
+    if ucl_obj.name == 'heidel_welch':
+        ucl_obj.set_heidel_welch_constants(
+            confidence_coefficient=confidence_coefficient,
+            heidel_welch_number_points=heidel_welch_number_points)
+
+    # Initial running length
     run_length = min(initial_run_length, maximum_run_length)
-    _run_length = min(int(initial_run_length * run_length_factor),
-                      maximum_run_length)
 
     equilibration_step = 0
-    total_run_length = 0
+    total_run_length = run_length
 
-    # Time series data
-    t = None
+    # Extra check flag
+    extra_check = population_mean is not None or population_cdf is not None
 
+    need_more_data = True
+
+    # one variable
     if ndim == 1:
+        # Time series data temporary array
+        tsd = _get_trajectory(get_trajectory, run_length, ndim)
+
         # Estimate the truncation point or "warm-up" period
-        while True:
-            total_run_length += run_length
+        # while we have sufficient data
+        while need_more_data:
+            truncated, truncate_index = mser_m(tsd,
+                                               batch_size=batch_size,
+                                               scale=scale,
+                                               with_centering=with_centering,
+                                               with_scaling=with_scaling,
+                                               ignore_end=ignore_end)
 
-            if total_run_length >= maximum_run_length:
-                total_run_length -= run_length
-                run_length = maximum_run_length - total_run_length
-                total_run_length = maximum_run_length
+            # if we reached the truncation point using
+            # marginal standard error rules
+            if truncated and extra_check:
+                # Experimental feature to make sure of detecting the
+                # correct equilibrium or warm-up period
 
-            try:
-                _t = get_trajectory(step=run_length)
-            except:
-                msg = 'failed to get the time-series data or do the '
-                msg += 'simulation for {} number of '.format(run_length)
-                msg += 'steps.'
-                raise CVGError(msg)
+                # slice a numpy array, the memory is shared
+                # between the slice and the original
+                time_series_data = tsd[truncate_index:]
 
-            # Extra check
-            if not np.all(np.isfinite(_t)):
-                msg = 'there is/are value/s in the input which is/are '
-                msg += 'non-finite or not number.'
-                raise CVGError(msg)
+                if population_mean is not None:
+                    sample_mean = time_series_data.mean()
+                    diff = abs(population_mean - sample_mean)
 
-            if t is None:
-                t = np.array(_t, dtype=np.float64)
-                if t.ndim != ndim:
-                    msg = 'the return from the "get_trajectory" function '
-                    msg += 'has a wrong dimension of {} != 1.'.format(t.ndim)
-                    raise CVGError(msg)
-            else:
-                _t = np.array(_t, copy=False, dtype=np.float64)
-                t = np.concatenate((t, _t))
+                    sample_std = time_series_data.std()
+                    if population_standard_deviation is not None:
+                        sample_std = \
+                            max(sample_std, population_standard_deviation)
 
-            truncated, truncate_index = \
-                mser_m(t,
-                       batch_size=batch_size,
-                       scale=scale,
-                       with_centering=with_centering,
-                       with_scaling=with_scaling,
-                       ignore_end_batch=ignore_end_batch)
+                if population_cdf is not None:
+                    population_median, _, _, population_std = \
+                        get_distribution_stats(population_cdf,
+                                               population_args,
+                                               population_loc,
+                                               population_scale)
 
-            # if we reached the truncation point using marginal standard
-            # error rules or we have reached the maximum limit
-            if truncated or total_run_length == maximum_run_length:
-                # Experimental feature to make sure of
-                # correct equilibrium or warm-up detection
-                if truncated and variable_known_mean is not None:
-                    time_series_data = t[truncate_index:]
-                    tmp_mean = np.mean(time_series_data)
-                    tmp_std = np.std(time_series_data)
-                    # Estimates further than 3 standard deviation away from the
-                    # known value can easily be flagged as not reached to the
-                    # steady state
-                    if np.abs(variable_known_mean - tmp_mean) > 3 * tmp_std:
-                        # Equilibration is detected wrongly and
-                        # the run must continue
-                        run_length = _run_length
-                        continue
-                break
+                    sample_median = time_series_data.median()
+                    diff = abs(population_median - sample_median)
 
-            run_length = _run_length
+                    sample_std = time_series_data.std()
+                    sample_std = max(sample_std, population_std)
+
+                # Estimates further than 3 standard errors away can then
+                # easily be flagged as not truncated
+                if diff > 3 * sample_std:
+                    truncated = False
+
+            # Found the truncation point or "warm-up" period
+            if truncated:
+                need_more_data = False
+
+            if need_more_data:
+                # get the run length
+                run_length = _get_run_length(run_length,
+                                             run_length_factor,
+                                             total_run_length,
+                                             maximum_run_length)
+
+                # We have reached the maximum limit
+                if run_length == 0:
+                    need_more_data = False
+                else:
+                    total_run_length += run_length
+
+                    _tsd = _get_trajectory(get_trajectory, run_length, ndim)
+                    tsd = np.concatenate((tsd, _tsd))
+
+        del extra_check
+
+        equilibration_step = truncate_index
+        equilibration_detected = truncated
 
         if truncated:
             # slice a numpy array, the memory is shared
             # between the slice and the original
-            time_series_data = t[truncate_index:]
-            time_series_data_size = time_series_data.size
+            time_series_data = tsd[truncate_index:]
 
+            # Check to get the more accurate estimate of the
+            # equilibrium or warm-up period index
             equilibration_index_estimate, _ = \
                 estimate_equilibration_length(
                     time_series_data,
                     si=si,
                     nskip=nskip,
-                    fft=(time_series_data_size > 30 and fft),
+                    fft=fft,
                     minimum_correlation_time=minimum_correlation_time,
-                    ignore_end=ignore_end)
+                    ignore_end=ignore_end,
+                    number_of_cores=number_of_cores)
 
-            equilibration_step = truncate_index + equilibration_index_estimate
-            equilibration_detected = True
-
-        else:
-            equilibration_step = truncate_index
-            equilibration_detected = False
+            # Correct the equilibration step
+            equilibration_step += equilibration_index_estimate
 
         # Check the hard limit
-        if equilibration_step >= maximum_equilibration_step:
-            if dump_trajectory:
-                kim_edn.dump(t.tolist(), dump_trajectory_fp)
+        _check_equilibration_step(equilibration_step,
+                                  maximum_equilibration_step,
+                                  maximum_run_length,
+                                  equilibration_detected,
+                                  tsd,
+                                  dump_trajectory,
+                                  dump_trajectory_fp)
 
-            if equilibration_detected:
-                msg = 'The equilibration or "warm-up" period is detected '
-                msg += 'at step = {}, which '.format(equilibration_step)
-                msg += 'is greater than the maximum number of allowed steps '
-                msg += 'for the equilibration detection = '
-                msg += '{}.\nTo prevent '.format(maximum_equilibration_step)
-                msg += 'this error, you can either request a longer maximum '
-                msg += 'number of allowed steps to reach equilibrium or if '
-                msg += 'you did not provide this limit you can increase the '
-                msg += 'maximum_run_length.'
-            else:
-                if equilibration_step == (maximum_run_length - 1):
-                    msg = 'The equilibration or "warm-up" period is '
-                    msg += 'not detected. Check the trajectory data!!!\n'
-                else:
-                    msg = 'The truncation point = '
-                    msg += '{}, returned by MSER-m '.format(equilibration_step)
-                    msg += 'is > half of the data set size and is '
-                    msg += 'invalid.\n'
-                msg += 'More data is required. To prevent this error, you can '
-                msg += 'request a longer maximum_run_length.\n'
-            raise CVGError(msg)
+        relative_half_width_estimate = None
 
-        run_length = _run_length
+        enough_accuracy = False
+        need_more_data = True
 
-        si_func = si_methods[si]
-        ucl_func = ucl_methods[confidence_interval_approximation_method]
-        statistical_inefficiency_estimate = None
-
-        while True:
+        while need_more_data:
             # slice a numpy array, the memory is shared
             # between the slice and the original
-            time_series_data = t[equilibration_step:]
+            time_series_data = tsd[equilibration_step:]
             time_series_data_size = time_series_data.size
 
-            if confidence_interval_approximation_method == 'subsample' or \
-                time_series_data_size < 100 or \
-                    population_standard_deviation is not None:
-                # Compute the statitical inefficiency of a time series
-                try:
-                    statistical_inefficiency_estimate = si_func(
-                        time_series_data,
-                        fft=(time_series_data_size > 30 and fft),
-                        minimum_correlation_time=minimum_correlation_time)
-                except CVGError:
-                    statistical_inefficiency_estimate = float(
-                        time_series_data_size)
-
-                try:
-                    subsample_indices = subsample_index(
-                        time_series_data,
-                        si=statistical_inefficiency_estimate,
-                        fft=(time_series_data_size > 30 and fft),
-                        minimum_correlation_time=minimum_correlation_time)
-                except CVGError:
-                    msg = 'Failed to compute the indices of uncorrelated '
-                    msg += 'subsamples of the time series data.'
-                    raise CVGError(msg)
-
-                # Get the upper confidence limit
-                try:
-                    upper_confidence_limit = ucl_func(
-                        time_series_data,
-                        confidence_coefficient=confidence_coefficient,
-                        population_standard_deviation=population_standard_deviation,
-                        subsample_indices=subsample_indices,
-                        si=statistical_inefficiency_estimate,
-                        fft=(subsample_indices.size > 30 and fft),
-                        minimum_correlation_time=minimum_correlation_time)
-                except CVGError:
-                    msg = "Failed to get the upper confidence limit."
-                    raise CVGError(msg)
-
-                # Compute the mean
-                _mean = np.mean(time_series_data[subsample_indices])
-
-            # confidence_interval_approximation_method == 'heidel_welch'
-            else:
-                # Get the upper confidence limit
-                try:
-                    upper_confidence_limit = ucl_func(
-                        time_series_data,
-                        confidence_coefficient=confidence_coefficient,
-                        heidel_welch_number_points=heidel_welch_number_points,
-                        fft=fft,
-                        test_size=test_size,
-                        train_size=train_size,
-                        heidel_welch=heidel_welch)
-                except CVGError:
-                    msg = "Failed to get the upper confidence limit."
-                    raise CVGError(msg)
-
-                subsample_indices = None
-
-                # Compute the mean
-                _mean = np.mean(time_series_data)
-
-            # Estimat the relative half width
-            if isclose(_mean, 0, abs_tol=1e-12):
-                relative_half_width_estimate = upper_confidence_limit / 1e-12
-            else:
-                relative_half_width_estimate = \
-                    upper_confidence_limit / fabs(_mean)
-
-            # Check the run stopping criteria
-            if relative_half_width_estimate < relative_accuracy:
-                if statistical_inefficiency_estimate is None:
-                    # Compute the statitical inefficiency of a time series
-                    try:
-                        statistical_inefficiency_estimate = si_func(
-                            time_series_data,
-                            fft=(time_series_data_size > 30 and fft),
-                            minimum_correlation_time=minimum_correlation_time)
-                    except:
-                        statistical_inefficiency_estimate = float(
-                            time_series_data_size)
-
-                    effective_sample_size = time_series_data_size / \
-                        statistical_inefficiency_estimate
-
-                    statistical_inefficiency_estimate = None
-                else:
-                    effective_sample_size = time_series_data_size / \
-                        statistical_inefficiency_estimate
-
-                # We should stop or we check for enough sample size
-                if (sample_size is None or
-                    effective_sample_size >= sample_size) and \
-                        (variable_known_mean is None or
-                         np.abs(variable_known_mean - _mean) <
-                            3 * upper_confidence_limit):
-
-                    if subsample_indices is None:
-                        _std = np.std(time_series_data)
-                    else:
-                        _std = np.std(time_series_data[subsample_indices])
-
-                    if dump_trajectory:
-                        kim_edn.dump(t.tolist(), dump_trajectory_fp)
-
-                    msg = convergence_message(fp_format,
-                                              True,
-                                              1,
-                                              total_run_length,
-                                              equilibration_detected,
-                                              equilibration_step,
-                                              maximum_equilibration_step,
-                                              confidence_coefficient,
-                                              relative_accuracy,
-                                              relative_half_width_estimate,
-                                              upper_confidence_limit,
-                                              _mean,
-                                              _std,
-                                              effective_sample_size,
-                                              sample_size)
-
-                    # It should return the string
-                    if fp is None:
-                        if fp_format == 'json':
-                            return json.dumps(msg, indent=4)
-                        if fp_format == 'edn':
-                            return kim_edn.dumps(msg, indent=4)
-                        return msg
-
-                    # Otherwise it uses fp to print the message
-                    if fp_format == 'json':
-                        json.dump(msg, fp, indent=4)
-                    elif fp_format == 'edn':
-                        kim_edn.dump(msg, fp, indent=4)
-                    else:
-                        print(msg, file=fp)
-
-                    return True
-
-            total_run_length += run_length
-
-            if total_run_length >= maximum_run_length:
-                total_run_length -= run_length
-                run_length = maximum_run_length - total_run_length
-                total_run_length = maximum_run_length
-
-            # We have reached the maximum limit
-            if run_length == 0:
-                break
+            enough_data = True
 
             try:
-                _t = get_trajectory(step=run_length)
-            except:
-                msg = 'failed to get the time-series data or do the '
-                msg += 'simulation for {} number of '.format(run_length)
-                msg += 'steps.'
-                raise CVGError(msg)
-
-            # Extra check
-            if not np.all(np.isfinite(_t)):
-                msg = 'there is/are value/s in the input which is/are '
-                msg += 'non-finite or not number.'
-                raise CVGError(msg)
-
-            _t = np.asarray(_t, dtype=np.float64)
-            t = np.concatenate((t, _t))
-
-        if statistical_inefficiency_estimate is None:
-            # Compute the statitical inefficiency of a time series
-            try:
-                statistical_inefficiency_estimate = si_func(
+                upper_confidence_limit = ucl_obj.ucl(
                     time_series_data,
-                    fft=(time_series_data_size > 30 and fft),
+                    confidence_coefficient=confidence_coefficient,
+                    equilibration_length_estimate=0,
+                    heidel_welch_number_points=heidel_welch_number_points,
+                    batch_size=batch_size,
+                    fft=fft,
+                    scale=scale,
+                    with_centering=with_centering,
+                    with_scaling=with_scaling,
+                    test_size=test_size,
+                    train_size=train_size,
+                    population_standard_deviation=population_standard_deviation,
+                    si=si,
                     minimum_correlation_time=minimum_correlation_time)
-            except:
-                statistical_inefficiency_estimate = float(
-                    time_series_data_size)
+            except CVGSampleSizeError:
+                # do not have enough data and need more
+                enough_data = False
+                upper_confidence_limit = None
+            except CVGError:
+                raise CVGError("Failed to compute the UCL.")
 
-        effective_sample_size = time_series_data_size / \
-            statistical_inefficiency_estimate
+            if enough_data:
+                if relative_accuracy is None:
+                    enough_accuracy = \
+                        upper_confidence_limit < absolute_accuracy
+                else:
+                    # Estimate the relative half width
+                    if isclose(
+                            ucl_obj.mean, 0,
+                            abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL
+                    ):
+                        msg = 'It is not possible to estimate the relative '
+                        msg += 'half width for the close to zero mean = '
+                        msg += '{}'.format(ucl_obj.mean)
+                        raise CVGError(msg)
 
-        if subsample_indices is None:
-            _std = np.std(time_series_data)
-        else:
-            _std = np.std(time_series_data[subsample_indices])
+                    relative_half_width_estimate = upper_confidence_limit / \
+                        fabs(ucl_obj.mean)
+
+                    enough_accuracy = \
+                        relative_half_width_estimate < relative_accuracy
+
+                if enough_accuracy:
+                    if ucl_obj.name != 'uncorrelated_sample':
+                        ucl_obj.set_indices(
+                            time_series_data,
+                            si=si,
+                            fft=fft,
+                            minimum_correlation_time=minimum_correlation_time)
+
+                    effective_sample_size = time_series_data_size / ucl_obj.si
+
+                    if minimum_number_of_independent_samples is None or \
+                            effective_sample_size >= \
+                    minimum_number_of_independent_samples:
+
+                        need_more_data = False
+
+                        if population_mean is not None:
+                            need_more_data = not t_test(
+                                sample_mean=ucl_obj.mean,
+                                sample_std=ucl_obj.std,
+                                sample_size=ucl_obj.sample_size,
+                                population_mean=population_mean,
+                                significance_level=1-confidence_coefficient)
+
+                        if not need_more_data and \
+                                population_standard_deviation is not None:
+                            need_more_data = not chi_square_test(
+                                sample_var=ucl_obj.std * ucl_obj.std,
+                                sample_size=ucl_obj.sample_size,
+                                population_var=population_standard_deviation *
+                                population_standard_deviation,
+                                significance_level=1-confidence_coefficient)
+
+                        if not need_more_data and \
+                                population_cdf is not None:
+                            need_more_data = not levene_test(
+                                time_series_data=time_series_data[
+                                    ucl_obj.indices],
+                                population_cdf=population_cdf,
+                                population_args=population_args,
+                                population_loc=population_loc,
+                                population_scale=population_scale,
+                                significance_level=1-confidence_coefficient)
+
+            if need_more_data:
+                # get the run length
+                run_length = _get_run_length(run_length,
+                                             run_length_factor,
+                                             total_run_length,
+                                             maximum_run_length)
+
+                # We have reached the maximum limit
+                if run_length == 0:
+                    need_more_data = False
+                else:
+                    total_run_length += run_length
+
+                    _tsd = _get_trajectory(get_trajectory, run_length, ndim)
+                    tsd = np.concatenate((tsd, _tsd))
+
+        if upper_confidence_limit is None:
+            raise CVGError("Failed to compute the UCL.")
 
         if dump_trajectory:
-            kim_edn.dump(t.tolist(), dump_trajectory_fp)
+            kim_edn.dump(tsd.tolist(), dump_trajectory_fp)
 
-        # We have reached the maximum limit
-        msg = convergence_message(fp_format,
-                                  False,
-                                  1,
-                                  total_run_length,
-                                  equilibration_detected,
-                                  equilibration_step,
-                                  maximum_equilibration_step,
-                                  confidence_coefficient,
-                                  relative_accuracy,
-                                  relative_half_width_estimate,
-                                  upper_confidence_limit,
-                                  _mean,
-                                  _std,
-                                  effective_sample_size,
-                                  sample_size)
+        converged = enough_accuracy and not need_more_data
 
-        # It should return the string
-        if fp is None:
-            if fp_format == 'json':
-                return json.dumps(msg, indent=4)
-            if fp_format == 'edn':
-                return kim_edn.dumps(msg, indent=4)
-            return msg
+        if not converged:
+            time_series_data = tsd[equilibration_step:]
+            time_series_data_size = time_series_data.size
 
-        # Otherwise it uses fp to print the message
-        if fp_format == 'json':
-            json.dump(msg, fp, indent=4)
-        elif fp_format == 'edn':
-            kim_edn.dump(msg, fp, indent=4)
-        else:
-            print(msg, file=fp)
+            if ucl_obj.name != 'uncorrelated_sample':
+                ucl_obj.set_indices(
+                    time_series_data,
+                    si=si,
+                    fft=fft,
+                    minimum_correlation_time=minimum_correlation_time)
 
-        return False
+            effective_sample_size = time_series_data_size / ucl_obj.si
+
+        msg = _convergence_message(number_of_variables,
+                                   converged,
+                                   total_run_length,
+                                   maximum_equilibration_step,
+                                   equilibration_detected,
+                                   equilibration_step,
+                                   confidence_coefficient,
+                                   relative_accuracy,
+                                   absolute_accuracy,
+                                   upper_confidence_limit,
+                                   relative_half_width_estimate,
+                                   ucl_obj.mean,
+                                   ucl_obj.std,
+                                   effective_sample_size,
+                                   minimum_number_of_independent_samples)
 
     # ndim == 2
     else:
-        _truncated = np.array([False] * n_variables)
-        truncate_index = np.empty(n_variables, dtype=int)
+        # Time series data temporary array
+        tsd = _get_trajectory(get_trajectory, run_length, ndim,
+                              number_of_variables)
 
-        # Estimate the equilibration or "warm-up" period
-        while True:
-            total_run_length += run_length
+        _truncated = [False] * number_of_variables
+        truncate_index = [None] * number_of_variables
 
-            if total_run_length >= maximum_run_length:
-                total_run_length -= run_length
-                run_length = maximum_run_length - total_run_length
-                total_run_length = maximum_run_length
-
-            try:
-                _t = get_trajectory(step=run_length)
-            except:
-                msg = 'failed to get the time-series data or do the '
-                msg += 'simulation for {} number of '.format(run_length)
-                msg += 'steps.'
-                raise CVGError(msg)
-
-            # Extra check
-            if not np.all(np.isfinite(_t)):
-                msg = 'there is/are value/s in the input which is/are '
-                msg += 'non-finite or not number.'
-                raise CVGError(msg)
-
-            if t is None:
-                t = np.array(_t, dtype=np.float64)
-
-                if t.ndim != ndim:
-                    msg = 'the return of "get_trajectory" function has a '
-                    msg += 'wrong dimension of {} != '.format(t.ndim)
-                    msg += '{}.\n'.format(ndim)
-                    msg += 'In a two-dimensional return array of '
-                    msg += '"get_trajectory" function, each row corresponds '
-                    msg += 'to the time series data for one variable.'
-                    raise CVGError(msg)
-
-                if n_variables != np.shape(t)[0]:
-                    msg = 'the return of "get_trajectory" function has a '
-                    msg += 'wrong number of variables = '
-                    msg += '{} != '.format(np.shape(t)[0])
-                    msg += '{}.\n'.format(n_variables)
-                    msg += 'In a two-dimensional return array of '
-                    msg += '"get_trajectory" function, each row corresponds '
-                    msg += 'to the time series data for one variable.'
-                    raise CVGError(msg)
-            else:
-                _t = np.array(_t, copy=False, dtype=np.float64)
-                t = np.concatenate((t, _t), axis=1)
-
-            for i in range(n_variables):
+        # Estimate the truncation point or "warm-up" period
+        # while we have sufficient data
+        while need_more_data:
+            for i in range(number_of_variables):
                 if not _truncated[i]:
                     _truncated[i], truncate_index[i] = \
-                        mser_m(t[i],
+                        mser_m(tsd[i],
                                batch_size=batch_size,
                                scale=scale,
                                with_centering=with_centering,
                                with_scaling=with_scaling,
-                               ignore_end_batch=ignore_end_batch)
+                               ignore_end=ignore_end)
 
             truncated = np.all(_truncated)
 
-            # if we reached the truncation point using marginal standard
-            # error rules or we have reached the maximum limit
-            if truncated or total_run_length == maximum_run_length:
-                # Experimental feature to make sure of
-                # correct equilibrium or warm-up detection
-                if truncated and variable_known_mean is not None:
-                    for i in range(n_variables):
-                        if variable_known_mean[i] is None:
-                            continue
+            # if we reached the truncation point using
+            # marginal standard error rules
+            if truncated and extra_check:
+                # Experimental feature to make sure of detecting the
+                # correct equilibrium or warm-up period
 
-                        time_series_data = t[i, truncate_index[i]:]
-                        tmp_mean = np.mean(time_series_data)
-                        tmp_std = np.std(time_series_data)
-                        # Estimates further than 3 standard deviation away from
-                        # the known value can easily be flagged as not reached
-                        # to the steady state
-                        if np.abs(variable_known_mean[i] - tmp_mean) > \
-                                3 * tmp_std:
-                            # Equilibration is detected wrongly and
-                            # the run must continue
-                            _truncated = False
-                            break
+                for i in range(number_of_variables):
+                    if truncated:
+                        # slice a numpy array, the memory is shared
+                        # between the slice and the original
+                        time_series_data = tsd[i, truncate_index[i]:]
 
-                    truncated = np.all(_truncated)
-                    if not truncated:
-                        run_length = _run_length
-                        continue
-                break
+                        diff = 0
+                        sample_std = 1
 
-            run_length = _run_length
+                        if population_mean is not None and \
+                                population_mean[i] is not None:
+                            sample_mean = time_series_data.mean()
+                            sample_std = time_series_data.std()
 
-        equilibration_step = np.empty(n_variables, dtype=int)
+                            diff = abs(population_mean[i] - sample_mean)
+
+                            if population_standard_deviation is not None and \
+                                    population_standard_deviation[i] is not None:
+                                sample_std = max(
+                                    sample_std,
+                                    population_standard_deviation[i])
+
+                        if population_cdf is not None and \
+                           population_cdf[i] is not None:
+                            if population_args is not None and \
+                                    population_args[i] is not None:
+                                args = population_args[i]
+                            else:
+                                args = None
+
+                            if population_loc is not None and \
+                                    population_loc[i] is not None:
+                                loc = population_loc[i]
+                            else:
+                                loc = None
+
+                            if population_scale is not None and \
+                                    population_scale[i] is not None:
+                                scale = population_scale[i]
+                            else:
+                                scale = None
+
+                            population_median, _, _, population_std = \
+                                get_distribution_stats(population_cdf[i],
+                                                       args,
+                                                       loc,
+                                                       scale)
+
+                            sample_median = time_series_data.median()
+                            sample_std = time_series_data.std()
+                            sample_std = max(sample_std, population_std)
+
+                            diff = abs(population_median - sample_median)
+
+                        # Estimates further than 3 standard errors away can then
+                        # easily be flagged as not truncated
+                        if diff > 3 * sample_std:
+                            truncated = False
+
+            # Found the truncation point or "warm-up" period
+            if truncated:
+                need_more_data = False
+
+            if need_more_data:
+                # get the run length
+                run_length = _get_run_length(run_length,
+                                             run_length_factor,
+                                             total_run_length,
+                                             maximum_run_length)
+
+                # We have reached the maximum limit
+                if run_length == 0:
+                    need_more_data = False
+                else:
+                    total_run_length += run_length
+
+                    _tsd = _get_trajectory(get_trajectory,
+                                           run_length,
+                                           ndim,
+                                           number_of_variables)
+                    tsd = np.concatenate((tsd, _tsd), axis=1)
+
+        del extra_check
+        del _truncated
+
+        equilibration_step = [index for index in truncate_index]
+        equilibration_detected = truncated
 
         if truncated:
-            del(_truncated)
-            for i in range(n_variables):
+            for i in range(number_of_variables):
                 # slice a numpy array, the memory is shared
                 # between the slice and the original
-                time_series_data = t[i, truncate_index[i]:]
-                time_series_data_size = time_series_data.size
+                time_series_data = tsd[i, truncate_index[i]:]
 
+                # Check to get the more accurate estimate of the
+                # equilibrium or warm-up period index
                 equilibration_index_estimate, _ = \
                     estimate_equilibration_length(
                         time_series_data,
                         si=si,
                         nskip=nskip,
-                        fft=(time_series_data_size > 30 and fft),
+                        fft=fft,
                         minimum_correlation_time=minimum_correlation_time,
-                        ignore_end=ignore_end)
-                equilibration_step[i] = truncate_index[i] + \
-                    equilibration_index_estimate
+                        ignore_end=ignore_end,
+                        number_of_cores=number_of_cores)
 
-            equilibration_detected = True
-        else:
-            for i in range(n_variables):
-                if _truncated[i]:
-                    # slice a numpy array, the memory is shared
-                    # between the slice and the original
-                    time_series_data = t[i, truncate_index[i]:]
-                    time_series_data_size = time_series_data.size
+                # Correct the equilibration step
+                equilibration_step[i] += equilibration_index_estimate
 
-                    equilibration_index_estimate, _ = \
-                        estimate_equilibration_length(
-                            time_series_data,
-                            si=si,
-                            nskip=nskip,
-                            fft=(time_series_data_size > 30 and fft),
-                            minimum_correlation_time=minimum_correlation_time,
-                            ignore_end=ignore_end)
-                    equilibration_step[i] = truncate_index[i] + \
-                        equilibration_index_estimate
-                else:
-                    equilibration_step[i] = truncate_index[i]
-            equilibration_detected = False
-            del(_truncated)
-        del(truncate_index)
+        del truncate_index
 
         # Check the hard limit
-        if np.any(equilibration_step >= maximum_equilibration_step):
-            if dump_trajectory:
-                kim_edn.dump(t.tolist(), dump_trajectory_fp)
+        _check_equilibration_step(equilibration_step,
+                                  maximum_equilibration_step,
+                                  maximum_run_length,
+                                  equilibration_detected,
+                                  tsd,
+                                  dump_trajectory,
+                                  dump_trajectory_fp)
 
-            for i in range(n_variables):
-                if equilibration_step[i] < maximum_equilibration_step:
-                    msg = 'The equilibration or "warm-up" period for variable '
-                    msg += 'number {} is detected at step = '.format(i + 1)
-                    msg += '{}.\n'.format(equilibration_step[i])
-                else:
-                    if equilibration_step[i] == (maximum_run_length - 1):
-                        msg = 'The equilibration or "warm-up" period for '
-                        msg += 'variable number {}, is not '.format(i + 1)
-                        msg = 'detected. Check the trajectory data!!!\n'
-                    else:
-                        msg = 'The truncation point for variable number '
-                        msg += '{} = {} '.format(i + 1, equilibration_step[i])
-                        msg += ', returned by MSER-m is > half of the data '
-                        msg += 'set size and is invalid.\n'
+        upper_confidence_limit = [None] * number_of_variables
+        relative_half_width_estimate = [None] * number_of_variables
+        effective_sample_size = [None] * number_of_variables
 
-            if equilibration_detected:
-                msg += 'To prevent this error, you can either request a '
-                msg += 'longer maximum number of allowed steps to reach '
-                msg += 'equilibrium or if you did not provide this limit you '
-                msg += 'can increase the maximum_run_length.\n'
-            else:
-                msg += 'More data is required. To prevent this error, you can '
-                msg += 'request a longer maximum_run_length.\n'
-            raise CVGError(msg)
+        _indices = [None] * number_of_variables
+        _si = [None] * number_of_variables
+        _mean = [None] * number_of_variables
+        _std = [None] * number_of_variables
+        _sample_size = [None] * number_of_variables
+        _done = [False] * number_of_variables
 
-        run_length = _run_length
+        enough_accuracy = False
+        need_more_data = True
 
-        si_func = si_methods[si]
-        ucl_func = ucl_methods[confidence_interval_approximation_method]
+        while need_more_data:
+            enough_data = True
 
-        statistical_inefficiency_estimate = \
-            np.array([np.nan] * n_variables, dtype=np.float64)
-        upper_confidence_limit = np.empty(n_variables, dtype=np.float64)
-        _mean = np.empty(n_variables, dtype=np.float64)
-        _done = np.array([False] * n_variables)
-        relative_half_width_estimate = np.empty(n_variables, dtype=np.float64)
-        effective_sample_size = np.empty(n_variables, dtype=np.float64)
-        subsample_indices = [None] * n_variables
+            for i in range(number_of_variables):
+                _done[i] = False
 
-        while True:
-            for i in range(n_variables):
-                # slice a numpy array, the memory is shared
-                # between the slice and the original
-                time_series_data = t[i, equilibration_step[i]:]
-                time_series_data_size = time_series_data.size
-
-                if confidence_interval_approximation_method == 'subsample' or \
-                    time_series_data_size < 100 or \
-                        population_standard_deviation is not None:
-
-                    # Compute the statitical inefficiency of a time series
-                    try:
-                        statistical_inefficiency_estimate[i] = si_func(
-                            time_series_data,
-                            fft=(time_series_data_size > 30 and fft),
-                            minimum_correlation_time=minimum_correlation_time)
-                    except CVGError:
-                        statistical_inefficiency_estimate[i] = float(
-                            time_series_data_size)
-
-                    try:
-                        subsample_indices[i] = subsample_index(
-                            time_series_data,
-                            si=statistical_inefficiency_estimate[i],
-                            fft=(time_series_data_size > 30 and fft),
-                            minimum_correlation_time=minimum_correlation_time)
-                    except CVGError:
-                        msg = 'Failed to compute the indices of uncorrelated '
-                        msg += 'subsamples of the time series data.'
-                        raise CVGError(msg)
-
-                    # Get the upper confidence limit
-                    try:
-                        upper_confidence_limit[i] = ucl_func(
-                            time_series_data,
-                            confidence_coefficient=confidence_coefficient,
-                            population_standard_deviation=population_standard_deviation,
-                            subsample_indices=subsample_indices[i],
-                            si=statistical_inefficiency_estimate[i],
-                            fft=(subsample_indices[i].size > 30 and fft),
-                            minimum_correlation_time=minimum_correlation_time)
-                    except CVGError:
-                        msg = "Failed to get the upper confidence limit."
-                        raise CVGError(msg)
-
-                    # Compute the mean
-                    _mean[i] = np.mean(time_series_data[subsample_indices[i]])
-
-                else:
-                    try:
-                        # Get the upper confidence limit
-                        upper_confidence_limit[i] = ucl_func(
-                            time_series_data,
-                            confidence_coefficient=confidence_coefficient,
-                            heidel_welch_number_points=heidel_welch_number_points,
-                            fft=fft,
-                            test_size=test_size,
-                            train_size=train_size,
-                            heidel_welch=heidel_welch)
-                    except CVGError:
-                        msg = "Failed to get the upper confidence limit."
-                        raise CVGError(msg)
-
-                    subsample_indices[i] = None
-
-                    # Compute the mean
-                    _mean[i] = np.mean(time_series_data)
-
-                # Estimat the relative half width
-                if isclose(_mean[i], 0, abs_tol=1e-12):
-                    relative_half_width_estimate[i] = \
-                        upper_confidence_limit[i] / 1e-12
-                else:
-                    relative_half_width_estimate[i] = \
-                        upper_confidence_limit[i] / fabs(_mean[i])
-
-                # The run stopping criteria
-                if _done[i]:
-                    if relative_half_width_estimate[i] > relative_accuracy[i]:
-                        if dump_trajectory:
-                            kim_edn.dump(t.tolist(), dump_trajectory_fp)
-
-                        msg = 'For variable number {}, '.format(i + 1)
-                        msg += 'the time series data diverges after meeting '
-                        msg += 'the required relative accuracy.\n'
-                        msg += 'Check the trajectory data!!!\n'
-                        raise CVGError(msg)
-
-                elif relative_half_width_estimate[i] < relative_accuracy[i]:
-                    if np.isnan(statistical_inefficiency_estimate[i]):
-                        # Compute the statitical inefficiency of a
-                        # time series
-                        try:
-                            statistical_inefficiency_estimate[i] = \
-                                si_func(
-                                time_series_data,
-                                fft=fft,
-                                minimum_correlation_time=minimum_correlation_time)
-                        except CVGError:
-                            statistical_inefficiency_estimate[i] = \
-                                float(time_series_data_size)
-
-                        effective_sample_size[i] = time_series_data_size / \
-                            statistical_inefficiency_estimate[i]
-
-                        statistical_inefficiency_estimate[i] = np.nan
-                    else:
-                        effective_sample_size[i] = time_series_data_size / \
-                            statistical_inefficiency_estimate[i]
-
-                    # It should stop if sample size is not requested or
-                    # we have enough enough sample size
-                    if (sample_size is None or
-                        effective_sample_size[i] >= sample_size) and \
-                        (variable_known_mean is None or
-                            variable_known_mean[i] is None or
-                            np.abs(variable_known_mean[i] - _mean[i]) <
-                         3 * upper_confidence_limit[i]):
-                        _done[i] = True
-
-            done = np.all(_done)
-            if done:
-                # It should stop
-                _std = np.empty(n_variables, dtype=np.float64)
-                for i in range(n_variables):
+                if enough_data:
                     # slice a numpy array, the memory is shared
                     # between the slice and the original
-                    time_series_data = t[i, equilibration_step[i]:]
+                    time_series_data = tsd[i, equilibration_step[i]:]
                     time_series_data_size = time_series_data.size
 
-                    if np.isnan(statistical_inefficiency_estimate[i]):
-                        # Compute the statitical inefficiency of a time
-                        # series
-                        try:
-                            statistical_inefficiency_estimate[i] = \
-                                si_func(
-                                time_series_data,
-                                fft=(time_series_data_size > 30 and fft),
-                                minimum_correlation_time=minimum_correlation_time)
-                        except CVGError:
-                            statistical_inefficiency_estimate[i] = \
-                                float(time_series_data_size)
-
-                    effective_sample_size[i] = time_series_data_size / \
-                        statistical_inefficiency_estimate[i]
-
-                    if subsample_indices[i] is None:
-                        _std[i] = np.std(time_series_data)
+                    if population_standard_deviation is not None and \
+                            population_standard_deviation[i] is not None:
+                        pop_std = population_standard_deviation[i]
                     else:
-                        _std[i] = np.std(
-                            time_series_data[subsample_indices[i]])
+                        pop_std = None
 
-                if dump_trajectory:
-                    kim_edn.dump(t.tolist(), dump_trajectory_fp)
+                    try:
+                        upper_confidence_limit[i] = ucl_obj.ucl(
+                            time_series_data,
+                            confidence_coefficient=confidence_coefficient,
+                            equilibration_length_estimate=0,
+                            heidel_welch_number_points=heidel_welch_number_points,
+                            batch_size=batch_size,
+                            fft=fft,
+                            scale=scale,
+                            with_centering=with_centering,
+                            with_scaling=with_scaling,
+                            test_size=test_size,
+                            train_size=train_size,
+                            population_standard_deviation=pop_std,
+                            si=si,
+                            minimum_correlation_time=minimum_correlation_time)
+                    except CVGSampleSizeError:
+                        # do not have enough data and need more
+                        enough_data = False
+                        upper_confidence_limit[i] = None
+                    except CVGError:
+                        raise CVGError("Failed to compute the ucl.")
 
-                msg = convergence_message(fp_format,
-                                          True,
-                                          n_variables,
-                                          total_run_length,
-                                          equilibration_detected,
-                                          equilibration_step,
-                                          maximum_equilibration_step,
-                                          confidence_coefficient,
-                                          relative_accuracy,
-                                          relative_half_width_estimate,
-                                          upper_confidence_limit,
-                                          _mean,
-                                          _std,
-                                          effective_sample_size,
-                                          sample_size)
+                if enough_data:
+                    if relative_accuracy[i] is None:
+                        enough_accuracy = \
+                            upper_confidence_limit[i] < absolute_accuracy[i]
+                    else:
+                        # Estimate the relative half width
+                        if isclose(
+                                ucl_obj.mean, 0,
+                                abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL
+                        ):
+                            msg = 'It is not possible to estimate the relative '
+                            msg += 'half width for the close to zero mean = '
+                            msg += '{}, for the variable '.format(ucl_obj.mean)
+                            msg += 'number = {}.'.format(i + 1)
+                            raise CVGError(msg)
 
-                # It should return the string
-                if fp is None:
-                    if fp_format == 'json':
-                        return json.dumps(msg, indent=4)
-                    if fp_format == 'edn':
-                        return kim_edn.dumps(msg, indent=4)
-                    return msg
+                        relative_half_width_estimate[i] = \
+                            upper_confidence_limit[i] / fabs(ucl_obj.mean)
 
-                # Otherwise it uses fp to print the message
-                if fp_format == 'json':
-                    json.dump(msg, fp, indent=4)
-                elif fp_format == 'edn':
-                    kim_edn.dump(msg, fp, indent=4)
+                        enough_accuracy = \
+                            relative_half_width_estimate[i] < \
+                            relative_accuracy[i]
+
+                    if enough_accuracy:
+                        if ucl_obj.name != 'uncorrelated_sample':
+                            ucl_obj.set_indices(
+                                time_series_data,
+                                si=si,
+                                fft=fft,
+                                minimum_correlation_time=minimum_correlation_time)
+
+                        effective_sample_size[i] = \
+                            time_series_data_size / ucl_obj.si
+
+                        if minimum_number_of_independent_samples is None or \
+                                effective_sample_size[i] >= \
+                        minimum_number_of_independent_samples:
+
+                            need_more_data = False
+
+                            if population_mean is not None and \
+                                    population_mean[i] is not None:
+                                need_more_data = not t_test(
+                                    sample_mean=ucl_obj.mean,
+                                    sample_std=ucl_obj.std,
+                                    sample_size=ucl_obj.sample_size,
+                                    population_mean=population_mean[i],
+                                    significance_level=1-confidence_coefficient)
+
+                            if not need_more_data and \
+                                    population_standard_deviation is not None \
+                                    and population_standard_deviation[i] is not None:
+                                need_more_data = not chi_square_test(
+                                    sample_var=ucl_obj.std * ucl_obj.std,
+                                    sample_size=ucl_obj.sample_size,
+                                    population_var=population_standard_deviation[i] *
+                                    population_standard_deviation[i],
+                                    significance_level=1-confidence_coefficient)
+
+                            if not need_more_data and \
+                                    population_cdf is not None and \
+                                    population_cdf[i] is not None:
+
+                                if population_args is not None and \
+                                        population_args[i] is not None:
+                                    args = population_args[i]
+                                else:
+                                    args = None
+
+                                if population_loc is not None and \
+                                        population_loc[i] is not None:
+                                    loc = population_loc[i]
+                                else:
+                                    loc = None
+
+                                if population_scale is not None and \
+                                        population_scale[i] is not None:
+                                    scale = population_scale[i]
+                                else:
+                                    scale = None
+
+                                need_more_data = not levene_test(
+                                    time_series_data=time_series_data[
+                                        ucl_obj.indices],
+                                    population_cdf=population_cdf[i],
+                                    population_args=args,
+                                    population_loc=loc,
+                                    population_scale=scale,
+                                    significance_level=1-confidence_coefficient)
+
+                            if not need_more_data:
+                                _indices[i] = ucl_obj.indices
+                                _si[i] = ucl_obj.si
+                                _mean[i] = ucl_obj.mean
+                                _std[i] = ucl_obj.std
+                                _sample_size[i] = ucl_obj.sample_size
+                                _done[i] = True
+
+            if not need_more_data:
+                enough_accuracy = np.all(_done)
+                need_more_data = not enough_accuracy
+
+            if need_more_data:
+                # get the run length
+                run_length = _get_run_length(run_length,
+                                             run_length_factor,
+                                             total_run_length,
+                                             maximum_run_length)
+
+                # We have reached the maximum limit
+                if run_length == 0:
+                    enough_accuracy = False
+                    need_more_data = False
                 else:
-                    print(msg, file=fp)
+                    total_run_length += run_length
 
-                return True
+                    _tsd = _get_trajectory(
+                        get_trajectory,
+                        run_length,
+                        ndim,
+                        number_of_variables=number_of_variables)
+                    tsd = np.concatenate((tsd, _tsd), axis=1)
 
-            total_run_length += run_length
-
-            if total_run_length >= maximum_run_length:
-                total_run_length -= run_length
-                run_length = maximum_run_length - total_run_length
-                total_run_length = maximum_run_length
-
-            if run_length == 0:
-                break
-
-            try:
-                _t = get_trajectory(step=run_length)
-            except:
-                msg = 'failed to get the time-series data or do the '
-                msg += 'simulation for {} number of '.format(run_length)
-                msg += 'steps.'
-                raise CVGError(msg)
-
-            # Extra check
-            if not np.all(np.isfinite(_t)):
-                msg = 'there is/are value/s in the input which is/are '
-                msg += 'non-finite or not number.'
-                raise CVGError(msg)
-
-            _t = np.asarray(_t, dtype=np.float64)
-            t = np.concatenate((t, _t), axis=1)
-
-        # We have reached the maximum limit
-        _std = np.empty(n_variables, dtype=np.float64)
-        for i in range(n_variables):
-            # slice a numpy array, the memory is shared
-            # between the slice and the original
-            time_series_data = t[i, equilibration_step[i]:]
-            time_series_data_size = time_series_data.size
-
-            if np.isnan(statistical_inefficiency_estimate[i]):
-                # Compute the statitical inefficiency of a time series
-                try:
-                    statistical_inefficiency_estimate[i] = \
-                        si_func(
-                        time_series_data,
-                        fft=fft,
-                        minimum_correlation_time=minimum_correlation_time)
-                except CVGError:
-                    statistical_inefficiency_estimate[i] = \
-                        float(time_series_data_size)
-
-            effective_sample_size[i] = time_series_data_size / \
-                statistical_inefficiency_estimate[i]
-
-            if subsample_indices[i] is None:
-                _std[i] = np.std(time_series_data)
-            else:
-                _std[i] = np.std(time_series_data[subsample_indices[i]])
+        msg = None
+        for index, ucl in enumerate(upper_confidence_limit):
+            if ucl is None:
+                if msg is None:
+                    msg = 'For variable number = {}, '.format(index + 1)
+                else:
+                    msg += '{}, '.format(index + 1)
+        if msg is not None:
+            msg += '. Failed to compute the ucl.'
+            raise CVGError(msg)
 
         if dump_trajectory:
-            kim_edn.dump(t.tolist(), dump_trajectory_fp)
+            kim_edn.dump(tsd.tolist(), dump_trajectory_fp)
 
-        msg = convergence_message(fp_format,
-                                  False,
-                                  n_variables,
-                                  total_run_length,
-                                  equilibration_detected,
-                                  equilibration_step,
-                                  maximum_equilibration_step,
-                                  confidence_coefficient,
-                                  relative_accuracy,
-                                  relative_half_width_estimate,
-                                  upper_confidence_limit,
-                                  _mean,
-                                  _std,
-                                  effective_sample_size,
-                                  sample_size)
+        converged = enough_accuracy and not need_more_data
 
-        # It should return the string
-        if fp is None:
-            if fp_format == 'json':
-                return json.dumps(msg, indent=4)
-            if fp_format == 'edn':
-                return kim_edn.dumps(msg, indent=4)
-            return msg
+        if not converged:
+            for i in range(number_of_variables):
+                # slice a numpy array, the memory is shared
+                # between the slice and the original
+                time_series_data = tsd[i, equilibration_step[i]:]
+                time_series_data_size = time_series_data.size
 
-        # Otherwise it uses fp to print the message
+                if population_standard_deviation is not None and \
+                        population_standard_deviation[i] is not None:
+                    pop_std = population_standard_deviation[i]
+                else:
+                    pop_std = None
+
+                upper_confidence_limit[i] = ucl_obj.ucl(
+                    time_series_data,
+                    confidence_coefficient=confidence_coefficient,
+                    equilibration_length_estimate=0,
+                    heidel_welch_number_points=heidel_welch_number_points,
+                    batch_size=batch_size,
+                    fft=fft,
+                    scale=scale,
+                    with_centering=with_centering,
+                    with_scaling=with_scaling,
+                    test_size=test_size,
+                    train_size=train_size,
+                    population_standard_deviation=pop_std,
+                    si=si,
+                    minimum_correlation_time=minimum_correlation_time)
+
+                if ucl_obj.name != 'uncorrelated_sample':
+                    ucl_obj.set_si(
+                        time_series_data,
+                        si=si,
+                        fft=fft,
+                        minimum_correlation_time=minimum_correlation_time)
+
+                _mean[i] = ucl_obj.mean
+                _std[i] = ucl_obj.std
+
+                effective_sample_size[i] = time_series_data_size / ucl_obj.si
+
+        del _indices
+        del _si
+        del _sample_size
+
+        msg = _convergence_message(number_of_variables,
+                                   converged,
+                                   total_run_length,
+                                   maximum_equilibration_step,
+                                   equilibration_detected,
+                                   equilibration_step,
+                                   confidence_coefficient,
+                                   relative_accuracy,
+                                   absolute_accuracy,
+                                   upper_confidence_limit,
+                                   relative_half_width_estimate,
+                                   _mean,
+                                   _std,
+                                   effective_sample_size,
+                                   minimum_number_of_independent_samples)
+
+    # It should return the string
+    if fp is None:
         if fp_format == 'json':
-            json.dump(msg, fp, indent=4)
-        elif fp_format == 'edn':
-            kim_edn.dump(msg, fp, indent=4)
-        else:
-            print(msg, file=fp)
+            return json.dumps(msg, indent=4)
 
-        return False
+        return kim_edn.dumps(msg, indent=4)
+
+    # Otherwise it uses fp to print the message
+    if fp_format == 'json':
+        json.dump(msg, fp, indent=4)
+        return converged
+
+    kim_edn.dump(msg, fp, indent=4)
+    return converged
