@@ -16,6 +16,7 @@ from .stats import \
     ContinuousDistributionsNumberOfRequiredArguments, \
     ContinuousDistributionsArgumentRequirement, \
     check_population_cdf_args, \
+    get_distribution_stats, \
     kruskal_test, \
     ks_test, \
     levene_test, \
@@ -117,6 +118,7 @@ __all__ = [
     'ContinuousDistributionsNumberOfRequiredArguments',
     'ContinuousDistributionsArgumentRequirement',
     'check_population_cdf_args',
+    'get_distribution_stats',
     'kruskal_test',
     'ks_test',
     'levene_test',
