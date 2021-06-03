@@ -17,6 +17,7 @@ __all__ = [
     'ContinuousDistributionsNumberOfRequiredArguments',
     'ContinuousDistributionsArgumentRequirement',
     'check_population_cdf_args',
+    'get_distribution_stats',
     'ks_test',
     'levene_test',
     'wilcoxon_test',
@@ -384,6 +385,41 @@ def check_population_cdf_args(population_cdf: str, population_args: tuple):
         msg += '\nReference:\n'
         msg += Reference
         raise CVGError(msg)
+
+
+def get_distribution_stats(population_cdf: str,
+                           population_args: tuple,
+                           population_loc: float,
+                           population_scale: float):
+    """Get the distribution stats from its name.
+
+    The stats include, Median, Mean, Variance, and Standard deviation of the
+    distribution.
+
+    Args:
+        population_cdf (str): The name of a distribution.
+        population_args (tuple): Distribution parameter.
+        population_loc (float, or None): location of the distribution.
+        population_scale (float, or None): scale of the distribution.
+
+    Returns:
+        tuple: median, mean, var, std
+
+    """
+    check_population_cdf_args(population_cdf, population_args)
+
+    args = [arg for arg in population_args]
+    args.append(population_loc if population_loc else 0)
+    args.append(population_scale if population_scale else 1)
+
+    distribution = getattr(distributions, population_cdf)
+
+    median = distribution.median(*args)
+    mean = distribution.mean(*args)
+    var = distribution.var(*args)
+    std = distribution.std(*args)
+
+    return median, mean, var, std
 
 
 def ks_test(time_series_data: np.ndarray,
