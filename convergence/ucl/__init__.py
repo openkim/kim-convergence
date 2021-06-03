@@ -61,11 +61,11 @@ from .mser_m_y import \
     mser_m_y_relative_half_width_estimate
 
 ucl_methods = {
-    'heidel_welch': heidelberger_welch_ucl,
-    'uncorrelated_sample': uncorrelated_samples_ucl,
-    'n_skart': n_skart_ucl,
-    'mser_m': mser_m_ucl,
-    'mser_m_y': mser_m_y_ucl,
+    'heidel_welch': HeidelbergerWelch,
+    'uncorrelated_sample': UncorrelatedSamples,
+    'n_skart': N_SKART,
+    'mser_m': MSER_m,
+    'mser_m_y': MSER_m_y,
 }
 
 
