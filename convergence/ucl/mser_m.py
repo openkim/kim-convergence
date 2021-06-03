@@ -191,6 +191,8 @@ def mser_m(time_series_data,
 
     # Convert truncation from batch to raw data
     truncate_index = np.nanargmin(d[:-ignore_end]) * batch_size
+    # Convert from numpy.int64 to int
+    truncate_index = int(truncate_index)
 
     # Correct the size of data
     processed_sample_size = number_batches * batch_size
