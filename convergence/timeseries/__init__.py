@@ -3,8 +3,8 @@
 from .equilibration_length import \
     estimate_equilibration_length
 
-# from .run_length_control import \
-#     run_length_control
+from .run_length_control import \
+    run_length_control
 
 from .statistical_inefficiency import \
     statistical_inefficiency, \
@@ -24,7 +24,7 @@ from .utils import \
 
 __all__ = [
     'estimate_equilibration_length',
-    # 'run_length_control',
+    'run_length_control',
     'statistical_inefficiency',
     'geyer_r_statistical_inefficiency',
     'geyer_split_r_statistical_inefficiency',
