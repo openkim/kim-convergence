@@ -16,24 +16,35 @@ MAX_RUN_LENGTH = 1000 * INITIAL_RUN_LENGTH
 # the maximum equilibration step.
 MAX_EQUILIBRATION_STEP = None
 # Maximum number of independent samples.
-SAMPLE_SIZE = None
+MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES = None
 # A relative half-width requirement or the accuracy parameter. Target value
-# for the ratio of halfwidth to sample mean. If n_variables > 1, 
+# for the ratio of halfwidth to sample mean. If n_variables > 1,
 # relative_accuracy can be a scalar to be used for all variables or a 1darray
 # of values of size n_variables.
 RELATIVE_ACCURACY = 0.01
+ABSOLUTE_ACCURACY = None
 # Probability (or confidence interval) and must be between 0.0 and 1.0, and
 # represents the confidence for calculation of relative halfwidths estimation.
 CONFIDENCE = 0.95
 # Method to use for approximating the upper confidence limit of the mean.
-# One of the ``subsample`` or ``heidel_welch`` aproaches.
-# In the ``subsample`` approach, independent samples in the time-series data
-# are used to approximate the confidence intervals for the mean.
-# The second approach, (``heidel_welch`` approach) requires no such
-# independence assumption. In fact, the problems of dealing with
-# dependent data are largely avoided by working in the frequency
-# domain with the sample spectrum (periodogram) of the process.
-UCL_METHOD = 'heidel_welch'
+UCL_METHOD = 'uncorrelated_sample'
+
+
+LAMMPS_ARGUMENTS = (
+    'variable',
+    'compute',
+    'fix',
+    'lb',
+    'lbound',
+    'ub',
+    'ubound',
+    'population_mean',
+    'population_std',
+    'population_cdf',
+    'population_args',
+    'population_loc',
+    'population_scale',
+)
 
 start = 0
 stop = 0
@@ -41,7 +52,7 @@ nstep = 0
 initialstep = 0
 
 
-def run_length_control(lmpptr, nevery, *argv):
+def run_length_control(lmpptr, nevery: int, *argv):
     """Control the length of the LAMMPS simulation run.
 
     Arguments:
@@ -74,12 +85,7 @@ def run_length_control(lmpptr, nevery, *argv):
     """
     lmp = lammps(ptr=lmpptr)
 
-    if not isinstance(nevery, int):
-        msg = 'nevery is not an `int`.'
-        raise cr.CVGError(msg)
-    elif nevery < 1:
-        msg = 'nevery is not a positive `int`.'
-        raise cr.CVGError(msg)
+    cr.cvg_check(nevery, 'nevery', int, 1)
 
     msg = 'fix cvg_fix all vector {} '.format(nevery)
 
@@ -106,19 +112,22 @@ def run_length_control(lmpptr, nevery, *argv):
             prefix = 'v_'
             i += 1
             continue
+
         # The values following the argument `compute` must previously be
         # defined in the input script (`c_`).
-        elif arg == 'compute':
+        if arg == 'compute':
             prefix = 'c_'
             i += 1
             continue
+
         # The values following the argument `fix` must previously be
         # defined in the input script (`f_`).
-        elif arg == 'fix':
+        if arg == 'fix':
             prefix = 'f_'
             i += 1
             continue
-        elif arg == 'lb' or arg == 'lbound':
+
+        if arg in ('lb', 'lbound'):
             try:
                 ctrl_name = '{}{}'.format(prefix, argv[i - 1])
             except IndexError:
@@ -147,7 +156,7 @@ def run_length_control(lmpptr, nevery, *argv):
                 ctrl_map[ctrl_name] = tuple([var_lb, var_ub])
                 break
 
-            if arg == 'ub' or arg == 'ubound':
+            if arg in ('ub', 'ubound'):
                 i += 1
                 try:
                     arg = argv[i]
@@ -167,7 +176,8 @@ def run_length_control(lmpptr, nevery, *argv):
             ctrl_map[ctrl_name] = tuple([var_lb, var_ub])
             i += 1
             continue
-        elif arg == 'ub' or arg == 'ubound':
+
+        if arg in ('ub', 'ubound'):
             try:
                 ctrl_name = '{}{}'.format(prefix, argv[i - 1])
             except IndexError:
@@ -210,27 +220,29 @@ def run_length_control(lmpptr, nevery, *argv):
             msg += 'bounded by lower and/or upper bound. It can not be '
             msg += 'used for the run length control at the same time.'
             raise cr.CVGError(msg)
-        elif n_arguments == len(ctrl_map):
+
+        if n_arguments == len(ctrl_map):
             var_name = arguments_map[0]
             msg = 'the variables "{}", '.format(var_name)
             for i in range(1, n_arguments - 1):
                 var_name = arguments_map[i]
                 msg = '"{}", '.format(var_name)
-            var_name = arguments_map[n_arguments - 1]
+            var_name = arguments_map[-1]
             msg = 'and "{}" are used for '.format(var_name)
             msg += 'controling the stability of the simulation to be '
             msg += 'bounded by lower and/or upper bounds. They can not be '
             msg += 'used for the run length control at the same time.'
             raise cr.CVGError(msg)
 
-    def get_trajectory(step):
+    def get_trajectory(step: int) -> np.ndarray:
         """Get trajectory vector or array of values.
 
         Arguments:
-            step {int} -- number of steps to run the simulation.
+            step (int): number of steps to run the simulation.
 
         Returns:
-            ndarray -- for a single specified value, the values are stored as
+            ndarray: trajectory
+                for a single specified value, the values are stored as
                 a vector. For multiple specified values, they are stored as
                 rows in an array.
 
@@ -301,36 +313,57 @@ def run_length_control(lmpptr, nevery, *argv):
             if _ndim == 1:
                 return trajectory.squeeze()
             return trajectory
-        else:
-            if n_arguments == 1:
-                trajectory = np.empty((ncountmax), dtype=np.float64)
-                for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
-                    trajectory[i] = lmp.extract_fix('cvg_fix', 0, 1, _nstep, 0)
-                nstep += ncountmax
-                return trajectory
-            else:
-                trajectory = np.empty((n_arguments, ncountmax),
-                                      dtype=np.float64)
-                for j in range(n_arguments):
-                    for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
-                        trajectory[j, i] = \
-                            lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
-                nstep += ncountmax
-                return trajectory
+
+        if n_arguments == 1:
+            trajectory = np.empty((ncountmax), dtype=np.float64)
+            for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
+                trajectory[i] = lmp.extract_fix('cvg_fix', 0, 1, _nstep, 0)
+            nstep += ncountmax
+            return trajectory
+
+        trajectory = np.empty((n_arguments, ncountmax), dtype=np.float64)
+        for j in range(n_arguments):
+            for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
+                trajectory[j, i] = \
+                    lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
+        nstep += ncountmax
+        return trajectory
 
     try:
         msg = cr.run_length_control(
             get_trajectory=get_trajectory,
-            n_variables=n_arguments - len(ctrl_map),
+            number_of_variables=n_arguments - len(ctrl_map),
             initial_run_length=INITIAL_RUN_LENGTH,
             run_length_factor=RUN_LENGTH_FACTOR,
             maximum_run_length=MAX_RUN_LENGTH,
             maximum_equilibration_step=MAX_EQUILIBRATION_STEP,
-            sample_size=SAMPLE_SIZE,
+            minimum_number_of_independent_samples=MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES,
             relative_accuracy=RELATIVE_ACCURACY,
+            absolute_accuracy=ABSOLUTE_ACCURACY,
+            population_mean=None,
+            population_standard_deviation=None,
+            population_cdf=None,
+            population_args=None,
+            population_loc=None,
+            population_scale=None,
             confidence_coefficient=CONFIDENCE,
             confidence_interval_approximation_method=UCL_METHOD,
-            fp="return",
+            heidel_welch_number_points=cr._default._DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+            fft=cr._default._DEFAULT_FFT,
+            test_size=cr._default._DEFAULT_TEST_SIZE,
+            train_size=cr._default._DEFAULT_TRAIN_SIZE,
+            batch_size=cr._default._DEFAULT_BATCH_SIZE,
+            scale=cr._default._DEFAULT_SCALE_METHOD,
+            with_centering=cr._default._DEFAULT_WITH_CENTERING,
+            with_scaling=cr._default._DEFAULT_WITH_SCALING,
+            ignore_end=cr._default._DEFAULT_IGNORE_END,
+            number_of_cores=cr._default._DEFAULT_NUMBER_OF_CORES,
+            si=cr._default._DEFAULT_SI,
+            nskip=cr._default._DEFAULT_NSKIP,
+            minimum_correlation_time=cr._default._DEFAULT_MINIMUM_CORRELATION_TIME,
+            dump_trajectory=False,
+            dump_trajectory_fp='convergence_trajectory.edn',
+            fp='return',
             fp_format='txt')
     except Exception as e:
         msg = '{}'.format(e)
