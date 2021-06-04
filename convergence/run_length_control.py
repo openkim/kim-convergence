@@ -31,11 +31,11 @@ from convergence import \
     cvg_warning, \
     cvg_check, \
     chi_square_test, \
-    estimate_equilibration_length, \
-    get_distribution_stats, \
     levene_test, \
-    mser_m, \
     t_test, \
+    get_distribution_stats, \
+    estimate_equilibration_length, \
+    mser_m, \
     ucl_methods
 
 
