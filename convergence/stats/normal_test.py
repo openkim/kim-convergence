@@ -62,9 +62,14 @@ def chi_square_test(
         sample_size: int,
         population_var: float,
         significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
-    """Chi-square test for the variance.
+    r"""Chi-square test for the variance.
 
     Calculate the chi-square test for the variance. This is a two-sided test.
+    Test Statistic is :math:`T=(N−1)\frac{\text{var}}{\text{var}_0}`, where
+    where `N` is the sample size and `var` is the sample variance. The ratio
+    `var/var0` compares the ratio of the sample variance to the target
+    variance.  The more this ratio deviates from 1, the more likely we are to
+    reject the null hypothesis.
 
     The null hypothesis is that the variance of a sample of independent
     observations `x` is equal to the given population variance,
