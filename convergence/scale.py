@@ -41,21 +41,24 @@ class MinMaxScale():
         feature_range (tuple, optional): tuple (min, max). (default: (0, 1))
             Desired range of transformed data.
 
-    Examples
-    --------
+    Examples:
+
     >>> from convergence import MinMaxScale, minmax_scale
     >>> data = [-1., 3.]
     >>> mms = MinMaxScale()
     >>> scaled_x = mms.scale(data)
     >>> print(scaled_x)
     [0. 1.]
+
     >>> x = mms.inverse(scaled_x)
     >>> print(x)
     [-1.  3.]
+
     >>> data = [-1., 3., 100.]
     >>> scaled_x = minmax_scale(data)
     >>> print(x)
     [0. 0.03960396 1.]
+
     >>> x = mms.inverse(scaled_x)
     >>> print(x)
     [ -1. 3. 100.]
@@ -74,7 +77,7 @@ class MinMaxScale():
         self.scale_ = None
         self.min_ = None
 
-    def scale(self, x):
+    def scale(self, x: np.ndarray) -> np.ndarray:
         """Standardize a dataset by scaling it to a given range.
 
         Args:
@@ -101,7 +104,8 @@ class MinMaxScale():
 
         if isclose(self.data_range, 0, abs_tol=_DEFAULT_ABS_TOL):
             msg = 'the data_range of the input array is almost zero within '
-            msg += '{} precision numbers.'.format(int(fabs(log10(_DEFAULT_ABS_TOL))))
+            msg += '{} precision numbers.'.format(
+                int(fabs(log10(_DEFAULT_ABS_TOL))))
             raise CVGError(msg)
 
         self.scale_ = \
@@ -113,7 +117,7 @@ class MinMaxScale():
         scaled_x += self.min_
         return scaled_x
 
-    def inverse(self, x):
+    def inverse(self, x: np.ndarray) -> np.ndarray:
         """Undo the scaling of dataset to its original range.
 
         Args:
@@ -133,8 +137,11 @@ class MinMaxScale():
         return inverse_scaled_x
 
 
-def minmax_scale(x, *, with_centering=True, with_scaling=True,
-                 feature_range=(0, 1)):
+def minmax_scale(x: np.ndarray,
+                 *,
+                 with_centering=True,
+                 with_scaling=True,
+                 feature_range=(0, 1)) -> np.ndarray:
     r"""Standardize/Transform a dataset by scaling it to a given range.
 
     This estimator scales and translates a dataset such that it is in the given
@@ -185,14 +192,15 @@ class TranslateScale():
             averages so that the numbers are of O(1) with a good spread.
             (default: True)
 
-    Examples
-    --------
+    Examples:
+
     >>> from convergence import TranslateScale
     >>> data = [1., 2., 2., 2., 3.]
     >>> tsc = TranslateScale()
     >>> scaled_x = tsc.scale(data)
     >>> print(scaled_x)
     [0. 1. 1. 1. 2.]
+
     >>> x = tsc.inverse(scaled_x)
     >>> print(x)
     [1. 2. 2. 2. 3.]
@@ -205,7 +213,7 @@ class TranslateScale():
         self.center_ = None
         self.scale_ = None
 
-    def scale(self, x):
+    def scale(self, x: np.ndarray) -> np.ndarray:
         """Standardize a dataset by scaling it to a given range.
 
         Args:
@@ -241,7 +249,7 @@ class TranslateScale():
 
         return scaled_x
 
-    def inverse(self, x):
+    def inverse(self, x: np.ndarray) -> np.ndarray:
         """Undo the scaling of dataset to its original range.
 
         Args:
@@ -268,7 +276,10 @@ class TranslateScale():
         return inverse_scaled_x
 
 
-def translate_scale(x, *, with_centering=True, with_scaling=True):
+def translate_scale(x: np.ndarray,
+                    *,
+                    with_centering=True,
+                    with_scaling=True) -> np.ndarray:
     r"""Standardize a dataset.
 
     Standardize a dataset by translating the data set so that :math:`x[0]=0`
@@ -329,8 +340,8 @@ class StandardScale():
         be performed on x). We use a biased estimator for the standard
         deviation.
 
-    Examples
-    --------
+    Examples:
+
     >>> from convergence import StandardScale
     >>> data = [-0.5, 6]
     >>> ssc = StandardScale()
@@ -350,7 +361,7 @@ class StandardScale():
         self.mean_1 = None
         self.mean_2 = None
 
-    def scale(self, x):
+    def scale(self, x: np.ndarray) -> np.ndarray:
         """Standardize a dataset.
 
         Args:
@@ -420,7 +431,7 @@ class StandardScale():
 
         return scaled_x
 
-    def inverse(self, x):
+    def inverse(self, x: np.ndarray) -> np.ndarray:
         """Undo the scaling of dataset to its original range.
 
         Args:
@@ -451,7 +462,10 @@ class StandardScale():
         return inverse_scaled_x
 
 
-def standard_scale(x, *, with_centering=True, with_scaling=True):
+def standard_scale(x: np.ndarray,
+                   *,
+                   with_centering=True,
+                   with_scaling=True) -> np.ndarray:
     r"""Standardize a dataset.
 
     Standardize a dataset by removing the mean and scaling to unit variance.
@@ -509,17 +523,19 @@ class RobustScale():
             0.0 < q_min < q_max < 100.0
             (default: (25.0, 75.0) = (1st quantile, 3rd quantile))
 
-    Examples
-    --------
+    Examples:
+
     >>> from convergence import RobustScale
     >>> data = [ 4.,  1., -2.]
     >>> rsc = RobustScale()
     >>> scaled_x = rsc.scale(data)
     >>> print(scaled_x)
     [ 1.22474487  0.         -1.22474487]
+
     >>> x = rsc.inverse(scaled_x)
     >>> print(x)
     [ 4.  1. -2.]
+
     """
 
     def __init__(self, *,
@@ -547,7 +563,7 @@ class RobustScale():
         self.center_ = None
         self.scale_ = None
 
-    def scale(self, x):
+    def scale(self, x: np.ndarray) -> np.ndarray:
         """Compute the median and quantiles to be used for scaling.
 
         Parameters
@@ -583,7 +599,7 @@ class RobustScale():
 
         return scaled_x
 
-    def inverse(self, x):
+    def inverse(self, x: np.ndarray) -> np.ndarray:
         """Undo the scaling of dataset to its original range.
 
         Args:
@@ -610,8 +626,11 @@ class RobustScale():
         return inverse_scaled_x
 
 
-def robust_scale(x, *, with_centering=True, with_scaling=True,
-                 quantile_range=(25.0, 75.0)):
+def robust_scale(x: np.ndarray,
+                 *,
+                 with_centering=True,
+                 with_scaling=True,
+                 quantile_range=(25.0, 75.0)) -> np.ndarray:
     """Standardize a dataset.
 
     Standardize a dataset by centering to the median and component wise scale
@@ -643,23 +662,25 @@ class MaxAbsScale():
     Standardize a dataset to the [-1, 1] range such that the maximal absolute
     value in the data set will be 1.0.
 
-    Examples
-    --------
+    Examples:
+
     >>> from convergence import MaxAbsScale
     >>> data = [ 4.,  1., -9.]
     >>> mas = MaxAbsScale()
     >>> scaled_x = mas.scale(data)
     >>> print(scaled_x)
     [ 0.44444444  0.11111111 -1.        ]
+
     >>> x = mas.inverse(scaled_x)
     >>> print(x)
     [ 4.  1. -9.]
+
     """
 
     def __init__(self):
         self.scale_ = None
 
-    def scale(self, x):
+    def scale(self, x: np.ndarray) -> np.ndarray:
         """
         Online computation of max absolute value of X for later scaling.
 
@@ -680,6 +701,7 @@ class MaxAbsScale():
         -------
         self : object
             Transformer instance.
+
         """
         x = np.array(x, copy=False)
 
@@ -701,7 +723,7 @@ class MaxAbsScale():
 
         return scaled_x
 
-    def inverse(self, x):
+    def inverse(self, x: np.ndarray) -> np.ndarray:
         """Undo the scaling of dataset to its original range.
 
         Args:
@@ -725,7 +747,10 @@ class MaxAbsScale():
         return inverse_scaled_x
 
 
-def maxabs_scale(x, *, with_centering=True, with_scaling=True):
+def maxabs_scale(x: np.ndarray,
+                 *,
+                 with_centering=True,
+                 with_scaling=True) -> np.ndarray:
     """Standardize a dataset to the [-1, 1] range.
 
     Standardize a dataset to the [-1, 1] range such that the maximal absolute
