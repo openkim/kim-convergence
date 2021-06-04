@@ -1,10 +1,27 @@
 r"""Convergence package."""
 
+from .batch import batch
 from .err import \
     CVGError, \
     CVGSampleSizeError, \
     cvg_warning, \
     cvg_check
+#from .geweke import geweke
+from .outlier import \
+    outlier_methods, \
+    outlier_test
+from .scale import \
+    MinMaxScale, \
+    minmax_scale, \
+    TranslateScale, \
+    translate_scale, \
+    StandardScale, \
+    standard_scale, \
+    RobustScale, \
+    robust_scale, \
+    MaxAbsScale, \
+    maxabs_scale, \
+    scale_methods
 from .stats import \
     beta, \
     betacf, \
@@ -42,26 +59,6 @@ from .stats import \
     ZERO_RC_BOUNDS, \
     ZERO_RC, \
     wilcoxon_test
-from .outlier import \
-    outlier_methods, \
-    outlier_test
-from .scale import \
-    MinMaxScale, \
-    minmax_scale, \
-    TranslateScale, \
-    translate_scale, \
-    StandardScale, \
-    standard_scale, \
-    RobustScale, \
-    robust_scale, \
-    MaxAbsScale, \
-    maxabs_scale, \
-    scale_methods
-from .batch import batch
-#from .geweke import geweke
-from .utils import \
-    validate_split, \
-    train_test_split
 from .timeseries import \
     estimate_equilibration_length, \
     statistical_inefficiency, \
@@ -75,10 +72,9 @@ from .timeseries import \
     uncorrelated_time_series_data_samples, \
     time_series_data_uncorrelated_samples, \
     time_series_data_uncorrelated_random_samples, \
-    time_series_data_uncorrelated_block_averaged_samples
-# run_length_control, \
-
-from .ucl import \
+    time_series_data_uncorrelated_block_averaged_samples, \
+    run_length_control, \
+    from .ucl import \
     HeidelbergerWelch, \
     heidelberger_welch_ucl, \
     heidelberger_welch_ci, \
@@ -101,6 +97,10 @@ from .ucl import \
     mser_m_y_ci, \
     mser_m_y_relative_half_width_estimate, \
     ucl_methods
+from .utils import \
+    validate_split, \
+    train_test_split
+
 
 __all__ = [
     'CVGError',
@@ -170,7 +170,7 @@ __all__ = [
     'train_test_split',
     # time series module
     'estimate_equilibration_length',
-    # 'run_length_control',
+    'run_length_control',
     'time_series_data_si',
     'uncorrelated_time_series_data_sample_indices',
     'uncorrelated_time_series_data_samples',
