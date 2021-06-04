@@ -1,7 +1,7 @@
 r"""Convergence package."""
 
 from .batch import batch
-#from .geweke import geweke
+# from .geweke import geweke
 from ._default import *
 from .err import \
     CVGError, \
