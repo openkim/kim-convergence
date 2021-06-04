@@ -4,6 +4,7 @@ import numpy as np
 
 from .err import CVGError
 
+
 __all__ = [
     'outlier_methods',
     'outlier_test'
