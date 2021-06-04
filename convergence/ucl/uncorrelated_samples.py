@@ -3,15 +3,6 @@
 from math import sqrt
 import numpy as np
 
-from .ucl_base import UCLBase
-from convergence import \
-    CVGError, \
-    CVGSampleSizeError, \
-    cvg_warning, \
-    t_inv_cdf, \
-    time_series_data_si, \
-    uncorrelated_time_series_data_sample_indices, \
-    uncorrelated_time_series_data_samples
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
@@ -28,7 +19,15 @@ from convergence._default import \
     _DEFAULT_MINIMUM_CORRELATION_TIME, \
     _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
     _DEFAULT_SAMPLE_METHOD
-
+from .ucl_base import UCLBase
+from convergence import \
+    CVGError, \
+    CVGSampleSizeError, \
+    cvg_warning, \
+    t_inv_cdf, \
+    time_series_data_si, \
+    uncorrelated_time_series_data_sample_indices, \
+    uncorrelated_time_series_data_samples
 
 __all__ = [
     'UncorrelatedSamples',
