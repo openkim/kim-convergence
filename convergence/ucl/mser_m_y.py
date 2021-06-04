@@ -4,12 +4,6 @@ from math import ceil, sqrt
 import numpy as np
 
 from .mser_m import MSER_m
-from convergence import \
-    batch, \
-    CVGError, \
-    CVGSampleSizeError, \
-    randomness_test, \
-    t_inv_cdf
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
@@ -26,6 +20,12 @@ from convergence._default import \
     _DEFAULT_MINIMUM_CORRELATION_TIME, \
     _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
     _DEFAULT_SAMPLE_METHOD
+from convergence import \
+    batch, \
+    CVGError, \
+    CVGSampleSizeError, \
+    randomness_test, \
+    t_inv_cdf
 
 
 __all__ = [
