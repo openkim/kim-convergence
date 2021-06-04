@@ -49,9 +49,9 @@ def t_test(sample_mean: float,
               var_name='significance_level',
               var_lower_bound=np.finfo(np.float64).resolution)
 
-    numer = sample_mean - population_mean
+    nomin = sample_mean - population_mean
     denom = sample_std / sqrt(sample_size)
-    t = fabs(numer / denom)
+    t = fabs(nomin / denom)
     df = sample_size - 1
     prob = 2 * (1.0 - t_cdf(t, df))
     return significance_level < prob
