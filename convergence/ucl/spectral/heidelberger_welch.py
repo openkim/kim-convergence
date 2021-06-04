@@ -88,6 +88,8 @@ class HeidelbergerWelch(UCLBase):
         Initialize a HeidelbergerWelch object and set the constants.
 
         """
+        UCLBase.__init__(self)
+
         self.name = 'heidel_welch'
 
         self.heidel_welch_set = False
@@ -107,8 +109,6 @@ class HeidelbergerWelch(UCLBase):
         self.tm_1 = None
         self.tm_2 = None
         self.tm_3 = None
-
-        UCLBase.__init__(self)
 
     def set_heidel_welch_constants(
             self,

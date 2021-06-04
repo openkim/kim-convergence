@@ -84,11 +84,11 @@ class N_SKART(UCLBase):
         Initialize a N_SKART object and set the constants.
 
         """
+        UCLBase.__init__(self)
+
         self.name = 'n_skart'
 
         self._reset()
-
-        UCLBase.__init__(self)
 
     def _reset(self):
         """reset the parmaters."""
