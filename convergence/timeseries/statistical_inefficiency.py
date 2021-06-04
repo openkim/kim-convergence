@@ -7,17 +7,18 @@ uncorrelated configurations.
 from math import isclose
 import numpy as np
 
+from convergence._default import \
+    _DEFAULT_ABS_TOL, \
+    _DEFAULT_FFT, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_SI
 from convergence import \
     auto_covariance, \
     auto_correlate, \
     cross_correlate, \
     CVGError, \
     CVGSampleSizeError
-from convergence._default import \
-    _DEFAULT_ABS_TOL, \
-    _DEFAULT_FFT, \
-    _DEFAULT_MINIMUM_CORRELATION_TIME, \
-    _DEFAULT_SI
+
 
 __all__ = [
     'statistical_inefficiency',

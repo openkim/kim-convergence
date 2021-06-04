@@ -13,7 +13,6 @@ import numpy as np
 
 from .statistical_inefficiency import si_methods
 
-from convergence import CVGError, CVGSampleSizeError
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_SI, \
@@ -26,6 +25,7 @@ from convergence._default import \
     _DEFAULT_WITH_CENTERING, \
     _DEFAULT_WITH_SCALING, \
     _DEFAULT_NUMBER_OF_CORES
+from convergence import CVGError, CVGSampleSizeError
 
 
 __all__ = [
