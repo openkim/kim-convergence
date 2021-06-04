@@ -1,7 +1,6 @@
 """Test stats normal test module."""
 import unittest
 import numpy as np
-from numpy.core.fromnumeric import size
 
 try:
     import convergence as cr
