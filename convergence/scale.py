@@ -347,9 +347,11 @@ class StandardScale():
     >>> ssc = StandardScale()
     >>> scaled_x = ssc.scale(data)
     >>> print(scaled_x)
+    [-1.  1.]
 
     >>> x = ssc.inverse(scaled_x)
     >>> print(x)
+    [-0.5  6. ]
 
     """
 
