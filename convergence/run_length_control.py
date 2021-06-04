@@ -1017,10 +1017,14 @@ def run_length_control(
                                                population_scale)
 
                     sample_median = time_series_data.median()
-                    diff = abs(population_median - sample_median)
+                    if np.isfinite(sample_median):
+                        diff = abs(population_median - sample_median)
+                    else:
+                        diff = 0
 
                     sample_std = time_series_data.std()
-                    sample_std = max(sample_std, population_std)
+                    if np.isfinite(population_std):
+                        sample_std = max(sample_std, population_std)
 
                 # Estimates further than 3 standard errors away can then
                 # easily be flagged as not truncated
@@ -1150,7 +1154,7 @@ def run_length_control(
 
                     if minimum_number_of_independent_samples is None or \
                             effective_sample_size >= \
-                        minimum_number_of_independent_samples:
+                    minimum_number_of_independent_samples:
 
                         need_more_data = False
 
@@ -1314,10 +1318,14 @@ def run_length_control(
                                                        scale)
 
                             sample_median = time_series_data.median()
-                            sample_std = time_series_data.std()
-                            sample_std = max(sample_std, population_std)
+                            if np.isfinite(population_median):
+                                diff = abs(population_median - sample_median)
+                            else:
+                                diff = 0
 
-                            diff = abs(population_median - sample_median)
+                            sample_std = time_series_data.std()
+                            if np.isfinite(population_std):
+                                sample_std = max(sample_std, population_std)
 
                         # Estimates further than 3 standard errors away can then
                         # easily be flagged as not truncated
@@ -1476,7 +1484,7 @@ def run_length_control(
 
                         if minimum_number_of_independent_samples is None or \
                                 effective_sample_size[i] >= \
-                            minimum_number_of_independent_samples:
+                        minimum_number_of_independent_samples:
 
                             need_more_data = False
 
