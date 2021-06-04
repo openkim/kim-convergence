@@ -73,8 +73,8 @@ from .timeseries import \
     time_series_data_uncorrelated_samples, \
     time_series_data_uncorrelated_random_samples, \
     time_series_data_uncorrelated_block_averaged_samples, \
-    run_length_control, \
-    from .ucl import \
+    run_length_control
+from .ucl import \
     HeidelbergerWelch, \
     heidelberger_welch_ucl, \
     heidelberger_welch_ci, \
