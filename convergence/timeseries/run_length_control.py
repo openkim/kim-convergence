@@ -100,17 +100,18 @@ def _convergence_message(number_of_variables: int,
 
     """
     if number_of_variables == 1:
-        if relative_accuracy is None:
+        relative_accuracy_ = relative_accuracy
+        absolute_accuracy_ = absolute_accuracy
+
+        if relative_accuracy_ is None:
             relative_accuracy_ = 'None'
             relative_half_width_estimate_ = 'None'
         else:
-            relative_accuracy_ = relative_accuracy
+            absolute_accuracy_ = None
             relative_half_width_estimate_ = relative_half_width_estimate
 
-        if absolute_accuracy is None:
+        if absolute_accuracy_ is None:
             absolute_accuracy_ = 'None'
-        else:
-            absolute_accuracy_ = absolute_accuracy
 
         if minimum_number_of_independent_samples is None:
             minimum_number_of_independent_samples_ = 'None'
@@ -124,7 +125,7 @@ def _convergence_message(number_of_variables: int,
             "maximum_equilibration_step": maximum_equilibration_step,
             "equilibration_detected": equilibration_detected,
             "equilibration_step": equilibration_step,
-            "confidence": round(confidence_coefficient * 100, 3),
+            "confidence": '{}%'.format(round(confidence_coefficient * 100, 3)),
             "relative_accuracy": relative_accuracy_,
             "absolute_accuracy": absolute_accuracy_,
             "relative_half_width": relative_half_width_estimate_,
@@ -145,17 +146,18 @@ def _convergence_message(number_of_variables: int,
             equilibration_detected_ = equilibration_detected or \
                 equilibration_step[i] < maximum_equilibration_step
 
-            if relative_accuracy[i] is None:
+            relative_accuracy_ = relative_accuracy[i]
+            absolute_accuracy_ = absolute_accuracy[i]
+
+            if relative_accuracy_ is None:
                 relative_accuracy_ = 'None'
                 relative_half_width_estimate_ = 'None'
             else:
-                relative_accuracy_ = relative_accuracy[i]
+                absolute_accuracy_ = None
                 relative_half_width_estimate_ = relative_half_width_estimate[i]
 
-            if absolute_accuracy[i] is None:
+            if absolute_accuracy_ is None:
                 absolute_accuracy_ = 'None'
-            else:
-                absolute_accuracy_ = absolute_accuracy[i]
 
             if minimum_number_of_independent_samples is None:
                 minimum_number_of_independent_samples_ = 'None'
@@ -166,7 +168,8 @@ def _convergence_message(number_of_variables: int,
             msg[i] = {
                 "equilibration_detected": equilibration_detected_,
                 "equilibration_step": equilibration_step[i],
-                "confidence": round(confidence_coefficient * 100, 3),
+                "confidence": '{}%'.format(
+                    round(confidence_coefficient * 100, 3)),
                 "relative_accuracy": relative_accuracy_,
                 "absolute_accuracy": absolute_accuracy_,
                 "relative_half_width": relative_half_width_estimate_,
@@ -292,8 +295,11 @@ def _check_equilibration_step(equilibration_step,
                               time_series_data: np.ndarray,
                               dump_trajectory: bool,
                               dump_trajectory_fp) -> None:
+    equilibration_step_array = np.array(equilibration_step, copy=False)
+
     hard_limit_crossed = np.any(
-        equilibration_step >= maximum_equilibration_step)
+        equilibration_step_array >= maximum_equilibration_step)
+
     if not hard_limit_crossed:
         return
 
@@ -1331,7 +1337,7 @@ def run_length_control(
         del _truncated
 
         equilibration_step = [index for index in truncate_index]
-        equilibration_detected = truncated
+        equilibration_detected = True if truncated else False
 
         if truncated:
             for i in range(number_of_variables):
@@ -1551,7 +1557,7 @@ def run_length_control(
                 else:
                     msg += '{}, '.format(index + 1)
         if msg is not None:
-            msg += '. Failed to compute the ucl.'
+            msg += '. Failed to compute the UCL.'
             raise CVGError(msg)
 
         if dump_trajectory:
@@ -1561,44 +1567,46 @@ def run_length_control(
 
         if not converged:
             for i in range(number_of_variables):
-                # slice a numpy array, the memory is shared
-                # between the slice and the original
-                time_series_data = tsd[i, equilibration_step[i]:]
-                time_series_data_size = time_series_data.size
+                if not _done[i]:
+                    # slice a numpy array, the memory is shared
+                    # between the slice and the original
+                    time_series_data = tsd[i, equilibration_step[i]:]
+                    time_series_data_size = time_series_data.size
 
-                if population_standard_deviation is not None and \
-                        population_standard_deviation[i] is not None:
-                    pop_std = population_standard_deviation[i]
-                else:
-                    pop_std = None
+                    if population_standard_deviation is not None and \
+                            population_standard_deviation[i] is not None:
+                        pop_std = population_standard_deviation[i]
+                    else:
+                        pop_std = None
 
-                upper_confidence_limit[i] = ucl_obj.ucl(
-                    time_series_data,
-                    confidence_coefficient=confidence_coefficient,
-                    equilibration_length_estimate=0,
-                    heidel_welch_number_points=heidel_welch_number_points,
-                    batch_size=batch_size,
-                    fft=fft,
-                    scale=scale,
-                    with_centering=with_centering,
-                    with_scaling=with_scaling,
-                    test_size=test_size,
-                    train_size=train_size,
-                    population_standard_deviation=pop_std,
-                    si=si,
-                    minimum_correlation_time=minimum_correlation_time)
-
-                if ucl_obj.name != 'uncorrelated_sample':
-                    ucl_obj.set_si(
+                    upper_confidence_limit[i] = ucl_obj.ucl(
                         time_series_data,
-                        si=si,
+                        confidence_coefficient=confidence_coefficient,
+                        equilibration_length_estimate=0,
+                        heidel_welch_number_points=heidel_welch_number_points,
+                        batch_size=batch_size,
                         fft=fft,
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling,
+                        test_size=test_size,
+                        train_size=train_size,
+                        population_standard_deviation=pop_std,
+                        si=si,
                         minimum_correlation_time=minimum_correlation_time)
 
-                _mean[i] = ucl_obj.mean
-                _std[i] = ucl_obj.std
+                    if ucl_obj.name != 'uncorrelated_sample':
+                        ucl_obj.set_si(
+                            time_series_data,
+                            si=si,
+                            fft=fft,
+                            minimum_correlation_time=minimum_correlation_time)
 
-                effective_sample_size[i] = time_series_data_size / ucl_obj.si
+                    _mean[i] = ucl_obj.mean
+                    _std[i] = ucl_obj.std
+
+                    effective_sample_size[i] = \
+                        time_series_data_size / ucl_obj.si
 
         del _indices
         del _si
