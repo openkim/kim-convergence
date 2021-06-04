@@ -1,4 +1,4 @@
-"""Time series run length control module."""
+"""Run length control module."""
 from inspect import isfunction
 import json
 import kim_edn
