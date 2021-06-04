@@ -3,16 +3,6 @@
 from math import ceil, floor, fabs, sqrt
 import numpy as np
 
-from .ucl_base import UCLBase
-from convergence import \
-    batch, \
-    CVGError, \
-    CVGSampleSizeError, \
-    cvg_warning, \
-    skew, \
-    randomness_test, \
-    auto_correlate, \
-    t_inv_cdf
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
@@ -32,6 +22,16 @@ from convergence._default import \
     _DEFAULT_NSKIP, \
     _DEFAULT_IGNORE_END, \
     _DEFAULT_NUMBER_OF_CORES
+from .ucl_base import UCLBase
+from convergence import \
+    batch, \
+    CVGError, \
+    CVGSampleSizeError, \
+    cvg_warning, \
+    skew, \
+    randomness_test, \
+    auto_correlate, \
+    t_inv_cdf
 
 
 __all__ = [
@@ -126,7 +126,7 @@ class N_SKART(UCLBase):
         batch_size=_DEFAULT_BATCH_SIZE,
         scale=_DEFAULT_SCALE_METHOD,
         with_centering=_DEFAULT_WITH_CENTERING,
-        with_scaling=_DEFAULT_WITH_SCALING):
+            with_scaling=_DEFAULT_WITH_SCALING):
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
