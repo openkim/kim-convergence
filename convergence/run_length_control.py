@@ -5,6 +5,7 @@ import kim_edn
 from math import isclose, fabs
 import numpy as np
 import sys
+import convergence
 
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
@@ -1214,6 +1215,8 @@ def run_length_control(
             kim_edn.dump(tsd.tolist(), dump_trajectory_fp)
 
         converged = enough_accuracy and not need_more_data
+        # convert np.bool_ to python bool
+        converged = bool(converged)
 
         if not converged:
             time_series_data = tsd[equilibration_step:]
