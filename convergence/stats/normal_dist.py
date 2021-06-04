@@ -16,7 +16,6 @@ References:
 
 """
 
-from copy import deepcopy
 from math import log, fabs, sqrt, inf, nan
 
 from convergence import CVGError
