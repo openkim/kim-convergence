@@ -5,7 +5,6 @@ import kim_edn
 from math import isclose, fabs
 import numpy as np
 import sys
-import convergence
 
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
