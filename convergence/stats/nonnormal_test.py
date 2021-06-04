@@ -365,24 +365,29 @@ def check_population_cdf_args(population_cdf: str, population_args: tuple):
 
     if number_of_required_arguments != number_of_arguments:
         msg = 'The {} distribution requires '.format(population_cdf)
-        if number_of_required_arguments in (0, 1):
-            msg += '{} argument, but '.format(number_of_required_arguments)
-            if number_of_arguments == 0:
-                msg += 'no input argument is provided.'
-            else:
-                msg += '1 input argument is provided.'
+
+        if number_of_required_arguments == 0:
+            msg += 'no input argument, but '
+        elif number_of_required_arguments == 1:
+            msg += '1 input argument, but '
         else:
             msg += '{} arguments, but '.format(number_of_required_arguments)
+
+        if number_of_arguments == 0:
+            msg += 'no input argument is provided.'
+        elif number_of_arguments == 1:
+            msg += '1 input argument is provided.'
+        else:
             msg += '{} input arguments '.format(number_of_arguments)
             msg += 'are provided.'
 
-        Reference = '    https://docs.scipy.org/doc/scipy/reference/generated/'
+        Reference = 'https://docs.scipy.org/doc/scipy/reference/generated/'
         Reference += 'scipy.stats.{}.html#scipy.stats.'.format(population_cdf)
         Reference += '{}'.format(population_cdf)
 
-        msg += '\n'
+        msg += '\n('
         msg += ContinuousDistributionsArgumentRequirement[population_cdf]
-        msg += '\nReference:\n'
+        msg += ')\nReference: '
         msg += Reference
         raise CVGError(msg)
 
