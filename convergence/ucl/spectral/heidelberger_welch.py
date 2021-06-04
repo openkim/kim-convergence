@@ -4,14 +4,6 @@ from math import sqrt
 import numpy as np
 from numpy.linalg import pinv, norm, inv
 
-from convergence.ucl import UCLBase
-from convergence import \
-    batch, \
-    CVGError, \
-    CVGSampleSizeError, \
-    modified_periodogram, \
-    t_inv_cdf, \
-    train_test_split
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
@@ -28,6 +20,14 @@ from convergence._default import \
     _DEFAULT_MINIMUM_CORRELATION_TIME, \
     _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
     _DEFAULT_SAMPLE_METHOD
+from convergence.ucl import UCLBase
+from convergence import \
+    batch, \
+    CVGError, \
+    CVGSampleSizeError, \
+    modified_periodogram, \
+    t_inv_cdf, \
+    train_test_split
 
 
 __all__ = [
