@@ -54,6 +54,7 @@ def _convergence_message(number_of_variables: int,
                          relative_accuracy: list,
                          absolute_accuracy: list,
                          upper_confidence_limit: list,
+                         upper_confidence_limit_method: str,
                          relative_half_width_estimate: list,
                          time_series_data_mean: list,
                          time_series_data_std: list,
@@ -84,6 +85,8 @@ def _convergence_message(number_of_variables: int,
             or a 1darray of values of size number_of_variables.
         upper_confidence_limit (float, or 1darray): the upper confidence limit
             of the mean.
+        upper_confidence_limit_method (str): Name of the UCL approach used to
+            compute the upper_confidence_limit of the mean.
         relative_half_width_estimate(float, or 1darray): estimatemed relative
             half-width from the time-series data.
         time_series_data_mean (float, or 1darray): the mean of time-series data
@@ -136,6 +139,7 @@ def _convergence_message(number_of_variables: int,
             'absolute_accuracy': absolute_accuracy_,
             'relative_half_width': relative_half_width_estimate_,
             'upper_confidence_limit': upper_confidence_limit,
+            'upper_confidence_limit_method': upper_confidence_limit_method,
             'mean': time_series_data_mean,
             'standard_deviation': time_series_data_std,
             'effective_sample_size': effective_sample_size,
@@ -187,6 +191,7 @@ def _convergence_message(number_of_variables: int,
                 'absolute_accuracy': absolute_accuracy_,
                 'relative_half_width': relative_half_width_estimate_,
                 'upper_confidence_limit': upper_confidence_limit[i],
+                'upper_confidence_limit_method': upper_confidence_limit_method,
                 'mean': time_series_data_mean[i],
                 'standard_deviation': time_series_data_std[i],
                 'effective_sample_size': effective_sample_size[i],
@@ -1154,7 +1159,7 @@ def run_length_control(
 
                     if minimum_number_of_independent_samples is None or \
                             effective_sample_size >= \
-                    minimum_number_of_independent_samples:
+                        minimum_number_of_independent_samples:
 
                         need_more_data = False
 
@@ -1233,6 +1238,7 @@ def run_length_control(
                                    relative_accuracy,
                                    absolute_accuracy,
                                    upper_confidence_limit,
+                                   ucl_obj.name,
                                    relative_half_width_estimate,
                                    ucl_obj.mean,
                                    ucl_obj.std,
@@ -1397,11 +1403,8 @@ def run_length_control(
         relative_half_width_estimate = [None] * number_of_variables
         effective_sample_size = [None] * number_of_variables
 
-        _indices = [None] * number_of_variables
-        _si = [None] * number_of_variables
         _mean = [None] * number_of_variables
         _std = [None] * number_of_variables
-        _sample_size = [None] * number_of_variables
         _done = [False] * number_of_variables
 
         enough_accuracy = False
@@ -1484,7 +1487,7 @@ def run_length_control(
 
                         if minimum_number_of_independent_samples is None or \
                                 effective_sample_size[i] >= \
-                        minimum_number_of_independent_samples:
+                            minimum_number_of_independent_samples:
 
                             need_more_data = False
 
@@ -1539,11 +1542,8 @@ def run_length_control(
                                     significance_level=1-confidence_coefficient)
 
                             if not need_more_data:
-                                _indices[i] = ucl_obj.indices
-                                _si[i] = ucl_obj.si
                                 _mean[i] = ucl_obj.mean
                                 _std[i] = ucl_obj.std
-                                _sample_size[i] = ucl_obj.sample_size
                                 _done[i] = True
 
             if not need_more_data:
@@ -1630,10 +1630,6 @@ def run_length_control(
                     effective_sample_size[i] = \
                         time_series_data_size / ucl_obj.si
 
-        del _indices
-        del _si
-        del _sample_size
-
         msg = _convergence_message(number_of_variables,
                                    converged,
                                    total_run_length,
@@ -1644,6 +1640,7 @@ def run_length_control(
                                    relative_accuracy,
                                    absolute_accuracy,
                                    upper_confidence_limit,
+                                   ucl_obj.name,
                                    relative_half_width_estimate,
                                    _mean,
                                    _std,
