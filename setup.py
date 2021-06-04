@@ -27,7 +27,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9'
     ],
-    install_requires=['numpy'],
+    install_requires=['numpy>=1.16', 'scipy', 'kim_edn', 'joblib'],
     python_requires='>=3.6',
     include_package_data=True,
     keywords='convergence',
