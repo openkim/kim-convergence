@@ -2,11 +2,12 @@
 
 import numpy as np
 
-from convergence import CVGError
 from ._default import \
     _DEFAULT_TEST_SIZE, \
     _DEFAULT_TRAIN_SIZE, \
     _DEFAULT_SEED
+from convergence import CVGError
+
 
 __all__ = [
     'validate_split',
