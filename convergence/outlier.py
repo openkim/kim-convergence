@@ -11,9 +11,12 @@ __all__ = [
 ]
 
 
-outlier_methods = ('iqr', 'boxplot',
-                   'extreme_iqr', 'extreme_boxplot',
-                   'z_score', 'standard_score',
+outlier_methods = ('iqr',
+                   'boxplot',
+                   'extreme_iqr',
+                   'extreme_boxplot',
+                   'z_score',
+                   'standard_score',
                    'modified_z_score')
 r"""Methods to decide what are outliers in the data.
 
@@ -50,7 +53,7 @@ r"""Methods to decide what are outliers in the data.
 """
 
 
-def outlier_test(x, outlier_method='iqr'):
+def outlier_test(x: np.ndarray, outlier_method='iqr'):
     r"""Test to detect what are outliers in the data.
 
     The intuitive definition for the concept of an outlier in the data is a
