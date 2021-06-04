@@ -2,13 +2,6 @@
 
 from math import fabs, isclose
 
-from numpy.core.fromnumeric import std
-
-from convergence import \
-    CVGError, \
-    estimate_equilibration_length, \
-    time_series_data_si, \
-    uncorrelated_time_series_data_sample_indices
 from convergence._default import \
     _DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL, \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
@@ -29,6 +22,12 @@ from convergence._default import \
     _DEFAULT_NSKIP, \
     _DEFAULT_IGNORE_END, \
     _DEFAULT_NUMBER_OF_CORES
+from convergence import \
+    CVGError, \
+    estimate_equilibration_length, \
+    time_series_data_si, \
+    uncorrelated_time_series_data_sample_indices
+
 
 __all__ = [
     'UCLBase',
