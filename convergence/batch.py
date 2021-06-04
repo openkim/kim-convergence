@@ -3,12 +3,13 @@
 import numpy as np
 
 from .err import CVGError
-from .scale import scale_methods
 from ._default import \
     _DEFAULT_BATCH_SIZE, \
     _DEFAULT_SCALE_METHOD, \
     _DEFAULT_WITH_CENTERING, \
     _DEFAULT_WITH_SCALING
+from .scale import scale_methods
+
 
 __all__ = [
     'batch',
