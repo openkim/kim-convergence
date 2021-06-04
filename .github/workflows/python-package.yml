@@ -28,6 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install flake8 numpy
         python -m pip install kim-edn
+        python -m pip install scipy
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
