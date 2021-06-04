@@ -99,6 +99,8 @@ def _convergence_message(number_of_variables: int,
         dict: convergence message
 
     """
+    confidence = '{}%'.format(round(confidence_coefficient * 100, 3))
+
     if number_of_variables == 1:
         relative_accuracy_ = relative_accuracy
         absolute_accuracy_ = absolute_accuracy
@@ -119,29 +121,35 @@ def _convergence_message(number_of_variables: int,
             minimum_number_of_independent_samples_ = int(
                 minimum_number_of_independent_samples)
 
+        txt = '{} confidence interval for the mean is '.format(confidence)
+        txt += '({}, '.format(time_series_data_mean - upper_confidence_limit)
+        txt += '{})'.format(time_series_data_mean + upper_confidence_limit)
+
         msg = {
-            "converged": converged,
-            "total_run_length": total_run_length,
-            "maximum_equilibration_step": maximum_equilibration_step,
-            "equilibration_detected": equilibration_detected,
-            "equilibration_step": equilibration_step,
-            "confidence": '{}%'.format(round(confidence_coefficient * 100, 3)),
-            "relative_accuracy": relative_accuracy_,
-            "absolute_accuracy": absolute_accuracy_,
-            "relative_half_width": relative_half_width_estimate_,
-            "upper_confidence_limit": upper_confidence_limit,
-            "mean": time_series_data_mean,
-            "standard_deviation": time_series_data_std,
-            "effective_sample_size": effective_sample_size,
-            "requested_sample_size": minimum_number_of_independent_samples_,
+            'converged': converged,
+            'total_run_length': total_run_length,
+            'maximum_equilibration_step': maximum_equilibration_step,
+            'equilibration_detected': equilibration_detected,
+            'equilibration_step': equilibration_step,
+            'confidence': confidence,
+            'relative_accuracy': relative_accuracy_,
+            'absolute_accuracy': absolute_accuracy_,
+            'relative_half_width': relative_half_width_estimate_,
+            'upper_confidence_limit': upper_confidence_limit,
+            'mean': time_series_data_mean,
+            'standard_deviation': time_series_data_std,
+            'effective_sample_size': effective_sample_size,
+            'requested_sample_size': minimum_number_of_independent_samples_,
+            'confidence_interval': txt,
         }
     else:
         msg = {
-            "converged": converged,
-            "total_run_length": total_run_length,
-            "maximum_equilibration_step": maximum_equilibration_step,
-            "equilibration_detected": equilibration_detected,
+            'converged': converged,
+            'total_run_length': total_run_length,
+            'maximum_equilibration_step': maximum_equilibration_step,
+            'equilibration_detected': equilibration_detected,
         }
+
         for i in range(number_of_variables):
             equilibration_detected_ = equilibration_detected or \
                 equilibration_step[i] < maximum_equilibration_step
@@ -165,19 +173,25 @@ def _convergence_message(number_of_variables: int,
                 minimum_number_of_independent_samples_ = \
                     minimum_number_of_independent_samples
 
+            txt = '{} confidence interval for the mean is '.format(confidence)
+            txt += '({}, '.format(time_series_data_mean[i] -
+                                  upper_confidence_limit[i])
+            txt += '{})'.format(time_series_data_mean[i] +
+                                upper_confidence_limit[i])
+
             msg[i] = {
-                "equilibration_detected": equilibration_detected_,
-                "equilibration_step": equilibration_step[i],
-                "confidence": '{}%'.format(
-                    round(confidence_coefficient * 100, 3)),
-                "relative_accuracy": relative_accuracy_,
-                "absolute_accuracy": absolute_accuracy_,
-                "relative_half_width": relative_half_width_estimate_,
-                "upper_confidence_limit": upper_confidence_limit[i],
-                "mean": time_series_data_mean[i],
-                "standard_deviation": time_series_data_std[i],
-                "effective_sample_size": effective_sample_size[i],
-                "requested_sample_size": minimum_number_of_independent_samples_
+                'equilibration_detected': equilibration_detected_,
+                'equilibration_step': equilibration_step[i],
+                'confidence': confidence,
+                'relative_accuracy': relative_accuracy_,
+                'absolute_accuracy': absolute_accuracy_,
+                'relative_half_width': relative_half_width_estimate_,
+                'upper_confidence_limit': upper_confidence_limit[i],
+                'mean': time_series_data_mean[i],
+                'standard_deviation': time_series_data_std[i],
+                'effective_sample_size': effective_sample_size[i],
+                'requested_sample_size': minimum_number_of_independent_samples_,
+                'confidence_interval': txt,
             }
     return msg
 
@@ -1136,7 +1150,7 @@ def run_length_control(
 
                     if minimum_number_of_independent_samples is None or \
                             effective_sample_size >= \
-                    minimum_number_of_independent_samples:
+                        minimum_number_of_independent_samples:
 
                         need_more_data = False
 
@@ -1462,7 +1476,7 @@ def run_length_control(
 
                         if minimum_number_of_independent_samples is None or \
                                 effective_sample_size[i] >= \
-                        minimum_number_of_independent_samples:
+                            minimum_number_of_independent_samples:
 
                             need_more_data = False
 
