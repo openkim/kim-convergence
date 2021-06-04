@@ -6,6 +6,7 @@ import numpy as np
 from .err import CVGError
 from ._default import _DEFAULT_ABS_TOL
 
+
 __all__ = [
     'MinMaxScale',
     'minmax_scale',
