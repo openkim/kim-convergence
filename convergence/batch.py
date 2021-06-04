@@ -16,13 +16,13 @@ __all__ = [
 ]
 
 
-def batch(time_series_data,
+def batch(time_series_data: np.ndarray,
           *,
           batch_size=_DEFAULT_BATCH_SIZE,
           func=np.mean,
           scale=_DEFAULT_SCALE_METHOD,
           with_centering=_DEFAULT_WITH_CENTERING,
-          with_scaling=_DEFAULT_WITH_SCALING):
+          with_scaling=_DEFAULT_WITH_SCALING) -> np.ndarray:
     r"""Batch the time series data.
 
     Args:
@@ -47,6 +47,26 @@ def batch(time_series_data,
 
         By default, this method is using ``np.mean`` and compute the arithmetic
         mean.
+
+    Example:
+
+    >>> import numpy as np
+    >>> rng = np.random.RandomState(12345)
+    >>> x = np.ones(100) * 10 + (rng.random_sample(100) - 0.5)
+    >>> x_batch = batch(x, batch_size=5)
+    >>> x_batch.size
+    20
+    >>> print(x.mean(), x_batch.mean())
+    10.054804081191616 10.054804081191616
+
+
+    >>> x_batch_scaled = batch(x, batch_size=5,
+                               scale='translate_scale',
+                               with_scaling=True)
+    >>> x_batch_scaled.size
+    20
+    >>> print(x.mean(), x_batch_scaled.mean())
+    10.054804081191616 1.0
 
     """
     time_series_data = np.array(time_series_data, copy=False)
