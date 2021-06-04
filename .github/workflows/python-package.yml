@@ -29,6 +29,7 @@ jobs:
         python -m pip install flake8 numpy
         python -m pip install kim-edn
         python -m pip install scipy
+        python -m pip install joblib
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
