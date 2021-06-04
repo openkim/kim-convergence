@@ -2,8 +2,6 @@
 from os import truncate
 import unittest
 import numpy as np
-from numpy.lib.function_base import select
-from numpy.testing._private.utils import assert_equal
 
 try:
     import convergence as cr
