@@ -7,9 +7,8 @@ from bisect import bisect_left
 from math import isclose, pi, sqrt
 import numpy as np
 
-from .normal_dist import normal_interval
-from convergence import CVGError
 from convergence._default import _DEFAULT_ABS_TOL
+from convergence import CVGError
 
 __all__ = [
     'get_fft_optimal_size',
