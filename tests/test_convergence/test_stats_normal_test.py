@@ -220,7 +220,7 @@ class TestStatsNormalTestModule(unittest.TestCase):
                                             population_var=population_var,
                                             significance_level=0.05))
 
-        population_var = 1.2
+        population_var = 1.5
         self.assertFalse(cr.chi_square_test(sample_var=sample_var,
                                             sample_size=sample_size,
                                             population_var=population_var,
@@ -232,71 +232,71 @@ class TestStatsNormalTestModule(unittest.TestCase):
                           population_var=population_var,
                           significance_level=0.0)
 
-        # rvs = rng.random_sample(1000)
-        # sample_var = rvs.var()
-        # sample_size = rvs.size
-        # population_var = 0.08333333333333333
-        # self.assertTrue(cr.chi_square_test(sample_var=sample_var,
-        #                                    sample_size=sample_size,
-        #                                    population_var=population_var,
-        #                                    significance_level=0.05))
+        rvs = rng.random_sample(20)
+        sample_var = rvs.var()
+        sample_size = rvs.size
+        population_var = 0.08333333333333333
+        self.assertTrue(cr.chi_square_test(sample_var=sample_var,
+                                           sample_size=sample_size,
+                                           population_var=population_var,
+                                           significance_level=0.05))
 
-        # population_var = 0.05
-        # self.assertFalse(cr.chi_square_test(sample_var=sample_var,
-        #                                     sample_size=sample_size,
-        #                                     population_var=population_var,
-        #                                     significance_level=0.05))
+        population_var = 0.04
+        self.assertFalse(cr.chi_square_test(sample_var=sample_var,
+                                            sample_size=sample_size,
+                                            population_var=population_var,
+                                            significance_level=0.05))
 
-        # population_var = 0.1
-        # self.assertFalse(cr.chi_square_test(sample_var=sample_var,
-        #                                     sample_size=sample_size,
-        #                                     population_var=population_var,
-        #                                     significance_level=0.05))
+        population_var = 0.2
+        self.assertFalse(cr.chi_square_test(sample_var=sample_var,
+                                            sample_size=sample_size,
+                                            population_var=population_var,
+                                            significance_level=0.05))
 
-        # population_var = 0.5
-        # self.assertFalse(cr.chi_square_test(sample_var=sample_var,
-        #                                     sample_size=sample_size,
-        #                                     population_var=population_var,
-        #                                     significance_level=0.05))
+        population_var = 0.5
+        self.assertFalse(cr.chi_square_test(sample_var=sample_var,
+                                            sample_size=sample_size,
+                                            population_var=population_var,
+                                            significance_level=0.05))
 
-        # rvs = rng.chisquare(df=2, size=5000)
-        # sample_var = rvs.var()
-        # sample_size = rvs.size
-        # population_var = 4.0
-        # self.assertTrue(cr.chi_square_test(sample_var=sample_var,
-        #                                    sample_size=sample_size,
-        #                                    population_var=population_var,
-        #                                    significance_level=0.05))
+        rvs = rng.chisquare(df=2, size=50)
+        sample_var = rvs.var()
+        sample_size = rvs.size
+        population_var = 4.0
+        self.assertTrue(cr.chi_square_test(sample_var=sample_var,
+                                           sample_size=sample_size,
+                                           population_var=population_var,
+                                           significance_level=0.05))
 
-        # population_var = 3.5
-        # self.assertFalse(cr.chi_square_test(sample_var=sample_var,
-        #                                     sample_size=sample_size,
-        #                                     population_var=population_var,
-        #                                     significance_level=0.05))
+        population_var = 3.0
+        self.assertFalse(cr.chi_square_test(sample_var=sample_var,
+                                            sample_size=sample_size,
+                                            population_var=population_var,
+                                            significance_level=0.05))
 
-        # population_var = 4.5
-        # self.assertFalse(cr.chi_square_test(sample_var=sample_var,
-        #                                     sample_size=sample_size,
-        #                                     population_var=population_var,
-        #                                     significance_level=0.05))
+        population_var = 10.0
+        self.assertFalse(cr.chi_square_test(sample_var=sample_var,
+                                            sample_size=sample_size,
+                                            population_var=population_var,
+                                            significance_level=0.05))
 
-        # rvs = rng.exponential(size=2000)
-        # sample_var = rvs.var()
-        # sample_size = rvs.size
-        # population_var = 1.0
-        # self.assertTrue(cr.chi_square_test(sample_var=sample_var,
-        #                                    sample_size=sample_size,
-        #                                    population_var=population_var,
-        #                                    significance_level=0.05))
+        rvs = rng.exponential(size=200)
+        sample_var = rvs.var()
+        sample_size = rvs.size
+        population_var = 1.0
+        self.assertTrue(cr.chi_square_test(sample_var=sample_var,
+                                           sample_size=sample_size,
+                                           population_var=population_var,
+                                           significance_level=0.05))
 
-        # population_var = 1.2
-        # self.assertFalse(cr.chi_square_test(sample_var=sample_var,
-        #                                     sample_size=sample_size,
-        #                                     population_var=population_var,
-        #                                     significance_level=0.05))
+        population_var = 1.5
+        self.assertFalse(cr.chi_square_test(sample_var=sample_var,
+                                            sample_size=sample_size,
+                                            population_var=population_var,
+                                            significance_level=0.05))
 
-        # population_var = 0.8
-        # self.assertFalse(cr.chi_square_test(sample_var=sample_var,
-        #                                     sample_size=sample_size,
-        #                                     population_var=population_var,
-        #                                     significance_level=0.05))
+        population_var = 0.5
+        self.assertFalse(cr.chi_square_test(sample_var=sample_var,
+                                            sample_size=sample_size,
+                                            population_var=population_var,
+                                            significance_level=0.05))
