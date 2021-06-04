@@ -3,12 +3,6 @@
 from math import isclose, sqrt
 import numpy as np
 
-from .ucl_base import UCLBase
-from convergence import \
-    batch, \
-    CVGError, \
-    CVGSampleSizeError, \
-    t_inv_cdf
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
@@ -29,6 +23,12 @@ from convergence._default import \
     _DEFAULT_IGNORE_END, \
     _DEFAULT_NSKIP, \
     _DEFAULT_NUMBER_OF_CORES
+from .ucl_base import UCLBase
+from convergence import \
+    batch, \
+    CVGError, \
+    CVGSampleSizeError, \
+    t_inv_cdf
 
 
 __all__ = [
@@ -263,7 +263,7 @@ class MSER_m(UCLBase):
         si=_DEFAULT_SI,
         nskip=_DEFAULT_NSKIP,
         fft=_DEFAULT_FFT,
-        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
+            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
         """Estimate the equilibration point in a time series data."""
         truncated, truncate_index = mser_m(
             time_series_data=time_series_data,
