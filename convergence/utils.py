@@ -15,14 +15,18 @@ __all__ = [
 ]
 
 
-def validate_split(*, n_samples, train_size, test_size, default_test_size=None):
+def validate_split(*,
+                   n_samples: int,
+                   train_size,
+                   test_size,
+                   default_test_size=None) -> tuple(int, int):
     r"""Validate test/train sizes.
 
     Helper function to validate the test/train sizes to be meaningful with
     regard to the size of the data (n_samples)
 
     Args:
-        n_samples (int): total number of sampl points
+        n_samples (int): total number of sample points
         train_size (int, float, or None): train size
         test_size (int, float, or None): test size
         default_test_size (int, float, or None, optional): default test size.
@@ -114,11 +118,12 @@ def validate_split(*, n_samples, train_size, test_size, default_test_size=None):
     return n_train, n_test
 
 
-def train_test_split(time_series_data, *,
+def train_test_split(time_series_data: np.ndarray,
+                     *,
                      train_size=_DEFAULT_TRAIN_SIZE,
                      test_size=_DEFAULT_TEST_SIZE,
                      seed=_DEFAULT_SEED,
-                     default_test_size=0.1):
+                     default_test_size=0.1) -> tuple(np.ndarray, np.ndarray):
     r"""Split time_series_data into random train and test indices.
 
     Args:
