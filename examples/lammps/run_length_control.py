@@ -1,4 +1,4 @@
-"""Run length control example by LAMMPS."""
+"""Run length control for LAMMPS."""
 
 import numpy as np
 from lammps import lammps
@@ -16,7 +16,7 @@ MAX_RUN_LENGTH = 1000 * INITIAL_RUN_LENGTH
 # the maximum equilibration step.
 MAX_EQUILIBRATION_STEP = None
 # Maximum number of independent samples.
-MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES = None
+MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES = 300
 # A relative half-width requirement or the accuracy parameter. Target value
 # for the ratio of halfwidth to sample mean. If n_variables > 1,
 # relative_accuracy can be a scalar to be used for all variables or a 1darray
@@ -28,9 +28,12 @@ ABSOLUTE_ACCURACY = None
 CONFIDENCE = 0.95
 # Method to use for approximating the upper confidence limit of the mean.
 UCL_METHOD = 'uncorrelated_sample'
+# if ``True``, dump the final trajectory data to a file.
+DUMP_TRAJECTORY = False
 
 
-LAMMPS_ARGUMENTS = (
+# Do not modify
+_LAMMPS_ARGUMENTS = (
     'variable',
     'compute',
     'fix',
@@ -38,14 +41,28 @@ LAMMPS_ARGUMENTS = (
     'lbound',
     'ub',
     'ubound',
+    'mean',
     'population_mean',
+    'std',
     'population_std',
+    'cdf',
     'population_cdf',
+    'args',
     'population_args',
+    'loc',
     'population_loc',
+    'scale',
     'population_scale',
 )
 
+# Do not modify
+_PREFIX_NAME = {
+    'v_': 'variable',
+    'c_': 'computation',
+    'f_': 'fix',
+}
+
+# Do not modify
 start = 0
 stop = 0
 nstep = 0
@@ -70,13 +87,13 @@ def run_length_control(lmpptr, nevery: int, *argv):
         global quantity, not a per-atom or local quantity. And the global
         quantity must be a scalar, not a vector or array.
 
-        Computes that produce global quantities are those which do not have
+        ``Computes`` that produce global quantities are those which do not have
         the word atom in their style name. Only a few fixes produce global
         quantities.
 
-        Variables of style equal or vector are the only ones that can be used
-        as an input here. Variables of style atom cannot be used, since they
-        produce per-atom values.
+        ``Variables of style equal or vector`` are the only ones that can be
+        used as an input here. ``Variables of style atom`` cannot be used,
+        since they produce per-atom values.
 
         Each input value through argv following the argument `lb`, or `lbound`
         and `ub`, or `ubound` must previously be defined in the input script
@@ -87,73 +104,97 @@ def run_length_control(lmpptr, nevery: int, *argv):
 
     cr.cvg_check(nevery, 'nevery', int, 1)
 
-    msg = 'fix cvg_fix all vector {} '.format(nevery)
+    cmd = 'fix cvg_fix all vector {} '.format(nevery)
 
-    # new keyword
-    prefix = None
+    # Arguments
+    arguments_map = {}
+
+    # New keyword
     ctrl_map = {}
 
-    # Number of arguments
-    arguments_map = {}
-    n_arguments = 0
-    _n_arguments = len(argv)
+    # default prefix
     prefix = 'v_'
+
+    var_name = None
+
+    # population info
+    population_mean = None
+    population_std = None
+    population_cdf = None
+    population_args = None
+    population_loc = None
+    population_scale = None
+
+    number_of_arguments = len(argv)
+
+    argument_counter = 0
     i = 0
-    while i < _n_arguments:
+    while i < number_of_arguments:
         arg = argv[i]
 
-        if not isinstance(arg, str):
-            msg = '{} is not an `str`.'.format(str(arg))
+        if arg not in _LAMMPS_ARGUMENTS:
+            msg = 'The input argument "{}" is not suppoerted.'
             raise cr.CVGError(msg)
 
-        # The values following the argument `variable` must previously be
-        # defined in the input script (`v_`).
-        if arg == 'variable':
-            prefix = 'v_'
-            i += 1
-            continue
-
-        # The values following the argument `compute` must previously be
-        # defined in the input script (`c_`).
-        if arg == 'compute':
-            prefix = 'c_'
-            i += 1
-            continue
-
-        # The values following the argument `fix` must previously be
-        # defined in the input script (`f_`).
-        if arg == 'fix':
-            prefix = 'f_'
-            i += 1
-            continue
-
-        if arg in ('lb', 'lbound'):
-            try:
-                ctrl_name = '{}{}'.format(prefix, argv[i - 1])
-            except IndexError:
-                msg = 'the ctrl variable does not exist.'
-                raise cr.CVGError(msg)
+        if arg in ('variable', 'compute', 'fix'):
+            # The value following the argument `variable`, `compute`, or
+            # `fix` must previously (in the input script) be defined
+            # (prefixed) as `v_`, `c_`, or `f_` variable respectively.
+            prefix = arg[0] + '_'
 
             i += 1
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the variable\'s lower bound does not exist.'
+                msg = {
+                    'v_': 'name of variable',
+                    'c_': 'user-assigned name for the computation',
+                    'f_': 'user-assigned name for the fix',
+                }
+                raise cr.CVGError(msg[prefix] + ' is not provided.')
+
+            var_name = '{}{}'.format(prefix, arg)
+
+            arguments_map[argument_counter] = var_name
+            argument_counter += 1
+
+            cmd = cmd + var_name + ' '
+
+            i += 1
+            continue
+
+        if var_name is None:
+            msg = 'A `variable` or a `compute`, or a `fix` must '
+            msg += 'previously be defined.'
+            raise cr.CVGError(msg)
+
+        if arg in ('lbound', 'lb'):
+            i += 1
+            try:
+                arg = argv[i]
+            except IndexError:
+                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg += 'lower bound is not provided.'
                 raise cr.CVGError(msg)
 
-            # lb & ub must be equal-style variable
+            # parse the value
             try:
+                var_lb = float(arg)
+            except ValueError:
+                # lb can be an equal-style variable
                 var_lb = lmp.extract_variable(arg, None, 0)
-            except:
-                msg = 'lb must be followed by an equal-style variable.'
-                raise cr.CVGError(msg)
+
+                if var_lb is None:
+                    msg = 'lb must be followed by an equal-style variable.'
+                    raise cr.CVGError(msg)
+
             var_ub = None
 
             i += 1
             try:
                 arg = argv[i]
             except IndexError:
-                ctrl_map[ctrl_name] = tuple([var_lb, var_ub])
+                ctrl_map[var_name] = tuple([var_lb, var_ub])
                 break
 
             if arg in ('ub', 'ubound'):
@@ -161,59 +202,197 @@ def run_length_control(lmpptr, nevery: int, *argv):
                 try:
                     arg = argv[i]
                 except IndexError:
-                    msg = 'the variable\' upper bound does not exist.'
+                    msg = 'the {} {}\'s'.format(var_name, _PREFIX_NAME[prefix])
+                    msg += ' upper bound is not provided.'
                     raise cr.CVGError(msg)
 
-                # lb & ub must be equal-style variable
                 try:
+                    var_ub = float(arg)
+                except ValueError:
+                    # ub can be an equal-style variable
                     var_ub = lmp.extract_variable(arg, None, 0)
-                except:
-                    msg = 'ub must be followed by an equal-style variable.'
-                    raise cr.CVGError(msg)
+                    if var_ub is None:
+                        msg = 'ub must be followed by an equal-style variable.'
+                        raise cr.CVGError(msg)
             else:
                 i -= 1
 
-            ctrl_map[ctrl_name] = tuple([var_lb, var_ub])
-            i += 1
-            continue
+            ctrl_map[var_name] = tuple([var_lb, var_ub])
 
-        if arg in ('ub', 'ubound'):
-            try:
-                ctrl_name = '{}{}'.format(prefix, argv[i - 1])
-            except IndexError:
-                msg = 'the ctrl variable does not exist.'
-                raise cr.CVGError(msg)
-
+        elif arg in ('ubound', 'ub'):
             i += 1
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the variable\' upper bound does not exist.'
+                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg += 'upper bound is not provided.'
                 raise cr.CVGError(msg)
 
-            # lb & ub must be equal-style variable
             # being here means that this ctrl variable has no lower bound
             var_lb = None
+
             try:
+                var_ub = float(arg)
+            except ValueError:
+                # lb & ub must be equal-style variable
                 var_ub = lmp.extract_variable(arg, None, 0)
-            except:
-                msg = 'ub must be followed by an equal-style variable.'
+                if var_ub is None:
+                    msg = 'ub must be followed by an equal-style variable.'
+                    raise cr.CVGError(msg)
+
+            ctrl_map[var_name] = tuple([var_lb, var_ub])
+
+        elif arg in ('population_mean', 'mean'):
+            i += 1
+            try:
+                arg = argv[i]
+            except IndexError:
+                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg += 'population_mean is not provided.'
                 raise cr.CVGError(msg)
 
-            ctrl_map[ctrl_name] = tuple([var_lb, var_ub])
-            i += 1
-            continue
+            if population_mean is None:
+                population_mean = {}
 
-        var_name = '{}{}'.format(prefix, arg)
-        msg += var_name + ' '
-        arguments_map[n_arguments] = var_name
-        n_arguments += 1
+            try:
+                value = float(arg)
+            except ValueError:
+                value = lmp.extract_variable(arg, None, 0)
+
+                if value is None:
+                    msg = 'population_mean must be followed by an '
+                    msg += 'equal-style variable.'
+                    raise cr.CVGError(msg)
+
+            population_mean[var_name] = value
+
+        elif arg in ('population_std', 'std'):
+            i += 1
+            try:
+                arg = argv[i]
+            except IndexError:
+                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg += 'population_std is not provided.'
+                raise cr.CVGError(msg)
+
+            if population_std is None:
+                population_std = {}
+
+            try:
+                value = float(arg)
+            except ValueError:
+                value = lmp.extract_variable(arg, None, 0)
+
+                if value is None:
+                    msg = 'population_std must be followed by an '
+                    msg += 'equal-style variable.'
+                    raise cr.CVGError(msg)
+
+            population_std[var_name] = value
+
+        elif arg in ('population_cdf', 'cdf'):
+            i += 1
+            try:
+                arg = argv[i]
+            except IndexError:
+                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg += 'population_cdf is not provided.'
+
+            if population_cdf is None:
+                population_cdf = {}
+
+            population_cdf[var_name] = arg
+
+        elif arg in ('population_args', 'args'):
+            i += 1
+            try:
+                arg = argv[i]
+            except IndexError:
+                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg += 'population_args is not provided.'
+
+            if population_args is None:
+                population_args = {}
+                population_args[var_name] = []
+
+            brackets = ('()', '{}', '[]', '(,)', '{,}',
+                        '[,]', '(', ')', '[', ']', '{', '}')
+
+            arg = arg.replace(' ', '')
+
+            for b in brackets:
+                if b in arg:
+                    arg = arg.replace(b, '')
+
+            if len(arg):
+                arg = arg.split(',')
+
+            for arg_ in arg:
+                try:
+                    value = int(arg_)
+                except ValueError:
+                    try:
+                        value = float(arg_)
+                    except ValueError:
+                        msg = 'population_args must be followed by a '
+                        msg += 'list or tuple of values(s).'
+                        raise cr.CVGError(msg)
+
+                population_args[var_name].append(value)
+
+        elif arg in ('population_loc', 'loc'):
+            i += 1
+            try:
+                arg = argv[i]
+            except IndexError:
+                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg += 'population_loc is not provided.'
+
+            if population_loc is None:
+                population_loc = {}
+
+            try:
+                value = float(arg)
+            except ValueError:
+                value = lmp.extract_variable(arg, None, 0)
+
+                if value is None:
+                    msg = 'population_loc must be followed by an '
+                    msg += 'equal-style variable.'
+                    raise cr.CVGError(msg)
+
+            population_loc[var_name] = value
+
+        elif arg in ('population_scale', 'scale'):
+            i += 1
+            try:
+                arg = argv[i]
+            except IndexError:
+                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg += 'population_scale is not provided.'
+
+            if population_scale is None:
+                population_scale = {}
+
+            try:
+                population_scale_var = float(arg)
+            except ValueError:
+                value = lmp.extract_variable(arg, None, 0)
+
+                if value is None:
+                    msg = 'population_scale must be followed by an '
+                    msg += 'equal-style variable.'
+                    raise cr.CVGError(msg)
+
+            population_scale[var_name] = value
+
         i += 1
 
-    lmp.command(msg)
+    # Run the LAMMPS script
+    lmp.command(cmd)
 
     if ctrl_map:
-        if n_arguments == 1:
+        if argument_counter == 1:
             var_name = arguments_map[0]
             msg = 'the variable "{}" is used for '.format(var_name)
             msg += 'controling the stability of the simulation to be '
@@ -221,10 +400,10 @@ def run_length_control(lmpptr, nevery: int, *argv):
             msg += 'used for the run length control at the same time.'
             raise cr.CVGError(msg)
 
-        if n_arguments == len(ctrl_map):
+        if argument_counter == len(ctrl_map):
             var_name = arguments_map[0]
             msg = 'the variables "{}", '.format(var_name)
-            for i in range(1, n_arguments - 1):
+            for i in range(1, argument_counter - 1):
                 var_name = arguments_map[i]
                 msg = '"{}", '.format(var_name)
             var_name = arguments_map[-1]
@@ -260,17 +439,17 @@ def run_length_control(lmpptr, nevery: int, *argv):
         initialstep = finalstep + nevery
 
         # Run the LAMMPS simulation
-        msg = 'run {}'.format(step)
-        lmp.command(msg)
+        cmd = 'run {}'.format(step)
+        lmp.command(cmd)
 
         if ctrl_map:
             # trajectory array
-            _ndim = n_arguments - len(ctrl_map)
+            _ndim = argument_counter - len(ctrl_map)
             trajectory = np.empty((_ndim, ncountmax), dtype=np.float64)
 
             # argument index in the trajectory array
             _j = 0
-            for j in range(n_arguments):
+            for j in range(argument_counter):
                 var_name = arguments_map[j]
                 if var_name in ctrl_map:
                     lb, ub = ctrl_map[var_name]
@@ -314,25 +493,96 @@ def run_length_control(lmpptr, nevery: int, *argv):
                 return trajectory.squeeze()
             return trajectory
 
-        if n_arguments == 1:
+        if argument_counter == 1:
             trajectory = np.empty((ncountmax), dtype=np.float64)
             for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
                 trajectory[i] = lmp.extract_fix('cvg_fix', 0, 1, _nstep, 0)
             nstep += ncountmax
             return trajectory
 
-        trajectory = np.empty((n_arguments, ncountmax), dtype=np.float64)
-        for j in range(n_arguments):
+        trajectory = np.empty((argument_counter, ncountmax), dtype=np.float64)
+        for j in range(argument_counter):
             for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
                 trajectory[j, i] = \
                     lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
         nstep += ncountmax
         return trajectory
 
+    p_mean = None
+    p_std = None
+    p_cdf = None
+    p_args = None
+    p_loc = None
+    p_scale = None
+
+    if argument_counter == 1:
+        var_name = arguments_map[0]
+        if population_mean is not None:
+            p_mean = population_mean[var_name]
+        if population_std is not None:
+            p_std = population_std[var_name]
+        if population_cdf is not None:
+            p_cdf = population_cdf[var_name]
+        if population_args is not None:
+            p_args = population_args[var_name]
+        if population_loc is not None:
+            p_loc = population_loc[var_name]
+        if population_scale is not None:
+            p_scale = population_scale[var_name]
+    else:
+        if population_mean is not None:
+            p_mean = []
+            for i in range(argument_counter):
+                var_name = arguments_map[i]
+                if var_name in population_mean:
+                    p_mean.append(population_mean[var_name])
+                else:
+                    p_mean.append(None)
+        if population_std is not None:
+            p_std = []
+            for i in range(argument_counter):
+                var_name = arguments_map[i]
+                if var_name in population_std:
+                    p_std.append(population_std[var_name])
+                else:
+                    p_std.append(None)
+        if population_cdf is not None:
+            p_cdf = []
+            for i in range(argument_counter):
+                var_name = arguments_map[i]
+                if var_name in population_cdf:
+                    p_cdf.append(population_cdf[var_name])
+                else:
+                    p_cdf.append(None)
+        if population_args is not None:
+            p_args = []
+            for i in range(argument_counter):
+                var_name = arguments_map[i]
+                if var_name in population_args:
+                    p_args.append(population_args[var_name])
+                else:
+                    p_args.append(None)
+        if population_loc is not None:
+            p_loc = []
+            for i in range(argument_counter):
+                var_name = arguments_map[i]
+                if var_name in population_loc:
+                    p_loc.append(population_loc[var_name])
+                else:
+                    p_loc.append(None)
+        if population_scale is not None:
+            p_scale = []
+            for i in range(argument_counter):
+                var_name = arguments_map[i]
+                if var_name in population_scale:
+                    p_scale.append(population_scale[var_name])
+                else:
+                    p_scale.append(None)
+
     try:
         msg = cr.run_length_control(
             get_trajectory=get_trajectory,
-            number_of_variables=n_arguments - len(ctrl_map),
+            number_of_variables=argument_counter - len(ctrl_map),
             initial_run_length=INITIAL_RUN_LENGTH,
             run_length_factor=RUN_LENGTH_FACTOR,
             maximum_run_length=MAX_RUN_LENGTH,
@@ -340,12 +590,12 @@ def run_length_control(lmpptr, nevery: int, *argv):
             minimum_number_of_independent_samples=MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES,
             relative_accuracy=RELATIVE_ACCURACY,
             absolute_accuracy=ABSOLUTE_ACCURACY,
-            population_mean=None,
-            population_standard_deviation=None,
-            population_cdf=None,
-            population_args=None,
-            population_loc=None,
-            population_scale=None,
+            population_mean=p_mean,
+            population_standard_deviation=p_std,
+            population_cdf=p_cdf,
+            population_args=p_args,
+            population_loc=p_loc,
+            population_scale=p_scale,
             confidence_coefficient=CONFIDENCE,
             confidence_interval_approximation_method=UCL_METHOD,
             heidel_welch_number_points=cr._default._DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
@@ -361,7 +611,7 @@ def run_length_control(lmpptr, nevery: int, *argv):
             si=cr._default._DEFAULT_SI,
             nskip=cr._default._DEFAULT_NSKIP,
             minimum_correlation_time=cr._default._DEFAULT_MINIMUM_CORRELATION_TIME,
-            dump_trajectory=False,
+            dump_trajectory=DUMP_TRAJECTORY,
             dump_trajectory_fp='convergence_trajectory.edn',
             fp='return',
             fp_format='txt')
