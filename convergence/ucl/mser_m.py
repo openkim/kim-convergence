@@ -163,6 +163,15 @@ def mser_m(time_series_data,
             msg = 'invalid ignore_end = {}. '.format(ignore_end)
             msg += 'ignore_end is not an `int`, `float`, or `None`.'
             raise CVGError(msg)
+
+        if ignore_end < 1:
+            msg = 'ignore_end is not given on input and it is automatically '
+            msg += 'set = {} using '.format(ignore_end)
+            msg += '{} number of data points '.format(time_series_data.size)
+            msg += 'and the batch size = {}.\n'.format(batch_size)
+            msg += 'ignore_end should be a positive `int`.'
+            raise CVGError(msg)
+
     elif ignore_end < 1:
         msg = 'invalid ignore_end = {}. '.format(ignore_end)
         msg += 'ignore_end should be a positive `int`.'
