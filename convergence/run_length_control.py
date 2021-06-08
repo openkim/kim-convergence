@@ -216,16 +216,26 @@ def _check_get_trajectory(get_trajectory: callable):
 def _get_trajectory(get_trajectory: callable,
                     run_length: int,
                     ndim: int,
-                    number_of_variables=1) -> np.ndarray:
+                    number_of_variables=1,
+                    get_trajectory_args=()) -> np.ndarray:
     if run_length == 0:
         return np.array([], dtype=np.float64)
 
-    try:
-        tsd = get_trajectory(step=run_length)
-    except:
-        msg = 'failed to get the time-series data or do the simulation '
-        msg += 'for {} number of steps.'.format(run_length)
-        raise CVGError(msg)
+    if type(get_trajectory_args) in (list, tuple) and \
+            np.size(get_trajectory_args) > 0:
+        try:
+            tsd = get_trajectory(step=run_length, *get_trajectory_args)
+        except:
+            msg = 'failed to get the time-series data or do the '
+            msg += 'simulation for {} number of steps.'.format(run_length)
+            raise CVGError(msg)
+    else:
+        try:
+            tsd = get_trajectory(step=run_length)
+        except:
+            msg = 'failed to get the time-series data or do the '
+            msg += 'simulationfor {} number of steps.'.format(run_length)
+            raise CVGError(msg)
 
     tsd = np.array(tsd, dtype=np.float64, copy=False)
 
@@ -513,6 +523,7 @@ def _get_array_tolist(input_array) -> list:
 
 def run_length_control(
     get_trajectory: callable,
+    get_trajectory_args=(),
     *,
     number_of_variables=1,
     initial_run_length=10000,
@@ -714,6 +725,8 @@ def run_length_control(
                 all the values returned from this function should be finite
                 values, otherwise the code will stop wih error message
                 explaining the issue.
+        get_trajectory_args (tuple, optional): Extra arguments passed to the
+            get_trajectory function. (default: ())
         number_of_variables (int, optional): number of variables in the
             corresponding time-series data from get_trajectory callback
             function. (default: 1)
@@ -983,7 +996,11 @@ def run_length_control(
     # one variable
     if ndim == 1:
         # Time series data temporary array
-        tsd = _get_trajectory(get_trajectory, run_length, ndim)
+        tsd = _get_trajectory(get_trajectory,
+                              run_length=run_length,
+                              ndim=ndim,
+                              number_of_variables=number_of_variables,
+                              get_trajectory_args=get_trajectory_args)
 
         # Estimate the truncation point or "warm-up" period
         # while we have sufficient data
@@ -1053,7 +1070,12 @@ def run_length_control(
                 else:
                     total_run_length += run_length
 
-                    _tsd = _get_trajectory(get_trajectory, run_length, ndim)
+                    _tsd = _get_trajectory(
+                        get_trajectory,
+                        run_length=run_length,
+                        ndim=ndim,
+                        number_of_variables=number_of_variables,
+                        get_trajectory_args=get_trajectory_args)
                     tsd = np.concatenate((tsd, _tsd))
 
         del extra_check
@@ -1159,7 +1181,7 @@ def run_length_control(
 
                     if minimum_number_of_independent_samples is None or \
                             effective_sample_size >= \
-                        minimum_number_of_independent_samples:
+                    minimum_number_of_independent_samples:
 
                         need_more_data = False
 
@@ -1204,7 +1226,12 @@ def run_length_control(
                 else:
                     total_run_length += run_length
 
-                    _tsd = _get_trajectory(get_trajectory, run_length, ndim)
+                    _tsd = _get_trajectory(
+                        get_trajectory,
+                        run_length=run_length,
+                        ndim=ndim,
+                        number_of_variables=number_of_variables,
+                        get_trajectory_args=get_trajectory_args)
                     tsd = np.concatenate((tsd, _tsd))
 
         if upper_confidence_limit is None:
@@ -1250,8 +1277,12 @@ def run_length_control(
     # ndim == 2
     else:
         # Time series data temporary array
-        tsd = _get_trajectory(get_trajectory, run_length, ndim,
-                              number_of_variables)
+        tsd = _get_trajectory(
+            get_trajectory,
+            run_length=run_length,
+            ndim=ndim,
+            number_of_variables=number_of_variables,
+            get_trajectory_args=get_trajectory_args)
 
         _truncated = [False] * number_of_variables
         truncate_index = [None] * number_of_variables
@@ -1357,10 +1388,12 @@ def run_length_control(
                 else:
                     total_run_length += run_length
 
-                    _tsd = _get_trajectory(get_trajectory,
-                                           run_length,
-                                           ndim,
-                                           number_of_variables)
+                    _tsd = _get_trajectory(
+                        get_trajectory,
+                        run_length=run_length,
+                        ndim=ndim,
+                        number_of_variables=number_of_variables,
+                        get_trajectory_args=get_trajectory_args)
                     tsd = np.concatenate((tsd, _tsd), axis=1)
 
         del extra_check
@@ -1489,7 +1522,7 @@ def run_length_control(
 
                         if minimum_number_of_independent_samples is None or \
                                 effective_sample_size[i] >= \
-                            minimum_number_of_independent_samples:
+                        minimum_number_of_independent_samples:
 
                             need_more_data = False
 
@@ -1568,9 +1601,10 @@ def run_length_control(
 
                     _tsd = _get_trajectory(
                         get_trajectory,
-                        run_length,
-                        ndim,
-                        number_of_variables=number_of_variables)
+                        run_length=run_length,
+                        ndim=ndim,
+                        number_of_variables=number_of_variables,
+                        get_trajectory_args=get_trajectory_args)
                     tsd = np.concatenate((tsd, _tsd), axis=1)
 
         msg = None
