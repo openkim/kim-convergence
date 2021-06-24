@@ -113,8 +113,8 @@ class HeidelbergerWelch(UCLBase):
     def set_heidel_welch_constants(
             self,
             *,
-            confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-            heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS):
+            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS):
         r"""Set Heidelberger and Welch constants globally.
 
         Set the constants necessary for application of the Heidelberger and
@@ -241,7 +241,7 @@ class HeidelbergerWelch(UCLBase):
         # reset the UCL Base class
         self.reset()
 
-    def get_heidel_welch_constants(self):
+    def get_heidel_welch_constants(self) -> tuple:
         """Get the Heidelberger and Welch constants."""
         return \
             self.heidel_welch_set, \
@@ -262,11 +262,11 @@ class HeidelbergerWelch(UCLBase):
             self.tm_2, \
             self.tm_3
 
-    def is_heidel_welch_set(self):
+    def is_heidel_welch_set(self) -> bool:
         """Return `True` if the flag is set to `True`."""
         return self.heidel_welch_set
 
-    def get_heidel_welch_knp(self):
+    def get_heidel_welch_knp(self) -> tuple:
         """Get the heidel_welch_number_points, n, and confidence_coefficient.
         """
         return \
@@ -274,7 +274,7 @@ class HeidelbergerWelch(UCLBase):
             self.heidel_welch_n, \
             self.heidel_welch_p
 
-    def get_heidel_welch_auxilary_matrices(self):
+    def get_heidel_welch_auxilary_matrices(self) -> tuple:
         """Get the Heidelberger and Welch auxilary matrices."""
         return \
             self.a_matrix, \
@@ -282,21 +282,21 @@ class HeidelbergerWelch(UCLBase):
             self.a_matrix_2_inv, \
             self.a_matrix_3_inv
 
-    def get_heidel_welch_c1(self):
+    def get_heidel_welch_c1(self) -> tuple:
         """Get the Heidelberger and Welch C1 constants."""
         return \
             self.heidel_welch_c1_1, \
             self.heidel_welch_c1_2, \
             self.heidel_welch_c1_3
 
-    def get_heidel_welch_c2(self):
+    def get_heidel_welch_c2(self) -> tuple:
         """Get the Heidelberger and Welch C2 constants."""
         return \
             self.heidel_welch_c2_1, \
             self.heidel_welch_c2_2, \
             self.heidel_welch_c2_3
 
-    def get_heidel_welch_tm(self):
+    def get_heidel_welch_tm(self) -> tuple:
         """Get the Heidelberger and Welch t_distribution ppf.
 
         Get the Heidelberger and Welch t_distribution ppf for C2 degrees of
@@ -305,25 +305,25 @@ class HeidelbergerWelch(UCLBase):
         return self.tm_1, self.tm_2, self.tm_3
 
     def ucl(self,
-            time_series_data,
+            time_series_data: list,
             *,
-            confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-            heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-            fft=_DEFAULT_FFT,
-            test_size=_DEFAULT_TEST_SIZE,
-            train_size=_DEFAULT_TRAIN_SIZE,
+            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+            fft: bool = _DEFAULT_FFT,
+            test_size: int = _DEFAULT_TEST_SIZE,
+            train_size: int = _DEFAULT_TRAIN_SIZE,
             # unused input parmeters in
             # Heidelberger and Welch ucl interface
-            batch_size=_DEFAULT_BATCH_SIZE,
-            equilibration_length_estimate=_DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-            scale=_DEFAULT_SCALE_METHOD,
-            with_centering=_DEFAULT_WITH_CENTERING,
-            with_scaling=_DEFAULT_WITH_SCALING,
-            population_standard_deviation=_DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si=_DEFAULT_SI,
-            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method=_DEFAULT_SAMPLE_METHOD):
+            batch_size: int = _DEFAULT_BATCH_SIZE,
+            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+            scale: str = _DEFAULT_SCALE_METHOD,
+            with_centering: bool = _DEFAULT_WITH_CENTERING,
+            with_scaling: bool = _DEFAULT_WITH_SCALING,
+            population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si: str = _DEFAULT_SI,
+            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method: str = _DEFAULT_SAMPLE_METHOD) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
         Approximate an unbiased estimate of the upper confidence limit or
@@ -538,14 +538,14 @@ class HeidelbergerWelch(UCLBase):
 
 
 def heidelberger_welch_ucl(
-        time_series_data,
+        time_series_data: list,
         *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-        fft=_DEFAULT_FFT,
-        test_size=_DEFAULT_TEST_SIZE,
-        train_size=_DEFAULT_TRAIN_SIZE,
-        obj=None):
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        fft: bool = _DEFAULT_FFT,
+        test_size: int = _DEFAULT_TEST_SIZE,
+        train_size: int = _DEFAULT_TRAIN_SIZE,
+        obj: HeidelbergerWelch = None) -> float:
     """Approximate the upper confidence limit of the mean."""
     heidelberger_welch = HeidelbergerWelch() if obj is None else obj
     upper_confidence_limit = heidelberger_welch.ucl(
@@ -560,14 +560,14 @@ def heidelberger_welch_ucl(
 
 
 def heidelberger_welch_ci(
-        time_series_data,
+        time_series_data: list,
         *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-        fft=_DEFAULT_FFT,
-        test_size=_DEFAULT_TEST_SIZE,
-        train_size=_DEFAULT_TRAIN_SIZE,
-        obj=None):
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        fft: bool = _DEFAULT_FFT,
+        test_size: int = _DEFAULT_TEST_SIZE,
+        train_size: int = _DEFAULT_TRAIN_SIZE,
+        obj: HeidelbergerWelch = None) -> tuple:
     r"""Approximate the confidence interval of the mean.
 
     Args:
@@ -611,14 +611,14 @@ def heidelberger_welch_ci(
 
 
 def heidelberger_welch_relative_half_width_estimate(
-        time_series_data,
+        time_series_data: list,
         *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-        fft=_DEFAULT_FFT,
-        test_size=_DEFAULT_TEST_SIZE,
-        train_size=_DEFAULT_TRAIN_SIZE,
-        obj=None):
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        fft: bool = _DEFAULT_FFT,
+        test_size: int = _DEFAULT_TEST_SIZE,
+        train_size: int = _DEFAULT_TRAIN_SIZE,
+        obj: HeidelbergerWelch = None) -> float:
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval
