@@ -46,9 +46,9 @@ def betacf(a: float,
            b: float,
            x: float,
            *,
-           eps=np.finfo(np.float64).resolution,
-           max_iteration=200,
-           _fpmin=1.0e-30) -> float:
+           eps: float = np.finfo(np.float64).resolution,
+           max_iteration: int = 200,
+           _fpmin: float = 1.0e-30) -> float:
     """Continued fraction for incomplete beta function by modified Lentz’s method.
 
     Evaluates continued fraction for incomplete beta function by modified

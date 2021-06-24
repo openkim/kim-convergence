@@ -432,7 +432,7 @@ def ks_test(time_series_data: np.ndarray,
             population_args: tuple,
             population_loc: float,
             population_scale: float,
-            significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+            significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Kolmogorov-Smirnov test for goodness of fit.
 
     Note:
@@ -503,12 +503,13 @@ def ks_test(time_series_data: np.ndarray,
     return significance_level < pvalue
 
 
-def levene_test(time_series_data: np.ndarray,
-                population_cdf: str,
-                population_args: tuple,
-                population_loc: float,
-                population_scale: float,
-                significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+def levene_test(
+        time_series_data: np.ndarray,
+        population_cdf: str,
+        population_args: tuple,
+        population_loc: float,
+        population_scale: float,
+        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Perform modified Levene test for equal variances.
 
     The modified Levene test tests the null hypothesis that one sample input
@@ -646,7 +647,7 @@ def wilcoxon_test(
         population_args: tuple,
         population_loc: float,
         population_scale: float,
-        significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Calculate the Wilcoxon signed-rank test.
 
     Here it is used as a non-parametric test to determine whether an unknown
@@ -736,7 +737,7 @@ def kruskal_test(
         population_args: tuple,
         population_loc: float,
         population_scale: float,
-        significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Kruskal-Wallis H-test for independent samples.
 
     The Kruskal-Wallis H-test tests the null hypothesis that the median of
