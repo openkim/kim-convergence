@@ -33,11 +33,11 @@ __all__ = [
 
 
 def _estimate_equilibration_length(
-        time_series_data,
-        t,
-        si_func,
-        fft,
-        minimum_correlation_time):
+        time_series_data: np.ndarray,
+        t: int,
+        si_func: callable,
+        fft: bool,
+        minimum_correlation_time: int) -> tuple:
     # slice a numpy array, the memory is shared
     # between the slice and the original
     x = time_series_data[t:]
@@ -52,20 +52,20 @@ def _estimate_equilibration_length(
 
 
 def estimate_equilibration_length(
-        time_series_data,
+        time_series_data: np.ndarray,
         *,
-        si=_DEFAULT_SI,
-        nskip=_DEFAULT_NSKIP,
-        fft=_DEFAULT_FFT,
-        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-        ignore_end=_DEFAULT_IGNORE_END,
-        number_of_cores=_DEFAULT_NUMBER_OF_CORES,
+        si: str = _DEFAULT_SI,
+        nskip: int = _DEFAULT_NSKIP,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        ignore_end: int = _DEFAULT_IGNORE_END,
+        number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
         # unused input parmeters in Time series module
         # estimate_equilibration_length interface
-        batch_size=_DEFAULT_BATCH_SIZE,
-        scale=_DEFAULT_SCALE_METHOD,
-        with_centering=_DEFAULT_WITH_CENTERING,
-        with_scaling=_DEFAULT_WITH_SCALING):
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple:
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the

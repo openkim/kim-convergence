@@ -9,7 +9,11 @@ __all__ = [
 ]
 
 
-def geweke(x, *, first=0.1, last=0.5, intervals=20):
+def geweke(x: np.ndarray,
+           *,
+           first: float = 0.1,
+           last: float = 0.5,
+           intervals: int = 20):
     r"""Compute z-scores for convergence diagnostics.
 
     # Compare the mean of the first % of series with the mean of the last % of
