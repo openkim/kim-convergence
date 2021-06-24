@@ -53,7 +53,7 @@ r"""Methods to decide what are outliers in the data.
 """
 
 
-def outlier_test(x: np.ndarray, outlier_method='iqr'):
+def outlier_test(x: list, outlier_method: str = 'iqr') -> np.ndarray:
     r"""Test to detect what are outliers in the data.
 
     The intuitive definition for the concept of an outlier in the data is a

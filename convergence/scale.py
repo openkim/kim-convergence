@@ -139,9 +139,9 @@ class MinMaxScale():
 
 def minmax_scale(x: np.ndarray,
                  *,
-                 with_centering=True,
-                 with_scaling=True,
-                 feature_range=(0, 1)) -> np.ndarray:
+                 with_centering: bool = True,
+                 with_scaling: bool = True,
+                 feature_range: tuple = (0, 1)) -> np.ndarray:
     r"""Standardize/Transform a dataset by scaling it to a given range.
 
     This estimator scales and translates a dataset such that it is in the given
@@ -278,8 +278,8 @@ class TranslateScale():
 
 def translate_scale(x: np.ndarray,
                     *,
-                    with_centering=True,
-                    with_scaling=True) -> np.ndarray:
+                    with_centering: bool = True,
+                    with_scaling: bool = True) -> np.ndarray:
     r"""Standardize a dataset.
 
     Standardize a dataset by translating the data set so that :math:`x[0]=0`
@@ -466,8 +466,8 @@ class StandardScale():
 
 def standard_scale(x: np.ndarray,
                    *,
-                   with_centering=True,
-                   with_scaling=True) -> np.ndarray:
+                   with_centering: bool = True,
+                   with_scaling: bool = True) -> np.ndarray:
     r"""Standardize a dataset.
 
     Standardize a dataset by removing the mean and scaling to unit variance.
@@ -630,9 +630,9 @@ class RobustScale():
 
 def robust_scale(x: np.ndarray,
                  *,
-                 with_centering=True,
-                 with_scaling=True,
-                 quantile_range=(25.0, 75.0)) -> np.ndarray:
+                 with_centering: bool = True,
+                 with_scaling: bool = True,
+                 quantile_range: tuple = (25.0, 75.0)) -> np.ndarray:
     """Standardize a dataset.
 
     Standardize a dataset by centering to the median and component wise scale
@@ -751,8 +751,8 @@ class MaxAbsScale():
 
 def maxabs_scale(x: np.ndarray,
                  *,
-                 with_centering=True,
-                 with_scaling=True) -> np.ndarray:
+                 with_centering: bool = True,
+                 with_scaling: bool = True) -> np.ndarray:
     """Standardize a dataset to the [-1, 1] range.
 
     Standardize a dataset to the [-1, 1] range such that the maximal absolute
