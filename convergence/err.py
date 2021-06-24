@@ -41,7 +41,7 @@ class CVGSampleSizeError(CVGError):
     pass
 
 
-def cvg_warning(msg):
+def cvg_warning(msg: str) -> None:
     """Print a warning message.
 
     Args:
@@ -53,7 +53,7 @@ def cvg_warning(msg):
     print(_msg)
 
 
-def _check_ndim(func):
+def _check_ndim(func: callable) -> callable:
     def wrapper(x, *args, **kwargs):
         if np.ndim(x) != 1:
             msg = 'input data is not an array of one-dimension.'
@@ -62,7 +62,7 @@ def _check_ndim(func):
     return wrapper
 
 
-def _check_isfinite(func):
+def _check_isfinite(func: callable) -> callable:
     def wrapper(x, *args, **kwargs):
         if not np.all(np.isfinite(x)):
             msg = 'there is at least one value in the input '
@@ -73,7 +73,7 @@ def _check_isfinite(func):
 
 
 def cvg_check(var,
-              var_name,
+              var_name: str,
               var_type=None,
               var_lower_bound=0,
               var_upper_bound=None):
