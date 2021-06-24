@@ -201,7 +201,7 @@ def _convergence_message(number_of_variables: int,
     return msg
 
 
-def _check_get_trajectory(get_trajectory: callable):
+def _check_get_trajectory(get_trajectory: callable) -> None:
     if not isfunction(get_trajectory):
         msg = 'the "get_trajectory" input is not a callback function.\n'
         msg += 'One has to provide the "get_trajectory" function as an '
@@ -216,8 +216,8 @@ def _check_get_trajectory(get_trajectory: callable):
 def _get_trajectory(get_trajectory: callable,
                     run_length: int,
                     ndim: int,
-                    number_of_variables=1,
-                    get_trajectory_args=()) -> np.ndarray:
+                    number_of_variables: int = 1,
+                    get_trajectory_args: tuple = ()) -> np.ndarray:
     if run_length == 0:
         return np.array([], dtype=np.float64)
 
@@ -386,7 +386,7 @@ def _check_population(number_of_variables: int,
                       population_cdf,
                       population_args,
                       population_loc,
-                      population_scale):
+                      population_scale) -> None:
 
     # Initialize
     if number_of_variables == 1:
@@ -523,43 +523,43 @@ def _get_array_tolist(input_array) -> list:
 
 def run_length_control(
     get_trajectory: callable,
-    get_trajectory_args=(),
+    get_trajectory_args: tuple = (),
     *,
-    number_of_variables=1,
-    initial_run_length=10000,
-    run_length_factor=1.0,
-    maximum_run_length=1000000,
-    maximum_equilibration_step=None,
-    minimum_number_of_independent_samples=None,
-    relative_accuracy=0.1,
-    absolute_accuracy=0.1,
-    population_mean=None,
-    population_standard_deviation=None,
-    population_cdf=None,
-    population_args=None,
-    population_loc=None,
-    population_scale=None,
+    number_of_variables: int = 1,
+    initial_run_length: int = 10000,
+    run_length_factor: float = 1.0,
+    maximum_run_length: int = 1000000,
+    maximum_equilibration_step: int = None,
+    minimum_number_of_independent_samples: int = None,
+    relative_accuracy: float = 0.1,
+    absolute_accuracy: float = 0.1,
+    population_mean: float = None,
+    population_standard_deviation: float = None,
+    population_cdf: str = None,
+    population_args: tuple = None,
+    population_loc: float = None,
+    population_scale: float = None,
     # arguments used by different components
-    confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-    confidence_interval_approximation_method=_DEFAULT_CONFIDENCE_INTERVAL_APPROXIMATION_METHOD,
-    heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-    fft=_DEFAULT_FFT,
-    test_size=_DEFAULT_TEST_SIZE,
-    train_size=_DEFAULT_TRAIN_SIZE,
-    batch_size=_DEFAULT_BATCH_SIZE,
-    scale=_DEFAULT_SCALE_METHOD,
-    with_centering=_DEFAULT_WITH_CENTERING,
-    with_scaling=_DEFAULT_WITH_SCALING,
-    ignore_end=_DEFAULT_IGNORE_END,
-    number_of_cores=_DEFAULT_NUMBER_OF_CORES,
-    si=_DEFAULT_SI,
-    nskip=_DEFAULT_NSKIP,
-    minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-    dump_trajectory=False,
-    dump_trajectory_fp='convergence_trajectory.edn',
+    confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+    confidence_interval_approximation_method: str = _DEFAULT_CONFIDENCE_INTERVAL_APPROXIMATION_METHOD,
+    heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+    fft: bool = _DEFAULT_FFT,
+    test_size: int = _DEFAULT_TEST_SIZE,
+    train_size: int = _DEFAULT_TRAIN_SIZE,
+    batch_size: int = _DEFAULT_BATCH_SIZE,
+    scale: str = _DEFAULT_SCALE_METHOD,
+    with_centering: bool = _DEFAULT_WITH_CENTERING,
+    with_scaling: bool = _DEFAULT_WITH_SCALING,
+    ignore_end: int = _DEFAULT_IGNORE_END,
+    number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
+    si: str = _DEFAULT_SI,
+    nskip: int = _DEFAULT_NSKIP,
+    minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    dump_trajectory: bool = False,
+    dump_trajectory_fp: str = 'convergence_trajectory.edn',
     fp=None,
-    fp_format='txt'
-):
+    fp_format: str = 'txt'
+) -> str:
     r"""Control the length of the time series data from a simulation run.
 
     It starts drawing ``initial_run_length`` number of observations (samples)
@@ -1181,7 +1181,7 @@ def run_length_control(
 
                     if minimum_number_of_independent_samples is None or \
                             effective_sample_size >= \
-                    minimum_number_of_independent_samples:
+                        minimum_number_of_independent_samples:
 
                         need_more_data = False
 
@@ -1523,7 +1523,7 @@ def run_length_control(
 
                         if minimum_number_of_independent_samples is None or \
                                 effective_sample_size[i] >= \
-                        minimum_number_of_independent_samples:
+                            minimum_number_of_independent_samples:
 
                             need_more_data = False
 
