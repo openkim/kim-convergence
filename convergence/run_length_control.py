@@ -1222,6 +1222,7 @@ def run_length_control(
 
                 # We have reached the maximum limit
                 if run_length == 0:
+                    enough_accuracy = False
                     need_more_data = False
                 else:
                     total_run_length += run_length
