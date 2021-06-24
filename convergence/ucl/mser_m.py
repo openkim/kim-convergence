@@ -40,13 +40,13 @@ __all__ = [
 ]
 
 
-def mser_m(time_series_data,
+def mser_m(time_series_data: list,
            *,
-           batch_size=_DEFAULT_BATCH_SIZE,
-           scale=_DEFAULT_SCALE_METHOD,
-           with_centering=_DEFAULT_WITH_CENTERING,
-           with_scaling=_DEFAULT_WITH_SCALING,
-           ignore_end=_DEFAULT_IGNORE_END):
+           batch_size: int = _DEFAULT_BATCH_SIZE,
+           scale: str = _DEFAULT_SCALE_METHOD,
+           with_centering: bool = _DEFAULT_WITH_CENTERING,
+           with_scaling: bool = _DEFAULT_WITH_SCALING,
+           ignore_end: int = _DEFAULT_IGNORE_END) -> tuple:
     r"""Determine the truncation point using marginal standard error rules.
 
     Determine the truncation point using marginal standard error rules
@@ -259,20 +259,20 @@ class MSER_m(UCLBase):
 
     def estimate_equilibration_length(
         self,
-        time_series_data,
+        time_series_data: list,
         *,
-        batch_size=_DEFAULT_BATCH_SIZE,
-        scale=_DEFAULT_SCALE_METHOD,
-        with_centering=_DEFAULT_WITH_CENTERING,
-        with_scaling=_DEFAULT_WITH_SCALING,
-        ignore_end=_DEFAULT_IGNORE_END,
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING,
+        ignore_end: int = _DEFAULT_IGNORE_END,
         # unused input parmeters in MSER-m UCL module
         # estimate_equilibration_length interface
-        number_of_cores=_DEFAULT_NUMBER_OF_CORES,
-        si=_DEFAULT_SI,
-        nskip=_DEFAULT_NSKIP,
-        fft=_DEFAULT_FFT,
-            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME):
+        number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
+        si: str = _DEFAULT_SI,
+        nskip: int = _DEFAULT_NSKIP,
+        fft: bool = _DEFAULT_FFT,
+            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> tuple:
         """Estimate the equilibration point in a time series data."""
         truncated, truncate_index = mser_m(
             time_series_data=time_series_data,
@@ -297,25 +297,25 @@ class MSER_m(UCLBase):
         return False, truncate_index
 
     def ucl(self,
-            time_series_data,
+            time_series_data: list,
             *,
-            confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-            batch_size=_DEFAULT_BATCH_SIZE,
-            scale=_DEFAULT_SCALE_METHOD,
-            with_centering=_DEFAULT_WITH_CENTERING,
-            with_scaling=_DEFAULT_WITH_SCALING,
+            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+            batch_size: int = _DEFAULT_BATCH_SIZE,
+            scale: str = _DEFAULT_SCALE_METHOD,
+            with_centering: bool = _DEFAULT_WITH_CENTERING,
+            with_scaling: bool = _DEFAULT_WITH_SCALING,
             # unused input parmeters in
             # MSER_m ucl interface
-            equilibration_length_estimate=_DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-            heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-            fft=_DEFAULT_FFT,
-            test_size=_DEFAULT_TEST_SIZE,
-            train_size=_DEFAULT_TRAIN_SIZE,
-            population_standard_deviation=_DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si=_DEFAULT_SI,
-            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method=_DEFAULT_SAMPLE_METHOD):
+            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+            fft: bool = _DEFAULT_FFT,
+            test_size: int = _DEFAULT_TEST_SIZE,
+            train_size: int = _DEFAULT_TRAIN_SIZE,
+            population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si: str = _DEFAULT_SI,
+            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method: str = _DEFAULT_SAMPLE_METHOD) -> float:
         r"""Approximate the upper confidence limit of the mean [20]_.
 
         Args:
@@ -388,14 +388,14 @@ class MSER_m(UCLBase):
         return self.upper_confidence_limit
 
 
-def mser_m_ucl(time_series_data,
+def mser_m_ucl(time_series_data: list,
                *,
                confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-               batch_size=_DEFAULT_BATCH_SIZE,
-               scale=_DEFAULT_SCALE_METHOD,
-               with_centering=_DEFAULT_WITH_CENTERING,
-               with_scaling=_DEFAULT_WITH_SCALING,
-               obj=None):
+               batch_size: int = _DEFAULT_BATCH_SIZE,
+               scale: str = _DEFAULT_SCALE_METHOD,
+               with_centering: bool = _DEFAULT_WITH_CENTERING,
+               with_scaling: bool = _DEFAULT_WITH_SCALING,
+               obj: MSER_m = None) -> float:
     """Approximate the upper confidence limit of the mean."""
     mser = MSER_m() if obj is None else obj
     upper_confidence_limit = mser.ucl(
@@ -408,14 +408,14 @@ def mser_m_ucl(time_series_data,
     return upper_confidence_limit
 
 
-def mser_m_ci(time_series_data,
+def mser_m_ci(time_series_data: list,
               *,
               confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-              batch_size=_DEFAULT_BATCH_SIZE,
-              scale=_DEFAULT_SCALE_METHOD,
-              with_centering=_DEFAULT_WITH_CENTERING,
-              with_scaling=_DEFAULT_WITH_SCALING,
-              obj=None):
+              batch_size: int = _DEFAULT_BATCH_SIZE,
+              scale: str = _DEFAULT_SCALE_METHOD,
+              with_centering: bool = _DEFAULT_WITH_CENTERING,
+              with_scaling: bool = _DEFAULT_WITH_SCALING,
+              obj: MSER_m = None) -> tuple:
     r"""Approximate the confidence interval of the mean [20]_.
 
     Args:
@@ -449,14 +449,14 @@ def mser_m_ci(time_series_data,
 
 
 def mser_m_relative_half_width_estimate(
-        time_series_data,
+        time_series_data: list,
         *,
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        batch_size=_DEFAULT_BATCH_SIZE,
-        scale=_DEFAULT_SCALE_METHOD,
-        with_centering=_DEFAULT_WITH_CENTERING,
-        with_scaling=_DEFAULT_WITH_SCALING,
-        obj=None):
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING,
+        obj: MSER_m = None) -> float:
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval

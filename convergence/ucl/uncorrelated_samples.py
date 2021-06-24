@@ -48,25 +48,25 @@ class UncorrelatedSamples(UCLBase):
         self.name = 'uncorrelated_sample'
 
     def ucl(self,
-            time_series_data,
+            time_series_data: list,
             *,
-            confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-            population_standard_deviation=_DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si=_DEFAULT_SI,
-            fft=_DEFAULT_FFT,
-            minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method=_DEFAULT_SAMPLE_METHOD,
+            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+            population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si: str = _DEFAULT_SI,
+            fft: bool = _DEFAULT_FFT,
+            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method: str = _DEFAULT_SAMPLE_METHOD,
             # unused input parmeters in
             # UncorrelatedSamples ucl interface
-            equilibration_length_estimate=_DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-            heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-            batch_size=_DEFAULT_BATCH_SIZE,
-            scale=_DEFAULT_SCALE_METHOD,
-            with_centering=_DEFAULT_WITH_CENTERING,
-            with_scaling=_DEFAULT_WITH_SCALING,
-            test_size=_DEFAULT_TEST_SIZE,
-            train_size=_DEFAULT_TRAIN_SIZE):
+            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+            batch_size: int = _DEFAULT_BATCH_SIZE,
+            scale: str = _DEFAULT_SCALE_METHOD,
+            with_centering: bool = _DEFAULT_WITH_CENTERING,
+            with_scaling: bool = _DEFAULT_WITH_SCALING,
+            test_size: int = _DEFAULT_TEST_SIZE,
+            train_size: int = _DEFAULT_TRAIN_SIZE) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
         - If the population standard deviation is known, and
@@ -202,16 +202,16 @@ class UncorrelatedSamples(UCLBase):
 
 
 def uncorrelated_samples_ucl(
-        time_series_data,
+        time_series_data: list,
         *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        population_standard_deviation=_DEFAULT_POPULATION_STANDARD_DEVIATION,
-        si=_DEFAULT_SI,
-        fft=_DEFAULT_FFT,
-        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-        sample_method=_DEFAULT_SAMPLE_METHOD,
-        obj=None):
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+        si: str = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        sample_method: str = _DEFAULT_SAMPLE_METHOD,
+        obj: UncorrelatedSamples = None) -> float:
     """Approximate the upper confidence limit of the mean."""
     uncorrelated_samples = UncorrelatedSamples() if obj is None else obj
     upper_confidence_limit = uncorrelated_samples.ucl(
@@ -227,16 +227,16 @@ def uncorrelated_samples_ucl(
 
 
 def uncorrelated_samples_ci(
-        time_series_data,
+        time_series_data: list,
         *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        population_standard_deviation=_DEFAULT_POPULATION_STANDARD_DEVIATION,
-        si=_DEFAULT_SI,
-        fft=_DEFAULT_FFT,
-        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-        sample_method=_DEFAULT_SAMPLE_METHOD,
-        obj=None):
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+        si: str = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        sample_method: str = _DEFAULT_SAMPLE_METHOD,
+        obj: UncorrelatedSamples = None) -> tuple:
     r"""Approximate the confidence interval of the mean.
 
     - If the population standard deviation is known, and
@@ -314,16 +314,16 @@ def uncorrelated_samples_ci(
 
 
 def uncorrelated_samples_relative_half_width_estimate(
-        time_series_data,
+        time_series_data: list,
         *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        population_standard_deviation=_DEFAULT_POPULATION_STANDARD_DEVIATION,
-        si=_DEFAULT_SI,
-        fft=_DEFAULT_FFT,
-        minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices=_DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-        sample_method=_DEFAULT_SAMPLE_METHOD,
-        obj=None):
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+        si: str = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        sample_method: str = _DEFAULT_SAMPLE_METHOD,
+        obj: UncorrelatedSamples = None) -> float:
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval
