@@ -236,7 +236,7 @@ def uncorrelated_samples_ci(
         minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
         uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method: str = _DEFAULT_SAMPLE_METHOD,
-        obj: UncorrelatedSamples = None) -> tuple:
+        obj: UncorrelatedSamples = None) -> tuple((float, float)):
     r"""Approximate the confidence interval of the mean.
 
     - If the population standard deviation is known, and

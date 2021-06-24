@@ -567,7 +567,7 @@ def heidelberger_welch_ci(
         fft: bool = _DEFAULT_FFT,
         test_size: int = _DEFAULT_TEST_SIZE,
         train_size: int = _DEFAULT_TRAIN_SIZE,
-        obj: HeidelbergerWelch = None) -> tuple:
+        obj: HeidelbergerWelch = None) -> tuple((float, float)):
     r"""Approximate the confidence interval of the mean.
 
     Args:

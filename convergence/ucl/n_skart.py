@@ -126,7 +126,7 @@ class N_SKART(UCLBase):
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
-            with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple:
+            with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple((bool, int)):
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
@@ -484,7 +484,7 @@ def n_skart_ci(
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
         fft: bool = _DEFAULT_FFT,
-        obj: N_SKART = None) -> tuple:
+        obj: N_SKART = None) -> tuple((float, float)):
     r"""Approximate the confidence interval of the mean.
 
     Args:

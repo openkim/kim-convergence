@@ -46,7 +46,7 @@ def mser_m(time_series_data: list,
            scale: str = _DEFAULT_SCALE_METHOD,
            with_centering: bool = _DEFAULT_WITH_CENTERING,
            with_scaling: bool = _DEFAULT_WITH_SCALING,
-           ignore_end: int = _DEFAULT_IGNORE_END) -> tuple:
+           ignore_end: int = _DEFAULT_IGNORE_END) -> tuple((bool, int)):
     r"""Determine the truncation point using marginal standard error rules.
 
     Determine the truncation point using marginal standard error rules
@@ -272,7 +272,7 @@ class MSER_m(UCLBase):
         si: str = _DEFAULT_SI,
         nskip: int = _DEFAULT_NSKIP,
         fft: bool = _DEFAULT_FFT,
-            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> tuple:
+            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> tuple((bool, int)):
         """Estimate the equilibration point in a time series data."""
         truncated, truncate_index = mser_m(
             time_series_data=time_series_data,
@@ -415,7 +415,7 @@ def mser_m_ci(time_series_data: list,
               scale: str = _DEFAULT_SCALE_METHOD,
               with_centering: bool = _DEFAULT_WITH_CENTERING,
               with_scaling: bool = _DEFAULT_WITH_SCALING,
-              obj: MSER_m = None) -> tuple:
+              obj: MSER_m = None) -> tuple((float, float)):
     r"""Approximate the confidence interval of the mean [20]_.
 
     Args:

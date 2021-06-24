@@ -224,7 +224,7 @@ def mser_m_y_ci(time_series_data: list,
                 scale: str = _DEFAULT_SCALE_METHOD,
                 with_centering: bool = _DEFAULT_WITH_CENTERING,
                 with_scaling: bool = _DEFAULT_WITH_SCALING,
-                obj: MSER_m_y = None) -> tuple:
+                obj: MSER_m_y = None) -> tuple((float, float)):
     r"""Approximate the confidence interval of the mean [20]_.
 
     Args:
