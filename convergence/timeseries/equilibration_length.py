@@ -37,7 +37,7 @@ def _estimate_equilibration_length(
         t: int,
         si_func: callable,
         fft: bool,
-        minimum_correlation_time: int) -> tuple:
+        minimum_correlation_time: int) -> tuple((float, float, int)):
     # slice a numpy array, the memory is shared
     # between the slice and the original
     x = time_series_data[t:]
@@ -65,7 +65,7 @@ def estimate_equilibration_length(
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple:
+        with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple((int, float)):
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the
