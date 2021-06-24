@@ -56,8 +56,8 @@ class ZERO_RC():
                  xlo: float,
                  xhi: float,
                  *,
-                 abs_tol=1.0e-50,
-                 rel_tol=1.0e-8):
+                 abs_tol: float = 1.0e-50,
+                 rel_tol: float = 1.0e-8):
         """Initialize parameters.
 
         Args:

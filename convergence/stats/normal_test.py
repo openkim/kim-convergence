@@ -20,11 +20,12 @@ __all__ = [
 ]
 
 
-def t_test(sample_mean: float,
-           sample_std: float,
-           sample_size: int,
-           population_mean: float,
-           significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+def t_test(
+        sample_mean: float,
+        sample_std: float,
+        sample_size: int,
+        population_mean: float,
+        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """T-test for the mean.
 
     Calculate the T-test for the mean. This is a two-sided test for the null
@@ -61,7 +62,7 @@ def chi_square_test(
         sample_var: float,
         sample_size: int,
         population_var: float,
-        significance_level=1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     r"""Chi-square test for the variance.
 
     Calculate the chi-square test for the variance. This is a two-sided test.
