@@ -187,7 +187,7 @@ def betai(a: float, b: float, x: float) -> float:
     return 1. - _beta
 
 
-def betai_cdf_ccdf(a: float, b: float, x: float) -> tuple:
+def betai_cdf_ccdf(a: float, b: float, x: float) -> tuple((float, float)):
     r"""Calculate the cumulative distribution of the incomplete beta distribution.
 
     Calculate the cumulative distribution of the incomplete beta

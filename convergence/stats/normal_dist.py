@@ -150,7 +150,7 @@ def normal_inv_cdf(p: float, *, loc=0.0, scale: float = 1.0) -> float:
 def normal_interval(confidence_level: float,
                     *,
                     loc: float = 0.0,
-                    scale: float = 1.0) -> tuple:
+                    scale: float = 1.0) -> tuple((float, float)):
     r"""Compute the normal distribution confidence interval.
 
     Compute the normal-distribution confidence interval with equal areas around

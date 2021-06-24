@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 
-def t_cdf_ccdf(t: float, df: float) -> tuple:
+def t_cdf_ccdf(t: float, df: float) -> tuple((float, float)):
     r"""Compute the cumulative distribution of the t-distribution.
 
     The cumulative distribution of the t-distribution for t > 0, can be
@@ -193,7 +193,7 @@ def t_inv_cdf(p: float,
 def t_interval(confidence_level: float,
                df: float, *,
                loc: float = 0.0,
-               scale: float = 1.0) -> tuple:
+               scale: float = 1.0) -> tuple((float, float)):
     r"""Compute the t_distribution confidence interval.
 
     Compute the t_distribution confidence interval with equal areas around
