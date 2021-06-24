@@ -16,13 +16,13 @@ __all__ = [
 ]
 
 
-def batch(time_series_data: np.ndarray,
+def batch(time_series_data: list,
           *,
-          batch_size=_DEFAULT_BATCH_SIZE,
-          func=np.mean,
-          scale=_DEFAULT_SCALE_METHOD,
-          with_centering=_DEFAULT_WITH_CENTERING,
-          with_scaling=_DEFAULT_WITH_SCALING) -> np.ndarray:
+          batch_size: int = _DEFAULT_BATCH_SIZE,
+          func: callable = np.mean,
+          scale: str = _DEFAULT_SCALE_METHOD,
+          with_centering: bool = _DEFAULT_WITH_CENTERING,
+          with_scaling: bool = _DEFAULT_WITH_SCALING) -> np.ndarray:
     r"""Batch the time series data.
 
     Args:
