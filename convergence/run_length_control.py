@@ -51,16 +51,16 @@ def _convergence_message(
         total_run_length: int,
         maximum_equilibration_step: int,
         equilibration_detected: bool,
-        equilibration_step: Union[int, np.ndarray],
+        equilibration_step: Union[int, list[int], np.ndarray],
         confidence_coefficient: float,
-        relative_accuracy: Union[float, np.ndarray, None],
-        absolute_accuracy: Union[float, np.ndarray, None],
-        upper_confidence_limit: Union[float, np.ndarray],
+        relative_accuracy: Union[float, list[float], np.ndarray, None],
+        absolute_accuracy: Union[float, list[float], np.ndarray, None],
+        upper_confidence_limit: Union[float, list[float], np.ndarray],
         upper_confidence_limit_method: str,
-        relative_half_width_estimate: Union[float, np.ndarray],
-        time_series_data_mean: Union[float, np.ndarray],
-        time_series_data_std: Union[float, np.ndarray],
-        effective_sample_size: Union[float, np.ndarray],
+        relative_half_width_estimate: Union[float, list[float], np.ndarray],
+        time_series_data_mean: Union[float, list[float], np.ndarray],
+        time_series_data_std: Union[float, list[float], np.ndarray],
+        effective_sample_size: Union[float, list[float], np.ndarray],
         minimum_number_of_independent_samples: int) -> dict:
     """Create convergence message.
 
@@ -510,7 +510,7 @@ def _check_population(
                         raise CVGError(msg)
 
 
-def _get_array_tolist(input_array: np.ndarray) -> list:
+def _get_array_tolist(input_array: Optional[np.ndarray]) -> Optional[list]:
     if input_array is not None:
         if isinstance(input_array, np.ndarray):
             input_array = input_array.tolist()
@@ -526,7 +526,7 @@ def _get_array_tolist(input_array: np.ndarray) -> list:
 
 def run_length_control(
     get_trajectory: callable,
-    get_trajectory_args: Optional(dict) = None,
+    get_trajectory_args: dict = {},
     *,
     number_of_variables: int = 1,
     initial_run_length: int = 10000,
@@ -557,8 +557,8 @@ def run_length_control(
     ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
     number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
     si: str = _DEFAULT_SI,
-    nskip: int = _DEFAULT_NSKIP,
-    minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    nskip: Optional[int] = _DEFAULT_NSKIP,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
     dump_trajectory: bool = False,
     dump_trajectory_fp: str = 'convergence_trajectory.edn',
     fp: Optional[str] = None,
