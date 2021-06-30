@@ -1,6 +1,7 @@
 """Batch module."""
 
 import numpy as np
+from typing import Union
 
 from .err import CVGError
 from ._default import \
@@ -16,7 +17,7 @@ __all__ = [
 ]
 
 
-def batch(time_series_data: list,
+def batch(time_series_data: Union[list[float], np.ndarray],
           *,
           batch_size: int = _DEFAULT_BATCH_SIZE,
           func: callable = np.mean,
