@@ -2,6 +2,7 @@
 
 from math import sqrt
 import numpy as np
+from typing import Union
 
 from .normal_dist import normal_interval
 from convergence import CVGError, CVGSampleSizeError, cvg_check
@@ -11,7 +12,8 @@ __all__ = [
 ]
 
 
-def randomness_test(x: np.ndarray, significance_level: float) -> bool:
+def randomness_test(x: Union[np.ndarray, list[float]],
+                    significance_level: float) -> bool:
     """Testing for independence of observations.
 
     The von-Neumann ratio test of independence of variables is a test designed
