@@ -9,12 +9,6 @@ from simtk.openmm.app import *
 from simtk.openmm import *
 from simtk.unit import *
 
-# Do not modify
-start = 0
-stop = 0
-nstep = 0
-skip_header = 1
-
 # use values every this many timesteps.
 nevery = 100
 buffer = StringIO()
@@ -39,7 +33,7 @@ simulation.reporters.append(
                       separator='\t'))
 
 
-def get_trajectory(step: int) -> np.ndarray:
+def get_trajectory(step: int, args: dict) -> np.ndarray:
     """Get trajectory vector or array of values.
 
     Arguments:
@@ -52,26 +46,26 @@ def get_trajectory(step: int) -> np.ndarray:
             rows in an array.
 
     """
-    global start, stop
-    global skip_header
-
-    start = stop
-    stop += step
-
+    args['stop'] += step
     simulation.step(step)
-
     trajectory = np.genfromtxt(StringIO(buffer.getvalue()),
-                               skip_header=skip_header)
-    skip_header += len(trajectory)
-
+                               skip_header=args['skip_header'])
+    args['skip_header'] += len(trajectory)
     if trajectory.ndim == 1:
         return trajectory
     return trajectory.transpose()
 
 
+get_trajectory_args = {
+    'stop': 0,
+    'skip_header': 1,
+}
+
+
 try:
     msg = cr.run_length_control(
         get_trajectory=get_trajectory,
+        get_trajectory_args=get_trajectory_args,
         number_of_variables=2,
         initial_run_length=2000,
         run_length_factor=1.0,
