@@ -2,6 +2,7 @@
 
 from math import fabs, isclose
 import numpy as np
+from typing import Optional, Union
 
 from convergence._default import \
     _DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL, \
@@ -93,11 +94,11 @@ class UCLBase:
 
     def set_indices(
             self,
-            time_series_data: list,
+            time_series_data: Union[list[float], np.ndarray],
             *,
-            si: str = _DEFAULT_SI,
+            si: Union[str, float, int, None] = _DEFAULT_SI,
             fft: bool = _DEFAULT_FFT,
-            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> None:
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> None:
         r"""Set the indices.
 
         Args:
@@ -151,9 +152,9 @@ class UCLBase:
             self,
             time_series_data,
             *,
-            si: str = _DEFAULT_SI,
+            si: Union[str, float, int, None] = _DEFAULT_SI,
             fft: bool = _DEFAULT_FFT,
-            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> None:
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> None:
         r"""Set the si (statistical inefficiency).
 
         Args:
@@ -237,13 +238,13 @@ class UCLBase:
 
     def estimate_equilibration_length(
             self,
-            time_series_data: list,
+            time_series_data: Union[list[float], np.ndarray],
             *,
-            si: str = _DEFAULT_SI,
-            nskip: int = _DEFAULT_NSKIP,
+            si: Union[str, float, int, None] = _DEFAULT_SI,
+            nskip: Optional[int] = _DEFAULT_NSKIP,
             fft: bool = _DEFAULT_FFT,
-            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            ignore_end: int = _DEFAULT_IGNORE_END,
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
             number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
             # unused input parmeters in
             # estimate_equilibration_length interface
@@ -269,7 +270,7 @@ class UCLBase:
         return False, equilibration_index_estimate
 
     def ucl(self,
-            time_series_data: list,
+            time_series_data: Union[list[float], np.ndarray],
             *,
             confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
             equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
@@ -279,18 +280,19 @@ class UCLBase:
             scale: str = _DEFAULT_SCALE_METHOD,
             with_centering: bool = _DEFAULT_WITH_CENTERING,
             with_scaling: bool = _DEFAULT_WITH_SCALING,
-            test_size: int = _DEFAULT_TEST_SIZE,
-            train_size: int = _DEFAULT_TRAIN_SIZE,
-            population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si: str = _DEFAULT_SI,
-            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method: str = _DEFAULT_SAMPLE_METHOD) -> float:
+            test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+            train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+            population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si: Union[str, float, int, None] = _DEFAULT_SI,
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices: Union[list[int], np.ndarray,
+                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
         """Approximate the upper confidence limit of the mean."""
         return 1e100
 
     def ci(self,
-           time_series_data: list,
+           time_series_data: Union[list[float], np.ndarray],
            *,
            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
@@ -300,13 +302,14 @@ class UCLBase:
            scale: str = _DEFAULT_SCALE_METHOD,
            with_centering: bool = _DEFAULT_WITH_CENTERING,
            with_scaling: bool = _DEFAULT_WITH_SCALING,
-           test_size: int = _DEFAULT_TEST_SIZE,
-           train_size: int = _DEFAULT_TRAIN_SIZE,
-           population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-           si: str = _DEFAULT_SI,
-           minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-           uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-           sample_method: str = _DEFAULT_SAMPLE_METHOD) -> tuple((float, float)):
+           test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+           train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+           population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+           si: Union[str, float, int, None] = _DEFAULT_SI,
+           minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+           uncorrelated_sample_indices: Union[list[int], np.ndarray,
+                                              None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+           sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> tuple((float, float)):
         """Approximate the confidence interval of the mean."""
         self.upper_confidence_limit = self.ucl(
             time_series_data=time_series_data,
@@ -331,7 +334,7 @@ class UCLBase:
 
     def relative_half_width_estimate(
             self,
-            time_series_data: list,
+            time_series_data: Union[list[float], np.ndarray],
             *,
             confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
             equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
@@ -341,13 +344,14 @@ class UCLBase:
             scale: str = _DEFAULT_SCALE_METHOD,
             with_centering: bool = _DEFAULT_WITH_CENTERING,
             with_scaling: bool = _DEFAULT_WITH_SCALING,
-            test_size: int = _DEFAULT_TEST_SIZE,
-            train_size: int = _DEFAULT_TRAIN_SIZE,
-            population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si: str = _DEFAULT_SI,
-            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method: str = _DEFAULT_SAMPLE_METHOD) -> float:
+            test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+            train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+            population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si: Union[str, float, int, None] = _DEFAULT_SI,
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices: Union[list[int], np.ndarray,
+                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
         """Get the relative half width estimate."""
         self.upper_confidence_limit = self.ucl(
             time_series_data=time_series_data,

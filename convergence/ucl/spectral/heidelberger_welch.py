@@ -3,6 +3,7 @@
 from math import sqrt
 import numpy as np
 from numpy.linalg import pinv, norm, inv
+from typing import Optional, Union
 
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
@@ -305,13 +306,13 @@ class HeidelbergerWelch(UCLBase):
         return self.tm_1, self.tm_2, self.tm_3
 
     def ucl(self,
-            time_series_data: list,
+            time_series_data: Union[list[float], np.ndarray],
             *,
             confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
             heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
             fft: bool = _DEFAULT_FFT,
-            test_size: int = _DEFAULT_TEST_SIZE,
-            train_size: int = _DEFAULT_TRAIN_SIZE,
+            test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+            train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
             # unused input parmeters in
             # Heidelberger and Welch ucl interface
             batch_size: int = _DEFAULT_BATCH_SIZE,
@@ -319,11 +320,12 @@ class HeidelbergerWelch(UCLBase):
             scale: str = _DEFAULT_SCALE_METHOD,
             with_centering: bool = _DEFAULT_WITH_CENTERING,
             with_scaling: bool = _DEFAULT_WITH_SCALING,
-            population_standard_deviation: float = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si: str = _DEFAULT_SI,
-            minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method: str = _DEFAULT_SAMPLE_METHOD) -> float:
+            population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si: Union[str, float, int, None] = _DEFAULT_SI,
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices: Union[list[int], np.ndarray,
+                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
         Approximate an unbiased estimate of the upper confidence limit or
@@ -538,14 +540,14 @@ class HeidelbergerWelch(UCLBase):
 
 
 def heidelberger_welch_ucl(
-        time_series_data: list,
+        time_series_data: Union[list[float], np.ndarray],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
         fft: bool = _DEFAULT_FFT,
-        test_size: int = _DEFAULT_TEST_SIZE,
-        train_size: int = _DEFAULT_TRAIN_SIZE,
-        obj: HeidelbergerWelch = None) -> float:
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        obj: Optional[HeidelbergerWelch] = None) -> float:
     """Approximate the upper confidence limit of the mean."""
     heidelberger_welch = HeidelbergerWelch() if obj is None else obj
     upper_confidence_limit = heidelberger_welch.ucl(
@@ -560,14 +562,14 @@ def heidelberger_welch_ucl(
 
 
 def heidelberger_welch_ci(
-        time_series_data: list,
+        time_series_data: Union[list[float], np.ndarray],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
         fft: bool = _DEFAULT_FFT,
-        test_size: int = _DEFAULT_TEST_SIZE,
-        train_size: int = _DEFAULT_TRAIN_SIZE,
-        obj: HeidelbergerWelch = None) -> tuple((float, float)):
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        obj: Optional[HeidelbergerWelch] = None) -> tuple((float, float)):
     r"""Approximate the confidence interval of the mean.
 
     Args:
@@ -611,14 +613,14 @@ def heidelberger_welch_ci(
 
 
 def heidelberger_welch_relative_half_width_estimate(
-        time_series_data: list,
+        time_series_data: Union[list[float], np.ndarray],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
         fft: bool = _DEFAULT_FFT,
-        test_size: int = _DEFAULT_TEST_SIZE,
-        train_size: int = _DEFAULT_TRAIN_SIZE,
-        obj: HeidelbergerWelch = None) -> float:
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        obj: Optional[HeidelbergerWelch] = None) -> float:
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval
