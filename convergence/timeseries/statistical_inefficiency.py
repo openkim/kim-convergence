@@ -552,7 +552,7 @@ def integrated_auto_correlation_time(
         x: Union[np.ndarray, list[float]],
         y: Union[np.ndarray, list[float], None] = None,
         *,
-        si: Union[str, float, None] = _DEFAULT_SI,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Estimate the integrated auto-correlation time.

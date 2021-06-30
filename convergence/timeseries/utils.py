@@ -146,7 +146,7 @@ def uncorrelated_time_series_data_samples(
         si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Optional[np.ndarray] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        uncorrelated_sample_indices: Union[list[int], np.ndarray, None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> np.ndarray:
     r"""Get time series data at the sample_method uncorrelated_sample indices.
 
@@ -219,7 +219,7 @@ def time_series_data_uncorrelated_samples(
         si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Optional[np.ndarray] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
+        uncorrelated_sample_indices: Union[list[int], np.ndarray, None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
     r"""Return time series data at uncorrelated uncorrelated_sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
@@ -299,7 +299,7 @@ def time_series_data_uncorrelated_random_samples(
         si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Optional[np.ndarray] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
+        uncorrelated_sample_indices: Union[list[int], np.ndarray, None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
     r"""Retuen random data for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
@@ -387,7 +387,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
         si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Optional[np.ndarray] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
+        uncorrelated_sample_indices: Union[list[int], np.ndarray, None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
     """Retuen average value for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
