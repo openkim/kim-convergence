@@ -219,21 +219,20 @@ def _get_trajectory(get_trajectory: callable,
                     run_length: int,
                     ndim: int,
                     number_of_variables: int = 1,
-                    get_trajectory_args: tuple = ()) -> np.ndarray:
+                    get_trajectory_args: dict = {}) -> np.ndarray:
     if run_length == 0:
         return np.array([], dtype=np.float64)
 
-    if type(get_trajectory_args) in (list, tuple) and \
-            np.size(get_trajectory_args) > 0:
+    if type(get_trajectory_args) == dict and len(get_trajectory_args) > 0:
         try:
-            tsd = get_trajectory(step=run_length, *get_trajectory_args)
+            tsd = get_trajectory(run_length, get_trajectory_args)
         except:
             msg = 'failed to get the time-series data or do the '
             msg += 'simulation for {} number of steps.'.format(run_length)
             raise CVGError(msg)
     else:
         try:
-            tsd = get_trajectory(step=run_length)
+            tsd = get_trajectory(run_length)
         except:
             msg = 'failed to get the time-series data or do the '
             msg += 'simulationfor {} number of steps.'.format(run_length)
@@ -527,7 +526,7 @@ def _get_array_tolist(input_array: np.ndarray) -> list:
 
 def run_length_control(
     get_trajectory: callable,
-    get_trajectory_args: Optional(tuple) = None,
+    get_trajectory_args: Optional(dict) = None,
     *,
     number_of_variables: int = 1,
     initial_run_length: int = 10000,
@@ -574,8 +573,18 @@ def run_length_control(
     Note:
         ``get_trajectory`` is a callback function with a specific signature of
         ``get_trajectory(nstep: int) -> 1darray`` if we only have one variable
-        or ``get_trajectory(nstep: int) -> 2darray`` with the shape of
+        or
+        ``get_trajectory(nstep: int) -> 2darray`` with the shape of
         (number_of_variables, nstep)
+
+        To use extra arguments in the ``get_trajectory``, one can use the other
+        specific signature of
+        ``get_trajectory(nstep: int, args: dict) -> 1darray``
+        or
+        ``get_trajectory(nstep: int, args: dict) -> 2darray`` with the shape of
+        (number_of_variables, nstep)
+
+        where all the required variables can be pass thrugh the args dictionary.
 
         All the values returned from this function should be finite values,
         otherwise the code will stop wih error message explaining the issue.
@@ -583,18 +592,27 @@ def run_length_control(
         Examples:
 
         >>> rng = np.random.RandomState(12345)
-        >>> n = 100000
-        >>> data = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
-        >>> data_size = data.size
         >>> start = 0
         >>> stop = 0
         >>> def get_trajectory(step):
                 global start, stop
                 start = stop
-                if data_size < start + step:
-                    step = data_size - start
+                if 100000 < start + step:
+                    step = 100000 - start
                 stop += step
-                return data[start:stop]
+                data = np.ones(step) * 10 + (rng.random_sample(step) - 0.5)
+                return data
+
+        or,
+
+        >>> targs = {'start': 0, 'stop': 0}
+        >>> def get_trajectory(step, targs):
+                targs['start'] = targs['stop']
+                if 100000 < targs['start'] + step:
+                    step = 100000 - targs['start']
+                targs['stop'] += step
+                data = np.ones(step) * 10 + (rng.random_sample(step) - 0.5)
+                return data
 
     Then it continues drawing observations until some pre-specified level of
     absolute or relative precision has been reached.
@@ -730,8 +748,13 @@ def run_length_control(
                 all the values returned from this function should be finite
                 values, otherwise the code will stop wih error message
                 explaining the issue.
-        get_trajectory_args (tuple, optional): Extra arguments passed to the
-            get_trajectory function. (default: ())
+        get_trajectory_args (dict, optional): Extra arguments passed to the
+            get_trajectory function. (default: {})
+            To use this option, the dictionary may contain `start` and `stop`
+            keywords as well as other keywords which are needed in the
+            function.
+            ``get_trajectory(nstep, get_trajectory_args) -> 1darray``
+
         number_of_variables (int, optional): number of variables in the
             corresponding time-series data from get_trajectory callback
             function. (default: 1)
