@@ -65,12 +65,12 @@ class MinMaxScale():
 
     """
 
-    def __init__(self, *, feature_range=(0, 1)):
+    def __init__(self, *, feature_range: tuple((float, float)) = (0, 1)):
         if feature_range[0] >= feature_range[1]:
             msg = "Minimum of desired feature range must be smaller "
             msg += "than maximum. Got {}".format(str(feature_range))
             raise CVGError(msg)
-        self.feature_range = feature_range
+        self.feature_range_ = feature_range
         self.data_min_ = None
         self.data_max_ = None
         self.data_range_ = None
@@ -98,20 +98,21 @@ class MinMaxScale():
             msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
-        self.data_min = np.min(x)
-        self.data_max = np.max(x)
-        self.data_range = self.data_max - self.data_min
+        self.data_min_ = np.min(x)
+        self.data_max_ = np.max(x)
+        self.data_range_ = self.data_max_ - self.data_min_
 
-        if isclose(self.data_range, 0, abs_tol=_DEFAULT_ABS_TOL):
+        if isclose(self.data_range_, 0, abs_tol=_DEFAULT_ABS_TOL):
             msg = 'the data_range of the input array is almost zero within '
             msg += '{} precision numbers.'.format(
                 int(fabs(log10(_DEFAULT_ABS_TOL))))
             raise CVGError(msg)
 
         self.scale_ = \
-            (self.feature_range[1] - self.feature_range[0]) / self.data_range
+            (self.feature_range_[1] -
+             self.feature_range_[0]) / self.data_range_
 
-        self.min_ = self.feature_range[0] - self.data_min * self.scale_
+        self.min_ = self.feature_range_[0] - self.data_min_ * self.scale_
 
         scaled_x = x * self.scale_
         scaled_x += self.min_
@@ -141,7 +142,7 @@ def minmax_scale(x: np.ndarray,
                  *,
                  with_centering: bool = True,
                  with_scaling: bool = True,
-                 feature_range: tuple = (0, 1)) -> np.ndarray:
+                 feature_range: tuple((float, float)) = (0, 1)) -> np.ndarray:
     r"""Standardize/Transform a dataset by scaling it to a given range.
 
     This estimator scales and translates a dataset such that it is in the given
@@ -207,9 +208,12 @@ class TranslateScale():
 
     """
 
-    def __init__(self, *, with_centering=True, with_scaling=True):
-        self.with_centering = with_centering
-        self.with_scaling = with_scaling
+    def __init__(self,
+                 *,
+                 with_centering: bool = True,
+                 with_scaling: bool = True):
+        self.with_centering_ = with_centering
+        self.with_scaling_ = with_scaling
         self.center_ = None
         self.scale_ = None
 
@@ -234,14 +238,14 @@ class TranslateScale():
             msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
-        if self.with_centering:
+        if self.with_centering_:
             self.center_ = x[0]
             # Fluctuations
             scaled_x = x - self.center_
         else:
             scaled_x = np.array(x, copy=True)
 
-        if self.with_scaling:
+        if self.with_scaling_:
             self.scale_ = np.mean(scaled_x)
 
             if not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -264,13 +268,14 @@ class TranslateScale():
             msg += "to scale an array before trying to inverse it."
             raise CVGError(msg)
 
-        if self.with_scaling and not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
+        if self.with_scaling_ and not isclose(
+                self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
             x = np.array(x, copy=False)
             inverse_scaled_x = x * self.scale_
         else:
             inverse_scaled_x = np.array(x, copy=True)
 
-        if self.with_centering:
+        if self.with_centering_:
             inverse_scaled_x += self.center_
 
         return inverse_scaled_x
@@ -355,9 +360,12 @@ class StandardScale():
 
     """
 
-    def __init__(self, *, with_centering=True, with_scaling=True):
-        self.with_centering = with_centering
-        self.with_scaling = with_scaling
+    def __init__(self,
+                 *,
+                 with_centering: bool = True,
+                 with_scaling: bool = True):
+        self.with_centering_ = with_centering
+        self.with_scaling_ = with_scaling
         self.std_ = None
         self.mean_ = None
         self.mean_1 = None
@@ -379,7 +387,7 @@ class StandardScale():
             msg = 'x is not an array of one-dimension.'
             raise CVGError(msg)
 
-        if self.with_centering:
+        if self.with_centering_:
             self.mean_ = np.mean(x)
 
             # Fluctuations
@@ -405,7 +413,7 @@ class StandardScale():
         else:
             scaled_x = np.array(x, copy=True)
 
-        if self.with_scaling:
+        if self.with_scaling_:
             self.std_ = np.std(x)
 
             if not np.isfinite(self.std_):
@@ -416,7 +424,7 @@ class StandardScale():
             if not isclose(self.std_, 0, abs_tol=_DEFAULT_ABS_TOL):
                 scaled_x /= self.std_
 
-            if self.with_centering:
+            if self.with_centering_:
                 self.mean_2 = np.mean(scaled_x)
 
                 # If mean_2 is not 'close to zero', it comes from the fact that
@@ -448,7 +456,7 @@ class StandardScale():
             msg += "to scale an array before trying to inverse it."
             raise CVGError(msg)
 
-        if self.with_scaling:
+        if self.with_scaling_:
             x = np.array(x, copy=False)
             if self.mean_2 is not None:
                 inverse_scaled_x = x + self.mean_2
@@ -456,7 +464,7 @@ class StandardScale():
         else:
             inverse_scaled_x = np.array(x, copy=True)
 
-        if self.with_centering:
+        if self.with_centering_:
             if not isclose(self.mean_1, 0, abs_tol=_DEFAULT_ABS_TOL):
                 inverse_scaled_x += self.mean_1
             inverse_scaled_x += self.mean_
@@ -541,11 +549,11 @@ class RobustScale():
     """
 
     def __init__(self, *,
-                 with_centering=True,
-                 with_scaling=True,
-                 quantile_range=(25.0, 75.0)):
-        self.with_centering = with_centering
-        self.with_scaling = with_scaling
+                 with_centering: bool = True,
+                 with_scaling: bool = True,
+                 quantile_range: tuple((float, float)) = (25.0, 75.0)):
+        self.with_centering_ = with_centering
+        self.with_scaling_ = with_scaling
 
         if not isinstance(quantile_range, tuple) or \
                 not isinstance(quantile_range, list):
@@ -585,13 +593,13 @@ class RobustScale():
             msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
-        if self.with_centering:
+        if self.with_centering_:
             self.center_ = np.median(x)
             scaled_x = x - self.center_
         else:
             scaled_x = np.array(x, copy=True)
 
-        if self.with_scaling:
+        if self.with_scaling_:
             quantiles = np.percentile(x, self.quantile_range)
 
             self.scale_ = quantiles[1] - quantiles[0]
@@ -616,23 +624,24 @@ class RobustScale():
             msg += "to scale an array before trying to inverse it."
             raise CVGError(msg)
 
-        if self.with_scaling and not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
+        if self.with_scaling_ and not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
             x = np.array(x, copy=False)
             inverse_scaled_x = x * self.scale_
         else:
             inverse_scaled_x = np.array(x, copy=True)
 
-        if self.with_centering:
+        if self.with_centering_:
             inverse_scaled_x += self.center_
 
         return inverse_scaled_x
 
 
-def robust_scale(x: np.ndarray,
-                 *,
-                 with_centering: bool = True,
-                 with_scaling: bool = True,
-                 quantile_range: tuple = (25.0, 75.0)) -> np.ndarray:
+def robust_scale(
+        x: np.ndarray,
+        *,
+        with_centering: bool = True,
+        with_scaling: bool = True,
+        quantile_range: tuple((float, float)) = (25.0, 75.0)) -> np.ndarray:
     """Standardize a dataset.
 
     Standardize a dataset by centering to the median and component wise scale
