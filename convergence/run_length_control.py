@@ -5,6 +5,7 @@ import kim_edn
 from math import isclose, fabs
 import numpy as np
 import sys
+from typing import Optional, Union
 
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
@@ -44,22 +45,23 @@ __all__ = [
 ]
 
 
-def _convergence_message(number_of_variables: int,
-                         converged: bool,
-                         total_run_length: int,
-                         maximum_equilibration_step: int,
-                         equilibration_detected: bool,
-                         equilibration_step,
-                         confidence_coefficient: float,
-                         relative_accuracy: list,
-                         absolute_accuracy: list,
-                         upper_confidence_limit: list,
-                         upper_confidence_limit_method: str,
-                         relative_half_width_estimate: list,
-                         time_series_data_mean: list,
-                         time_series_data_std: list,
-                         effective_sample_size: list,
-                         minimum_number_of_independent_samples: int) -> dict:
+def _convergence_message(
+        number_of_variables: int,
+        converged: bool,
+        total_run_length: int,
+        maximum_equilibration_step: int,
+        equilibration_detected: bool,
+        equilibration_step: Union[int, np.ndarray],
+        confidence_coefficient: float,
+        relative_accuracy: Union[float, np.ndarray, None],
+        absolute_accuracy: Union[float, np.ndarray, None],
+        upper_confidence_limit: Union[float, np.ndarray],
+        upper_confidence_limit_method: str,
+        relative_half_width_estimate: Union[float, np.ndarray],
+        time_series_data_mean: Union[float, np.ndarray],
+        time_series_data_std: Union[float, np.ndarray],
+        effective_sample_size: Union[float, np.ndarray],
+        minimum_number_of_independent_samples: int) -> dict:
     """Create convergence message.
 
     Args:
@@ -95,8 +97,8 @@ def _convergence_message(number_of_variables: int,
             for each variable.
         effective_sample_size (float, or 1darray): the number of effective
             sample size.
-        minimum_number_of_independent_samples (int): the requested maximum
-            number of independent samples.
+        minimum_number_of_independent_samples (int): the minimum number of
+            requested independent samples.
 
     Returns:
         dict: convergence message
@@ -281,9 +283,10 @@ def _get_run_length(run_length: int,
     return run_length
 
 
-def _check_accuracy(number_of_variables: int,
-                    relative_accuracy: list,
-                    absolute_accuracy: list) -> None:
+def _check_accuracy(
+        number_of_variables: int,
+        relative_accuracy: Union[float, list[float], np.ndarray, None],
+        absolute_accuracy: Union[float, list[float], np.ndarray, None]) -> None:
     if number_of_variables == 1:
         if np.size(relative_accuracy) != 1:
             msg = 'For one variable, "relative_accuracy" must be a scalar '
@@ -317,11 +320,11 @@ def _check_accuracy(number_of_variables: int,
                           var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY)
 
 
-def _check_equilibration_step(equilibration_step,
+def _check_equilibration_step(equilibration_step: Union[int, list[int]],
                               maximum_equilibration_step: int,
                               maximum_run_length: int,
                               equilibration_detected: bool,
-                              time_series_data: np.ndarray,
+                              time_series_data: Union[list[float], np.ndarray],
                               dump_trajectory: bool,
                               dump_trajectory_fp) -> None:
     equilibration_step_array = np.array(equilibration_step, copy=False)
@@ -380,13 +383,14 @@ def _check_equilibration_step(equilibration_step,
     raise CVGError(msg)
 
 
-def _check_population(number_of_variables: int,
-                      population_mean,
-                      population_standard_deviation,
-                      population_cdf,
-                      population_args,
-                      population_loc,
-                      population_scale) -> None:
+def _check_population(
+        number_of_variables: int,
+        population_mean: Union[float, list[float], np.ndarray, None],
+        population_standard_deviation: Union[float, list[float], np.ndarray, None],
+        population_cdf: Union[str, list[str], None],
+        population_args: Union[tuple, list[tuple], None],
+        population_loc: Union[float, list[float], np.ndarray, None],
+        population_scale: Union[float, list[float], np.ndarray, None]) -> None:
 
     # Initialize
     if number_of_variables == 1:
@@ -507,7 +511,7 @@ def _check_population(number_of_variables: int,
                         raise CVGError(msg)
 
 
-def _get_array_tolist(input_array) -> list:
+def _get_array_tolist(input_array: np.ndarray) -> list:
     if input_array is not None:
         if isinstance(input_array, np.ndarray):
             input_array = input_array.tolist()
@@ -523,41 +527,42 @@ def _get_array_tolist(input_array) -> list:
 
 def run_length_control(
     get_trajectory: callable,
-    get_trajectory_args: tuple = (),
+    get_trajectory_args: Optional(tuple) = None,
     *,
     number_of_variables: int = 1,
     initial_run_length: int = 10000,
     run_length_factor: float = 1.0,
     maximum_run_length: int = 1000000,
-    maximum_equilibration_step: int = None,
-    minimum_number_of_independent_samples: int = None,
-    relative_accuracy: float = 0.1,
-    absolute_accuracy: float = 0.1,
-    population_mean: float = None,
-    population_standard_deviation: float = None,
-    population_cdf: str = None,
-    population_args: tuple = None,
-    population_loc: float = None,
-    population_scale: float = None,
+    maximum_equilibration_step: Optional(int) = None,
+    minimum_number_of_independent_samples: Optional(int) = None,
+    relative_accuracy: Union[float, list[float], np.ndarray, None] = 0.1,
+    absolute_accuracy: Union[float, list[float], np.ndarray, None] = 0.1,
+    population_mean: Union[float, list[float], np.ndarray, None] = None,
+    population_standard_deviation: Union[float,
+                                         list[float], np.ndarray, None] = None,
+    population_cdf: Union[str, list[str], None] = None,
+    population_args: Union[tuple, list[tuple], None] = None,
+    population_loc: Union[float, list[float], np.ndarray, None] = None,
+    population_scale: Union[float, list[float], np.ndarray, None] = None,
     # arguments used by different components
     confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
     confidence_interval_approximation_method: str = _DEFAULT_CONFIDENCE_INTERVAL_APPROXIMATION_METHOD,
     heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
     fft: bool = _DEFAULT_FFT,
-    test_size: int = _DEFAULT_TEST_SIZE,
-    train_size: int = _DEFAULT_TRAIN_SIZE,
+    test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+    train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
     batch_size: int = _DEFAULT_BATCH_SIZE,
     scale: str = _DEFAULT_SCALE_METHOD,
     with_centering: bool = _DEFAULT_WITH_CENTERING,
     with_scaling: bool = _DEFAULT_WITH_SCALING,
-    ignore_end: int = _DEFAULT_IGNORE_END,
+    ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
     number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
     si: str = _DEFAULT_SI,
     nskip: int = _DEFAULT_NSKIP,
     minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
     dump_trajectory: bool = False,
     dump_trajectory_fp: str = 'convergence_trajectory.edn',
-    fp=None,
+    fp: Optional(str) = None,
     fp_format: str = 'txt'
 ) -> str:
     r"""Control the length of the time series data from a simulation run.
