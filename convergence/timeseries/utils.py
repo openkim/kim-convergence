@@ -2,6 +2,7 @@
 
 import numpy as np
 from random import randint
+from typing import Optional, Union
 
 from .statistical_inefficiency import si_methods
 
@@ -26,11 +27,11 @@ SAMPLING_METHODS = ('uncorrelated', 'random', 'block_averaged')
 
 
 def time_series_data_si(
-        time_series_data: list,
+        time_series_data: Union[np.ndarray, list[float]],
         *,
-        si: str = _DEFAULT_SI,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     """Helper method to compute or return the statistical inefficiency value.
 
     Args:
@@ -89,11 +90,11 @@ def time_series_data_si(
 
 
 def uncorrelated_time_series_data_sample_indices(
-        time_series_data: list,
+        time_series_data: Union[np.ndarray, list[float]],
         *,
-        si: str = _DEFAULT_SI,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> np.ndarray:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> np.ndarray:
     r"""Return indices of uncorrelated subsamples of the time series data.
 
     Return indices of the uncorrelated uncorrelated_sample of the time series data.
@@ -140,13 +141,13 @@ def uncorrelated_time_series_data_sample_indices(
 
 
 def uncorrelated_time_series_data_samples(
-        time_series_data: list,
+        time_series_data: Union[np.ndarray, list[float]],
         *,
-        si: str = _DEFAULT_SI,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-        sample_method: str = _DEFAULT_SAMPLE_METHOD) -> np.ndarray:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Optional[np.ndarray] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> np.ndarray:
     r"""Get time series data at the sample_method uncorrelated_sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
@@ -213,12 +214,12 @@ def uncorrelated_time_series_data_samples(
 
 
 def time_series_data_uncorrelated_samples(
-        time_series_data: list,
+        time_series_data: Union[np.ndarray, list[float]],
         *,
-        si: str = _DEFAULT_SI,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Optional[np.ndarray] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
     r"""Return time series data at uncorrelated uncorrelated_sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
@@ -293,12 +294,12 @@ def time_series_data_uncorrelated_samples(
 
 
 def time_series_data_uncorrelated_random_samples(
-        time_series_data: list,
+        time_series_data: Union[np.ndarray, list[float]],
         *,
-        si: str = _DEFAULT_SI,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Optional[np.ndarray] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
     r"""Retuen random data for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
@@ -381,12 +382,12 @@ def time_series_data_uncorrelated_random_samples(
 
 
 def time_series_data_uncorrelated_block_averaged_samples(
-        time_series_data: list,
+        time_series_data: Union[np.ndarray, list[float]],
         *,
-        si: str = _DEFAULT_SI,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: np.ndarray = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Optional[np.ndarray] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
     """Retuen average value for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
