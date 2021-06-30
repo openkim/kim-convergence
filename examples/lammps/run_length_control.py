@@ -1,35 +1,36 @@
 """Run length control for LAMMPS."""
 
 import numpy as np
+from typing import Optional
 from lammps import lammps
 import convergence as cr
 
 # Initial run length
-INITIAL_RUN_LENGTH = 1000
+INITIAL_RUN_LENGTH: int = 1000
 # Run length increasing factor
-RUN_LENGTH_FACTOR = 1
+RUN_LENGTH_FACTOR: float = 1
 # The maximum run length represents a cost constraint.
-MAX_RUN_LENGTH = 1000 * INITIAL_RUN_LENGTH
+MAX_RUN_LENGTH: int = 1000 * INITIAL_RUN_LENGTH
 # The maximum number of steps as an equilibration hard limit. If the
 # algorithm finds equilibration_step greater than this limit it will fail.
 # For the default None, the function is using `maximum_run_length // 2` as
 # the maximum equilibration step.
-MAX_EQUILIBRATION_STEP = None
+MAX_EQUILIBRATION_STEP: Optional[int] = None
 # Maximum number of independent samples.
-MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES = 300
+MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES: int = 300
 # A relative half-width requirement or the accuracy parameter. Target value
 # for the ratio of halfwidth to sample mean. If n_variables > 1,
 # relative_accuracy can be a scalar to be used for all variables or a 1darray
 # of values of size n_variables.
-RELATIVE_ACCURACY = 0.01
-ABSOLUTE_ACCURACY = None
+RELATIVE_ACCURACY: float = 0.01
+ABSOLUTE_ACCURACY: Optional[float] = None
 # Probability (or confidence interval) and must be between 0.0 and 1.0, and
 # represents the confidence for calculation of relative halfwidths estimation.
-CONFIDENCE = 0.95
+CONFIDENCE: float = 0.95
 # Method to use for approximating the upper confidence limit of the mean.
-UCL_METHOD = 'uncorrelated_sample'
+UCL_METHOD: str = 'uncorrelated_sample'
 # if ``True``, dump the final trajectory data to a file.
-DUMP_TRAJECTORY = False
+DUMP_TRAJECTORY: bool = False
 
 
 # Do not modify
@@ -62,14 +63,8 @@ _PREFIX_NAME = {
     'f_': 'fix',
 }
 
-# Do not modify
-start = 0
-stop = 0
-nstep = 0
-initialstep = 0
 
-
-def run_length_control(lmpptr, nevery: int, *argv):
+def run_length_control(lmpptr, nevery: int, *argv) -> None:
     """Control the length of the LAMMPS simulation run.
 
     Arguments:
@@ -375,7 +370,7 @@ def run_length_control(lmpptr, nevery: int, *argv):
                 population_scale = {}
 
             try:
-                population_scale_var = float(arg)
+                value = float(arg)
             except ValueError:
                 value = lmp.extract_variable(arg, None, 0)
 
@@ -413,30 +408,27 @@ def run_length_control(lmpptr, nevery: int, *argv):
             msg += 'used for the run length control at the same time.'
             raise cr.CVGError(msg)
 
-    def get_trajectory(step: int) -> np.ndarray:
+    def get_trajectory(step: int, args: dict) -> np.ndarray:
         """Get trajectory vector or array of values.
 
         Arguments:
             step (int): number of steps to run the simulation.
+            args (dict): arguments necessary to get the trajectory.
 
         Returns:
             ndarray: trajectory
-                for a single specified value, the values are stored as
-                a vector. For multiple specified values, they are stored as
-                rows in an array.
+                for a single specified value, the values are stored as a
+                vector. For multiple specified values, they are stored as rows
+                in an array.
 
         """
-        global start, stop
-        global nstep, initialstep
+        args['stop'] += step
 
-        start = stop
-        stop += step
-
-        finalstep = stop // nevery * nevery
-        if finalstep > stop:
+        finalstep = args['stop'] // nevery * nevery
+        if finalstep > args['stop']:
             finalstep -= nevery
-        ncountmax = (finalstep - initialstep) // nevery + 1
-        initialstep = finalstep + nevery
+        ncountmax = (finalstep - args['initialstep']) // nevery + 1
+        args['initialstep'] = finalstep + nevery
 
         # Run the LAMMPS simulation
         cmd = 'run {}'.format(step)
@@ -454,7 +446,7 @@ def run_length_control(lmpptr, nevery: int, *argv):
                 if var_name in ctrl_map:
                     lb, ub = ctrl_map[var_name]
                     if lb and ub:
-                        for _nstep in range(nstep, nstep + ncountmax):
+                        for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
                             if val <= lb or val >= ub:
                                 msg = 'the "{}"\'s value = '.format(var_name)
@@ -464,7 +456,7 @@ def run_length_control(lmpptr, nevery: int, *argv):
                                 raise cr.CVGError(msg)
                         continue
                     elif lb:
-                        for _nstep in range(nstep, nstep + ncountmax):
+                        for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
                             if val <= lb:
                                 msg = 'the "{}"\'s value = '.format(var_name)
@@ -474,7 +466,7 @@ def run_length_control(lmpptr, nevery: int, *argv):
                                 raise cr.CVGError(msg)
                         continue
                     elif ub:
-                        for _nstep in range(nstep, nstep + ncountmax):
+                        for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
                             if val >= ub:
                                 msg = 'the "{}"\'s value = '.format(var_name)
@@ -484,28 +476,27 @@ def run_length_control(lmpptr, nevery: int, *argv):
                                 raise cr.CVGError(msg)
                         continue
                 else:
-                    for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
+                    for i, _nstep in enumerate(range(args['nstep'], args['nstep'] + ncountmax)):
                         trajectory[_j, i] = \
                             lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
                     _j += 1
-            nstep += ncountmax
+            args['nstep'] += ncountmax
             if _ndim == 1:
                 return trajectory.squeeze()
             return trajectory
 
         if argument_counter == 1:
             trajectory = np.empty((ncountmax), dtype=np.float64)
-            for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
+            for i, _nstep in enumerate(range(args['nstep'], args['nstep'] + ncountmax)):
                 trajectory[i] = lmp.extract_fix('cvg_fix', 0, 1, _nstep, 0)
-            nstep += ncountmax
+            args['nstep'] += ncountmax
             return trajectory
 
         trajectory = np.empty((argument_counter, ncountmax), dtype=np.float64)
         for j in range(argument_counter):
-            for i, _nstep in enumerate(range(nstep, nstep + ncountmax)):
-                trajectory[j, i] = \
-                    lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
-        nstep += ncountmax
+            for i, _nstep in enumerate(range(args['nstep'], args['nstep'] + ncountmax)):
+                trajectory[j, i] = lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
+        args['nstep'] += ncountmax
         return trajectory
 
     p_mean = None
@@ -579,9 +570,16 @@ def run_length_control(lmpptr, nevery: int, *argv):
                 else:
                     p_scale.append(None)
 
+    get_trajectory_args = {
+        'stop': 0,
+        'nstep': 0,
+        'initialstep': 0,
+    }
+
     try:
         msg = cr.run_length_control(
             get_trajectory=get_trajectory,
+            get_trajectory_args=get_trajectory_args,
             number_of_variables=argument_counter - len(ctrl_map),
             initial_run_length=INITIAL_RUN_LENGTH,
             run_length_factor=RUN_LENGTH_FACTOR,
