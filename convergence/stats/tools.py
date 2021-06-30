@@ -6,6 +6,7 @@ Helper functions for time series analysis.
 from bisect import bisect_left
 from math import isclose, pi, sqrt
 import numpy as np
+from typing import Optional, Union
 
 from convergence._default import _DEFAULT_ABS_TOL
 from convergence import CVGError
@@ -142,7 +143,9 @@ def get_fft_optimal_size(input_size: int) -> int:
     return optimal_size
 
 
-def auto_covariance(x: np.ndarray, *, fft: bool = False) -> np.ndarray:
+def auto_covariance(x: Union[np.ndarray, list[float]],
+                    *,
+                    fft: bool = False) -> np.ndarray:
     """Calculate biased auto-covariance estimates.
 
     Compute auto-covariance estimates for every lag for the input array.
@@ -217,7 +220,10 @@ def auto_covariance(x: np.ndarray, *, fft: bool = False) -> np.ndarray:
     return autocov
 
 
-def cross_covariance(x: np.ndarray, y: np.ndarray, *, fft: bool = False) -> np.ndarray:
+def cross_covariance(x: Union[np.ndarray, list[float]],
+                     y: Union[np.ndarray, list[float], None],
+                     *,
+                     fft: bool = False) -> np.ndarray:
     """Calculate the biased cross covariance estimate between two time series.
 
     Calculate the cross covariance between two time series for every lag for
@@ -296,7 +302,10 @@ def cross_covariance(x: np.ndarray, y: np.ndarray, *, fft: bool = False) -> np.n
     return crosscov
 
 
-def auto_correlate(x: np.ndarray, *, nlags: int = None, fft: bool = False) -> np.ndarray:
+def auto_correlate(x: Union[np.ndarray, list[float]],
+                   *,
+                   nlags: Optional[int] = None,
+                   fft: bool = False) -> np.ndarray:
     """Calculate the auto-correlation function.
 
     Calculate the auto-correlation function for `nlags` lag for the input
@@ -344,7 +353,11 @@ def auto_correlate(x: np.ndarray, *, nlags: int = None, fft: bool = False) -> np
     return autocor
 
 
-def cross_correlate(x: np.ndarray, y: np.ndarray, *, nlags: int = None, fft: bool = False) -> np.ndarray:
+def cross_correlate(x: Union[np.ndarray, list[float]],
+                    y: Union[np.ndarray, list[float], None],
+                    *,
+                    nlags: Optional[int] = None,
+                    fft: bool = False) -> np.ndarray:
     """Calculate the cross-correlation function.
 
     Calculate the cross-correlation function for `nlags` lag for the input
@@ -403,7 +416,10 @@ def cross_correlate(x: np.ndarray, y: np.ndarray, *, nlags: int = None, fft: boo
     return crosscorr
 
 
-def modified_periodogram(x: np.ndarray, *, fft: bool = False, with_mean: bool = False) -> np.ndarray:
+def modified_periodogram(x: Union[np.ndarray, list[float]],
+                         *,
+                         fft: bool = False,
+                         with_mean: bool = False) -> np.ndarray:
     r"""Compute a modified periodogram to estimate the power spectrum.
 
     Estimate the power spectrum using a modified periodogram.
@@ -504,7 +520,10 @@ def modified_periodogram(x: np.ndarray, *, fft: bool = False, with_mean: bool = 
     return result
 
 
-def periodogram(x: np.ndarray, *, fft: bool = False, with_mean: bool = False) -> np.ndarray:
+def periodogram(x: Union[np.ndarray, list[float]],
+                *,
+                fft: bool = False,
+                with_mean: bool = False) -> np.ndarray:
     r"""Compute a periodogram to estimate the power spectrum.
 
     Args:
@@ -553,7 +572,7 @@ def periodogram(x: np.ndarray, *, fft: bool = False, with_mean: bool = False) ->
     return result
 
 
-def summary(x: np.ndarray):
+def summary(x: Union[np.ndarray, list[float]]):
     """Return the summary of the time series data.
 
     Args:
@@ -586,7 +605,7 @@ def summary(x: np.ndarray):
         x_3rd_quartile
 
 
-def int_power(x: np.ndarray, exponent: int) -> np.ndarray:
+def int_power(x: Union[np.ndarray, list[float]], exponent: int) -> np.ndarray:
     """Array elements raised to the power exponent.
 
     Args:
@@ -634,7 +653,7 @@ def int_power(x: np.ndarray, exponent: int) -> np.ndarray:
     return 1.0 / yy
 
 
-def moment(x: np.ndarray, *, moment: int = 1) -> float:
+def moment(x: Union[np.ndarray, list[float]], *, moment: int = 1) -> float:
     r"""Calculates the nth moment about the mean for a sample.
 
     Args:
@@ -684,7 +703,7 @@ def moment(x: np.ndarray, *, moment: int = 1) -> float:
     return dx_power_moment.mean()
 
 
-def skew(x: np.ndarray, *, bias: bool = False) -> float:
+def skew(x: Union[np.ndarray, list[float]], *, bias: bool = False) -> float:
     r"""Compute the time series data set skewness.
 
     ``skewness`` is a measure of the asymmetry of the probability distribution
