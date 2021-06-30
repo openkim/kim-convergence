@@ -1,6 +1,7 @@
 """Utility module."""
 
 import numpy as np
+from typing import Union
 
 from ._default import \
     _DEFAULT_TEST_SIZE, \
@@ -15,11 +16,12 @@ __all__ = [
 ]
 
 
-def validate_split(*,
-                   n_samples: int,
-                   train_size: int,
-                   test_size: int,
-                   default_test_size: float = None) -> tuple((int, int)):
+def validate_split(
+    *,
+    n_samples: int,
+    train_size: Union[int, float, None],
+    test_size: Union[int, float, None],
+        default_test_size: Union[int, float, None] = None) -> tuple((int, int)):
     r"""Validate test/train sizes.
 
     Helper function to validate the test/train sizes to be meaningful with
@@ -118,12 +120,13 @@ def validate_split(*,
     return n_train, n_test
 
 
-def train_test_split(time_series_data: np.ndarray,
-                     *,
-                     train_size: int = _DEFAULT_TRAIN_SIZE,
-                     test_size: int = _DEFAULT_TEST_SIZE,
-                     seed: int = _DEFAULT_SEED,
-                     default_test_size: float = 0.1) -> tuple((np.ndarray, np.ndarray)):
+def train_test_split(
+        time_series_data: Union[list[float], np.ndarray],
+        *,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        seed: Union[int, np.random.RandomState, None] = _DEFAULT_SEED,
+        default_test_size: Union[int, float, None] = 0.1) -> tuple((np.ndarray, np.ndarray)):
     r"""Split time_series_data into random train and test indices.
 
     Args:
