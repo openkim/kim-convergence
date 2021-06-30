@@ -7,6 +7,7 @@ Note:
 """
 import numpy as np
 from scipy.stats import distributions, kruskal, kstest, levene, wilcoxon
+from typing import Optional, Union
 
 from convergence._default import _DEFAULT_CONFIDENCE_COEFFICIENT
 from convergence import CVGError, CVGSampleSizeError, cvg_check
@@ -341,7 +342,8 @@ ContinuousDistributionsArgumentRequirement = {
 }
 
 
-def check_population_cdf_args(population_cdf: str, population_args: tuple):
+def check_population_cdf_args(population_cdf: Optional[str],
+                              population_args: tuple):
     """Check the input population_cdf and population_args for correctness.
 
     Args:
@@ -392,10 +394,10 @@ def check_population_cdf_args(population_cdf: str, population_args: tuple):
         raise CVGError(msg)
 
 
-def get_distribution_stats(population_cdf: str,
+def get_distribution_stats(population_cdf: Optional[str],
                            population_args: tuple,
-                           population_loc: float,
-                           population_scale: float):
+                           population_loc: Optional[float],
+                           population_scale: Optional[float]):
     """Get the distribution stats from its name.
 
     The stats include, Median, Mean, Variance, and Standard deviation of the
@@ -427,12 +429,13 @@ def get_distribution_stats(population_cdf: str,
     return median, mean, var, std
 
 
-def ks_test(time_series_data: np.ndarray,
-            population_cdf: str,
-            population_args: tuple,
-            population_loc: float,
-            population_scale: float,
-            significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+def ks_test(
+        time_series_data: Union[np.ndarray, list[float]],
+        population_cdf: Optional[str],
+        population_args: tuple,
+        population_loc: Optional[float],
+        population_scale: Optional[float],
+        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Kolmogorov-Smirnov test for goodness of fit.
 
     Note:
@@ -504,11 +507,11 @@ def ks_test(time_series_data: np.ndarray,
 
 
 def levene_test(
-        time_series_data: np.ndarray,
-        population_cdf: str,
+        time_series_data: Union[np.ndarray, list[float]],
+        population_cdf: Optional[str],
         population_args: tuple,
-        population_loc: float,
-        population_scale: float,
+        population_loc: Optional[float],
+        population_scale: Optional[float],
         significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Perform modified Levene test for equal variances.
 
@@ -642,11 +645,11 @@ def levene_test(
 
 
 def wilcoxon_test(
-        time_series_data: np.ndarray,
-        population_cdf: str,
+        time_series_data: Union[np.ndarray, list[float]],
+        population_cdf: Optional[str],
         population_args: tuple,
-        population_loc: float,
-        population_scale: float,
+        population_loc: Optional[float],
+        population_scale: Optional[float],
         significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Calculate the Wilcoxon signed-rank test.
 
@@ -732,11 +735,11 @@ def wilcoxon_test(
 
 
 def kruskal_test(
-        time_series_data: np.ndarray,
-        population_cdf: str,
+        time_series_data: Union[np.ndarray, list[float]],
+        population_cdf: Optional[str],
         population_args: tuple,
-        population_loc: float,
-        population_scale: float,
+        population_loc: Optional[float],
+        population_scale: Optional[float],
         significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
     """Kruskal-Wallis H-test for independent samples.
 
