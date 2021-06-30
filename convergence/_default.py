@@ -1,6 +1,5 @@
 r"""Convergence package default values."""
 
-from typing import Optional
 
 _DEFAULT_ABS_TOL: float = 1e-18
 _DEFAULT_REL_TOL: float = 1e-09
@@ -14,16 +13,16 @@ _DEFAULT_FFT: bool = True
 _DEFAULT_SCALE_METHOD: str = 'translate_scale'
 _DEFAULT_WITH_CENTERING: bool = False
 _DEFAULT_WITH_SCALING: bool = False
-_DEFAULT_TEST_SIZE: Optional[int] = None
-_DEFAULT_TRAIN_SIZE: Optional[int] = None
-_DEFAULT_POPULATION_STANDARD_DEVIATION: Optional[float] = None
-_DEFAULT_SI: Optional[str] = None
-_DEFAULT_MINIMUM_CORRELATION_TIME: Optional[int] = None
-_DEFAULT_UNCORRELATED_SAMPLE_INDICES: Optional(list) = None
-_DEFAULT_SAMPLE_METHOD: Optional[str] = None
-_DEFAULT_IGNORE_END: Optional[int] = None
+_DEFAULT_TEST_SIZE: None = None
+_DEFAULT_TRAIN_SIZE: None = None
+_DEFAULT_POPULATION_STANDARD_DEVIATION: None = None
+_DEFAULT_SI: None = None
+_DEFAULT_MINIMUM_CORRELATION_TIME: None = None
+_DEFAULT_UNCORRELATED_SAMPLE_INDICES: None = None
+_DEFAULT_SAMPLE_METHOD: None = None
+_DEFAULT_IGNORE_END: None = None
 _DEFAULT_NSKIP: int = 1
-_DEFAULT_SEED: Optional[int] = None
+_DEFAULT_SEED: None = None
 _DEFAULT_NUMBER_OF_CORES: int = 1
 _DEFAULT_MIN_ABSOLUTE_ACCURACY: float = 1e-4
 
