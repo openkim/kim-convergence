@@ -6,6 +6,7 @@ uncorrelated configurations.
 
 from math import isclose
 import numpy as np
+from typing import Optional, Union
 
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
@@ -31,11 +32,11 @@ __all__ = [
 
 
 def statistical_inefficiency(
-        x: list,
-        y: list = None,
+        x: Union[np.ndarray, list[float]],
+        y: Union[np.ndarray, list[float], None] = None,
         *,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Compute the statistical inefficiency.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
@@ -161,11 +162,11 @@ def statistical_inefficiency(
 
 
 def geyer_r_statistical_inefficiency(
-        x: list,
-        y: list = None,
+        x: Union[np.ndarray, list[float]],
+        y: Union[np.ndarray, list[float], None] = None,
         *,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the Geyer’s [8]_, [9]_ initial
@@ -322,11 +323,11 @@ def geyer_r_statistical_inefficiency(
 
 
 def geyer_split_r_statistical_inefficiency(
-        x: list,
-        y: list = None,
+        x: Union[np.ndarray, list[float]],
+        y: Union[np.ndarray, list[float], None] = None,
         *,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the split-r method of
@@ -388,11 +389,11 @@ def geyer_split_r_statistical_inefficiency(
 
 
 def geyer_split_statistical_inefficiency(
-        x: list,
-        y: list = None,
+        x: Union[np.ndarray, list[float]],
+        y: Union[np.ndarray, list[float], None] = None,
         *,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Compute the statistical inefficiency.
 
     Computes the effective sample size. The value returned is the minimum of
@@ -548,12 +549,12 @@ si_methods = {
 
 
 def integrated_auto_correlation_time(
-        x: list,
-        y: list = None,
+        x: Union[np.ndarray, list[float]],
+        y: Union[np.ndarray, list[float], None] = None,
         *,
-        si: str = _DEFAULT_SI,
+        si: Union[str, float, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Estimate the integrated auto-correlation time.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
