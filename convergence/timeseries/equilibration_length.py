@@ -10,7 +10,7 @@ uncorrelated samples.
 from joblib import Parallel, delayed
 from math import isclose
 import numpy as np
-from typing import Union
+from typing import Optional, Union
 
 from .statistical_inefficiency import si_methods
 from convergence._default import \
@@ -38,7 +38,7 @@ def _estimate_equilibration_length(
         t: int,
         si_func: callable,
         fft: bool,
-        minimum_correlation_time: int) -> tuple((float, float, int)):
+        minimum_correlation_time: Optional[int]) -> tuple((float, float, int)):
     # slice a numpy array, the memory is shared
     # between the slice and the original
     x = time_series_data[t:]
@@ -55,10 +55,10 @@ def _estimate_equilibration_length(
 def estimate_equilibration_length(
         time_series_data: Union[np.ndarray, list[float]],
         *,
-        si: str = _DEFAULT_SI,
-        nskip: int = _DEFAULT_NSKIP,
+        si: Optional[str] = _DEFAULT_SI,
+        nskip: Optional[int] = _DEFAULT_NSKIP,
         fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
         ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
         number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
         # unused input parmeters in Time series module
