@@ -532,8 +532,8 @@ def run_length_control(
     initial_run_length: int = 10000,
     run_length_factor: float = 1.0,
     maximum_run_length: int = 1000000,
-    maximum_equilibration_step: Optional(int) = None,
-    minimum_number_of_independent_samples: Optional(int) = None,
+    maximum_equilibration_step: Optional[int] = None,
+    minimum_number_of_independent_samples: Optional[int] = None,
     relative_accuracy: Union[float, list[float], np.ndarray, None] = 0.1,
     absolute_accuracy: Union[float, list[float], np.ndarray, None] = 0.1,
     population_mean: Union[float, list[float], np.ndarray, None] = None,
@@ -561,7 +561,7 @@ def run_length_control(
     minimum_correlation_time: int = _DEFAULT_MINIMUM_CORRELATION_TIME,
     dump_trajectory: bool = False,
     dump_trajectory_fp: str = 'convergence_trajectory.edn',
-    fp: Optional(str) = None,
+    fp: Optional[str] = None,
     fp_format: str = 'txt'
 ) -> str:
     r"""Control the length of the time series data from a simulation run.
