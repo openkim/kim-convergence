@@ -7,7 +7,7 @@ Note:
 """
 import numpy as np
 from scipy.stats import distributions, kruskal, kstest, levene, wilcoxon
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from convergence._default import _DEFAULT_CONFIDENCE_COEFFICIENT
 from convergence import CVGError, CVGSampleSizeError, cvg_check
@@ -430,7 +430,7 @@ def get_distribution_stats(population_cdf: Optional[str],
 
 
 def ks_test(
-        time_series_data: Union[np.ndarray, list[float]],
+        time_series_data: Union[np.ndarray, List[float]],
         population_cdf: Optional[str],
         population_args: tuple,
         population_loc: Optional[float],
@@ -507,7 +507,7 @@ def ks_test(
 
 
 def levene_test(
-        time_series_data: Union[np.ndarray, list[float]],
+        time_series_data: Union[np.ndarray, List[float]],
         population_cdf: Optional[str],
         population_args: tuple,
         population_loc: Optional[float],
@@ -645,7 +645,7 @@ def levene_test(
 
 
 def wilcoxon_test(
-        time_series_data: Union[np.ndarray, list[float]],
+        time_series_data: Union[np.ndarray, List[float]],
         population_cdf: Optional[str],
         population_args: tuple,
         population_loc: Optional[float],
@@ -735,7 +735,7 @@ def wilcoxon_test(
 
 
 def kruskal_test(
-        time_series_data: Union[np.ndarray, list[float]],
+        time_series_data: Union[np.ndarray, List[float]],
         population_cdf: Optional[str],
         population_args: tuple,
         population_loc: Optional[float],

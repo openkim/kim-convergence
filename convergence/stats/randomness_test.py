@@ -2,7 +2,7 @@
 
 from math import sqrt
 import numpy as np
-from typing import Union
+from typing import Union, List
 
 from .normal_dist import normal_interval
 from convergence import CVGError, CVGSampleSizeError, cvg_check
@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 
-def randomness_test(x: Union[np.ndarray, list[float]],
+def randomness_test(x: Union[np.ndarray, List[float]],
                     significance_level: float) -> bool:
     """Testing for independence of observations.
 

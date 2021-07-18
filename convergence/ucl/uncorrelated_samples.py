@@ -2,7 +2,7 @@
 
 from math import sqrt
 import numpy as np
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
@@ -49,14 +49,14 @@ class UncorrelatedSamples(UCLBase):
         self.name = 'uncorrelated_sample'
 
     def ucl(self,
-            time_series_data: Union[list[float], np.ndarray],
+            time_series_data: Union[np.ndarray, List[float]],
             *,
             confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
             population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
             si: Union[str, float, int, None] = _DEFAULT_SI,
             fft: bool = _DEFAULT_FFT,
             minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: Union[list[int], np.ndarray,
+            uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                                None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
             sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
             # unused input parmeters in
@@ -204,14 +204,14 @@ class UncorrelatedSamples(UCLBase):
 
 
 def uncorrelated_samples_ucl(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
         si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Union[list[int], np.ndarray,
+        uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                            None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
         obj: Optional[UncorrelatedSamples] = None) -> float:
@@ -230,14 +230,14 @@ def uncorrelated_samples_ucl(
 
 
 def uncorrelated_samples_ci(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
         si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Union[list[int], np.ndarray,
+        uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                            None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
         obj: Optional[UncorrelatedSamples] = None) -> tuple((float, float)):
@@ -318,14 +318,14 @@ def uncorrelated_samples_ci(
 
 
 def uncorrelated_samples_relative_half_width_estimate(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
         si: Union[str, float, int, None] = _DEFAULT_SI,
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Union[list[int], np.ndarray,
+        uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                            None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
         obj: Optional[UncorrelatedSamples] = None) -> float:

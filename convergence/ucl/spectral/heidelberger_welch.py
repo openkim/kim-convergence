@@ -3,7 +3,7 @@
 from math import sqrt
 import numpy as np
 from numpy.linalg import pinv, norm, inv
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
@@ -306,7 +306,7 @@ class HeidelbergerWelch(UCLBase):
         return self.tm_1, self.tm_2, self.tm_3
 
     def ucl(self,
-            time_series_data: Union[list[float], np.ndarray],
+            time_series_data: Union[np.ndarray, List[float]],
             *,
             confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
             heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
@@ -323,7 +323,7 @@ class HeidelbergerWelch(UCLBase):
             population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
             si: Union[str, float, int, None] = _DEFAULT_SI,
             minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: Union[list[int], np.ndarray,
+            uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                                None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
             sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
         r"""Approximate the upper confidence limit of the mean.
@@ -540,7 +540,7 @@ class HeidelbergerWelch(UCLBase):
 
 
 def heidelberger_welch_ucl(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
@@ -562,7 +562,7 @@ def heidelberger_welch_ucl(
 
 
 def heidelberger_welch_ci(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
@@ -613,7 +613,7 @@ def heidelberger_welch_ci(
 
 
 def heidelberger_welch_relative_half_width_estimate(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,

@@ -10,7 +10,7 @@ uncorrelated samples.
 from joblib import Parallel, delayed
 from math import isclose
 import numpy as np
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from .statistical_inefficiency import si_methods
 from convergence._default import \
@@ -53,7 +53,7 @@ def _estimate_equilibration_length(
 
 
 def estimate_equilibration_length(
-        time_series_data: Union[np.ndarray, list[float]],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         si: Optional[str] = _DEFAULT_SI,
         nskip: Optional[int] = _DEFAULT_NSKIP,

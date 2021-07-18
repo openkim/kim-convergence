@@ -1,7 +1,7 @@
 """Utility module."""
 
 import numpy as np
-from typing import Union
+from typing import Union, List
 
 from ._default import \
     _DEFAULT_TEST_SIZE, \
@@ -121,7 +121,7 @@ def validate_split(
 
 
 def train_test_split(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
         test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,

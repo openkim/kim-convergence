@@ -2,7 +2,7 @@
 
 from math import ceil, floor, fabs, sqrt
 import numpy as np
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
@@ -114,7 +114,7 @@ class N_SKART(UCLBase):
 
     def estimate_equilibration_length(
         self,
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         # unused input parmeters in N-SKART UCL module
         # estimate_equilibration_length interface
@@ -295,7 +295,7 @@ class N_SKART(UCLBase):
         return False, time_series_data_size
 
     def ucl(self,
-            time_series_data: Union[list[float], np.ndarray],
+            time_series_data: Union[np.ndarray, List[float]],
             *,
             confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
             equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
@@ -312,7 +312,7 @@ class N_SKART(UCLBase):
             population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
             si: Union[str, float, int, None] = _DEFAULT_SI,
             minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: Union[list[int], np.ndarray,
+            uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                                None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
             sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
         r"""Approximate the upper confidence limit of the mean.
@@ -464,7 +464,7 @@ class N_SKART(UCLBase):
 
 
 def n_skart_ucl(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
@@ -481,7 +481,7 @@ def n_skart_ucl(
 
 
 def n_skart_ci(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
@@ -516,7 +516,7 @@ def n_skart_ci(
 
 
 def n_skart_relative_half_width_estimate(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,

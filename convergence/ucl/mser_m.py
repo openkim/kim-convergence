@@ -2,7 +2,7 @@
 
 from math import isclose, sqrt
 import numpy as np
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from convergence._default import \
     _DEFAULT_ABS_TOL, \
@@ -41,13 +41,14 @@ __all__ = [
 ]
 
 
-def mser_m(time_series_data: Union[list[float], np.ndarray],
-           *,
-           batch_size: int = _DEFAULT_BATCH_SIZE,
-           scale: str = _DEFAULT_SCALE_METHOD,
-           with_centering: bool = _DEFAULT_WITH_CENTERING,
-           with_scaling: bool = _DEFAULT_WITH_SCALING,
-           ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END) -> tuple((bool, int)):
+def mser_m(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING,
+        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END) -> tuple((bool, int)):
     r"""Determine the truncation point using marginal standard error rules.
 
     Determine the truncation point using marginal standard error rules
@@ -260,7 +261,7 @@ class MSER_m(UCLBase):
 
     def estimate_equilibration_length(
         self,
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
@@ -298,7 +299,7 @@ class MSER_m(UCLBase):
         return False, truncate_index
 
     def ucl(self,
-            time_series_data: Union[list[float], np.ndarray],
+            time_series_data: Union[np.ndarray, List[float]],
             *,
             confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
             batch_size: int = _DEFAULT_BATCH_SIZE,
@@ -315,7 +316,7 @@ class MSER_m(UCLBase):
             population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
             si: Union[str, float, int, None] = _DEFAULT_SI,
             minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: Union[list[int], np.ndarray,
+            uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                                None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
             sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
         r"""Approximate the upper confidence limit of the mean [20]_.
@@ -390,14 +391,15 @@ class MSER_m(UCLBase):
         return self.upper_confidence_limit
 
 
-def mser_m_ucl(time_series_data: Union[list[float], np.ndarray],
-               *,
-               confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-               batch_size: int = _DEFAULT_BATCH_SIZE,
-               scale: str = _DEFAULT_SCALE_METHOD,
-               with_centering: bool = _DEFAULT_WITH_CENTERING,
-               with_scaling: bool = _DEFAULT_WITH_SCALING,
-               obj: Optional[MSER_m] = None) -> float:
+def mser_m_ucl(
+    time_series_data: Union[np.ndarray, List[float]],
+    *,
+    confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+    batch_size: int = _DEFAULT_BATCH_SIZE,
+    scale: str = _DEFAULT_SCALE_METHOD,
+    with_centering: bool = _DEFAULT_WITH_CENTERING,
+    with_scaling: bool = _DEFAULT_WITH_SCALING,
+        obj: Optional[MSER_m] = None) -> float:
     """Approximate the upper confidence limit of the mean."""
     mser = MSER_m() if obj is None else obj
     upper_confidence_limit = mser.ucl(
@@ -410,14 +412,15 @@ def mser_m_ucl(time_series_data: Union[list[float], np.ndarray],
     return upper_confidence_limit
 
 
-def mser_m_ci(time_series_data: Union[list[float], np.ndarray],
-              *,
-              confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-              batch_size: int = _DEFAULT_BATCH_SIZE,
-              scale: str = _DEFAULT_SCALE_METHOD,
-              with_centering: bool = _DEFAULT_WITH_CENTERING,
-              with_scaling: bool = _DEFAULT_WITH_SCALING,
-              obj: Optional[MSER_m] = None) -> tuple((float, float)):
+def mser_m_ci(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING,
+        obj: Optional[MSER_m] = None) -> tuple((float, float)):
     r"""Approximate the confidence interval of the mean [20]_.
 
     Args:
@@ -451,7 +454,7 @@ def mser_m_ci(time_series_data: Union[list[float], np.ndarray],
 
 
 def mser_m_relative_half_width_estimate(
-        time_series_data: Union[list[float], np.ndarray],
+        time_series_data: Union[np.ndarray, List[float]],
         *,
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
         batch_size: int = _DEFAULT_BATCH_SIZE,

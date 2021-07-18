@@ -6,7 +6,7 @@ Helper functions for time series analysis.
 from bisect import bisect_left
 from math import isclose, pi, sqrt
 import numpy as np
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from convergence._default import _DEFAULT_ABS_TOL
 from convergence import CVGError
@@ -143,7 +143,7 @@ def get_fft_optimal_size(input_size: int) -> int:
     return optimal_size
 
 
-def auto_covariance(x: Union[np.ndarray, list[float]],
+def auto_covariance(x: Union[np.ndarray, List[float]],
                     *,
                     fft: bool = False) -> np.ndarray:
     """Calculate biased auto-covariance estimates.
@@ -220,8 +220,8 @@ def auto_covariance(x: Union[np.ndarray, list[float]],
     return autocov
 
 
-def cross_covariance(x: Union[np.ndarray, list[float]],
-                     y: Union[np.ndarray, list[float], None],
+def cross_covariance(x: Union[np.ndarray, List[float]],
+                     y: Union[np.ndarray, List[float], None],
                      *,
                      fft: bool = False) -> np.ndarray:
     """Calculate the biased cross covariance estimate between two time series.
@@ -302,7 +302,7 @@ def cross_covariance(x: Union[np.ndarray, list[float]],
     return crosscov
 
 
-def auto_correlate(x: Union[np.ndarray, list[float]],
+def auto_correlate(x: Union[np.ndarray, List[float]],
                    *,
                    nlags: Optional[int] = None,
                    fft: bool = False) -> np.ndarray:
@@ -353,8 +353,8 @@ def auto_correlate(x: Union[np.ndarray, list[float]],
     return autocor
 
 
-def cross_correlate(x: Union[np.ndarray, list[float]],
-                    y: Union[np.ndarray, list[float], None],
+def cross_correlate(x: Union[np.ndarray, List[float]],
+                    y: Union[np.ndarray, List[float], None],
                     *,
                     nlags: Optional[int] = None,
                     fft: bool = False) -> np.ndarray:
@@ -416,7 +416,7 @@ def cross_correlate(x: Union[np.ndarray, list[float]],
     return crosscorr
 
 
-def modified_periodogram(x: Union[np.ndarray, list[float]],
+def modified_periodogram(x: Union[np.ndarray, List[float]],
                          *,
                          fft: bool = False,
                          with_mean: bool = False) -> np.ndarray:
@@ -520,7 +520,7 @@ def modified_periodogram(x: Union[np.ndarray, list[float]],
     return result
 
 
-def periodogram(x: Union[np.ndarray, list[float]],
+def periodogram(x: Union[np.ndarray, List[float]],
                 *,
                 fft: bool = False,
                 with_mean: bool = False) -> np.ndarray:
@@ -572,7 +572,7 @@ def periodogram(x: Union[np.ndarray, list[float]],
     return result
 
 
-def summary(x: Union[np.ndarray, list[float]]):
+def summary(x: Union[np.ndarray, List[float]]):
     """Return the summary of the time series data.
 
     Args:
@@ -605,7 +605,8 @@ def summary(x: Union[np.ndarray, list[float]]):
         x_3rd_quartile
 
 
-def int_power(x: Union[np.ndarray, list[float]], exponent: int) -> np.ndarray:
+def int_power(x: Union[np.ndarray, List[float]],
+              exponent: int) -> np.ndarray:
     """Array elements raised to the power exponent.
 
     Args:
@@ -653,7 +654,9 @@ def int_power(x: Union[np.ndarray, list[float]], exponent: int) -> np.ndarray:
     return 1.0 / yy
 
 
-def moment(x: Union[np.ndarray, list[float]], *, moment: int = 1) -> float:
+def moment(x: Union[np.ndarray, List[float]],
+           *,
+           moment: int = 1) -> float:
     r"""Calculates the nth moment about the mean for a sample.
 
     Args:
@@ -703,7 +706,9 @@ def moment(x: Union[np.ndarray, list[float]], *, moment: int = 1) -> float:
     return dx_power_moment.mean()
 
 
-def skew(x: Union[np.ndarray, list[float]], *, bias: bool = False) -> float:
+def skew(x: Union[np.ndarray, List[float]],
+         *,
+         bias: bool = False) -> float:
     r"""Compute the time series data set skewness.
 
     ``skewness`` is a measure of the asymmetry of the probability distribution

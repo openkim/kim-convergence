@@ -1,7 +1,7 @@
 """Outlier module."""
 
 import numpy as np
-from typing import Union
+from typing import Union, List
 
 from .err import CVGError
 
@@ -54,7 +54,7 @@ r"""Methods to decide what are outliers in the data.
 """
 
 
-def outlier_test(x: Union[list[float], np.ndarray],
+def outlier_test(x: Union[np.ndarray, List[float]],
                  outlier_method: str = 'iqr') -> np.ndarray:
     r"""Test to detect what are outliers in the data.
 
