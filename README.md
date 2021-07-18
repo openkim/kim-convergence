@@ -34,6 +34,9 @@ Welcome to **Convergence** module!
 The convergence package is designed to help in automatic equilibration
 detection & run length control.
 
+## Document
+
+<span style="font-size:300%; color:red; font-weight: 900;">!WORK IN PROGRESS!</span>
 
 ## Installing convergence
 
