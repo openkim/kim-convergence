@@ -1,8 +1,14 @@
 """Utility module."""
 
 import numpy as np
+from typing import Union, List
 
+from ._default import \
+    _DEFAULT_TEST_SIZE, \
+    _DEFAULT_TRAIN_SIZE, \
+    _DEFAULT_SEED
 from convergence import CVGError
+
 
 __all__ = [
     'validate_split',
@@ -10,14 +16,19 @@ __all__ = [
 ]
 
 
-def validate_split(*, n_samples, train_size, test_size, default_test_size=None):
+def validate_split(
+    *,
+    n_samples: int,
+    train_size: Union[int, float, None],
+    test_size: Union[int, float, None],
+        default_test_size: Union[int, float, None] = None) -> tuple((int, int)):
     r"""Validate test/train sizes.
 
     Helper function to validate the test/train sizes to be meaningful with
     regard to the size of the data (n_samples)
 
     Args:
-        n_samples (int): total number of sampl points
+        n_samples (int): total number of sample points
         train_size (int, float, or None): train size
         test_size (int, float, or None): test size
         default_test_size (int, float, or None, optional): default test size.
@@ -109,11 +120,13 @@ def validate_split(*, n_samples, train_size, test_size, default_test_size=None):
     return n_train, n_test
 
 
-def train_test_split(time_series_data, *,
-                     train_size=None,
-                     test_size=None,
-                     seed=None,
-                     default_test_size=0.1):
+def train_test_split(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        seed: Union[int, np.random.RandomState, None] = _DEFAULT_SEED,
+        default_test_size: Union[int, float, None] = 0.1) -> tuple((np.ndarray, np.ndarray)):
     r"""Split time_series_data into random train and test indices.
 
     Args:
@@ -125,7 +138,7 @@ def train_test_split(time_series_data, *,
             include in the test split. If ``int``, represents the absolute
             number of test samples. If ``None``, the value is set to the
             complement of the train size. If ``train_size`` is also None, it
-            will be set to ``default_test_size``. (default: None)
+            will be set to ``default_test_size``. (default: 0.1)
         train_size (int, float, or None, optional): if ``float``, should be
             between 0.0 and 1.0 and represent the proportion of the dataset to
             include in the train split. If ``int``, represents the absolute

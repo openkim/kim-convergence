@@ -2,14 +2,17 @@
 
 import numpy as np
 from random import randint
+from typing import Optional, Union, List
 
-from convergence import \
-    CVGError, \
-    statistical_inefficiency, \
-    r_statistical_inefficiency, \
-    split_r_statistical_inefficiency, \
-    split_statistical_inefficiency, \
-    si_methods
+from .statistical_inefficiency import si_methods
+
+from convergence import CVGError
+from convergence._default import \
+    _DEFAULT_SI, \
+    _DEFAULT_FFT, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
+    _DEFAULT_SAMPLE_METHOD
 
 __all__ = [
     'time_series_data_si',
@@ -23,11 +26,12 @@ __all__ = [
 SAMPLING_METHODS = ('uncorrelated', 'random', 'block_averaged')
 
 
-def time_series_data_si(time_series_data,
-                        *,
-                        si=None,
-                        fft=True,
-                        minimum_correlation_time=None):
+def time_series_data_si(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     """Helper method to compute or return the statistical inefficiency value.
 
     Args:
@@ -62,7 +66,7 @@ def time_series_data_si(time_series_data,
         try:
             si_value = si_func(
                 time_series_data,
-                fft=(len(time_series_data) > 30 and fft),
+                fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
         except CVGError:
             msg = 'Failed to compute the statistical inefficiency '
@@ -86,14 +90,14 @@ def time_series_data_si(time_series_data,
 
 
 def uncorrelated_time_series_data_sample_indices(
-        time_series_data,
+        time_series_data: Union[np.ndarray, List[float]],
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None):
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> np.ndarray:
     r"""Return indices of uncorrelated subsamples of the time series data.
 
-    Return indices of the uncorrelated subsample of the time series data.
+    Return indices of the uncorrelated uncorrelated_sample of the time series data.
     Subsample a correlated timeseries to extract an effectively
     uncorrelated dataset. If si (statistical inefficiency) is not provided
     it will be computed.
@@ -137,14 +141,15 @@ def uncorrelated_time_series_data_sample_indices(
 
 
 def uncorrelated_time_series_data_samples(
-        time_series_data,
+        time_series_data: Union[np.ndarray, List[float]],
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None,
-        sample_method=None):
-    r"""Get time series data at the sample_method subsample indices.
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Union[np.ndarray, List[int],
+                                           None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> np.ndarray:
+    r"""Get time series data at the sample_method uncorrelated_sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
     dataset. If si (statistical inefficiency) is not provided it will be
@@ -168,8 +173,8 @@ def uncorrelated_time_series_data_samples(
             (default: None)
 
     Returns:
-        1darray: subsample of the time series data.
-            time series data at uncorrelated subsample indices.
+        1darray: uncorrelated_sample of the time series data.
+            time series data at uncorrelated uncorrelated_sample indices.
 
     """
     if sample_method is None:
@@ -189,7 +194,7 @@ def uncorrelated_time_series_data_samples(
         return time_series_data_uncorrelated_samples(
             time_series_data=time_series_data,
             si=si,
-            fft=(len(time_series_data) > 30 and fft),
+            fft=fft,
             minimum_correlation_time=minimum_correlation_time,
             uncorrelated_sample_indices=uncorrelated_sample_indices)
 
@@ -197,26 +202,27 @@ def uncorrelated_time_series_data_samples(
         return time_series_data_uncorrelated_random_samples(
             time_series_data=time_series_data,
             si=si,
-            fft=(len(time_series_data) > 30 and fft),
+            fft=fft,
             minimum_correlation_time=minimum_correlation_time,
             uncorrelated_sample_indices=uncorrelated_sample_indices)
 
     return time_series_data_uncorrelated_block_averaged_samples(
         time_series_data=time_series_data,
         si=si,
-        fft=(len(time_series_data) > 30 and fft),
+        fft=fft,
         minimum_correlation_time=minimum_correlation_time,
         uncorrelated_sample_indices=uncorrelated_sample_indices)
 
 
 def time_series_data_uncorrelated_samples(
-        time_series_data,
+        time_series_data: Union[np.ndarray, List[float]],
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None):
-    r"""Return time series data at uncorrelated subsample indices.
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Union[np.ndarray, List[int],
+                                           None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
+    r"""Return time series data at uncorrelated uncorrelated_sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
     dataset. If si (statistical inefficiency) is not provided it will be
@@ -241,8 +247,8 @@ def time_series_data_uncorrelated_samples(
             (default: None)
 
     Returns:
-        1darray: subsample of the time series data.
-            time series data at uncorrelated subsample indices.
+        1darray: uncorrelated_sample of the time series data.
+            time series data at uncorrelated uncorrelated_sample indices.
 
     """
     time_series_data = np.array(time_series_data, copy=False)
@@ -257,7 +263,7 @@ def time_series_data_uncorrelated_samples(
             indices = uncorrelated_time_series_data_sample_indices(
                 time_series_data=time_series_data,
                 si=si,
-                fft=(time_series_data.size > 30 and fft),
+                fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
         except CVGError:
             msg = 'Failed to compute the indices of uncorrelated '
@@ -275,26 +281,28 @@ def time_series_data_uncorrelated_samples(
     try:
         uncorrelated_samples = time_series_data[indices]
     except IndexError:
-        mask = indices >= time_series_data.size
+        time_series_data_size = time_series_data.size
+        mask = indices >= time_series_data_size
         wrong_indices = np.where(mask)
         msg = 'Index = {' if len(wrong_indices[0]) == 1 else 'Indices = {'
         msg += ', '.join(map(str, indices[wrong_indices]))
         msg += '} is out ' if len(wrong_indices[0]) == 1 else '} are out '
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
-        msg += "{}".format(time_series_data.size)
+        msg += "{}".format(time_series_data_size)
         raise CVGError(msg)
 
     return uncorrelated_samples
 
 
 def time_series_data_uncorrelated_random_samples(
-        time_series_data,
+        time_series_data: Union[np.ndarray, List[float]],
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None):
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Union[np.ndarray, List[int],
+                                           None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
     r"""Retuen random data for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
@@ -318,7 +326,7 @@ def time_series_data_uncorrelated_random_samples(
             (default: None)
 
     Returns:
-        1darray: subsample of the time series data.
+        1darray: uncorrelated_sample of the time series data.
             random data for each block after blocking the time series data.
 
     """
@@ -334,7 +342,7 @@ def time_series_data_uncorrelated_random_samples(
             indices = uncorrelated_time_series_data_sample_indices(
                 time_series_data=time_series_data,
                 si=si,
-                fft=(time_series_data.size > 30 and fft),
+                fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
         except CVGError:
             msg = 'Failed to compute the indices of uncorrelated '
@@ -349,14 +357,17 @@ def time_series_data_uncorrelated_random_samples(
             msg += 'an array of one-dimension.'
             raise CVGError(msg)
 
-    wrong_indices = np.where(indices >= time_series_data.size)
+    time_series_data_size = time_series_data.size
+
+    wrong_indices = np.where(indices >= time_series_data_size)
+
     if len(wrong_indices[0]) > 0:
         msg = 'Index = {' if len(wrong_indices[0]) == 1 else 'Indices = {'
         msg += ', '.join(map(str, indices[wrong_indices]))
         msg += '} is out ' if len(wrong_indices[0]) == 1 else '} are out '
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
-        msg += "{}".format(time_series_data.size)
+        msg += "{}".format(time_series_data_size)
         raise CVGError(msg)
 
     random_samples = np.empty(indices.size, dtype=time_series_data.dtype)
@@ -374,12 +385,13 @@ def time_series_data_uncorrelated_random_samples(
 
 
 def time_series_data_uncorrelated_block_averaged_samples(
-        time_series_data,
+        time_series_data: Union[np.ndarray, List[float]],
         *,
-        si=None,
-        fft=True,
-        minimum_correlation_time=None,
-        uncorrelated_sample_indices=None):
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Union[np.ndarray, List[int],
+                                           None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
     """Retuen average value for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
@@ -404,7 +416,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
             (default: None)
 
     Returns:
-        1darray: subsample of the time series data.
+        1darray: uncorrelated_sample of the time series data.
             average value for each block after blocking the time series
             data.
 
@@ -421,7 +433,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
             indices = uncorrelated_time_series_data_sample_indices(
                 time_series_data=time_series_data,
                 si=si,
-                fft=(time_series_data.size > 30 and fft),
+                fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
         except CVGError:
             msg = 'Failed to compute the indices of uncorrelated '
@@ -436,14 +448,17 @@ def time_series_data_uncorrelated_block_averaged_samples(
             msg += 'an array of one-dimension.'
             raise CVGError(msg)
 
-    wrong_indices = np.where(indices >= time_series_data.size)
+    time_series_data_size = time_series_data.size
+
+    wrong_indices = np.where(indices >= time_series_data_size)
+
     if len(wrong_indices[0]) > 0:
         msg = 'Index = {' if len(wrong_indices[0]) == 1 else 'Indices = {'
         msg += ', '.join(map(str, indices[wrong_indices]))
         msg += '} is out ' if len(wrong_indices[0]) == 1 else '} are out '
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
-        msg += "{}".format(time_series_data.size)
+        msg += "{}".format(time_series_data_size)
         raise CVGError(msg)
 
     block_averaged_samples = \

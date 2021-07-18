@@ -43,7 +43,7 @@ from copy import deepcopy
 from math import fabs
 
 from .zero_rc import ZERO_RC
-from convergence.err import CVGError
+from convergence import CVGError
 
 __all__ = [
     'ZERO_RC_BOUNDS',
@@ -60,8 +60,8 @@ class ZERO_RC_BOUNDS():
                  rel_step: float,
                  step_mul: float,
                  *,
-                 abs_tol=1.0e-50,
-                 rel_tol=1.0e-8):
+                 abs_tol: float = 1.0e-50,
+                 rel_tol: float = 1.0e-8):
         """Initialize parameters.
 
         Args:

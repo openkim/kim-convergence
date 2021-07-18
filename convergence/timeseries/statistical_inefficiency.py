@@ -1,4 +1,4 @@
-"""Statistical inefficiency module.
+"""Time series statistical inefficiency module.
 
 The statistical inefficiency is the limiting number of steps to obtain
 uncorrelated configurations.
@@ -6,23 +6,37 @@ uncorrelated configurations.
 
 from math import isclose
 import numpy as np
+from typing import Optional, Union, List
 
-from .err import CVGError
-from .stats import auto_covariance, auto_correlate, cross_correlate
+from convergence._default import \
+    _DEFAULT_ABS_TOL, \
+    _DEFAULT_FFT, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_SI
+from convergence import \
+    auto_covariance, \
+    auto_correlate, \
+    cross_correlate, \
+    CVGError, \
+    CVGSampleSizeError
+
 
 __all__ = [
     'statistical_inefficiency',
-    'r_statistical_inefficiency',
-    'split_r_statistical_inefficiency',
-    'split_statistical_inefficiency',
+    'geyer_r_statistical_inefficiency',
+    'geyer_split_r_statistical_inefficiency',
+    'geyer_split_statistical_inefficiency',
     'integrated_auto_correlation_time',
     'si_methods',
 ]
 
 
-def statistical_inefficiency(x, y=None, *,
-                             fft=False,
-                             minimum_correlation_time=None):
+def statistical_inefficiency(
+        x: Union[np.ndarray, List[float]],
+        y: Union[np.ndarray, List[float], None] = None,
+        *,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Compute the statistical inefficiency.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
@@ -38,6 +52,13 @@ def statistical_inefficiency(x, y=None, *,
     :math:`C\left(t\right)` is the normalized fluctuation auto-correlation
     function of the observable :math:`x`
 
+    Note:
+        The behavior is updated. Suppose the time series data is an array of
+        (constant) numbers with standard deviation close to zero within
+        `abs_tol=1e-18`, where `abs(a) <= max(1e-9 * abs(a), abs_tol)`.
+        In that case, this function returns the statistical inefficiency as the
+        size of the time series data array.
+
     Args:
         x (array_like, 1d): time series data.
         y (array_like, 1d, optional): time series data.
@@ -45,7 +66,7 @@ def statistical_inefficiency(x, y=None, *,
             timeseries x and y will be estimated instead of the
             auto-correlation of timeseries x. (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+            preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): minimum amount of correlation
             function to compute. The algorithm terminates after computing the
             correlation time out to minimum_correlation_time when the
@@ -70,7 +91,7 @@ def statistical_inefficiency(x, y=None, *,
     if x_size < 2:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
 
     # minimum amount of correlation function to compute
     if not isinstance(minimum_correlation_time, int):
@@ -83,6 +104,8 @@ def statistical_inefficiency(x, y=None, *,
         msg = 'minimum_correlation_time must be a positive `int`.'
         raise CVGError(msg)
 
+    fft = fft and x_size > 30
+
     if y is None or y is x:
         # Special case if timeseries is constant.
         _std = np.std(x)
@@ -92,8 +115,8 @@ def statistical_inefficiency(x, y=None, *,
             msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
-        if isclose(_std, 0, abs_tol=1e-14):
-            return 1.0
+        if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
+            return x_size
 
         del _std
 
@@ -138,33 +161,23 @@ def statistical_inefficiency(x, y=None, *,
 # .. [13] Gelman et al. BDA (2014) Formula 11.8
 
 
-def r_statistical_inefficiency(x, y=None, *,
-                               fft=False,
-                               minimum_correlation_time=None):
+def geyer_r_statistical_inefficiency(
+        x: Union[np.ndarray, List[float]],
+        y: Union[np.ndarray, List[float], None] = None,
+        *,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the Geyer’s [8]_, [9]_ initial
     monotone sequence criterion.
 
-    Args:
-        x (array_like, 1d): time series data. Using this method, statistical
-            inefficiency can not be estimated with less than four data points.
-        y (array_like, 1d, optional): time series data. If it is passed to this
-            function, the cross-correlation of timeseries x and y will be
-            estimated instead of the auto-correlation of timeseries x.
-            (default: None)
-        fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
-        minimum_correlation_time (int, optional): minimum amount of correlation
-            function to compute. The algorithm terminates after computing the
-            correlation time out to minimum_correlation_time when the
-            correlation function first goes negative. (default: None)
-
-    Returns:
-        float: estimated statistical inefficiency.
-            :math:`si >= 1` is the estimated statistical inefficiency
-            (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
-            :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
+    Note:
+        The behavior is updated. Suppose the time series data is an array of
+        (constant) numbers with standard deviation close to zero within
+        `abs_tol=1e-18`, where `abs(a) <= max(1e-9 * abs(a), abs_tol)`.
+        In that case, this function returns the statistical inefficiency as the
+        size of the time series data array.
 
     Note:
         The effective sample size is computed by:
@@ -188,6 +201,26 @@ def r_statistical_inefficiency(x, y=None, *,
         uses Geyer's initial monotone sequence criterion (Geyer, 1992 [8]_;
         Geyer, 2011 [9]_).
 
+    Args:
+        x (array_like, 1d): time series data. Using this method, statistical
+            inefficiency can not be estimated with less than four data points.
+        y (array_like, 1d, optional): time series data. If it is passed to this
+            function, the cross-correlation of timeseries x and y will be
+            estimated instead of the auto-correlation of timeseries x.
+            (default: None)
+        fft (bool, optional): if ``True``, use FFT convolution. FFT should be
+            preferred for long time series. (default: True)
+        minimum_correlation_time (int, optional): minimum amount of correlation
+            function to compute. The algorithm terminates after computing the
+            correlation time out to minimum_correlation_time when the
+            correlation function first goes negative. (default: None)
+
+    Returns:
+        float: estimated statistical inefficiency.
+            :math:`si >= 1` is the estimated statistical inefficiency
+            (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
+            :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
+
     References:
         .. [8] Geyer, Charles J. (1992). "Practical Markov Chain Monte Carlo."
                Statistical Science, 473–83.
@@ -210,7 +243,9 @@ def r_statistical_inefficiency(x, y=None, *,
     if x_size < 4:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
+
+    fft = fft and x_size > 30
 
     if y is None or y is x:
         # Special case if timeseries is constant.
@@ -221,8 +256,8 @@ def r_statistical_inefficiency(x, y=None, *,
             msg += 'array which is non-finite or not-number.'
             raise CVGError(msg)
 
-        if isclose(_std, 0, abs_tol=1e-14):
-            return 1.0
+        if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
+            return x_size
 
         del _std
 
@@ -287,30 +322,16 @@ def r_statistical_inefficiency(x, y=None, *,
     return max(1.0, si)
 
 
-def split_r_statistical_inefficiency(x, y=None, *,
-                                     fft=False,
-                                     minimum_correlation_time=None):
+def geyer_split_r_statistical_inefficiency(
+        x: Union[np.ndarray, List[float]],
+        y: Union[np.ndarray, List[float], None] = None,
+        *,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the split-r method of
     Geyer’s [8]_, [9]_ initial monotone sequence criterion.
-
-    Args:
-        x (array_like, 1d): time series data.
-            Using this method, statistical inefficiency can not be estimated
-            with less than eight data points.
-        fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
-        minimum_correlation_time (int, optional): minimum amount of correlation
-            function to compute. The algorithm terminates after computing the
-            correlation time out to minimum_correlation_time when the
-            correlation function first goes negative. (default: None)
-
-    Returns:
-        float: estimated statistical inefficiency.
-            :math:`si >= 1` is the estimated statistical inefficiency
-            (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
-            :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
 
     Note:
         The effective sample size is computed by:
@@ -334,6 +355,23 @@ def split_r_statistical_inefficiency(x, y=None, *,
         uses Geyer's initial monotone sequence criterion (Geyer, 1992 [8]_;
         Geyer, 2011 [9]_).
 
+    Args:
+        x (array_like, 1d): time series data.
+            Using this method, statistical inefficiency can not be estimated
+            with less than eight data points.
+        fft (bool, optional): if ``True``, use FFT convolution. FFT should be
+            preferred for long time series. (default: True)
+        minimum_correlation_time (int, optional): minimum amount of correlation
+            function to compute. The algorithm terminates after computing the
+            correlation time out to minimum_correlation_time when the
+            correlation function first goes negative. (default: None)
+
+    Returns:
+        float: estimated statistical inefficiency.
+            :math:`si >= 1` is the estimated statistical inefficiency
+            (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
+            :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
+
     """
     if y is not None:
         msg = 'The split-r method, splits the x time-series data '
@@ -345,14 +383,17 @@ def split_r_statistical_inefficiency(x, y=None, *,
     if x_size < 8:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
     x_size //= 2
-    return r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
+    return geyer_r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
 
 
-def split_statistical_inefficiency(x, y=None, *,
-                                   fft=False,
-                                   minimum_correlation_time=None):
+def geyer_split_statistical_inefficiency(
+        x: Union[np.ndarray, List[float]],
+        y: Union[np.ndarray, List[float], None] = None,
+        *,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Compute the statistical inefficiency.
 
     Computes the effective sample size. The value returned is the minimum of
@@ -362,10 +403,17 @@ def split_statistical_inefficiency(x, y=None, *,
         Note that the effective sample size can not be estimated with less than
         four samples.
 
+    Note:
+        The behavior is updated. Suppose the time series data is an array of
+        (constant) numbers with standard deviation close to zero within
+        `abs_tol=1e-18`, where `abs(a) <= max(1e-9 * abs(a), abs_tol)`.
+        In that case, this function returns the statistical inefficiency as the
+        size of the time series data array.
+
     Args:
         x (array_like, 1d): time series data.
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+            preferred for long time series. (default: True)
 
     Returns:
         float: estimated statistical inefficiency.
@@ -388,9 +436,7 @@ def split_statistical_inefficiency(x, y=None, *,
     if x_size < 8:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGError(msg)
-
-    x_size //= 2
+        raise CVGSampleSizeError(msg)
 
     # Special case if timeseries is constant.
     _std = np.std(x)
@@ -400,13 +446,17 @@ def split_statistical_inefficiency(x, y=None, *,
         msg += 'array which is non-finite or not-number.'
         raise CVGError(msg)
 
-    if isclose(_std, 0, abs_tol=1e-14):
-        return 1.0
+    if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
+        return x_size
 
     del _std
 
-    acov_1 = auto_covariance(x[:x_size], fft=True)
-    acov_2 = auto_covariance(x[x_size:2 * x_size], fft=True)
+    x_size //= 2
+
+    fft = fft and x_size > 30
+
+    acov_1 = auto_covariance(x[:x_size], fft=fft)
+    acov_2 = auto_covariance(x[x_size:2 * x_size], fft=fft)
 
     chain_mean_1 = np.mean(x[:x_size])
     chain_mean_2 = np.mean(x[x_size:2 * x_size])
@@ -492,16 +542,19 @@ def split_statistical_inefficiency(x, y=None, *,
 
 si_methods = {
     'statistical_inefficiency': statistical_inefficiency,
-    'r_statistical_inefficiency': r_statistical_inefficiency,
-    'split_r_statistical_inefficiency': split_r_statistical_inefficiency,
-    'split_statistical_inefficiency': split_statistical_inefficiency,
+    'geyer_r_statistical_inefficiency': geyer_r_statistical_inefficiency,
+    'geyer_split_r_statistical_inefficiency': geyer_split_r_statistical_inefficiency,
+    'geyer_split_statistical_inefficiency': geyer_split_statistical_inefficiency,
 }
 
 
-def integrated_auto_correlation_time(x, y=None, *,
-                                     si=None,
-                                     fft=False,
-                                     minimum_correlation_time=None):
+def integrated_auto_correlation_time(
+        x: Union[np.ndarray, List[float]],
+        y: Union[np.ndarray, List[float], None] = None,
+        *,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
     r"""Estimate the integrated auto-correlation time.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
@@ -518,7 +571,7 @@ def integrated_auto_correlation_time(x, y=None, *,
         si (float, or str, optional): estimated statistical inefficiency, or a
             method of computing the statistical inefficiency. (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: {False})
+            preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): minimum amount of correlation
             function to compute. The algorithm terminates after computing the
             correlation time out to minimum_correlation_time when the
@@ -530,13 +583,11 @@ def integrated_auto_correlation_time(x, y=None, *,
 
     """
     if si is None:
-        try:
-            # Compute the statistical inefficiency
-            si = statistical_inefficiency(
-                x, y=y, fft=fft,
-                minimum_correlation_time=minimum_correlation_time)
-        except:
-            si = 1.0
+        # Compute the statistical inefficiency
+        si = statistical_inefficiency(
+            x, y=y, fft=fft,
+            minimum_correlation_time=minimum_correlation_time)
+
     elif isinstance(si, str):
         if si not in si_methods:
             msg = 'method {} not found. Valid statistical '.format(si)
@@ -545,12 +596,11 @@ def integrated_auto_correlation_time(x, y=None, *,
             raise CVGError(msg)
 
         si_func = si_methods[si]
-        try:
-            # Compute the statistical inefficiency
-            si = si_func(x, y=y, fft=fft,
-                         minimum_correlation_time=minimum_correlation_time)
-        except:
-            si = 1.0
+
+        # Compute the statistical inefficiency
+        si = si_func(x, y=y, fft=fft,
+                     minimum_correlation_time=minimum_correlation_time)
+
     elif si < 1.0:
         msg = 'statistical inefficiency (si) must '
         msg += 'be greater than or equal one.'

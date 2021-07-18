@@ -4,14 +4,13 @@ This module is specilized for the ``convergence`` code and is not a general
 function to be used for other purposes.
 """
 
-from copy import deepcopy
-from math import lgamma, fabs
+from math import fabs
 import numpy as np
 
 from .beta_dist import betai_cdf_ccdf
 from .normal_dist import s_normal_inv_cdf
 from .zero_rc_bounds import ZERO_RC_BOUNDS
-from convergence.err import CVGError
+from convergence import CVGError
 
 __all__ = [
     't_cdf_ccdf',
@@ -21,7 +20,7 @@ __all__ = [
 ]
 
 
-def t_cdf_ccdf(t: float, df: float):
+def t_cdf_ccdf(t: float, df: float) -> tuple((float, float)):
     r"""Compute the cumulative distribution of the t-distribution.
 
     The cumulative distribution of the t-distribution for t > 0, can be
@@ -103,11 +102,11 @@ def t_cdf(t: float, df: float) -> float:
 def t_inv_cdf(p: float,
               df: float,
               *,
-              loc=0.0,
-              scale=1.0,
-              _tol=1.0e-8,
-              _atol=1.0e-50,
-              _rtinf=1.0e100):
+              loc: float = 0.0,
+              scale: float = 1.0,
+              _tol: float = 1.0e-8,
+              _atol: float = 1.0e-50,
+              _rtinf: float = 1.0e100) -> float:
     """Compute the t_distribution inverse cumulative distribution function.
 
     Compute the inverse cumulative distribution function (percent point
@@ -191,7 +190,10 @@ def t_inv_cdf(p: float,
     return x * scale + loc
 
 
-def t_interval(confidence_level: float, df: float, *, loc=0.0, scale=1.0):
+def t_interval(confidence_level: float,
+               df: float, *,
+               loc: float = 0.0,
+               scale: float = 1.0) -> tuple((float, float)):
     r"""Compute the t_distribution confidence interval.
 
     Compute the t_distribution confidence interval with equal areas around

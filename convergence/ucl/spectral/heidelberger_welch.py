@@ -1,17 +1,35 @@
-"""Heidelberger and Welch UCL method."""
+"""Heidelberger and Welch UCL module."""
 
-from math import isclose, fabs, sqrt
+from math import sqrt
 import numpy as np
 from numpy.linalg import pinv, norm, inv
+from typing import Optional, Union, List
 
+from convergence._default import \
+    _DEFAULT_CONFIDENCE_COEFFICIENT, \
+    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
+    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
+    _DEFAULT_BATCH_SIZE, \
+    _DEFAULT_FFT, \
+    _DEFAULT_SCALE_METHOD, \
+    _DEFAULT_WITH_CENTERING, \
+    _DEFAULT_WITH_SCALING, \
+    _DEFAULT_TEST_SIZE, \
+    _DEFAULT_TRAIN_SIZE, \
+    _DEFAULT_POPULATION_STANDARD_DEVIATION, \
+    _DEFAULT_SI, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
+    _DEFAULT_SAMPLE_METHOD
+from convergence.ucl import UCLBase
 from convergence import \
     batch, \
     CVGError, \
+    CVGSampleSizeError, \
     modified_periodogram, \
     t_inv_cdf, \
-    train_test_split, \
-    time_series_data_si, \
-    uncorrelated_time_series_data_sample_indices
+    train_test_split
+
 
 __all__ = [
     'HeidelbergerWelch',
@@ -21,7 +39,7 @@ __all__ = [
 ]
 
 
-class HeidelbergerWelch:
+class HeidelbergerWelch(UCLBase):
     r"""Heidelberger and Welch class.
 
     Heidelberger and Welch (1981) [2]_ Object.
@@ -66,11 +84,15 @@ class HeidelbergerWelch:
     """
 
     def __init__(self):
-        """Initialize the class.
+        """Initialize the Heidelberger and Welch class.
 
         Initialize a HeidelbergerWelch object and set the constants.
 
         """
+        UCLBase.__init__(self)
+
+        self.name = 'heidel_welch'
+
         self.heidel_welch_set = False
         self.heidel_welch_k = None
         self.heidel_welch_n = None
@@ -89,14 +111,11 @@ class HeidelbergerWelch:
         self.tm_2 = None
         self.tm_3 = None
 
-        self._indices = None
-        self._si = None
-        self._mean = None
-        self._std = None
-
-    def set_heidel_welch_constants(self, *,
-                                   confidence_coefficient,
-                                   heidel_welch_number_points):
+    def set_heidel_welch_constants(
+            self,
+            *,
+            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS):
         r"""Set Heidelberger and Welch constants globally.
 
         Set the constants necessary for application of the Heidelberger and
@@ -104,18 +123,16 @@ class HeidelbergerWelch:
 
         Args:
             confidence_coefficient (float): probability (or confidence
-                interval) and must be between 0.0 and 1.0.
+                interval) and must be between 0.0 and 1.0. (default: 0.95)
             heidel_welch_number_points (int): the number of points in
                 Heidelberger and Welch's spectral method that are used to
                 obtain the polynomial fit. The parameter
                 ``heidel_welch_number_points`` determines the frequency range
-                over which the fit is made.
+                over which the fit is made. (default: 50)
 
         """
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'probability (or confidence interval) '
-            msg += 'confidence_coefficient = '
-            msg += '{} '.format(confidence_coefficient)
+            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
             msg += 'is not in the range (0.0 1.0).'
             raise CVGError(msg)
 
@@ -195,10 +212,8 @@ class HeidelbergerWelch:
         self.tm_2 = t_inv_cdf(p_up, self.heidel_welch_c2_2)
         self.tm_3 = t_inv_cdf(p_up, self.heidel_welch_c2_3)
 
-        self._indices = None
-        self._si = None
-        self._mean = None
-        self._std = None
+        # reset the UCL Base class
+        self.reset()
 
         # Set the flag
         self.heidel_welch_set = True
@@ -224,12 +239,10 @@ class HeidelbergerWelch:
         self.tm_2 = None
         self.tm_3 = None
 
-        self._indices = None
-        self._si = None
-        self._mean = None
-        self._std = None
+        # reset the UCL Base class
+        self.reset()
 
-    def get_heidel_welch_constants(self):
+    def get_heidel_welch_constants(self) -> tuple:
         """Get the Heidelberger and Welch constants."""
         return \
             self.heidel_welch_set, \
@@ -250,11 +263,11 @@ class HeidelbergerWelch:
             self.tm_2, \
             self.tm_3
 
-    def is_heidel_welch_set(self):
+    def is_heidel_welch_set(self) -> bool:
         """Return `True` if the flag is set to `True`."""
         return self.heidel_welch_set
 
-    def get_heidel_welch_knp(self):
+    def get_heidel_welch_knp(self) -> tuple:
         """Get the heidel_welch_number_points, n, and confidence_coefficient.
         """
         return \
@@ -262,7 +275,7 @@ class HeidelbergerWelch:
             self.heidel_welch_n, \
             self.heidel_welch_p
 
-    def get_heidel_welch_auxilary_matrices(self):
+    def get_heidel_welch_auxilary_matrices(self) -> tuple:
         """Get the Heidelberger and Welch auxilary matrices."""
         return \
             self.a_matrix, \
@@ -270,21 +283,21 @@ class HeidelbergerWelch:
             self.a_matrix_2_inv, \
             self.a_matrix_3_inv
 
-    def get_heidel_welch_c1(self):
+    def get_heidel_welch_c1(self) -> tuple:
         """Get the Heidelberger and Welch C1 constants."""
         return \
             self.heidel_welch_c1_1, \
             self.heidel_welch_c1_2, \
             self.heidel_welch_c1_3
 
-    def get_heidel_welch_c2(self):
+    def get_heidel_welch_c2(self) -> tuple:
         """Get the Heidelberger and Welch C2 constants."""
         return \
             self.heidel_welch_c2_1, \
             self.heidel_welch_c2_2, \
             self.heidel_welch_c2_3
 
-    def get_heidel_welch_tm(self):
+    def get_heidel_welch_tm(self) -> tuple:
         """Get the Heidelberger and Welch t_distribution ppf.
 
         Get the Heidelberger and Welch t_distribution ppf for C2 degrees of
@@ -292,100 +305,33 @@ class HeidelbergerWelch:
         """
         return self.tm_1, self.tm_2, self.tm_3
 
-    def set_indices(self,
-                    time_series_data,
-                    *,
-                    si=None,
-                    fft=True,
-                    minimum_correlation_time=None):
-        r"""Set the indices.
-
-        Args:
-            time_series_data (array_like, 1d): time series data.
-            si (float, or str, optional): estimated statistical inefficiency.
-                (default: None)
-            fft (bool, optional): if True, use FFT convolution. FFT should be
-                preferred for long time series. (default: True)
-            minimum_correlation_time (int, optional): minimum amount of
-                correlation function to compute. The algorithm terminates after
-                computing the correlation time out to minimum_correlation_time
-                when the correlation function first goes negative.
-                (default: None)
-
-        """
-        self.set_si(
-            time_series_data=time_series_data,
-            si=si,
-            fft=fft,
-            minimum_correlation_time=minimum_correlation_time)
-
-        si_value = self.get_si()
-
-        self._indices = uncorrelated_time_series_data_sample_indices(
-            time_series_data=time_series_data,
-            si=si_value,
-            fft=fft,
-            minimum_correlation_time=minimum_correlation_time)
-
-    @property
-    def indices(self):
-        """Get the subsample indices."""
-        return self._indices
-
-    def set_si(self,
-               time_series_data,
-               *,
-               si=None,
-               fft=True,
-               minimum_correlation_time=None):
-        r"""Set the si (statistical inefficiency).
-
-        Args:
-            time_series_data (array_like, 1d): time series data.
-            si (float, or str, optional): estimated statistical inefficiency.
-                (default: None)
-            fft (bool, optional): if True, use FFT convolution. FFT should be
-                preferred for long time series. (default: True)
-            minimum_correlation_time (int, optional): minimum amount of
-                correlation function to compute. The algorithm terminates after
-                computing the correlation time out to minimum_correlation_time
-                when the correlation function first goes negative.
-                (default: None)
-
-        """
-        self._si = time_series_data_si(
-            time_series_data=time_series_data,
-            si=si,
-            fft=fft,
-            minimum_correlation_time=minimum_correlation_time)
-
-    @property
-    def si(self):
-        """Get the si."""
-        return self._si
-
-    @property
-    def mean(self):
-        """Get the mean."""
-        return self._mean
-
-    @property
-    def std(self):
-        """Get the std."""
-        return self._std
-
     def ucl(self,
-            time_series_data, *,
-            confidence_coefficient=0.95,
-            heidel_welch_number_points=50,
-            fft=True,
-            test_size=None,
-            train_size=None):
+            time_series_data: Union[np.ndarray, List[float]],
+            *,
+            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+            fft: bool = _DEFAULT_FFT,
+            test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+            train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+            # unused input parmeters in
+            # Heidelberger and Welch ucl interface
+            batch_size: int = _DEFAULT_BATCH_SIZE,
+            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+            scale: str = _DEFAULT_SCALE_METHOD,
+            with_centering: bool = _DEFAULT_WITH_CENTERING,
+            with_scaling: bool = _DEFAULT_WITH_SCALING,
+            population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si: Union[str, float, int, None] = _DEFAULT_SI,
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices: Union[np.ndarray, List[int],
+                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
         Approximate an unbiased estimate of the upper confidence limit or
         half the width of the `confidence_coefficient%` probability interval
-        (confidence interval, or credible interval) around the time-series mean.
+        (confidence interval, or credible interval) around the time-series
+        mean.
 
         An estimate of the variance of the time-series mean is obtained by
         estimating the spectral density at zero frequency [12]_. We use an
@@ -445,6 +391,10 @@ class HeidelbergerWelch:
             if both test_size and train_size are ``None`` it does not split the
             priodogram data to train and test.
 
+        Note:
+            in the ucl method, it is mandatory to compute and set the
+            ``mean`` and ``std`` property.
+
         References:
             .. [12] Heidelberger, P. and Welch, P.D. (1983). "Simulation Run
                    Length Control in the Presence of an Initial Transient".
@@ -471,27 +421,29 @@ class HeidelbergerWelch:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by this method.\n"HeidelbergerWelch" '
             msg += 'at least needs {} data points.'.format(self.heidel_welch_n)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
 
-        n_batches = self.heidel_welch_n
-        batch_size = time_series_data_size // n_batches
+        number_batches = self.heidel_welch_n
+        batch_size = time_series_data_size // number_batches
 
-        processed_sample_size = n_batches * batch_size
+        processed_sample_size = number_batches * batch_size
 
         # Batch the data
         x_batch = batch(time_series_data[:processed_sample_size],
                         batch_size=batch_size,
-                        with_centering=False,
-                        with_scaling=False)
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling)
 
         # Compute the mean & std of the batched data
         # to be used later in the CI method
-        self._mean = x_batch.mean()
-        self._std = x_batch.std()
+        self.mean = time_series_data.mean()
+        self.std = x_batch.std()
+        self.sample_size = number_batches
 
         # Compute the periodogram of the sequence x_batch
         period = modified_periodogram(x_batch,
-                                      fft=(n_batches > 30 and fft),
+                                      fft=(fft and number_batches > 30),
                                       with_mean=False)
 
         left_range = range(0, period.size, 2)
@@ -576,180 +528,145 @@ class HeidelbergerWelch:
 
         # Calculate the approximately unbiased estimate of the variance of the
         # sample mean
-        sigma_sq = heidel_welch_c * np.exp(unbiased_estimate) / n_batches
+        sigma_sq = heidel_welch_c * np.exp(unbiased_estimate) / number_batches
 
         # The standard deviation of the mean within the dataset. The
         # standard_error_of_mean provides a measurement for spread. The smaller
         # the spread the more accurate.
         standard_error_of_mean = sqrt(sigma_sq)
 
-        upper_confidence_limit = hwl_tm * standard_error_of_mean
-        return upper_confidence_limit
-
-    def ci(self,
-           time_series_data, *,
-           confidence_coefficient=0.95,
-           heidel_welch_number_points=50,
-           fft=True,
-           test_size=None,
-           train_size=None):
-        r"""Approximate the confidence interval of the mean.
-
-        Args:
-            time_series_data (array_like, 1d): time series data.
-            confidence_coefficient (float, optional): probability (or
-                confidence interval) and must be between 0.0 and 1.0, and
-                represents the confidence for calculation of relative
-                halfwidths estimation. (default: 0.95)
-            heidel_welch_number_points (int, optional): the number of points
-                that are used to obtain the polynomial fit. The parameter
-                ``heidel_welch_number_points`` determines the frequency range
-                over which the fit is made. (default: 50)
-            fft (bool, optional): if ``True``, use FFT convolution. FFT should
-                be preferred for long time series. (default: True)
-            test_size (int, float, optional): if ``float``, should be between
-                0.0 and 1.0 and represent the proportion of the periodogram
-                dataset to include in the test split. If ``int``, represents
-                the absolute number of test samples. (default: None)
-            train_size (int, float, optional): if ``float``, should be between
-                0.0 and 1.0 and represent the proportion of the preiodogram
-                dataset to include in the train split. If ``int``, represents
-                the absolute number of train samples. (default: None)
-
-        Returns:
-            float, float: confidence interval.
-                The estimate of confidence Limits for the mean.
-
-        """
-        upper_confidence_limit = \
-            self.ucl(time_series_data,
-                     confidence_coefficient=confidence_coefficient,
-                     heidel_welch_number_points=heidel_welch_number_points,
-                     fft=fft,
-                     test_size=test_size,
-                     train_size=train_size)
-        lower_interval = self._mean - upper_confidence_limit
-        upper_interval = self._mean + upper_confidence_limit
-        return lower_interval, upper_interval
-
-    def relative_half_width_estimate(self,
-                                     time_series_data, *,
-                                     confidence_coefficient=0.95,
-                                     heidel_welch_number_points=50,
-                                     fft=True,
-                                     test_size=None,
-                                     train_size=None):
-        r"""Get the relative half width estimate.
-
-        The relative half width estimate is the confidence interval
-        half-width or upper confidence limit (UCL) divided by the sample mean.
-
-        The UCL is calculated as a `confidence_coefficient%` confidence
-        interval for the mean, using the portion of the time series data, which
-        is in the stationarity region.
-
-        Args:
-            time_series_data (array_like, 1d): time series data.
-            confidence_coefficient (float, optional): probability (or
-                confidence interval) and must be between 0.0 and 1.0, and
-                represents the confidence for calculation of relative
-                halfwidths estimation. (default: 0.95)
-            heidel_welch_number_points (int, optional): the number of points
-                that are used to obtain the polynomial fit. The parameter
-                ``heidel_welch_number_points`` determines the frequency range
-                over which the fit is made. (default: 50)
-            fft (bool, optional): if ``True``, use FFT convolution. FFT should
-                be preferred for long time series. (default: True)
-            test_size (int, float, optional): if ``float``, should be between
-                0.0 and 1.0 and represent the proportion of the periodogram
-                dataset to include in the test split. If ``int``, represents
-                the absolute number of test samples. (default: None)
-            train_size (int, float, optional): if ``float``, should be between
-                0.0 and 1.0 and represent the proportion of the preiodogram
-                dataset to include in the train split. If ``int``, represents
-                the absolute number of train samples. (default: None)
-
-        Returns:
-            float: relative half width estimate
-
-        """
-        upper_confidence_limit = \
-            self.ucl(time_series_data,
-                     confidence_coefficient=confidence_coefficient,
-                     heidel_welch_number_points=heidel_welch_number_points,
-                     fft=fft,
-                     test_size=test_size,
-                     train_size=train_size)
-
-        # Estimat the relative half width
-        if isclose(self._mean, 0, abs_tol=1e-6):
-            msg = 'It is not possible to estimate the relative half width '
-            msg += 'for the close to zero mean = {}'.format(self._mean)
-            raise CVGError(msg)
-        else:
-            relative_half_width_estimate = \
-                upper_confidence_limit / fabs(self._mean)
-        return relative_half_width_estimate
+        self.upper_confidence_limit = hwl_tm * standard_error_of_mean
+        return self.upper_confidence_limit
 
 
-def heidelberger_welch_ucl(time_series_data,
-                           *,
-                           confidence_coefficient=0.95,
-                           heidel_welch_number_points=50,
-                           fft=True,
-                           test_size=None,
-                           train_size=None,
-                           obj=None):
+def heidelberger_welch_ucl(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        fft: bool = _DEFAULT_FFT,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        obj: Optional[HeidelbergerWelch] = None) -> float:
     """Approximate the upper confidence limit of the mean."""
     heidelberger_welch = HeidelbergerWelch() if obj is None else obj
-    upper_confidence_limit = \
-        heidelberger_welch.ucl(
-            time_series_data,
-            confidence_coefficient=confidence_coefficient,
-            heidel_welch_number_points=heidel_welch_number_points,
-            fft=fft,
-            test_size=test_size,
-            train_size=train_size)
-    return upper_confidence_limit
-
-
-def heidelberger_welch_ci(time_series_data,
-                          *,
-                          confidence_coefficient=0.95,
-                          heidel_welch_number_points=50,
-                          fft=True,
-                          test_size=None,
-                          train_size=None,
-                          obj=None):
-    """Approximate the confidence interval of the mean."""
-    heidelberger_welch = HeidelbergerWelch() if obj is None else obj
-    confidence_limits = heidelberger_welch.ci(
-        time_series_data,
+    upper_confidence_limit = heidelberger_welch.ucl(
+        time_series_data=time_series_data,
         confidence_coefficient=confidence_coefficient,
         heidel_welch_number_points=heidel_welch_number_points,
         fft=fft,
         test_size=test_size,
-        train_size=train_size)
+        train_size=train_size
+    )
+    return upper_confidence_limit
+
+
+def heidelberger_welch_ci(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        fft: bool = _DEFAULT_FFT,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        obj: Optional[HeidelbergerWelch] = None) -> tuple((float, float)):
+    r"""Approximate the confidence interval of the mean.
+
+    Args:
+        time_series_data (array_like, 1d): time series data.
+        confidence_coefficient (float, optional): probability (or
+            confidence interval) and must be between 0.0 and 1.0, and
+            represents the confidence for calculation of relative
+            halfwidths estimation. (default: 0.95)
+        heidel_welch_number_points (int, optional): the number of points
+            that are used to obtain the polynomial fit. The parameter
+            ``heidel_welch_number_points`` determines the frequency range
+            over which the fit is made. (default: 50)
+        fft (bool, optional): if ``True``, use FFT convolution. FFT should
+            be preferred for long time series. (default: True)
+        test_size (int, float, optional): if ``float``, should be between
+            0.0 and 1.0 and represent the proportion of the periodogram
+            dataset to include in the test split. If ``int``, represents
+            the absolute number of test samples. (default: None)
+        train_size (int, float, optional): if ``float``, should be between
+            0.0 and 1.0 and represent the proportion of the preiodogram
+            dataset to include in the train split. If ``int``, represents
+            the absolute number of train samples. (default: None)
+        obj (HeidelbergerWelch, optional): instance of ``HeidelbergerWelch``
+            (default: None)
+
+    Returns:
+        float, float: confidence interval.
+            The estimate of confidence Limits for the mean.
+
+    """
+    heidelberger_welch = HeidelbergerWelch() if obj is None else obj
+    confidence_limits = heidelberger_welch.ci(
+        time_series_data=time_series_data,
+        confidence_coefficient=confidence_coefficient,
+        heidel_welch_number_points=heidel_welch_number_points,
+        fft=fft,
+        test_size=test_size,
+        train_size=train_size
+    )
     return confidence_limits
 
 
 def heidelberger_welch_relative_half_width_estimate(
-        time_series_data,
+        time_series_data: Union[np.ndarray, List[float]],
         *,
-        confidence_coefficient=0.95,
-        heidel_welch_number_points=50,
-        fft=True,
-        test_size=None,
-        train_size=None,
-        obj=None):
-    """Get the relative half width estimate."""
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        fft: bool = _DEFAULT_FFT,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        obj: Optional[HeidelbergerWelch] = None) -> float:
+    r"""Get the relative half width estimate.
+
+    The relative half width estimate is the confidence interval
+    half-width or upper confidence limit (UCL) divided by the sample mean.
+
+    The UCL is calculated as a `confidence_coefficient%` confidence
+    interval for the mean, using the portion of the time series data, which
+    is in the stationarity region.
+
+    Args:
+        time_series_data (array_like, 1d): time series data.
+        confidence_coefficient (float, optional): probability (or
+            confidence interval) and must be between 0.0 and 1.0, and
+            represents the confidence for calculation of relative
+            halfwidths estimation. (default: 0.95)
+        heidel_welch_number_points (int, optional): the number of points
+            that are used to obtain the polynomial fit. The parameter
+            ``heidel_welch_number_points`` determines the frequency range
+            over which the fit is made. (default: 50)
+        fft (bool, optional): if ``True``, use FFT convolution. FFT should
+            be preferred for long time series. (default: True)
+        test_size (int, float, optional): if ``float``, should be between
+            0.0 and 1.0 and represent the proportion of the periodogram
+            dataset to include in the test split. If ``int``, represents
+            the absolute number of test samples. (default: None)
+        train_size (int, float, optional): if ``float``, should be between
+            0.0 and 1.0 and represent the proportion of the preiodogram
+            dataset to include in the train split. If ``int``, represents
+            the absolute number of train samples. (default: None)
+        obj (HeidelbergerWelch, optional): instance of ``HeidelbergerWelch``
+            (default: None)
+
+    Returns:
+        float: relative half width estimate
+
+    """
     heidelberger_welch = HeidelbergerWelch() if obj is None else obj
-    relative_half_width_estimate = \
-        heidelberger_welch.relative_half_width_estimate(
-            time_series_data,
-            confidence_coefficient=confidence_coefficient,
-            heidel_welch_number_points=heidel_welch_number_points,
-            fft=fft,
-            test_size=test_size,
-            train_size=train_size)
+    try:
+        relative_half_width_estimate = \
+            heidelberger_welch.relative_half_width_estimate(
+                time_series_data=time_series_data,
+                confidence_coefficient=confidence_coefficient,
+                heidel_welch_number_points=heidel_welch_number_points,
+                fft=fft,
+                test_size=test_size,
+                train_size=train_size)
+    except CVGError:
+        raise CVGError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

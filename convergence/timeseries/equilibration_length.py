@@ -7,29 +7,66 @@ uncorrelated samples.
 
 """
 
+from joblib import Parallel, delayed
 from math import isclose
 import numpy as np
+from typing import Optional, Union, List
 
-from convergence import \
-    CVGError, \
-    statistical_inefficiency,\
-    r_statistical_inefficiency, \
-    split_r_statistical_inefficiency, \
-    split_statistical_inefficiency, \
-    si_methods
+from .statistical_inefficiency import si_methods
+from convergence._default import \
+    _DEFAULT_ABS_TOL, \
+    _DEFAULT_SI, \
+    _DEFAULT_FFT, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_IGNORE_END, \
+    _DEFAULT_NSKIP, \
+    _DEFAULT_BATCH_SIZE, \
+    _DEFAULT_SCALE_METHOD, \
+    _DEFAULT_WITH_CENTERING, \
+    _DEFAULT_WITH_SCALING, \
+    _DEFAULT_NUMBER_OF_CORES
+from convergence.err import CVGError, CVGSampleSizeError
+
 
 __all__ = [
     'estimate_equilibration_length',
 ]
 
 
-def estimate_equilibration_length(time_series_data,
-                                  *,
-                                  si='statistical_inefficiency',
-                                  nskip=1,
-                                  fft=False,
-                                  minimum_correlation_time=None,
-                                  ignore_end=None):
+def _estimate_equilibration_length(
+        time_series_data: np.ndarray,
+        t: int,
+        si_func: callable,
+        fft: bool,
+        minimum_correlation_time: Optional[int]) -> tuple((float, float, int)):
+    # slice a numpy array, the memory is shared
+    # between the slice and the original
+    x = time_series_data[t:]
+    x_size = float(x.size)
+    try:
+        si_value = si_func(
+            x, fft=fft, minimum_correlation_time=minimum_correlation_time)
+    except CVGError:
+        si_value = x_size
+    effective_samples_size = x_size / si_value
+    return effective_samples_size, si_value, t
+
+
+def estimate_equilibration_length(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        si: Optional[str] = _DEFAULT_SI,
+        nskip: Optional[int] = _DEFAULT_NSKIP,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
+        number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
+        # unused input parmeters in Time series module
+        # estimate_equilibration_length interface
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple((int, float)):
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the
@@ -37,12 +74,11 @@ def estimate_equilibration_length(time_series_data,
 
     Args:
         time_series_data (array_like, 1d): time series data.
-        si (str, optional): statistical inefficiency method.
-            (default: 'statistical_inefficiency')
+        si (str, optional): statistical inefficiency method. (default: None)
         nskip (int, optional): the number of data points to skip.
             (default: 1)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+            preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): the minimum amount of
             correlation function to compute. The algorithm terminates after
             computing the correlation time out to minimum_correlation_time when
@@ -52,6 +88,12 @@ def estimate_equilibration_length(time_series_data,
             ``(0, 1)`` and it is the percent of number of points that should be
             ignored. If ``None`` it would be set to the one fourth of the total
             number of points. (default: None)
+        number_of_cores (int, optional): The maximum number of concurrently
+            running jobs, such as the number of Python worker processes or the
+            size of the thread-pool. If -1 all CPUs are used. If 1 is given, no
+            parallel computing code is used at all. For n_jobs below -1,
+            (n_cpus + 1 + n_jobs) are used. Thus for n_jobs = -2, all CPUs but
+            one are used. (default: 1)
 
     Returns:
         int, float: equilibration index, statistical inefficiency estimates
@@ -60,8 +102,8 @@ def estimate_equilibration_length(time_series_data,
 
     References:
         .. [11] Chodera, J. D., (2016). "A Simple Method for Automated
-               Equilibration Detection in Molecular Simulations". J. Chem.
-               Theory and Comp., Simulation., 12(4), p. 1799--1805.
+                Equilibration Detection in Molecular Simulations". J. Chem.
+                Theory and Comp., Simulation., 12(4), p. 1799--1805.
 
     """
     time_series_data = np.array(time_series_data, copy=False)
@@ -79,18 +121,21 @@ def estimate_equilibration_length(time_series_data,
             msg += 'inefficiency (si) methods are:\n\t- '
             msg += '{}'.format('\n\t- '.join(si_methods))
             raise CVGError(msg)
+    elif si is None:
+        si = 'statistical_inefficiency'
     else:
-        msg = 'si is not a `str`.'
+        msg = 'si is not a `str` or `None`.'
         raise CVGError(msg)
 
     si_func = si_methods[si]
 
     if not isinstance(nskip, int):
-        if nskip is None:
-            nskip = 1
-        else:
+        if nskip is not None:
             msg = 'nskip must be an `int`.'
             raise CVGError(msg)
+
+        nskip = 1
+
     elif nskip < 1:
         msg = 'nskip must be a positive `int`.'
         raise CVGError(msg)
@@ -116,42 +161,42 @@ def estimate_equilibration_length(time_series_data,
         raise CVGError(msg)
 
     # Upper bound check
-    if si == 'r_statistical_inefficiency':
+    if si == 'geyer_r_statistical_inefficiency':
         if time_series_data_size < 4:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
         ignore_end = max(3, ignore_end)
-    elif si == 'split_r_statistical_inefficiency':
+    elif si == 'geyer_split_r_statistical_inefficiency':
         if time_series_data_size < 8:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
         ignore_end = max(7, ignore_end)
-    elif si == 'split_statistical_inefficiency':
+    elif si == 'geyer_split_statistical_inefficiency':
         if time_series_data_size < 8:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
         ignore_end = max(7, ignore_end)
 
     if time_series_data_size <= ignore_end:
         msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
         msg = 'Wrong number of data points is requested to be '
         msg += 'ignored from {} total points.'.format(time_series_data_size)
-        raise CVGError(msg)
+        raise CVGSampleSizeError(msg)
 
     # Special case if timeseries is constant.
-    _std = np.std(time_series_data)
+    _std = time_series_data.std()
 
     if not np.isfinite(_std):
         msg = 'there is at least one value in the input '
         msg += 'array which is non-finite or not-number.'
         raise CVGError(msg)
 
-    if isclose(_std, 0, abs_tol=1e-14):
+    if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         # index and si
-        return 0, 1.0
+        return 0, time_series_data_size
 
     del _std
 
@@ -159,6 +204,27 @@ def estimate_equilibration_length(time_series_data,
     upper_bound = time_series_data_size - ignore_end
 
     nskip = min(nskip, upper_bound)
+
+    if number_of_cores != 1:
+        # Compute the statitical inefficiency of a time series
+        results = Parallel(n_jobs=number_of_cores)(
+            delayed(_estimate_equilibration_length)(
+                time_series_data,
+                t,
+                si_func,
+                fft,
+                minimum_correlation_time)
+            for t in range(0, upper_bound, nskip))
+
+        results_array = np.array(results, copy=False)
+
+        # Find the maximum
+        max_index = np.argmax(results_array[:, 0])
+
+        equilibration_index_estimate = results_array[max_index, 2]
+        statistical_inefficiency_estimate = results_array[max_index, 1]
+
+        return equilibration_index_estimate, statistical_inefficiency_estimate
 
     # Estimate of statistical inefficiency
     statistical_inefficiency_estimate = 1.0
@@ -175,13 +241,16 @@ def estimate_equilibration_length(time_series_data,
         # slice and the original
         x = time_series_data[t:]
 
+        x_size = float(x.size)
+
         try:
             si_value = si_func(
-                x, fft=fft, minimum_correlation_time=minimum_correlation_time)
+                x, fft=fft,
+                minimum_correlation_time=minimum_correlation_time)
         except CVGError:
-            si_value = float(time_series_data_size - t)
+            si_value = x_size
 
-        effective_samples_size_ = float(time_series_data_size - t) / si_value
+        effective_samples_size_ = x_size / si_value
 
         # Find the maximum
         if effective_samples_size_ > effective_samples_size:

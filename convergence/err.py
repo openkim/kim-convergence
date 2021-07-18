@@ -5,7 +5,9 @@ import numpy as np
 
 __all__ = [
     'CVGError',
+    'CVGSampleSizeError',
     'cvg_warning',
+    'cvg_check'
 ]
 
 
@@ -34,7 +36,12 @@ class CVGError(Exception):
         return self.msg
 
 
-def cvg_warning(msg):
+class CVGSampleSizeError(CVGError):
+    """Raise an exception if there is not enough samples."""
+    pass
+
+
+def cvg_warning(msg: str) -> None:
     """Print a warning message.
 
     Args:
@@ -46,7 +53,7 @@ def cvg_warning(msg):
     print(_msg)
 
 
-def _check_ndim(func):
+def _check_ndim(func: callable) -> callable:
     def wrapper(x, *args, **kwargs):
         if np.ndim(x) != 1:
             msg = 'input data is not an array of one-dimension.'
@@ -55,7 +62,7 @@ def _check_ndim(func):
     return wrapper
 
 
-def _check_isfinite(func):
+def _check_isfinite(func: callable) -> callable:
     def wrapper(x, *args, **kwargs):
         if not np.all(np.isfinite(x)):
             msg = 'there is at least one value in the input '
@@ -63,3 +70,62 @@ def _check_isfinite(func):
             raise CVGError(msg)
         return func(x, *args, **kwargs)
     return wrapper
+
+
+def cvg_check(var,
+              var_name: str,
+              var_type=None,
+              var_lower_bound=0,
+              var_upper_bound=None):
+    """Check the variable type and lower bound.
+
+    Args:
+        var (var_type): variable
+        var_name (str): variable name
+        var_type (type, optional): variable type. (default: None)
+        var_lower_bound (var_type, optional): variable lower bound.
+            (default: 0)
+        var_upper_bound (var_type, optional): variable upper bound.
+            (default: None)
+
+    """
+    if var_upper_bound is None:
+        if var_type is None:
+            if var < var_lower_bound:
+                msg = '"{}" must be '.format(var_name)
+                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                raise CVGError(msg)
+        else:
+            if not isinstance(var, var_type):
+                msg = '"{}" must be a `{}`.'.format(var_name, var_type)
+                raise CVGError(msg)
+
+            if var < var_lower_bound:
+                msg = '"{}" must be a `{}` '.format(var_name, var_type)
+                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                raise CVGError(msg)
+    else:
+        if var_type is None:
+            if var < var_lower_bound:
+                msg = '"{}" must be '.format(var_name)
+                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                raise CVGError(msg)
+
+            if var > var_upper_bound:
+                msg = '"{}" must be '.format(var_name)
+                msg += 'smaller than or equal {}.'.format(var_upper_bound)
+                raise CVGError(msg)
+        else:
+            if not isinstance(var, var_type):
+                msg = '"{}" must be a `{}`.'.format(var_name, var_type)
+                raise CVGError(msg)
+
+            if var < var_lower_bound:
+                msg = '"{}" must be a `{}` '.format(var_name, var_type)
+                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                raise CVGError(msg)
+
+            if var > var_upper_bound:
+                msg = '"{}" must be a `{}` '.format(var_name, var_type)
+                msg += 'smaller than or equal {}.'.format(var_upper_bound)
+                raise CVGError(msg)

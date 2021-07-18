@@ -1,18 +1,39 @@
-"""N-SKART UCL method."""
+"""N-SKART UCL module."""
 
 from math import ceil, floor, fabs, sqrt
 import numpy as np
+from typing import Optional, Union, List
 
+from convergence._default import \
+    _DEFAULT_CONFIDENCE_COEFFICIENT, \
+    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
+    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
+    _DEFAULT_BATCH_SIZE, \
+    _DEFAULT_FFT, \
+    _DEFAULT_SCALE_METHOD, \
+    _DEFAULT_WITH_CENTERING, \
+    _DEFAULT_WITH_SCALING, \
+    _DEFAULT_TEST_SIZE, \
+    _DEFAULT_TRAIN_SIZE, \
+    _DEFAULT_POPULATION_STANDARD_DEVIATION, \
+    _DEFAULT_SI, \
+    _DEFAULT_MINIMUM_CORRELATION_TIME, \
+    _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
+    _DEFAULT_SAMPLE_METHOD, \
+    _DEFAULT_NSKIP, \
+    _DEFAULT_IGNORE_END, \
+    _DEFAULT_NUMBER_OF_CORES
+from .ucl_base import UCLBase
 from convergence import \
     batch, \
     CVGError, \
+    CVGSampleSizeError, \
     cvg_warning, \
     skew, \
     randomness_test, \
     auto_correlate, \
-    t_inv_cdf, \
-    time_series_data_si, \
-    uncorrelated_time_series_data_sample_indices
+    t_inv_cdf
+
 
 __all__ = [
     'N_SKART',
@@ -22,8 +43,8 @@ __all__ = [
 ]
 
 
-class N_SKART:
-    r"""N-Skart algorithm.
+class N_SKART(UCLBase):
+    r"""N-Skart class.
 
     N-Skart is a nonsequential procedure designed to compute a half the width
     of the `confidence_coefficient%` probability interval (CI) (confidence
@@ -59,9 +80,19 @@ class N_SKART:
     """
 
     def __init__(self):
+        """Initialize the N_SKART class.
+
+        Initialize a N_SKART object and set the constants.
+
+        """
+        UCLBase.__init__(self)
+
+        self.name = 'n_skart'
+
         self._reset()
 
-    def _reset(self):
+    def _reset(self) -> None:
+        """reset the parmaters."""
         # k <- 1280
         self.k_number_batches = 1280
         # k' <- 1280
@@ -78,94 +109,25 @@ class N_SKART:
         # in the randomness test b <- 0
         self.randomness_test_counter = 0
 
-        self._indices = None
-        self._si = None
-        self._mean = None
-        self._std = None
+        # UCLBase reset method
+        self.reset()
 
-    def set_indices(self,
-                    time_series_data,
-                    *,
-                    si=None,
-                    fft=True,
-                    minimum_correlation_time=None):
-        r"""Set the indices.
-
-        Args:
-            time_series_data (array_like, 1d): time series data.
-            si (float, or str, optional): estimated statistical inefficiency.
-                (default: None)
-            fft (bool, optional): if True, use FFT convolution. FFT should be
-                preferred for long time series. (default: True)
-            minimum_correlation_time (int, optional): minimum amount of
-                correlation function to compute. The algorithm terminates after
-                computing the correlation time out to minimum_correlation_time
-                when the correlation function first goes negative.
-                (default: None)
-
-        """
-        self.set_si(
-            time_series_data=time_series_data,
-            si=si,
-            fft=fft,
-            minimum_correlation_time=minimum_correlation_time)
-
-        si_value = self.get_si()
-
-        self._indices = uncorrelated_time_series_data_sample_indices(
-            time_series_data=time_series_data,
-            si=si_value,
-            fft=fft,
-            minimum_correlation_time=minimum_correlation_time)
-
-    @property
-    def indices(self):
-        """Get the indices."""
-        return self._indices
-
-    def set_si(self,
-               time_series_data,
-               *,
-               si=None,
-               fft=True,
-               minimum_correlation_time=None):
-        r"""Set the si (statistical inefficiency).
-
-        Args:
-            time_series_data (array_like, 1d): time series data.
-            si (float, or str, optional): estimated statistical inefficiency.
-                (default: None)
-            fft (bool, optional): if True, use FFT convolution. FFT should be
-                preferred for long time series. (default: True)
-            minimum_correlation_time (int, optional): minimum amount of
-                correlation function to compute. The algorithm terminates after
-                computing the correlation time out to minimum_correlation_time
-                when the correlation function first goes negative.
-                (default: None)
-
-        """
-        self._si = time_series_data_si(
-            time_series_data=time_series_data,
-            si=si,
-            fft=fft,
-            minimum_correlation_time=minimum_correlation_time)
-
-    @property
-    def si(self):
-        """Get the si."""
-        return self._si
-
-    @property
-    def mean(self):
-        """Get the mean."""
-        return self._mean
-
-    @property
-    def std(self):
-        """Get the std."""
-        return self._std
-
-    def estimate_equilibration_length(self, time_series_data):
+    def estimate_equilibration_length(
+        self,
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        # unused input parmeters in N-SKART UCL module
+        # estimate_equilibration_length interface
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        nskip: Optional[int] = _DEFAULT_NSKIP,
+        fft: bool = _DEFAULT_FFT,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
+        number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+            with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple((bool, int)):
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
@@ -196,7 +158,7 @@ class N_SKART:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "N-Skart".\n"N-Skart" at '
             msg += 'least needs {} data points.'.format(self.k_number_batches)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
 
         # Reset the parameters for run-length control
         # cases, where we call this function in a loop
@@ -224,11 +186,13 @@ class N_SKART:
         # Batch the data, Y_j(m) : j = 1 ... k
         x_batch = batch(time_series_data[:processed_sample_size],
                         batch_size=self.batch_size,
-                        with_centering=False,
-                        with_scaling=False)
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling)
 
         dependent_data = True
         sufficient_data = True
+
         while dependent_data and sufficient_data:
             # Perform step 2 of the N-Skart algorithm
 
@@ -299,7 +263,10 @@ class N_SKART:
 
                     # Rebatch the data
                     x_batch = batch(time_series_data[:processed_sample_size],
-                                    batch_size=self.batch_size)
+                                    batch_size=self.batch_size,
+                                    scale=scale,
+                                    with_centering=with_centering,
+                                    with_scaling=with_scaling)
                 else:
                     msg = '{} number of input '.format(time_series_data_size)
                     msg += 'data points is not sufficient to be used by '
@@ -307,6 +274,7 @@ class N_SKART:
                     msg += '{} = '.format(processed_sample_size)
                     msg += '{} x {}'.format(k_number_batches, batch_size)
                     msg += ' data points.\n'
+                    cvg_warning(msg)
 
                     sufficient_data = False
 
@@ -314,17 +282,39 @@ class N_SKART:
             # Perform step 5 of the N-Skart algorithm
             # w <- d * m
             truncate_index = self.number_batches_per_spacer * self.batch_size
+
+            self.set_si(
+                time_series_data=time_series_data[truncate_index:],
+                si=si,
+                fft=fft,
+                minimum_correlation_time=minimum_correlation_time)
+
             return True, truncate_index
 
-        cvg_warning(msg)
-        return False, time_series_data_size - 1
+        self.si = None
+        return False, time_series_data_size
 
     def ucl(self,
-            time_series_data,
+            time_series_data: Union[np.ndarray, List[float]],
             *,
-            equilibration_length_estimate=0,
-            confidence_coefficient=0.95,
-            fft=True):
+            confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+            fft: bool = _DEFAULT_FFT,
+            # unused input parmeters in
+            # N_SKART ucl interface
+            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+            batch_size: int = _DEFAULT_BATCH_SIZE,
+            scale: str = _DEFAULT_SCALE_METHOD,
+            with_centering: bool = _DEFAULT_WITH_CENTERING,
+            with_scaling: bool = _DEFAULT_WITH_SCALING,
+            test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+            train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+            population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+            si: Union[str, float, int, None] = _DEFAULT_SI,
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+            uncorrelated_sample_indices: Union[np.ndarray, List[int],
+                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+            sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
         Args:
@@ -353,6 +343,11 @@ class N_SKART:
 
         if not isinstance(equilibration_length_estimate, int):
             msg = 'equilibration_length_estimate must be an `int`.'
+            raise CVGError(msg)
+
+        if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
+            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
+            msg += 'is not in the range (0.0 1.0).'
             raise CVGError(msg)
 
         # Perform step 5 of the N-Skart algorithm
@@ -398,7 +393,7 @@ class N_SKART:
             msg = '{} input data points are '.format(time_series_data_size)
             msg += 'not sufficient to be used by "N-Skart".\n"N-Skart" at '
             msg += 'least needs {} data points.'.format(processed_sample_size)
-            raise CVGError(msg)
+            raise CVGSampleSizeError(msg)
 
         # step 5b
 
@@ -409,25 +404,27 @@ class N_SKART:
         equilibration_length_estimate += idx
 
         sliced_time = time_series_data[idx:]
-        sliced_time_size = sliced_time.size
 
         # Batch the data
-        x_batch = batch(sliced_time, batch_size=self.batch_size)
+        x_batch = batch(sliced_time,
+                        batch_size=self.batch_size,
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling)
 
         # Perform step 6 of the N-Skart algorithm
 
-        # compute the mean to be used later in interval method
-        self._mean = x_batch.mean()
-        self._std = x_batch.std()
+        # compute and set the mean to be used later in interval method
+        self.mean = x_batch.mean()
+        self.std = x_batch.std()
+        self.sample_size = x_batch.size
 
         # compute the sample variance
         x_batch_var = x_batch.var(ddof=1)
 
         # compute the sample estimator of the lag-one correlation
-        lag1_correlation = \
-            auto_correlate(x_batch,
-                           nlags=1,
-                           fft=(self.kp_number_batches > 30 and fft))[1]
+        lag1_correlation = auto_correlate(
+            x_batch, nlags=1, fft=(fft and x_batch.size > 30))[1]
 
         # compute the correlation adjustment A <- (1 + \phi) / (1 - \phi)
         correlation_adjustment = \
@@ -448,7 +445,7 @@ class N_SKART:
         # spaced_x_batch_size = spaced_x_batch.size
 
         # compute skewness
-        spaced_x_batch_skewness = skew(spaced_batches, bias=False)
+        spaced_x_batch_skewness = skew(spaced_x_batch, bias=False)
 
         # compute beta <- skew / (6 sqrt(k''))
         beta = spaced_x_batch_skewness / (6 * sqrt(spaced_x_batch_size))
@@ -461,117 +458,57 @@ class N_SKART:
         skewness_adjustment = (
             (1 + 6 * beta * (upper - beta))**(1 / 3) - 1) / (2 * beta)
 
-        upper_confidence_limit = skewness_adjustment * \
+        self.upper_confidence_limit = skewness_adjustment * \
             sqrt(correlation_adjustment * x_batch_var / self.kp_number_batches)
-        return upper_confidence_limit
-
-    def ci(self,
-           time_series_data, *,
-           equilibration_length_estimate=0,
-           confidence_coefficient=0.95,
-           fft=True):
-        r"""Approximate the confidence interval of the mean.
-
-        Args:
-            time_series_data (array_like, 1d): time series data.
-            equilibration_length_estimate (int, optional): an estimate for the
-                equilibration length.
-            confidence_coefficient (float, optional): probability (or confidence
-                interval) and must be between 0.0 and 1.0, and represents the
-                confidence for calculation of relative halfwidths estimation.
-                (default: 0.95)
-            fft (bool, optional): if ``True``, use FFT convolution. FFT should
-                be preferred for long time series. (default: True)
-
-        Returns:
-            [type]: [description]
-
-        """
-        upper_confidence_limit = \
-            self.ucl(
-                time_series_data=time_series_data,
-                equilibration_length_estimate=equilibration_length_estimate,
-                confidence_coefficient=confidence_coefficient,
-                fft=fft)
-        lower_interval = self._mean - upper_confidence_limit
-        upper_interval = self._mean + upper_confidence_limit
-        return lower_interval, upper_interval
-
-    def relative_half_width_estimate(self,
-                                     time_series_data,
-                                     *,
-                                     equilibration_length_estimate=0,
-                                     confidence_coefficient=0.95,
-                                     fft=True):
-        r"""Get the relative half width estimate.
-
-        The relative half width estimate is the confidence interval
-        half-width or upper confidence limit (UCL) divided by the sample mean.
-
-        The UCL is calculated as a `confidence_coefficient%` confidence
-        interval for the mean, using the portion of the time series data, which
-        is in the stationarity region.
-
-        Args:
-            time_series_data (array_like, 1d): time series data.
-            equilibration_length_estimate (int, optional): an estimate for the
-                equilibration length.
-            confidence_coefficient (float, optional): probability (or confidence
-                interval) and must be between 0.0 and 1.0, and represents the
-                confidence for calculation of relative halfwidths estimation.
-                (default: 0.95)
-            fft (bool, optional): if ``True``, use FFT convolution. FFT should
-                be preferred for long time series. (default: True)
-
-        Returns:
-            float: the relative half width estimate.
-
-        """
-        upper_confidence_limit = \
-            self.ucl(
-                time_series_data=time_series_data,
-                equilibration_length_estimate=equilibration_length_estimate,
-                confidence_coefficient=confidence_coefficient,
-                fft=fft)
-
-        # Estimat the relative half width
-        if isclose(self._mean, 0, abs_tol=1e-6):
-            msg = 'It is not possible to estimate the relative half width '
-            msg += 'for the close to zero mean = {}'.format(self._mean)
-            raise CVGError(msg)
-        else:
-            relative_half_width_estimate = \
-                upper_confidence_limit / fabs(self._mean)
-        return relative_half_width_estimate
+        return self.upper_confidence_limit
 
 
-def n_skart_ucl(time_series_data,
-                *,
-                equilibration_length_estimate=0,
-                confidence_coefficient=0.95,
-                fft=True,
-                obj=None):
+def n_skart_ucl(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+        fft: bool = _DEFAULT_FFT,
+        obj: Optional[N_SKART] = None) -> float:
     """Approximate the upper confidence limit of the mean."""
     n_skart = N_SKART() if obj is None else obj
-    upper_confidence_limit = \
-        n_skart.ucl(
-            time_series_data,
-            equilibration_length_estimate=equilibration_length_estimate,
-            confidence_coefficient=confidence_coefficient,
-            fft=fft)
+    upper_confidence_limit = n_skart.ucl(
+        time_series_data=time_series_data,
+        equilibration_length_estimate=equilibration_length_estimate,
+        confidence_coefficient=confidence_coefficient,
+        fft=fft)
     return upper_confidence_limit
 
 
-def n_skart_ci(time_series_data,
-               *,
-               equilibration_length_estimate=0,
-               confidence_coefficient=0.95,
-               fft=True,
-               obj=None):
-    """Approximate the confidence interval of the mean."""
+def n_skart_ci(
+        time_series_data: Union[np.ndarray, List[float]],
+        *,
+        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+        fft: bool = _DEFAULT_FFT,
+        obj: Optional[N_SKART] = None) -> tuple((float, float)):
+    r"""Approximate the confidence interval of the mean.
+
+    Args:
+        time_series_data (array_like, 1d): time series data.
+        equilibration_length_estimate (int, optional): an estimate for the
+            equilibration length.
+        confidence_coefficient (float, optional): probability (or confidence
+            interval) and must be between 0.0 and 1.0, and represents the
+            confidence for calculation of relative halfwidths estimation.
+            (default: 0.95)
+        fft (bool, optional): if ``True``, use FFT convolution. FFT should
+            be preferred for long time series. (default: True)
+        obj (N_SKART, optional): instance of ``N_SKART`` (default: None)
+
+
+    Returns:
+        float, float: confidence interval
+
+    """
     n_skart = N_SKART() if obj is None else obj
     confidence_limits = n_skart.ci(
-        time_series_data,
+        time_series_data=time_series_data,
         equilibration_length_estimate=equilibration_length_estimate,
         confidence_coefficient=confidence_coefficient,
         fft=fft)
@@ -579,18 +516,44 @@ def n_skart_ci(time_series_data,
 
 
 def n_skart_relative_half_width_estimate(
-        time_series_data,
+        time_series_data: Union[np.ndarray, List[float]],
         *,
-        equilibration_length_estimate=0,
-        confidence_coefficient=0.95,
-        fft=True,
-        obj=None):
-    """Get the relative half width estimate."""
+        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+        fft: bool = _DEFAULT_FFT,
+        obj: Optional[N_SKART] = None) -> float:
+    r"""Get the relative half width estimate.
+
+    The relative half width estimate is the confidence interval
+    half-width or upper confidence limit (UCL) divided by the sample mean.
+
+    The UCL is calculated as a `confidence_coefficient%` confidence
+    interval for the mean, using the portion of the time series data, which
+    is in the stationarity region.
+
+    Args:
+        time_series_data (array_like, 1d): time series data.
+        equilibration_length_estimate (int, optional): an estimate for the
+            equilibration length.
+        confidence_coefficient (float, optional): probability (or confidence
+            interval) and must be between 0.0 and 1.0, and represents the
+            confidence for calculation of relative halfwidths estimation.
+            (default: 0.95)
+        fft (bool, optional): if ``True``, use FFT convolution. FFT should
+            be preferred for long time series. (default: True)
+        obj (N_SKART, optional): instance of ``N_SKART`` (default: None)
+
+    Returns:
+        float: the relative half width estimate.
+
+    """
     n_skart = N_SKART() if obj is None else obj
-    relative_half_width_estimate = \
-        n_skart.relative_half_width_estimate(
-            time_series_data,
+    try:
+        relative_half_width_estimate = n_skart.relative_half_width_estimate(
+            time_series_data=time_series_data,
             equilibration_length_estimate=equilibration_length_estimate,
             confidence_coefficient=confidence_coefficient,
             fft=fft)
+    except CVGError:
+        raise CVGError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate
