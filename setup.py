@@ -15,16 +15,17 @@ setup(
     url='https://github.com/openkim/convergence',
     author='Yaser Afshar',
     author_email='yafshar@openkim.org',
-    license='CDDL-1.0',
+    license='LGPLv2',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering',
         'Operating System :: OS Independent',
-        'License :: OSI Approved :: Common Development and Distribution License 1.0 (CDDL-1.0)',
+        'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9'
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10'
     ],
     install_requires=['numpy>=1.16', 'scipy', 'kim_edn', 'joblib'],
     python_requires='>=3.7',
