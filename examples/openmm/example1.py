@@ -1,6 +1,6 @@
 """Run length control example for OpenMM."""
 
-import convergence as cr
+import kim_convergence as cr
 from io import StringIO
 import numpy as np
 from sys import stdout
@@ -77,11 +77,11 @@ try:
         confidence_coefficient=0.95,
         confidence_interval_approximation_method='uncorrelated_sample',
         dump_trajectory=True,
-        dump_trajectory_fp='convergence_trajectory.edn',
+        dump_trajectory_fp='kim_convergence_trajectory.edn',
         fp='return',
         fp_format='txt')
 except Exception as e:
     msg = '{}'.format(e)
-    raise cr.CVGError(msg)
+    raise cr.CRError(msg)
 
 print(msg)

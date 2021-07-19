@@ -3,7 +3,7 @@
 import numpy as np
 from typing import Optional
 from lammps import lammps
-import convergence as cr
+import kim_convergence as cr
 
 # Initial run length
 INITIAL_RUN_LENGTH: int = 1000
@@ -97,9 +97,9 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
     """
     lmp = lammps(ptr=lmpptr)
 
-    cr.cvg_check(nevery, 'nevery', int, 1)
+    cr.cr_check(nevery, 'nevery', int, 1)
 
-    cmd = 'fix cvg_fix all vector {} '.format(nevery)
+    cmd = 'fix cr_fix all vector {} '.format(nevery)
 
     # Arguments
     arguments_map = {}
@@ -129,7 +129,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
 
         if arg not in _LAMMPS_ARGUMENTS:
             msg = 'The input argument "{}" is not suppoerted.'
-            raise cr.CVGError(msg)
+            raise cr.CRError(msg)
 
         if arg in ('variable', 'compute', 'fix'):
             # The value following the argument `variable`, `compute`, or
@@ -146,7 +146,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                     'c_': 'user-assigned name for the computation',
                     'f_': 'user-assigned name for the fix',
                 }
-                raise cr.CVGError(msg[prefix] + ' is not provided.')
+                raise cr.CRError(msg[prefix] + ' is not provided.')
 
             var_name = '{}{}'.format(prefix, arg)
 
@@ -161,7 +161,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
         if var_name is None:
             msg = 'A `variable` or a `compute`, or a `fix` must '
             msg += 'previously be defined.'
-            raise cr.CVGError(msg)
+            raise cr.CRError(msg)
 
         if arg in ('lbound', 'lb'):
             i += 1
@@ -170,7 +170,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             except IndexError:
                 msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
                 msg += 'lower bound is not provided.'
-                raise cr.CVGError(msg)
+                raise cr.CRError(msg)
 
             # parse the value
             try:
@@ -181,7 +181,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
 
                 if var_lb is None:
                     msg = 'lb must be followed by an equal-style variable.'
-                    raise cr.CVGError(msg)
+                    raise cr.CRError(msg)
 
             var_ub = None
 
@@ -199,7 +199,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 except IndexError:
                     msg = 'the {} {}\'s'.format(var_name, _PREFIX_NAME[prefix])
                     msg += ' upper bound is not provided.'
-                    raise cr.CVGError(msg)
+                    raise cr.CRError(msg)
 
                 try:
                     var_ub = float(arg)
@@ -208,7 +208,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                     var_ub = lmp.extract_variable(arg, None, 0)
                     if var_ub is None:
                         msg = 'ub must be followed by an equal-style variable.'
-                        raise cr.CVGError(msg)
+                        raise cr.CRError(msg)
             else:
                 i -= 1
 
@@ -221,7 +221,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             except IndexError:
                 msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
                 msg += 'upper bound is not provided.'
-                raise cr.CVGError(msg)
+                raise cr.CRError(msg)
 
             # being here means that this ctrl variable has no lower bound
             var_lb = None
@@ -233,7 +233,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 var_ub = lmp.extract_variable(arg, None, 0)
                 if var_ub is None:
                     msg = 'ub must be followed by an equal-style variable.'
-                    raise cr.CVGError(msg)
+                    raise cr.CRError(msg)
 
             ctrl_map[var_name] = tuple([var_lb, var_ub])
 
@@ -244,7 +244,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             except IndexError:
                 msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
                 msg += 'population_mean is not provided.'
-                raise cr.CVGError(msg)
+                raise cr.CRError(msg)
 
             if population_mean is None:
                 population_mean = {}
@@ -257,7 +257,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 if value is None:
                     msg = 'population_mean must be followed by an '
                     msg += 'equal-style variable.'
-                    raise cr.CVGError(msg)
+                    raise cr.CRError(msg)
 
             population_mean[var_name] = value
 
@@ -268,7 +268,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             except IndexError:
                 msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
                 msg += 'population_std is not provided.'
-                raise cr.CVGError(msg)
+                raise cr.CRError(msg)
 
             if population_std is None:
                 population_std = {}
@@ -281,7 +281,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 if value is None:
                     msg = 'population_std must be followed by an '
                     msg += 'equal-style variable.'
-                    raise cr.CVGError(msg)
+                    raise cr.CRError(msg)
 
             population_std[var_name] = value
 
@@ -331,7 +331,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                     except ValueError:
                         msg = 'population_args must be followed by a '
                         msg += 'list or tuple of values(s).'
-                        raise cr.CVGError(msg)
+                        raise cr.CRError(msg)
 
                 population_args[var_name].append(value)
 
@@ -354,7 +354,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 if value is None:
                     msg = 'population_loc must be followed by an '
                     msg += 'equal-style variable.'
-                    raise cr.CVGError(msg)
+                    raise cr.CRError(msg)
 
             population_loc[var_name] = value
 
@@ -377,7 +377,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 if value is None:
                     msg = 'population_scale must be followed by an '
                     msg += 'equal-style variable.'
-                    raise cr.CVGError(msg)
+                    raise cr.CRError(msg)
 
             population_scale[var_name] = value
 
@@ -393,7 +393,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             msg += 'controling the stability of the simulation to be '
             msg += 'bounded by lower and/or upper bound. It can not be '
             msg += 'used for the run length control at the same time.'
-            raise cr.CVGError(msg)
+            raise cr.CRError(msg)
 
         if argument_counter == len(ctrl_map):
             var_name = arguments_map[0]
@@ -406,7 +406,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             msg += 'controling the stability of the simulation to be '
             msg += 'bounded by lower and/or upper bounds. They can not be '
             msg += 'used for the run length control at the same time.'
-            raise cr.CVGError(msg)
+            raise cr.CRError(msg)
 
     def get_trajectory(step: int, args: dict) -> np.ndarray:
         """Get trajectory vector or array of values.
@@ -447,38 +447,38 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                     lb, ub = ctrl_map[var_name]
                     if lb and ub:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
-                            val = lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
+                            val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val <= lb or val >= ub:
                                 msg = 'the "{}"\'s value = '.format(var_name)
                                 msg += '{} is out of bound of ('.format(val)
                                 msg += '{} {}). '.format(lb, ub)
                                 msg += 'This run is unstable.'
-                                raise cr.CVGError(msg)
+                                raise cr.CRError(msg)
                         continue
                     elif lb:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
-                            val = lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
+                            val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val <= lb:
                                 msg = 'the "{}"\'s value = '.format(var_name)
                                 msg += '{} is out of bound of ('.format(val)
                                 msg += '{} ...). '.format(lb)
                                 msg += 'This run is unstable.'
-                                raise cr.CVGError(msg)
+                                raise cr.CRError(msg)
                         continue
                     elif ub:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
-                            val = lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
+                            val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val >= ub:
                                 msg = 'the "{}"\'s value = '.format(var_name)
                                 msg += '{} is out of bound of ('.format(val)
                                 msg += '... {}). '.format(ub)
                                 msg += 'This run is unstable.'
-                                raise cr.CVGError(msg)
+                                raise cr.CRError(msg)
                         continue
                 else:
                     for i, _nstep in enumerate(range(args['nstep'], args['nstep'] + ncountmax)):
                         trajectory[_j, i] = \
-                            lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
+                            lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                     _j += 1
             args['nstep'] += ncountmax
             if _ndim == 1:
@@ -488,14 +488,14 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
         if argument_counter == 1:
             trajectory = np.empty((ncountmax), dtype=np.float64)
             for i, _nstep in enumerate(range(args['nstep'], args['nstep'] + ncountmax)):
-                trajectory[i] = lmp.extract_fix('cvg_fix', 0, 1, _nstep, 0)
+                trajectory[i] = lmp.extract_fix('cr_fix', 0, 1, _nstep, 0)
             args['nstep'] += ncountmax
             return trajectory
 
         trajectory = np.empty((argument_counter, ncountmax), dtype=np.float64)
         for j in range(argument_counter):
             for i, _nstep in enumerate(range(args['nstep'], args['nstep'] + ncountmax)):
-                trajectory[j, i] = lmp.extract_fix('cvg_fix', 0, 2, _nstep, j)
+                trajectory[j, i] = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
         args['nstep'] += ncountmax
         return trajectory
 
@@ -610,12 +610,12 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             nskip=cr._default._DEFAULT_NSKIP,
             minimum_correlation_time=cr._default._DEFAULT_MINIMUM_CORRELATION_TIME,
             dump_trajectory=DUMP_TRAJECTORY,
-            dump_trajectory_fp='convergence_trajectory.edn',
+            dump_trajectory_fp='kim_convergence_trajectory.edn',
             fp='return',
             fp_format='txt')
     except Exception as e:
         msg = '{}'.format(e)
-        raise cr.CVGError(msg)
+        raise cr.CRError(msg)
 
     cmd = "variable run_var string ''"
     lmp.command(cmd)
