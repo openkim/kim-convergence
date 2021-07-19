@@ -1,2 +1,2 @@
 include versioneer.py
-include convergence/_version.py
+include kim_convergence/_version.py

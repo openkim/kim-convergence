@@ -1,13 +1,13 @@
-r"""Convergence package."""
+r"""kim-convergence package."""
 
 from .batch import batch
 # from .geweke import geweke
 from ._default import *
 from .err import \
-    CVGError, \
-    CVGSampleSizeError, \
-    cvg_warning, \
-    cvg_check
+    CRError, \
+    CRSampleSizeError, \
+    cr_warning, \
+    cr_check
 from .outlier import \
     outlier_methods, \
     outlier_test
@@ -108,10 +108,10 @@ __all__ = [
     'batch',
     # 'geweke',
     # err module
-    'CVGError',
-    'CVGSampleSizeError',
-    'cvg_warning',
-    'cvg_check',
+    'CRError',
+    'CRSampleSizeError',
+    'cr_warning',
+    'cr_check',
     # outlier module
     'outlier_methods',
     'outlier_test',
@@ -212,6 +212,5 @@ __all__ = [
 __author__ = 'Yaser Afshar <yafshar@openkim.org>'
 
 
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+from . import _version
+__version__ = _version.get_versions()['version']
