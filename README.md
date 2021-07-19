@@ -117,92 +117,190 @@ conda search kim-convergence --channel conda-forge
 
 ## Basic Usage
 
-The basic use is to control the length of the time series data from a
-simulation run. For example, one can start drawing ``initial_run_length`` data
-points (the number of observations or samples) by calling the ``get_trajectory``
-function in a loop to reach equilibration or pass the ``warm-up`` period.
+Basic usage involves importing kim-convergence and use the utility to control
+the length of the time series data from a simulation run or a sampling approach,
+or a dump file from the previously done simulation.
 
-**Note** ``get_trajectory`` is a callback function with a specific signature of
-`get_trajectory(nstep: int) -> 1darray` if we only have one variable or
-`get_trajectory(nstep: int) -> 2darray` with the shape of
-`(number_of_variables, nstep)`.
+The main requirement is a `get_trajectory` function. **`get_trajectory`** is a
+callback function with a specific signature of
 
-All the values returned from this function should be finite values, otherwise
-the code will stop wih error message explaining the issue.
+```get_trajectory(nstep: int) -> 1darray```
 
-Example:
+if we only have one variable or,
+
+```get_trajectory(nstep: int) -> 2darray```
+
+with the shape of return array as,
+
+```(number_of_variables, nstep)```.
+
+For example,
 
 ```py
-  rng = np.random.RandomState(12345)
-  stop = 0
+rng = np.random.RandomState(12345)
+stop = 0
 
-  def get_trajectory(step: int) -> np.ndarray:
-    global stop
-    start = stop
-    if 100000 < start + step:
-      step = 100000 - start
-    stop += step
-    data = np.ones(step) * 10 + (rng.random_sample(step) - 0.5)
-    return data
+def get_trajectory(step: int) -> np.ndarray:
+  global stop
+  start = stop
+  if 100000 < start + step:
+    step = 100000 - start
+  stop += step
+  data = np.ones(step) * 10 + (rng.random_sample(step) - 0.5)
+  return data
 ```
+
+**NOTE:**
 
 To use extra arguments in calling the ``get_trajectory`` function, one can use
 the other specific signature of
-`get_trajectory(nstep: int, args: dict) -> 1darray` or
-`get_trajectory(nstep: int, args: dict) -> 2darray` with the shape of
-`(number_of_variables, nstep)` where all the required variables can be pass
-thrugh the args dictionary.
+
+```get_trajectory(nstep: int, args: dict) -> 1darray```
+
+or
+
+```get_trajectory(nstep: int, args: dict) -> 2darray```,
+
+where all the extra required parameters and arguments can be provided with the
+args.
 
 ```py
-  rng = np.random.RandomState(12345)
-  targs = {'stop': 0}
+rng = np.random.RandomState(12345)
+args = {'stop': 0, 'maximum_steps': 100000}
 
-  def get_trajectory(step: int, targs: dict) -> np.ndarray:
-    start = targs['stop']
-    if 100000 < start + step:
-      step = 100000 - start
-    targs['stop'] += step
-    data = np.ones(step) * 10 + (rng.random_sample(step) - 0.5)
-    return data
+def get_trajectory(step: int, args: dict) -> np.ndarray:
+  start = args['stop']
+  if args['maximum_steps'] < start + step:
+    step = args['maximum_steps'] - start
+  args['stop'] += step
+  data = np.ones(step) * 10 + (rng.random_sample(step) - 0.5)
+  return data
 ```
 
-Then the code continues drawing observations until some pre-specified level of
-``absolute`` or ``relative`` precision has been reached. The relative
-``precision`` is defined as a half-width of the estimator's confidence interval
-(CI). At each call, an upper confidence limit (``UCL``) is approximated.
-If UCL is less than the pre-specified absolute precision ``absolute_accuracy``
-or if the relative UCL (UCL divided by the computed sample mean) is less than a
-pre-specified value ``relative_accuracy``, the drawing of observations is
-terminated.
+---
+
+Then call the `run_length_control` function as below,
+
+```py
+import kim_convergence as cr
+
+msg = cr.run_length_control(
+  get_trajectory=get_trajectory,
+  number_of_variables=1,
+  initial_run_length=1000,
+  maximum_run_length=100000,
+  relative_accuracy=0.01,
+  fp_format='json'
+)
+```
+
+or
+
+```py
+import kim_convergence as cr
+
+msg = cr.run_length_control(
+  get_trajectory=get_trajectory,
+  get_trajectory_args=args,
+  number_of_variables=1,
+  initial_run_length=1000,
+  maximum_run_length=100000,
+  relative_accuracy=0.01,
+  fp_format='json'
+)
+```
+
+An estimate produced by a simulation typically has an accuracy requirement and
+is an input to the utility. This requirement means that the experimenter wishes
+to run the simulation only until an estimate meets this accuracy requirement.
+Running the simulation less than this length would not provide the information
+needed while running it longer would be a waste of computing time. In the above
+example, the accuracy requirement is specified as the relative accuracy.
+
+In case of having more than one variable,
+
+```py
+rng = np.random.RandomState(12345)
+stop = 0
+
+def get_trajectory(step: int) -> np.ndarray:
+  global stop
+  start = stop
+  if 100000 < start + step:
+    step = 100000 - start
+  stop += step
+  data = np.ones((3, step)) * 10 + (rng.random_sample(3 * step).reshape(3, step) - 0.5)
+  return data
+```
+
+Then call the `run_length_control` function as below,
+
+```py
+import kim_convergence as cr
+
+msg = cr.run_length_control(
+  get_trajectory=get_trajectory,
+  number_of_variables=3,
+  initial_run_length=1000,
+  maximum_run_length=100000,
+  relative_accuracy=0.01,
+  fp_format='json'
+)
+```
+
+**NOTE:**
+
+All the values returned from this `get_trajectory` function should be finite
+values, otherwise the code will stop wih error message explaining the issue.
+
+```py
+ERROR(@_get_trajectory): there is/are value/s in the input which is/are non-finite or not number.
+```
+
+Thus, one should remove infinit values or Not a Number (NaN) values from the
+returning array within the `get_trajectory` function.
+
+---
+
+The run-length control procedure employs `initial_run_length` parameter. It
+begins at time 0 and starts calling the `get_trajectory` function with the
+provided number of steps (e.g. ```initial_run_length=1000```). At this point,
+and with no assumptions about the distribution of the observable of interest,
+it tries to estimate an equilibration time. Failing to find the transition
+point will request more data and call the `get_trajectory` function until it
+finds the equilibration time or hits the maximum run length limit
+(e.g. ```maximum_run_length=100000```).
+
+At this point, and after finding an optimal equilibration time, the confidence
+interval (CI) generation method is applied to the set of available data points.
+If the resulting confidence interval met the provided accuracy value
+(e.g. ```relative_accuracy=0.01```), the simulation is terminated. If not, the
+simulation is continued by requesting more data and calling the `get_trajectory`
+function again and again until it does. This procedure continues until the
+criteria is met or it reaches the maximum run length limit.
+
+The `relative_accuracy` as mentioned above, is the relative precision and
+defined as a half-width of the estimator's confidence interval or an
+approximated upper confidence limit (UCL) divided by the computed sample mean.
 
 The UCL is calculated as a `confidence_coefficient%` confidence interval for
-the mean, using the portion of the time series data, which is in the
-stationary region.
-
-The ``Relative accuracy`` is the confidence interval half-width or UCL divided
-by the sample mean. If the ratio is bigger than `relative_accuracy`, the length
-of the time series is deemed not long enough to estimate the mean with
-sufficient accuracy, which means the run should be extended.
-
-In order to avoid problems caused by sequential UCL evaluation cost, this
-calculation should not be repeated too frequently. Heidelberger and Welch (1981)
-[2]_ suggested increasing the run length by a factor of
-`run_length_factor > 1.5`, each time, so that estimate has the same, reasonably
-large proportion of new data.
+the mean, using the portion of the time series data, which is in the stationary
+region. If the ratio is bigger than `relative_accuracy`, the length of the time
+series is deemed not long enough to estimate the mean with sufficient accuracy,
+which means the run should be extended.
 
 The accuracy parameter `relative_accuracy` specifies the maximum relative error
-that will be allowed in the mean value of time-series data. In other words, the
-distance from the confidence limit(s) to the mean (which is also known as the
-precision, half-width, or margin of error). A value of `0.01` is usually used to
-request two digits of accuracy, and so forth.
+that will be allowed in the mean value of the data point series. In other words,
+the distance from the confidence limit(s) to the mean (which is also known as
+the precision, half-width, or margin of error). A value of `0.01` is usually
+used to request two digits of accuracy, and so forth.
 
-The parameter ``confidence_coefficient`` is the confidence coefficient and
-often, the values 0.95 is used. For the confidence coefficient,
-`confidence_coefficient`, we can use the following interpretation,
-
-If thousands of samples of n items are drawn from a population using simple
-random sampling and a confidence interval is calculated for each sample, the
-proportion of those intervals that will include the true population mean is
+The parameter ```confidence_coefficient``` is the confidence coefficient and
+often, the values ```0.95``` is used. For the confidence coefficient,
+`confidence_coefficient`, we can use the following interpretation, If thousands
+of samples of n items are drawn from a population using simple random sampling
+and a confidence interval is calculated for each sample, the proportion of
+those intervals that will include the true population mean is
 `confidence_coefficient`.
 
 ## Contact us
