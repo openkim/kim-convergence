@@ -6,11 +6,11 @@ import os
 import unittest
 
 try:
-    import convergence as cr
+    import kim_convergence as cr
 except:
-    raise Exception('Failed to import `convergence` utility module')
+    raise Exception('Failed to import `kim-convergence` utility module')
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 start = 0
 stop = 0

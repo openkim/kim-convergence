@@ -3,11 +3,11 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cr
+    import kim_convergence as cr
 except:
-    raise Exception('Failed to import `convergence` utility module')
+    raise Exception('Failed to import `kim-convergence` utility module')
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 
 class TestUCLMSERModule(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestUCLMSERModule(unittest.TestCase):
         x = np.ones(n)
 
         # x is not one dimensional
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x.reshape(5, 20))
 
         # constant data sets
@@ -32,18 +32,18 @@ class TestUCLMSERModule(unittest.TestCase):
         if n > 10:
             x[10] = np.nan
 
-        self.assertRaises(CVGError, cr.mser_m, x)
+        self.assertRaises(CRError, cr.mser_m, x)
 
         # inf in the input
         if n > 10:
             x[10] = np.inf
 
-        self.assertRaises(CVGError, cr.mser_m, x)
+        self.assertRaises(CRError, cr.mser_m, x)
 
         if n > 10:
             x[10] = -np.inf
 
-        self.assertRaises(CVGError, cr.mser_m, x)
+        self.assertRaises(CRError, cr.mser_m, x)
 
         # const value array less than batch_size
         # one value array
@@ -65,31 +65,31 @@ class TestUCLMSERModule(unittest.TestCase):
         x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
         # invalid int ignore_end
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end=0)
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end=-1)
 
         # invalid float ignore_end
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end=0.0)
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end=1.0)
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end=-0.1)
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end=1.1)
 
         # invalid ignore_end
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end="None")
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end="1")
 
         # invalid ignore_end
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end=120)
-        self.assertRaises(CVGError, cr.mser_m,
+        self.assertRaises(CRError, cr.mser_m,
                           x, ignore_end=100)
 
         # Create synthetic data

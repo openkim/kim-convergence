@@ -3,11 +3,11 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cr
+    import kim_convergence as cr
 except:
-    raise Exception('Failed to import `convergence` utility module')
+    raise Exception('Failed to import `kim-convergence` utility module')
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 
 class TestStatsNonNormalTestModule(unittest.TestCase):
@@ -17,31 +17,31 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
         """Test check_population_cdf_args function."""
         population_cdf = 'unknown'
         population_args = ()
-        self.assertRaises(CVGError, cr.check_population_cdf_args,
+        self.assertRaises(CRError, cr.check_population_cdf_args,
                           population_cdf=population_cdf,
                           population_args=population_args)
 
         population_cdf = 'alpha'
         population_args = ()
-        self.assertRaises(CVGError, cr.check_population_cdf_args,
+        self.assertRaises(CRError, cr.check_population_cdf_args,
                           population_cdf=population_cdf,
                           population_args=population_args)
 
         population_cdf = 'alpha'
         population_args = (2, 2)
-        self.assertRaises(CVGError, cr.check_population_cdf_args,
+        self.assertRaises(CRError, cr.check_population_cdf_args,
                           population_cdf=population_cdf,
                           population_args=population_args)
 
         population_args = ()
-        self.assertRaises(CVGError, cr.check_population_cdf_args,
+        self.assertRaises(CRError, cr.check_population_cdf_args,
                           population_cdf=population_cdf,
                           population_args=population_args)
 
         for cdf in cr.ContinuousDistributions.keys():
             args = np.arange(
                 cr.ContinuousDistributionsNumberOfRequiredArguments[cdf] + 1)
-            self.assertRaises(CVGError, cr.check_population_cdf_args,
+            self.assertRaises(CRError, cr.check_population_cdf_args,
                               population_cdf=cdf,
                               population_args=args)
 
@@ -51,7 +51,7 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
         population_args = ()
         population_loc = None
         population_scale = None
-        self.assertRaises(CVGError, cr.get_distribution_stats,
+        self.assertRaises(CRError, cr.get_distribution_stats,
                           population_cdf=population_cdf,
                           population_args=population_args,
                           population_loc=population_loc,

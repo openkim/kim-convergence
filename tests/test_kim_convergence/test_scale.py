@@ -4,11 +4,11 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cr
+    import kim_convergence as cr
 except:
-    raise Exception('Failed to import `convergence` utility module')
+    raise Exception('Failed to import `kim-convergence` utility module')
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 
 class TestScaleModule(unittest.TestCase):
@@ -48,12 +48,12 @@ class TestScaleModule(unittest.TestCase):
         self.assertTrue(np.allclose(inverse_scaled_x, x))
 
         x = [-1., 3., 100., np.nan]
-        self.assertRaises(CVGError, mms.scale, x)
+        self.assertRaises(CRError, mms.scale, x)
 
         x = [-1., np.inf, 3., 100.]
-        self.assertRaises(CVGError, mms.scale, x)
+        self.assertRaises(CRError, mms.scale, x)
 
-        self.assertRaises(CVGError, mms.scale, self.x.reshape((2, -1)))
+        self.assertRaises(CRError, mms.scale, self.x.reshape((2, -1)))
 
     def test_translate_scale(self):
         """Test translate_scale function."""
@@ -72,7 +72,7 @@ class TestScaleModule(unittest.TestCase):
         inverse_scaled_x = tsc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, self.x))
 
-        self.assertRaises(CVGError, tsc.scale, self.x.reshape((2, -1)))
+        self.assertRaises(CRError, tsc.scale, self.x.reshape((2, -1)))
 
     def test_standard_scale(self):
         """Test standard_scale function."""
@@ -94,7 +94,7 @@ class TestScaleModule(unittest.TestCase):
         inverse_scaled_x = ssc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, x))
 
-        self.assertRaises(CVGError, ssc.scale, self.x.reshape((2, -1)))
+        self.assertRaises(CRError, ssc.scale, self.x.reshape((2, -1)))
 
     def test_maxabs_scale(self):
         """Test maxabs_scale function."""
@@ -109,4 +109,4 @@ class TestScaleModule(unittest.TestCase):
         inverse_scaled_x = msc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, x))
 
-        self.assertRaises(CVGError, msc.scale, self.x.reshape((2, -1)))
+        self.assertRaises(CRError, msc.scale, self.x.reshape((2, -1)))

@@ -3,11 +3,11 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cr
+    import kim_convergence as cr
 except:
-    raise Exception('Failed to import `convergence` utility module')
+    raise Exception('Failed to import `kim-convergence` utility module')
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 
 class TestBatchModule(unittest.TestCase):
@@ -18,23 +18,23 @@ class TestBatchModule(unittest.TestCase):
         x = np.ones(10)
 
         # dimension
-        self.assertRaises(CVGError, cr.batch, x.reshape((2, 5)))
+        self.assertRaises(CRError, cr.batch, x.reshape((2, 5)))
 
         # batch_size
-        self.assertRaises(CVGError, cr.batch, x, batch_size=5.0)
-        self.assertRaises(CVGError, cr.batch, x, batch_size=-1)
-        self.assertRaises(CVGError, cr.batch, x, batch_size=20)
-        self.assertRaises(CVGError, cr.batch, x, batch_size='20')
-        self.assertRaises(CVGError, cr.batch, x, batch_size=None)
+        self.assertRaises(CRError, cr.batch, x, batch_size=5.0)
+        self.assertRaises(CRError, cr.batch, x, batch_size=-1)
+        self.assertRaises(CRError, cr.batch, x, batch_size=20)
+        self.assertRaises(CRError, cr.batch, x, batch_size='20')
+        self.assertRaises(CRError, cr.batch, x, batch_size=None)
 
         # scale method
-        self.assertRaises(CVGError, cr.batch, x,
+        self.assertRaises(CRError, cr.batch, x,
                           batch_size=5, scale=cr.translate_scale,
                           with_centering=True)
-        self.assertRaises(CVGError, cr.batch, x,
+        self.assertRaises(CRError, cr.batch, x,
                           batch_size=5, scale='new_scale_metod',
                           with_centering=True)
-        self.assertRaises(CVGError, cr.batch, x,
+        self.assertRaises(CRError, cr.batch, x,
                           batch_size=5, scale=None,
                           with_centering=True)
 
@@ -43,7 +43,7 @@ class TestBatchModule(unittest.TestCase):
 
         n = 100
         x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
-        self.assertRaises(CVGError, cr.batch, x, batch_size=101)
+        self.assertRaises(CRError, cr.batch, x, batch_size=101)
 
         x = np.ones(n)
         b = cr.batch(x,
@@ -134,13 +134,13 @@ class TestBatchModule(unittest.TestCase):
             self.assertTrue(i == 0.0)
 
         x[0] = np.nan
-        self.assertRaises(CVGError, cr.batch, x)
+        self.assertRaises(CRError, cr.batch, x)
 
         x[0] = np.inf
-        self.assertRaises(CVGError, cr.batch, x)
+        self.assertRaises(CRError, cr.batch, x)
 
         x[0] = np.NaN
-        self.assertRaises(CVGError, cr.batch, x)
+        self.assertRaises(CRError, cr.batch, x)
 
         rng = np.random.RandomState(12345)
 
@@ -158,7 +158,7 @@ class TestBatchModule(unittest.TestCase):
 
         try:
             b = cr.batch(x, func=np.median)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)

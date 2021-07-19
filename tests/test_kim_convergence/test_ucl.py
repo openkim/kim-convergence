@@ -4,11 +4,11 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cr
+    import kim_convergence as cr
 except:
-    raise Exception('Failed to import `convergence` utility module')
+    raise Exception('Failed to import `kim-convergence` utility module')
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 
 def first_order_autoregressive_process(*,
@@ -79,7 +79,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             # Initialize the HeidelbergerWelch object
             ucl_base = cr.ucl.UCLBase()
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -103,7 +103,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             truncated, truncated_index = \
                 ucl_base.estimate_equilibration_length(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -114,7 +114,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             ucl_base.set_indices(x_cut)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -132,7 +132,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             # Initialize the HeidelbergerWelch object
             heidel_welch = cr.HeidelbergerWelch()
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -184,7 +184,7 @@ class TestUCLModule(unittest.TestCase):
             # Initialize the HeidelbergerWelch object
             heidel_welch.set_heidel_welch_constants(
                 confidence_coefficient=0.95, heidel_welch_number_points=50)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -228,43 +228,43 @@ class TestUCLModule(unittest.TestCase):
         heidel_welch.unset_heidel_welch_constants()
 
         self.assertRaises(
-            CVGError,
+            CRError,
             heidel_welch.set_heidel_welch_constants,
             confidence_coefficient=0.0,
             heidel_welch_number_points=50)
 
         self.assertRaises(
-            CVGError,
+            CRError,
             heidel_welch.set_heidel_welch_constants,
             confidence_coefficient=1.0,
             heidel_welch_number_points=50)
 
         self.assertRaises(
-            CVGError,
+            CRError,
             heidel_welch.set_heidel_welch_constants,
             confidence_coefficient=0.95,
             heidel_welch_number_points=0)
 
         self.assertRaises(
-            CVGError,
+            CRError,
             heidel_welch.set_heidel_welch_constants,
             confidence_coefficient=0.95,
             heidel_welch_number_points=10)
 
         self.assertRaises(
-            CVGError,
+            CRError,
             heidel_welch.set_heidel_welch_constants,
             confidence_coefficient=0.95,
             heidel_welch_number_points=50.0)
 
         self.assertRaises(
-            CVGError,
+            CRError,
             heidel_welch.set_heidel_welch_constants,
             confidence_coefficient=0.95,
             heidel_welch_number_points=-10.0)
 
         self.assertRaises(
-            CVGError,
+            CRError,
             heidel_welch.set_heidel_welch_constants,
             confidence_coefficient=0.95,
             heidel_welch_number_points='50')
@@ -275,7 +275,7 @@ class TestUCLModule(unittest.TestCase):
             # Initialize the HeidelbergerWelch object
             heidel_welch.set_heidel_welch_constants(
                 confidence_coefficient=0.95, heidel_welch_number_points=50)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -340,7 +340,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             # Initialize the HeidelbergerWelch object
             heidel_welch = cr.HeidelbergerWelch()
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -349,17 +349,17 @@ class TestUCLModule(unittest.TestCase):
             # Initialize the HeidelbergerWelch object
             heidel_welch.set_heidel_welch_constants(
                 confidence_coefficient=0.95, heidel_welch_number_points=50)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         x = np.arange(100.)
 
-        self.assertRaises(CVGError, heidel_welch.ucl, x.reshape(5, 20))
+        self.assertRaises(CRError, heidel_welch.ucl, x.reshape(5, 20))
 
         # input data points are not sufficient
         x = np.arange(10.)
 
-        self.assertRaises(CVGError, heidel_welch.ucl, x)
+        self.assertRaises(CRError, heidel_welch.ucl, x)
 
         rng = np.random.RandomState(12345)
 
@@ -370,7 +370,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             truncated, truncated_index = \
                 heidel_welch.estimate_equilibration_length(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -382,7 +382,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             upper_confidence_limit_1 = heidel_welch.ucl(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -391,7 +391,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             lower, upper = heidel_welch.ci(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -402,7 +402,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             relative_half_width_estimate = \
                 heidel_welch.relative_half_width_estimate(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -412,7 +412,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             upper_confidence_limit_2 = cr.heidelberger_welch_ucl(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -422,7 +422,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             upper_confidence_limit_2 = cr.heidelberger_welch_ucl(
                 x, obj=heidel_welch)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -431,21 +431,21 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             cr.heidelberger_welch_ci(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
 
         try:
             cr.heidelberger_welch_ci(x, obj=heidel_welch)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
 
         try:
             cr.heidelberger_welch_relative_half_width_estimate(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -453,7 +453,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             cr.heidelberger_welch_relative_half_width_estimate(
                 x, obj=heidel_welch)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -465,7 +465,7 @@ class TestUCLModule(unittest.TestCase):
         try:
             # Initialize the UncorrelatedSamples object
             usamples = cr.UncorrelatedSamples()
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -477,15 +477,15 @@ class TestUCLModule(unittest.TestCase):
 
         x = np.arange(100.)
 
-        self.assertRaises(CVGError, usamples.ucl, x.reshape(5, 20))
+        self.assertRaises(CRError, usamples.ucl, x.reshape(5, 20))
 
-        self.assertRaises(CVGError, usamples.ucl, x, confidence_coefficient=0)
-        self.assertRaises(CVGError, usamples.ucl, x, confidence_coefficient=1)
+        self.assertRaises(CRError, usamples.ucl, x, confidence_coefficient=0)
+        self.assertRaises(CRError, usamples.ucl, x, confidence_coefficient=1)
 
         # input data points are not sufficient
         x = np.arange(4.)
 
-        self.assertRaises(CVGError, usamples.ucl, x)
+        self.assertRaises(CRError, usamples.ucl, x)
 
         rng = np.random.RandomState(12345)
 
@@ -495,7 +495,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             usamples.ucl(x)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -508,7 +508,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             usamples.ucl(y)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertFalse(test_passed)
@@ -519,7 +519,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             ucl = usamples.ucl(y, uncorrelated_sample_indices=indices)
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -543,13 +543,13 @@ class TestUCLModule(unittest.TestCase):
         x = np.ones(n)
 
         # x is not one dimensional
-        self.assertRaises(CVGError, mser.ucl, x.reshape(5, 20))
+        self.assertRaises(CRError, mser.ucl, x.reshape(5, 20))
 
         # nan in the input
         if n > 10:
             x[10] = np.nan
 
-        self.assertRaises(CVGError, mser.ucl, x)
+        self.assertRaises(CRError, mser.ucl, x)
 
         rng = np.random.RandomState(12345)
 
@@ -567,7 +567,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             mser.ucl(x[truncated_i:])
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -591,7 +591,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             ucl = mser.ucl(x[truncated_i:])
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -610,13 +610,13 @@ class TestUCLModule(unittest.TestCase):
         x = np.ones(n)
 
         # x is not one dimensional
-        self.assertRaises(CVGError, mser.ucl, x.reshape(5, 20))
+        self.assertRaises(CRError, mser.ucl, x.reshape(5, 20))
 
         # nan in the input
         if n > 10:
             x[10] = np.nan
 
-        self.assertRaises(CVGError, mser.ucl, x)
+        self.assertRaises(CRError, mser.ucl, x)
 
         rng = np.random.RandomState(12345)
 
@@ -634,7 +634,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             mser.ucl(x[truncated_i:])
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -658,7 +658,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             ucl = mser.ucl(x[truncated_i:])
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)
@@ -675,13 +675,13 @@ class TestUCLModule(unittest.TestCase):
 
         x = np.arange(100)
 
-        self.assertRaises(CVGError,
+        self.assertRaises(CRError,
                           skart.estimate_equilibration_length,
                           x.reshape(5, 20))
 
         # input data points are not sufficient
-        self.assertRaises(CVGError, skart.estimate_equilibration_length, x)
-        self.assertRaises(CVGError, skart.ucl, x)
+        self.assertRaises(CRError, skart.estimate_equilibration_length, x)
+        self.assertRaises(CRError, skart.ucl, x)
 
         rng = np.random.RandomState(12345)
 
@@ -700,7 +700,7 @@ class TestUCLModule(unittest.TestCase):
 
         try:
             ucl = skart.ucl(x[truncated_i:])
-        except CVGError:
+        except CRError:
             test_passed = False
 
         self.assertTrue(test_passed)

@@ -3,11 +3,11 @@ import unittest
 import numpy as np
 
 try:
-    import convergence as cr
+    import kim_convergence as cr
 except:
-    raise Exception('Failed to import `convergence` utility module')
+    raise Exception('Failed to import `kim-convergence` utility module')
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 
 class TestStatsNormalTestModule(unittest.TestCase):
@@ -43,7 +43,7 @@ class TestStatsNormalTestModule(unittest.TestCase):
                                    population_mean=population_mean,
                                    significance_level=0.05))
 
-        self.assertRaises(CVGError, cr.t_test,
+        self.assertRaises(CRError, cr.t_test,
                           sample_mean=sample_mean,
                           sample_std=sample_std,
                           sample_size=sample_size,
@@ -226,7 +226,7 @@ class TestStatsNormalTestModule(unittest.TestCase):
                                             population_var=population_var,
                                             significance_level=0.05))
 
-        self.assertRaises(CVGError, cr.chi_square_test,
+        self.assertRaises(CRError, cr.chi_square_test,
                           sample_var=sample_var,
                           sample_size=sample_size,
                           population_var=population_var,
