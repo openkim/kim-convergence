@@ -117,6 +117,95 @@ conda search kim-convergence --channel conda-forge
 
 ## Basic Usage
 
+The basic use is to control the length of the time series data from a
+simulation run. For example, one can start drawing ``initial_run_length`` data
+points (the number of observations or samples) by calling the ``get_trajectory``
+function in a loop to reach equilibration or pass the ``warm-up`` period.
+
+**Note** ``get_trajectory`` is a callback function with a specific signature of
+`get_trajectory(nstep: int) -> 1darray` if we only have one variable or
+`get_trajectory(nstep: int) -> 2darray` with the shape of
+`(number_of_variables, nstep)`.
+
+All the values returned from this function should be finite values, otherwise
+the code will stop wih error message explaining the issue.
+
+Example:
+
+```py
+  rng = np.random.RandomState(12345)
+  stop = 0
+
+  def get_trajectory(step: int) -> np.ndarray:
+    global stop
+    start = stop
+    if 100000 < start + step:
+      step = 100000 - start
+    stop += step
+    data = np.ones(step) * 10 + (rng.random_sample(step) - 0.5)
+    return data
+```
+
+To use extra arguments in calling the ``get_trajectory`` function, one can use
+the other specific signature of
+`get_trajectory(nstep: int, args: dict) -> 1darray` or
+`get_trajectory(nstep: int, args: dict) -> 2darray` with the shape of
+`(number_of_variables, nstep)` where all the required variables can be pass
+thrugh the args dictionary.
+
+```py
+  rng = np.random.RandomState(12345)
+  targs = {'stop': 0}
+
+  def get_trajectory(step: int, targs: dict) -> np.ndarray:
+    start = targs['stop']
+    if 100000 < start + step:
+      step = 100000 - start
+    targs['stop'] += step
+    data = np.ones(step) * 10 + (rng.random_sample(step) - 0.5)
+    return data
+```
+
+Then the code continues drawing observations until some pre-specified level of
+``absolute`` or ``relative`` precision has been reached. The relative
+``precision`` is defined as a half-width of the estimator's confidence interval
+(CI). At each call, an upper confidence limit (``UCL``) is approximated.
+If UCL is less than the pre-specified absolute precision ``absolute_accuracy``
+or if the relative UCL (UCL divided by the computed sample mean) is less than a
+pre-specified value ``relative_accuracy``, the drawing of observations is
+terminated.
+
+The UCL is calculated as a `confidence_coefficient%` confidence interval for
+the mean, using the portion of the time series data, which is in the
+stationary region.
+
+The ``Relative accuracy`` is the confidence interval half-width or UCL divided
+by the sample mean. If the ratio is bigger than `relative_accuracy`, the length
+of the time series is deemed not long enough to estimate the mean with
+sufficient accuracy, which means the run should be extended.
+
+In order to avoid problems caused by sequential UCL evaluation cost, this
+calculation should not be repeated too frequently. Heidelberger and Welch (1981)
+[2]_ suggested increasing the run length by a factor of
+`run_length_factor > 1.5`, each time, so that estimate has the same, reasonably
+large proportion of new data.
+
+The accuracy parameter `relative_accuracy` specifies the maximum relative error
+that will be allowed in the mean value of time-series data. In other words, the
+distance from the confidence limit(s) to the mean (which is also known as the
+precision, half-width, or margin of error). A value of `0.01` is usually used to
+request two digits of accuracy, and so forth.
+
+The parameter ``confidence_coefficient`` is the confidence coefficient and
+often, the values 0.95 is used. For the confidence coefficient,
+`confidence_coefficient`, we can use the following interpretation,
+
+If thousands of samples of n items are drawn from a population using simple
+random sampling and a confidence interval is calculated for each sample, the
+proportion of those intervals that will include the true population mean is
+`confidence_coefficient`.
+
+
 ## Contact us
 
 If something is not working as you think it should or would like it to, please
