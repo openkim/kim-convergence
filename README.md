@@ -3,7 +3,7 @@
 [![Python package](https://github.com/openkim/kim-convergence/actions/workflows/python-package.yml/badge.svg)](https://github.com/openkim/kim-convergence/actions/workflows/python-package.yml)
 [![Anaconda-Server Badge](https://img.shields.io/conda/vn/conda-forge/kim-convergence.svg)](https://anaconda.org/conda-forge/kim-convergence)
 [![PyPI](https://img.shields.io/pypi/v/kim-convergence.svg)](https://pypi.python.org/pypi/kim-convergence)
-[![License](https://img.shields.io/badge/license-LGPLv2-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-LGPLv2+-blue)](LICENSE)
 
 ## How do you automatically estimate the length of the simulation required?
 
@@ -310,7 +310,7 @@ get in touch with us! Further, if you have an algorithm or any idea that you
 would want to try using the kim-convergence, please get in touch with us, we
 would be glad to help!
 
-[![Join the chat at https://gitter.im/kim-convergence](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kim-convergence/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/openkim/kim-convergence](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/openkim/kim-convergence/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Contributing
 
