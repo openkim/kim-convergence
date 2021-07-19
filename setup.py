@@ -7,12 +7,12 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='convergence',
+    name='kim-convergence',
     version=versioneer.get_version(),
-    description='convergence - convergence module.',
+    description='kim-convergence designed to help in automatic equilibration detection & run length control.',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/openkim/convergence',
+    url='https://github.com/openkim/kim-convergence',
     author='Yaser Afshar',
     author_email='yafshar@openkim.org',
     license='LGPLv2',
@@ -30,7 +30,9 @@ setup(
     install_requires=['numpy>=1.16', 'scipy', 'kim_edn', 'joblib'],
     python_requires='>=3.7',
     include_package_data=True,
-    keywords='convergence',
+    keywords=['convergence', 'automated equilibration detection',
+              'run length control', 'upper confidence limit',
+              'confidence interval'],
     packages=find_packages(),
     cmdclass=versioneer.get_cmdclass(),
 )
