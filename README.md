@@ -310,7 +310,7 @@ get in touch with us! Further, if you have an algorithm or any idea that you
 would want to try using the kim-convergence, please get in touch with us, we
 would be glad to help!
 
-[![Join the chat at https://gitter.im/openkim/kim-convergence](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/openkim/kim-convergence/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Gitter](https://badges.gitter.im/openkim/kim-convergence.svg)](https://gitter.im/openkim/kim-convergence?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Contributing
 
