@@ -205,7 +205,6 @@ random sampling and a confidence interval is calculated for each sample, the
 proportion of those intervals that will include the true population mean is
 `confidence_coefficient`.
 
-
 ## Contact us
 
 If something is not working as you think it should or would like it to, please
