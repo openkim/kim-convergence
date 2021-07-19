@@ -235,7 +235,7 @@ def _get_trajectory(get_trajectory: callable,
             tsd = get_trajectory(run_length)
         except:
             msg = 'failed to get the time-series data or do the '
-            msg += 'simulationfor {} number of steps.'.format(run_length)
+            msg += 'simulation for {} number of steps.'.format(run_length)
             raise CRError(msg)
 
     tsd = np.array(tsd, dtype=np.float64, copy=False)
@@ -618,8 +618,8 @@ def run_length_control(
     Then it continues drawing observations until some pre-specified level of
     absolute or relative precision has been reached.
 
-    The ``precision`` is defined as a half-width of the confidence interval
-    (CI) of the estimator.
+    The relative ``precision`` is defined as a half-width of the estimator's
+    confidence interval (CI).
 
     At each checkpoint, an upper confidence limit (``UCL``) is approximated.
     The drawing of observations is terminated, if UCL is less than the
