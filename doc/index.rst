@@ -1,9 +1,9 @@
-.. convergence documentation master file, created by
+.. kim-convergence documentation master file, created by
    sphinx-quickstart on Mon May 18 13:47:42 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to convergence's documentation!
+Welcome to kim-convergence's documentation!
 =======================================
 
 .. toctree::
@@ -11,7 +11,7 @@ Welcome to convergence's documentation!
    :caption: Contents:
 
 .. toctree::
-   convergence
+   kim_convergence
    :maxdepth: 2
    :caption: Package reference:
 
@@ -23,4 +23,4 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. _`github page`: https://github.com/yafshar/convergence
+.. _`github page`: https://github.com/yafshar/kim-convergence

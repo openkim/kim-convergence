@@ -1,5 +1,5 @@
-convergence package
+kim-convergence package
 ===================
 
-.. automodule:: convergence
+.. automodule:: kim-convergence
     :members:
