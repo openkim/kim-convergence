@@ -13,7 +13,7 @@ import numpy as np
 from typing import Optional, Union, List
 
 from .statistical_inefficiency import si_methods
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_SI, \
     _DEFAULT_FFT, \
@@ -25,7 +25,7 @@ from convergence._default import \
     _DEFAULT_WITH_CENTERING, \
     _DEFAULT_WITH_SCALING, \
     _DEFAULT_NUMBER_OF_CORES
-from convergence.err import CVGError, CVGSampleSizeError
+from kim_convergence.err import CRError, CRSampleSizeError
 
 
 __all__ = [
@@ -46,7 +46,7 @@ def _estimate_equilibration_length(
     try:
         si_value = si_func(
             x, fft=fft, minimum_correlation_time=minimum_correlation_time)
-    except CVGError:
+    except CRError:
         si_value = x_size
     effective_samples_size = x_size / si_value
     return effective_samples_size, si_value, t
@@ -110,7 +110,7 @@ def estimate_equilibration_length(
 
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Get the length of the timeseries.
     time_series_data_size = time_series_data.size
@@ -120,25 +120,25 @@ def estimate_equilibration_length(
             msg = 'method {} not found. Valid statistical '.format(si)
             msg += 'inefficiency (si) methods are:\n\t- '
             msg += '{}'.format('\n\t- '.join(si_methods))
-            raise CVGError(msg)
+            raise CRError(msg)
     elif si is None:
         si = 'statistical_inefficiency'
     else:
         msg = 'si is not a `str` or `None`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     si_func = si_methods[si]
 
     if not isinstance(nskip, int):
         if nskip is not None:
             msg = 'nskip must be an `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         nskip = 1
 
     elif nskip < 1:
         msg = 'nskip must be a positive `int`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not isinstance(ignore_end, int):
         if ignore_end is None:
@@ -148,43 +148,43 @@ def estimate_equilibration_length(
                 msg = 'invalid ignore_end = {}. If '.format(ignore_end)
                 msg += 'ignore_end input is a `float`, it should be in a '
                 msg += '`(0, 1)` range.'
-                raise CVGError(msg)
+                raise CRError(msg)
             ignore_end *= time_series_data_size
             ignore_end = max(1, int(ignore_end))
         else:
             msg = 'invalid ignore_end = {}. '.format(ignore_end)
             msg += 'ignore_end is not an `int`, `float`, or `None`.'
-            raise CVGError(msg)
+            raise CRError(msg)
     elif ignore_end < 1:
         msg = 'invalid ignore_end = {}. '.format(ignore_end)
         msg += 'ignore_end should be a positive `int`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Upper bound check
     if si == 'geyer_r_statistical_inefficiency':
         if time_series_data_size < 4:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGSampleSizeError(msg)
+            raise CRSampleSizeError(msg)
         ignore_end = max(3, ignore_end)
     elif si == 'geyer_split_r_statistical_inefficiency':
         if time_series_data_size < 8:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGSampleSizeError(msg)
+            raise CRSampleSizeError(msg)
         ignore_end = max(7, ignore_end)
     elif si == 'geyer_split_statistical_inefficiency':
         if time_series_data_size < 8:
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "{}".'.format(si)
-            raise CVGSampleSizeError(msg)
+            raise CRSampleSizeError(msg)
         ignore_end = max(7, ignore_end)
 
     if time_series_data_size <= ignore_end:
         msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
         msg = 'Wrong number of data points is requested to be '
         msg += 'ignored from {} total points.'.format(time_series_data_size)
-        raise CVGSampleSizeError(msg)
+        raise CRSampleSizeError(msg)
 
     # Special case if timeseries is constant.
     _std = time_series_data.std()
@@ -192,7 +192,7 @@ def estimate_equilibration_length(
     if not np.isfinite(_std):
         msg = 'there is at least one value in the input '
         msg += 'array which is non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         # index and si
@@ -247,7 +247,7 @@ def estimate_equilibration_length(
             si_value = si_func(
                 x, fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
-        except CVGError:
+        except CRError:
             si_value = x_size
 
         effective_samples_size_ = x_size / si_value

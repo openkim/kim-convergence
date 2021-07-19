@@ -8,8 +8,8 @@ from math import isclose, pi, sqrt
 import numpy as np
 from typing import Optional, Union, List
 
-from convergence._default import _DEFAULT_ABS_TOL
-from convergence import CVGError
+from kim_convergence._default import _DEFAULT_ABS_TOL
+from kim_convergence import CRError
 
 __all__ = [
     'get_fft_optimal_size',
@@ -91,12 +91,12 @@ def get_fft_optimal_size(input_size: int) -> int:
     # Check inputs
     if not isinstance(input_size, int):
         msg = 'input_size must be an `int`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if input_size < 7:
         if input_size < 0:
             msg = 'input_size must be a positive `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
         return input_size
 
     # Return if it is power of 2
@@ -181,19 +181,19 @@ def auto_covariance(x: Union[np.ndarray, List[float]],
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Data size
     x_size = x.size
 
     if x_size < 1:
         msg = 'x is empty.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not np.all(np.isfinite(x)):
         msg = 'there is at least one value in the input array which is '
         msg += 'non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Fluctuations
     dx = x - np.mean(x)
@@ -250,30 +250,30 @@ def cross_covariance(x: Union[np.ndarray, List[float]],
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Data size
     x_size = x.size
 
     if x_size < 1:
         msg = 'x is empty.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not np.all(np.isfinite(x)):
         msg = 'there is at least one value in the input array x which is '
         msg += 'non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     y = np.array(y, copy=False)
 
     if x.shape != y.shape:
         msg = 'x and y time series should have the same shape.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not np.all(np.isfinite(y)):
         msg = 'there is at least one value in the input array y which is '
         msg += 'non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Fluctuations
     dx = x - x.mean()
@@ -330,7 +330,7 @@ def auto_correlate(x: Union[np.ndarray, List[float]],
     if isclose(autocor[0], 0, abs_tol=_DEFAULT_ABS_TOL):
         msg = 'divide by zero encountered, which means the first element of '
         msg += 'the auto covariances of x is zero (or close to zero).'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if nlags is None:
         # Calculate the auto correlation
@@ -339,11 +339,11 @@ def auto_correlate(x: Union[np.ndarray, List[float]],
         # Check input
         if not isinstance(nlags, int):
             msg = 'nlags must be an `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if nlags < 1:
             msg = 'nlags must be a positive `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         nlags = min(nlags, x.size)
 
@@ -393,7 +393,7 @@ def cross_correlate(x: Union[np.ndarray, List[float]],
     if isclose(sigma_xy, 0, abs_tol=_DEFAULT_ABS_TOL):
         msg = 'Divide by zero encountered, which means the multiplication '
         msg += 'of the standard deviation of x and y is zero.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if nlags is None:
         # Calculate the cross correlation
@@ -402,11 +402,11 @@ def cross_correlate(x: Union[np.ndarray, List[float]],
         # Check input
         if not isinstance(nlags, int):
             msg = 'nlags must be an `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if nlags < 1:
             msg = 'nlags must be a positive `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         nlags = min(nlags, x.size)
 
@@ -463,7 +463,7 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         # Fluctuations
         _mean = np.mean(x)
@@ -471,7 +471,7 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
         if not np.isfinite(_mean):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         dx = x - _mean
 
@@ -482,12 +482,12 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
 
         if dx.ndim != 1:
             msg = 'x is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if not np.all(np.isfinite(dx)):
             msg = 'there is at least one value in the input array which is '
             msg += 'non-finite or not-number.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     # Data size
     x_size = dx.size
@@ -551,9 +551,9 @@ def periodogram(x: Union[np.ndarray, List[float]],
     """
     try:
         result = modified_periodogram(x, fft=fft, with_mean=with_mean)
-    except CVGError:
+    except CRError:
         msg = 'Failed to compute a modified periodogram.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Data size
     x_size = np.size(x)
@@ -587,7 +587,7 @@ def summary(x: Union[np.ndarray, List[float]]):
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x_min = np.nanmin(x)
     x_max = np.nanmax(x)
@@ -621,20 +621,20 @@ def int_power(x: Union[np.ndarray, List[float]],
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if x.size < 1:
         msg = 'x is empty.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not isinstance(exponent, int):
         msg = 'exponent must be an `int`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not np.all(np.isfinite(x)):
         msg = 'there is at least one value in the input array x which is '
         msg += 'non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if exponent == 1:
         return x
@@ -682,20 +682,20 @@ def moment(x: Union[np.ndarray, List[float]],
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if x.size < 1:
         msg = 'x is empty.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not np.all(np.isfinite(x)):
         msg = 'there is at least one value in the input array x which is '
         msg += 'non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not isinstance(moment, int):
         msg = 'moment must be an `int`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # The first moment about the mean is 0
     if moment == 1:

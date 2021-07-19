@@ -42,7 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from copy import deepcopy
 from math import copysign, fabs, nan
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 __all__ = [
     'ZERO_RC',
@@ -151,7 +151,7 @@ class ZERO_RC():
             msg = 'Wrong index number={}.\n'.format(self.index)
             msg += 'This function should be called with zero status for the '
             msg += 'first time.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if fabs(self.fc) < fabs(self.fb):
             if self.c != self.a:

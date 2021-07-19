@@ -3,7 +3,7 @@
 import numpy as np
 from typing import Union, List
 
-from .err import CVGError
+from .err import CRError
 from ._default import \
     _DEFAULT_BATCH_SIZE, \
     _DEFAULT_SCALE_METHOD, \
@@ -75,20 +75,20 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
     # Check inputs
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not isinstance(batch_size, int):
         msg = 'batch_size = {} is not an `int`.'.format(batch_size)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if batch_size < 1:
         msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not np.all(np.isfinite(time_series_data)):
         msg = 'there is at least one value in the input '
         msg += 'array which is non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Initialize
 
@@ -101,7 +101,7 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
         msg += '{} are '.format(time_series_data.size)
         msg += 'not enough to produce batches with the batch size of '
         msg += '{} data points.'.format(batch_size)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Correct the size of data
     processed_sample_size = number_batches * batch_size
@@ -123,13 +123,13 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
         if not isinstance(scale, str):
             msg = 'scale is not a `str`.\nScale = {} is not '.format(scale)
             msg += 'a valid method to scale and standardize a dataset.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if scale not in scale_methods:
             msg = 'method "{}" not found. Valid methods '.format(scale)
             msg += 'to scale and standardize a dataset are:\n\t- '
             msg += '{}'.format('\n\t- '.join(scale_methods))
-            raise CVGError(msg)
+            raise CRError(msg)
 
         scale_func = scale_methods[scale]
 

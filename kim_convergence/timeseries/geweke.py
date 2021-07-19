@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 __all__ = [
     'geweke',
@@ -59,19 +59,19 @@ def geweke(x: np.ndarray,
         msg = 'Invalid intervals for Geweke convergence analysis:'
         msg += '({}, {}), '.format(first, last)
         msg += 'where {} + {} >= 1'.format(first, last)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
             msg = 'Invalid intervals for Geweke convergence analysis:'
             msg += '({}, {})'.format(first, last)
-            raise CVGError(msg)
+            raise CRError(msg)
 
     x = np.array(x, copy=False)
 
     if x.ndim != 1:
         msg = "x is not an array of one-dimension."
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Initialize list of z-scores
     zscores = []

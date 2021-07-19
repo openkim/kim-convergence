@@ -5,7 +5,7 @@ import numpy as np
 from typing import Optional, Union, List
 
 from .mser_m import MSER_m
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
     _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
@@ -21,10 +21,10 @@ from convergence._default import \
     _DEFAULT_MINIMUM_CORRELATION_TIME, \
     _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
     _DEFAULT_SAMPLE_METHOD
-from convergence import \
+from kim_convergence import \
     batch, \
-    CVGError, \
-    CVGSampleSizeError, \
+    CRError, \
+    CRSampleSizeError, \
     randomness_test, \
     t_inv_cdf
 
@@ -116,7 +116,7 @@ class MSER_m_y(MSER_m):
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         time_series_data_size = time_series_data.size
 
@@ -124,12 +124,12 @@ class MSER_m_y(MSER_m):
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "MSER_m_y".\n"MSER_m_y" at '
             msg += 'least needs 10 data points.'
-            raise CVGSampleSizeError(msg)
+            raise CRSampleSizeError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
             msg += 'is not in the range (0.0 1.0).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         batch_size = 1
         number_batches = time_series_data_size
@@ -307,6 +307,6 @@ def mser_m_y_relative_half_width_estimate(
             scale=scale,
             with_centering=with_centering,
             with_scaling=with_scaling)
-    except CVGError:
-        raise CVGError('Failed to get the relative_half_width_estimate.')
+    except CRError:
+        raise CRError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

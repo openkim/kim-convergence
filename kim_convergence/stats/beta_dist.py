@@ -4,7 +4,7 @@ from copy import deepcopy
 from math import lgamma, log, fabs, exp, nan
 import numpy as np
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 __all__ = [
     'beta',
@@ -144,7 +144,7 @@ def betacf(a: float,
     msg = 'betacf failed with the current result = {}, '.format(h)
     msg = 'where a={} or b={} are too big, or '.format(a, b)
     msg += 'max_iteration={} is too small.'.format(max_iteration)
-    raise CVGError(msg)
+    raise CRError(msg)
 
 
 def betai(a: float, b: float, x: float) -> float:

@@ -4,7 +4,7 @@ from math import ceil, floor, fabs, sqrt
 import numpy as np
 from typing import Optional, Union, List
 
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
     _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
@@ -24,11 +24,11 @@ from convergence._default import \
     _DEFAULT_IGNORE_END, \
     _DEFAULT_NUMBER_OF_CORES
 from .ucl_base import UCLBase
-from convergence import \
+from kim_convergence import \
     batch, \
-    CVGError, \
-    CVGSampleSizeError, \
-    cvg_warning, \
+    CRError, \
+    CRSampleSizeError, \
+    cr_warning, \
     skew, \
     randomness_test, \
     auto_correlate, \
@@ -149,7 +149,7 @@ class N_SKART(UCLBase):
         time_series_data = np.array(time_series_data, copy=False)
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         time_series_data_size = time_series_data.size
 
@@ -158,7 +158,7 @@ class N_SKART(UCLBase):
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by "N-Skart".\n"N-Skart" at '
             msg += 'least needs {} data points.'.format(self.k_number_batches)
-            raise CVGSampleSizeError(msg)
+            raise CRSampleSizeError(msg)
 
         # Reset the parameters for run-length control
         # cases, where we call this function in a loop
@@ -274,7 +274,7 @@ class N_SKART(UCLBase):
                     msg += '{} = '.format(processed_sample_size)
                     msg += '{} x {}'.format(k_number_batches, batch_size)
                     msg += ' data points.\n'
-                    cvg_warning(msg)
+                    cr_warning(msg)
 
                     sufficient_data = False
 
@@ -339,16 +339,16 @@ class N_SKART(UCLBase):
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if not isinstance(equilibration_length_estimate, int):
             msg = 'equilibration_length_estimate must be an `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
             msg += 'is not in the range (0.0 1.0).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         # Perform step 5 of the N-Skart algorithm
 
@@ -393,7 +393,7 @@ class N_SKART(UCLBase):
             msg = '{} input data points are '.format(time_series_data_size)
             msg += 'not sufficient to be used by "N-Skart".\n"N-Skart" at '
             msg += 'least needs {} data points.'.format(processed_sample_size)
-            raise CVGSampleSizeError(msg)
+            raise CRSampleSizeError(msg)
 
         # step 5b
 
@@ -554,6 +554,6 @@ def n_skart_relative_half_width_estimate(
             equilibration_length_estimate=equilibration_length_estimate,
             confidence_coefficient=confidence_coefficient,
             fft=fft)
-    except CVGError:
-        raise CVGError('Failed to get the relative_half_width_estimate.')
+    except CRError:
+        raise CRError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

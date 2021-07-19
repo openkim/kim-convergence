@@ -5,7 +5,7 @@ import numpy as np
 from numpy.linalg import pinv, norm, inv
 from typing import Optional, Union, List
 
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
     _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
@@ -21,11 +21,11 @@ from convergence._default import \
     _DEFAULT_MINIMUM_CORRELATION_TIME, \
     _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
     _DEFAULT_SAMPLE_METHOD
-from convergence.ucl import UCLBase
-from convergence import \
+from kim_convergence.ucl import UCLBase
+from kim_convergence import \
     batch, \
-    CVGError, \
-    CVGSampleSizeError, \
+    CRError, \
+    CRSampleSizeError, \
     modified_periodogram, \
     t_inv_cdf, \
     train_test_split
@@ -134,7 +134,7 @@ class HeidelbergerWelch(UCLBase):
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
             msg += 'is not in the range (0.0 1.0).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if self.heidel_welch_set and \
                 heidel_welch_number_points == self.heidel_welch_k:
@@ -153,12 +153,12 @@ class HeidelbergerWelch(UCLBase):
                 msg = 'given to obtain the polynomial fit. According to '
                 msg += 'Heidelberger, and Welch, (1981), this procedure '
                 msg += 'at least needs to have 25 points.'
-                raise CVGError(msg)
+                raise CRError(msg)
         else:
             msg = 'heidel_welch_number_points = '
             msg += '{} '.format(heidel_welch_number_points)
             msg += 'is the number of points and should be a positive `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         self.heidel_welch_k = heidel_welch_number_points
         self.heidel_welch_n = heidel_welch_number_points * 4
@@ -405,7 +405,7 @@ class HeidelbergerWelch(UCLBase):
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         # We compute once and use it during iterations
         if not self.heidel_welch_set or \
@@ -421,7 +421,7 @@ class HeidelbergerWelch(UCLBase):
             msg = '{} input data points are not '.format(time_series_data_size)
             msg += 'sufficient to be used by this method.\n"HeidelbergerWelch" '
             msg += 'at least needs {} data points.'.format(self.heidel_welch_n)
-            raise CVGSampleSizeError(msg)
+            raise CRSampleSizeError(msg)
 
         number_batches = self.heidel_welch_n
         batch_size = time_series_data_size // number_batches
@@ -667,6 +667,6 @@ def heidelberger_welch_relative_half_width_estimate(
                 fft=fft,
                 test_size=test_size,
                 train_size=train_size)
-    except CVGError:
-        raise CVGError('Failed to get the relative_half_width_estimate.')
+    except CRError:
+        raise CRError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

@@ -9,8 +9,8 @@ import numpy as np
 from scipy.stats import distributions, kruskal, kstest, levene, wilcoxon
 from typing import Optional, Union, List
 
-from convergence._default import _DEFAULT_CONFIDENCE_COEFFICIENT
-from convergence import CVGError, CVGSampleSizeError, cvg_check
+from kim_convergence._default import _DEFAULT_CONFIDENCE_COEFFICIENT
+from kim_convergence import CRError, CRSampleSizeError, cr_check
 
 
 __all__ = [
@@ -359,7 +359,7 @@ def check_population_cdf_args(population_cdf: Optional[str],
         msg += 'It should be the name of a distribution in:\n'
         msg += '    https://docs.scipy.org/doc/scipy/reference/stats.html#'
         msg += 'continuous-distributions'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     number_of_required_arguments = \
         ContinuousDistributionsNumberOfRequiredArguments[population_cdf]
@@ -391,7 +391,7 @@ def check_population_cdf_args(population_cdf: Optional[str],
         msg += ContinuousDistributionsArgumentRequirement[population_cdf]
         msg += ')\nReference: '
         msg += Reference
-        raise CVGError(msg)
+        raise CRError(msg)
 
 
 def get_distribution_stats(population_cdf: Optional[str],
@@ -483,9 +483,9 @@ def ks_test(
 
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
-    cvg_check(significance_level,
+    cr_check(significance_level,
               var_name='significance_level',
               var_lower_bound=np.finfo(np.float64).resolution)
 
@@ -501,7 +501,7 @@ def ks_test(
                            args=args,
                            alternative='two-sided')
     except:
-        raise CVGError('Kolmogorov-Smirnov test failed.')
+        raise CRError('Kolmogorov-Smirnov test failed.')
 
     return significance_level < pvalue
 
@@ -607,11 +607,11 @@ def levene_test(
 
     if x.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x_size = x.size
 
-    cvg_check(significance_level,
+    cr_check(significance_level,
               var_name='significance_level',
               var_lower_bound=np.finfo(np.float64).resolution)
 
@@ -634,12 +634,12 @@ def levene_test(
                                args=args,
                                alternative='two-sided')
         except:
-            raise CVGError('Kolmogorov-Smirnov test failed.')
+            raise CRError('Kolmogorov-Smirnov test failed.')
 
     try:
         _, pvalue = levene(x, y)
     except:
-        raise CVGError('Levene test failed.')
+        raise CRError('Levene test failed.')
 
     return significance_level < pvalue
 
@@ -701,11 +701,11 @@ def wilcoxon_test(
 
     if x.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x_size = x.size
 
-    cvg_check(significance_level,
+    cr_check(significance_level,
               var_name='significance_level',
               var_lower_bound=np.finfo(np.float64).resolution)
 
@@ -725,7 +725,7 @@ def wilcoxon_test(
                                args=args,
                                alternative='two-sided')
         except:
-            raise CVGError('Kolmogorov-Smirnov test failed.')
+            raise CRError('Kolmogorov-Smirnov test failed.')
 
     _, pvalue = wilcoxon(x, y,
                          zero_method='wilcox',
@@ -786,7 +786,7 @@ def kruskal_test(
 
     if x.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x_size = x.size
 
@@ -795,9 +795,9 @@ def kruskal_test(
     # must have at least 5 data.
     if x_size < 5:
         msg = 'time_series_data must have at least 5 data.'
-        raise CVGSampleSizeError(msg)
+        raise CRSampleSizeError(msg)
 
-    cvg_check(significance_level,
+    cr_check(significance_level,
               var_name='significance_level',
               var_lower_bound=np.finfo(np.float64).resolution)
 
@@ -817,11 +817,11 @@ def kruskal_test(
                                args=args,
                                alternative='two-sided')
         except:
-            raise CVGError('Kolmogorov-Smirnov test failed.')
+            raise CRError('Kolmogorov-Smirnov test failed.')
 
     try:
         _, pvalue = kruskal(x, y)
     except:
-        raise CVGError('Levene test failed.')
+        raise CRError('Levene test failed.')
 
     return significance_level < pvalue

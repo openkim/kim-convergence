@@ -7,7 +7,7 @@ import numpy as np
 import sys
 from typing import Optional, Union, List
 
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_CONFIDENCE_INTERVAL_APPROXIMATION_METHOD, \
     _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
@@ -25,12 +25,12 @@ from convergence._default import \
     _DEFAULT_MINIMUM_CORRELATION_TIME, \
     _DEFAULT_MIN_ABSOLUTE_ACCURACY, \
     _DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL
-from convergence import \
+from kim_convergence import \
     check_population_cdf_args, \
-    CVGError, \
-    CVGSampleSizeError, \
-    cvg_warning, \
-    cvg_check, \
+    CRError, \
+    CRSampleSizeError, \
+    cr_warning, \
+    cr_check, \
     chi_square_test, \
     levene_test, \
     t_test, \
@@ -212,7 +212,7 @@ def _check_get_trajectory(get_trajectory: callable) -> None:
         msg += 'where nstep is the number of steps and the function '
         msg += 'should return a time-series data with the requested '
         msg += 'length equals to the number of steps.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
 
 def _get_trajectory(get_trajectory: callable,
@@ -229,14 +229,14 @@ def _get_trajectory(get_trajectory: callable,
         except:
             msg = 'failed to get the time-series data or do the '
             msg += 'simulation for {} number of steps.'.format(run_length)
-            raise CVGError(msg)
+            raise CRError(msg)
     else:
         try:
             tsd = get_trajectory(run_length)
         except:
             msg = 'failed to get the time-series data or do the '
             msg += 'simulationfor {} number of steps.'.format(run_length)
-            raise CVGError(msg)
+            raise CRError(msg)
 
     tsd = np.array(tsd, dtype=np.float64, copy=False)
 
@@ -244,12 +244,12 @@ def _get_trajectory(get_trajectory: callable,
     if not np.all(np.isfinite(tsd)):
         msg = 'there is/are value/s in the input which is/are non-finite or '
         msg += 'not number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if np.ndim(tsd) != ndim:
         msg = 'the return from the "get_trajectory" function has a wrong '
         msg += 'dimension of {} != 1.'.format(tsd.ndim)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if ndim == 2 and number_of_variables != np.shape(tsd)[0]:
         msg = 'the return of "get_trajectory" function has a wrong number '
@@ -258,7 +258,7 @@ def _get_trajectory(get_trajectory: callable,
         msg += 'In a two-dimensional return array of "get_trajectory" '
         msg += 'function, each row corresponds to the time series data '
         msg += 'for one variable.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     return tsd
 
@@ -290,31 +290,31 @@ def _check_accuracy(
         if np.size(relative_accuracy) != 1:
             msg = 'For one variable, "relative_accuracy" must be a scalar '
             msg += '(a `float`).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if np.size(absolute_accuracy) != 1:
             msg = 'For one variable, "absolute_accuracy" must be a scalar '
             msg += '(a `float`).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if relative_accuracy is None:
-            cvg_check(absolute_accuracy, 'absolute_accuracy',
+            cr_check(absolute_accuracy, 'absolute_accuracy',
                       var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY)
 
     else:
         if np.size(relative_accuracy) != number_of_variables:
             msg = '"relative_accuracy" must be a list of '
             msg += '{} floats.'.format(number_of_variables)
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if np.size(absolute_accuracy) != number_of_variables:
             msg = '"absolute_accuracy" must be a list of '
             msg += '{} floats.'.format(number_of_variables)
-            raise CVGError(msg)
+            raise CRError(msg)
 
         for index, rel_acc in enumerate(relative_accuracy):
             if rel_acc is None:
-                cvg_check(absolute_accuracy[index],
+                cr_check(absolute_accuracy[index],
                           'absolute_accuracy[{}]'.format(index),
                           var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY)
 
@@ -380,7 +380,7 @@ def _check_equilibration_step(
         msg += 'More data is required. To prevent this error, you can '
         msg += 'request a longer maximum_run_length.\n'
 
-    raise CVGError(msg)
+    raise CRError(msg)
 
 
 def _check_population(
@@ -397,19 +397,19 @@ def _check_population(
         if population_mean is not None and np.size(population_mean) != 1:
             msg = 'For one variable, "population_mean" must be a scalar '
             msg += '(a `float`).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if population_standard_deviation is not None and \
                 np.size(population_standard_deviation) != 1:
             msg = 'For one variable, "population_standard_deviation" must '
             msg += 'be a scalar (a `float`).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if population_cdf is not None:
             if np.size(population_cdf) != 1:
                 msg = 'For one variable, "population_cdf" must be a name '
                 msg += '(a `str`).'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             check_population_cdf_args(population_cdf=population_cdf,
                                       population_args=population_args)
@@ -419,7 +419,7 @@ def _check_population(
                 msg += '"population_mean" should not be provided.\n'
                 msg += 'To shift and/or scale the distribution use the '
                 msg += '"population_loc" and "population_scale" parameters.'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if population_standard_deviation is not None:
                 msg = 'For the non-normally distributed data '
@@ -427,59 +427,59 @@ def _check_population(
                 msg += 'be provided.\n'
                 msg += 'To shift and/or scale the distribution use the '
                 msg += '"population_loc" and "population_scale" parameters.'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if population_loc is not None and np.size(population_loc) != 1:
                 msg = 'For one variable, "population_loc" must be a scalar '
                 msg += '(a `float`).'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if population_scale is not None and np.size(population_scale) != 1:
                 msg = 'For one variable, "population_scale" must be a scalar '
                 msg += '(a `float`).'
-                raise CVGError(msg)
+                raise CRError(msg)
 
     else:
         if population_mean is not None:
             if np.size(population_mean) != number_of_variables:
                 msg = '"population_mean" must be a 1darray/list of size = '
                 msg += '{}.'.format(number_of_variables)
-                raise CVGError(msg)
+                raise CRError(msg)
 
         if population_standard_deviation is not None:
             if np.size(population_standard_deviation) != number_of_variables:
                 msg = '"population_standard_deviation" must be a 1darray/list '
                 msg += 'of size = {}.'.format(number_of_variables)
-                raise CVGError(msg)
+                raise CRError(msg)
 
         if population_cdf is not None:
             if np.size(population_cdf) != number_of_variables:
                 msg = '"population_cdf" must be a 1darray/list of size = '
                 msg += '{}.'.format(number_of_variables)
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if population_args is not None and \
                     len(population_args) != number_of_variables:
                 msg = '"population_args" must be a list of size = '
                 msg += '{}.'.format(number_of_variables)
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if population_args is None:
                 msg = '"population_args" must be a list of size = '
                 msg += '{}.'.format(number_of_variables)
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if population_loc is not None and \
                     np.size(population_loc) != number_of_variables:
                 msg = '"population_loc" must be a 1darray/list '
                 msg += 'of size = {}.'.format(number_of_variables)
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if population_scale is not None and \
                     np.size(population_scale) != number_of_variables:
                 msg = '"population_scale" must be a 1darray/list '
                 msg += 'of size = {}.'.format(number_of_variables)
-                raise CVGError(msg)
+                raise CRError(msg)
 
             index = -1
 
@@ -498,7 +498,7 @@ def _check_population(
                         msg += '\nTo shift and/or scale the distribution '
                         msg += 'use the "population_loc" and '
                         msg += '"population_scale" parameters.'
-                        raise CVGError(msg)
+                        raise CRError(msg)
 
                     if population_standard_deviation is not None and \
                             population_standard_deviation[index] is not None:
@@ -508,7 +508,7 @@ def _check_population(
                         msg += 'not be provided.\nTo shift and/or scale '
                         msg += 'the distribution use the "population_loc" '
                         msg += 'and "population_scale" parameters.'
-                        raise CVGError(msg)
+                        raise CRError(msg)
 
 
 def _get_array_tolist(input_array: Optional[np.ndarray]) -> Optional[list]:
@@ -561,7 +561,7 @@ def run_length_control(
     nskip: Optional[int] = _DEFAULT_NSKIP,
     minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
     dump_trajectory: bool = False,
-    dump_trajectory_fp: str = 'convergence_trajectory.edn',
+    dump_trajectory_fp: str = 'kim_convergence_trajectory.edn',
     fp: Optional[str] = None,
     fp_format: str = 'txt'
 ) -> str:
@@ -902,7 +902,7 @@ def run_length_control(
             data to a file ``dump_trajectory_fp``. (default: False)
         dump_trajectory_fp (str, object with a write(string) method, optional):
             a ``.write()``-supporting file-like object or a name string to open
-            a file. (default: 'convergence_trajectory.edn')
+            a file. (default: 'kim_convergence_trajectory.edn')
         fp (str, object with a write(string) method, optional): if an ``str``
             equals to ``'return'`` the function will return string of the
             analysis results on the length of the time series. Otherwise it
@@ -922,28 +922,28 @@ def run_length_control(
 
     """
     _check_get_trajectory(get_trajectory)
-    cvg_check(number_of_variables, 'number_of_variables', int, 1)
-    cvg_check(initial_run_length, 'initial_run_length', int, 1)
-    cvg_check(run_length_factor, 'run_length_factor', None, 0)
-    cvg_check(maximum_run_length, 'maximum_run_length', int, 1)
+    cr_check(number_of_variables, 'number_of_variables', int, 1)
+    cr_check(initial_run_length, 'initial_run_length', int, 1)
+    cr_check(run_length_factor, 'run_length_factor', None, 0)
+    cr_check(maximum_run_length, 'maximum_run_length', int, 1)
 
     if maximum_equilibration_step is None:
         maximum_equilibration_step = maximum_run_length // 2
         msg = '"maximum_equilibration_step" is not given on input!\nThe '
         msg += 'maximum number of steps as an equilibration hard limit '
         msg += 'is set to {}.'.format(maximum_equilibration_step)
-        cvg_warning(msg)
+        cr_warning(msg)
 
     # Set the hard limit for the equilibration step
-    cvg_check(maximum_equilibration_step, 'maximum_equilibration_step', int, 1)
+    cr_check(maximum_equilibration_step, 'maximum_equilibration_step', int, 1)
     if maximum_equilibration_step >= maximum_run_length:
         msg = '"maximum_equilibration_step" = '
         msg += '{} must be '.format(maximum_equilibration_step)
         msg += 'less than maximum_run_length = {}.'.format(maximum_run_length)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if minimum_number_of_independent_samples is not None:
-        cvg_check(minimum_number_of_independent_samples,
+        cr_check(minimum_number_of_independent_samples,
                   'minimum_number_of_independent_samples', int, 1)
 
     if fp is None:
@@ -951,17 +951,17 @@ def run_length_control(
     elif isinstance(fp, str):
         if fp != 'return':
             msg = 'Keyword argument `fp` is a `str` and not equal to "return".'
-            raise CVGError(msg)
+            raise CRError(msg)
         fp = None
     elif not hasattr(fp, 'write'):
         msg = 'Keyword argument `fp` must be either a `str` and equal to '
         msg += '"return", or None, or an object with write(string) method.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if fp_format not in ('txt', 'json', 'edn'):
         msg = 'fp format is unknown. Valid formats are:\n\t- '
         msg += '{}'.format('\n\t- '.join(('txt', 'json', 'edn')))
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Initialize
     if number_of_variables == 1:
@@ -998,13 +998,13 @@ def run_length_control(
         msg += 'to aproximate confidence interval not found. Valid '
         msg += 'methods are:\n\t- '
         msg += '{}'.format('\n\t- '.join(ucl_methods))
-        raise CVGError(msg)
+        raise CRError(msg)
 
     try:
         ucl_obj = ucl_methods[confidence_interval_approximation_method]()
-    except CVGError:
+    except CRError:
         msg = "Failed to initialize the UCL object."
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if ucl_obj.name == 'heidel_welch':
         ucl_obj.set_heidel_welch_constants(
@@ -1170,12 +1170,12 @@ def run_length_control(
                     population_standard_deviation=population_standard_deviation,
                     si=si,
                     minimum_correlation_time=minimum_correlation_time)
-            except CVGSampleSizeError:
+            except CRSampleSizeError:
                 # do not have enough data and need more
                 enough_data = False
                 upper_confidence_limit = None
-            except CVGError:
-                raise CVGError("Failed to compute the UCL.")
+            except CRError:
+                raise CRError("Failed to compute the UCL.")
 
             if enough_data:
                 if relative_accuracy is None:
@@ -1190,7 +1190,7 @@ def run_length_control(
                         msg = 'It is not possible to estimate the relative '
                         msg += 'half width for the close to zero mean = '
                         msg += '{}'.format(ucl_obj.mean)
-                        raise CVGError(msg)
+                        raise CRError(msg)
 
                     relative_half_width_estimate = upper_confidence_limit / \
                         fabs(ucl_obj.mean)
@@ -1265,7 +1265,7 @@ def run_length_control(
                     tsd = np.concatenate((tsd, _tsd))
 
         if upper_confidence_limit is None:
-            raise CVGError("Failed to compute the UCL.")
+            raise CRError("Failed to compute the UCL.")
 
         if dump_trajectory:
             kim_edn.dump(tsd.tolist(), dump_trajectory_fp)
@@ -1509,12 +1509,12 @@ def run_length_control(
                             population_standard_deviation=pop_std,
                             si=si,
                             minimum_correlation_time=minimum_correlation_time)
-                    except CVGSampleSizeError:
+                    except CRSampleSizeError:
                         # do not have enough data and need more
                         enough_data = False
                         upper_confidence_limit[i] = None
-                    except CVGError:
-                        raise CVGError("Failed to compute the ucl.")
+                    except CRError:
+                        raise CRError("Failed to compute the ucl.")
 
                 if enough_data:
                     if relative_accuracy[i] is None:
@@ -1530,7 +1530,7 @@ def run_length_control(
                             msg += 'half width for the close to zero mean = '
                             msg += '{}, for the variable '.format(ucl_obj.mean)
                             msg += 'number = {}.'.format(i + 1)
-                            raise CVGError(msg)
+                            raise CRError(msg)
 
                         relative_half_width_estimate[i] = \
                             upper_confidence_limit[i] / fabs(ucl_obj.mean)
@@ -1646,7 +1646,7 @@ def run_length_control(
                     msg += '{}, '.format(index + 1)
         if msg is not None:
             msg += '. Failed to compute the UCL.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if dump_trajectory:
             kim_edn.dump(tsd.tolist(), dump_trajectory_fp)

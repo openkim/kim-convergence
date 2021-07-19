@@ -4,7 +4,7 @@ from math import isclose, sqrt
 import numpy as np
 from typing import Optional, Union, List
 
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
@@ -25,10 +25,10 @@ from convergence._default import \
     _DEFAULT_NSKIP, \
     _DEFAULT_NUMBER_OF_CORES
 from .ucl_base import UCLBase
-from convergence import \
+from kim_convergence import \
     batch, \
-    CVGError, \
-    CVGSampleSizeError, \
+    CRError, \
+    CRSampleSizeError, \
     t_inv_cdf
 
 
@@ -113,7 +113,7 @@ def mser_m(
     # Check inputs
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Special case if timeseries is constant.
     _std = np.std(time_series_data)
@@ -121,16 +121,16 @@ def mser_m(
     if not np.isfinite(_std):
         msg = 'there is at least one value in the input array which is '
         msg += 'non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         if not isinstance(batch_size, int):
             msg = 'batch_size = {} is not an `int`.'.format(batch_size)
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if batch_size < 1:
             msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if time_series_data.size < batch_size:
             return False, 0
@@ -158,13 +158,13 @@ def mser_m(
                 msg = 'invalid ignore_end = {}. If '.format(ignore_end)
                 msg += 'ignore_end input is a `float`, it should be in a '
                 msg += '`(0, 1)` range.'
-                raise CVGError(msg)
+                raise CRError(msg)
             ignore_end *= number_batches
             ignore_end = max(1, int(ignore_end))
         else:
             msg = 'invalid ignore_end = {}. '.format(ignore_end)
             msg += 'ignore_end is not an `int`, `float`, or `None`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if ignore_end < 1:
             msg = 'ignore_end is not given on input and it is automatically '
@@ -172,18 +172,18 @@ def mser_m(
             msg += '{} number of data points '.format(time_series_data.size)
             msg += 'and the batch size = {}.\n'.format(batch_size)
             msg += 'ignore_end should be a positive `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     elif ignore_end < 1:
         msg = 'invalid ignore_end = {}. '.format(ignore_end)
         msg += 'ignore_end should be a positive `int`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if number_batches <= ignore_end:
         msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
         msg += 'Wrong number of batches is requested to be ignored '
         msg += 'from the total {} batches.'.format(number_batches)
-        raise CVGSampleSizeError(msg)
+        raise CRSampleSizeError(msg)
 
     # To find the optimal truncation point in MSER-m
 
@@ -351,12 +351,12 @@ class MSER_m(UCLBase):
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
             msg += 'is not in the range (0.0 1.0).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         # Initialize
         x_batch = batch(time_series_data,
@@ -500,6 +500,6 @@ def mser_m_relative_half_width_estimate(
                 scale=scale,
                 with_centering=with_centering,
                 with_scaling=with_scaling)
-    except CVGError:
-        raise CVGError('Failed to get the relative_half_width_estimate.')
+    except CRError:
+        raise CRError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

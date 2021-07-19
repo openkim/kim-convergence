@@ -4,7 +4,7 @@ from math import sqrt
 import numpy as np
 from typing import Optional, Union, List
 
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
     _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
@@ -21,10 +21,10 @@ from convergence._default import \
     _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
     _DEFAULT_SAMPLE_METHOD
 from .ucl_base import UCLBase
-from convergence import \
-    CVGError, \
-    CVGSampleSizeError, \
-    cvg_warning, \
+from kim_convergence import \
+    CRError, \
+    CRSampleSizeError, \
+    cr_warning, \
     t_inv_cdf, \
     time_series_data_si, \
     uncorrelated_time_series_data_sample_indices, \
@@ -124,7 +124,7 @@ class UncorrelatedSamples(UCLBase):
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         time_series_data_size = time_series_data.size
 
@@ -132,12 +132,12 @@ class UncorrelatedSamples(UCLBase):
             msg = '{} input data points '.format(time_series_data_size)
             msg += 'are not sufficient to be used by "UCL".\n'
             msg += '"UCL" at least needs 5 data points.'
-            raise CVGSampleSizeError(msg)
+            raise CRSampleSizeError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
             msg += 'is not in the range (0.0 1.0).'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         self.si = time_series_data_si(
             time_series_data=time_series_data,
@@ -169,11 +169,11 @@ class UncorrelatedSamples(UCLBase):
             if uncorrelated_samples_size < 2:
                 msg = '{} uncorrelated '.format(uncorrelated_samples_size)
                 msg += 'sample points are not sufficient to be used by "UCL".'
-                raise CVGSampleSizeError(msg)
+                raise CRSampleSizeError(msg)
 
             msg = '{} uncorrelated sample '.format(uncorrelated_samples_size)
             msg += 'points are not sufficient to be used by "UCL".'
-            cvg_warning(msg)
+            cr_warning(msg)
 
         # compute mean
         self.mean = uncorrelated_samples.mean()
@@ -380,6 +380,6 @@ def uncorrelated_samples_relative_half_width_estimate(
                 minimum_correlation_time=minimum_correlation_time,
                 uncorrelated_sample_indices=uncorrelated_sample_indices,
                 sample_method=sample_method)
-    except CVGError:
-        raise CVGError('Failed to get the relative_half_width_estimate.')
+    except CRError:
+        raise CRError('Failed to get the relative_half_width_estimate.')
     return relative_half_width_estimate

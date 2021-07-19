@@ -3,7 +3,7 @@
 import numpy as np
 from typing import Union, List
 
-from .err import CVGError
+from .err import CRError
 
 
 __all__ = [
@@ -84,22 +84,22 @@ def outlier_test(x: Union[np.ndarray, List[float]],
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if not np.all(np.isfinite(x)):
         msg = 'there is at least one value in the input array which is '
         msg += 'non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if isinstance(outlier_method, str):
         if outlier_method not in outlier_methods:
             msg = 'method {} not found. Valid '.format(outlier_method)
             msg += 'methods to detect outliers are:\n\t- '
             msg += '{}'.format('\n\t- '.join(outlier_methods))
-            raise CVGError(msg)
+            raise CRError(msg)
     else:
         msg = 'Input outlier_method is not a `str`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if outlier_method in ('iqr', 'boxplot'):
         lower_quartile, upper_quartile = np.quantile(x, [0.25, 0.75])

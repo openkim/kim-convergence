@@ -1,4 +1,4 @@
-r"""Convergence package default values."""
+r"""kim-convergence package default values."""
 
 
 _DEFAULT_ABS_TOL: float = 1e-18

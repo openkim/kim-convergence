@@ -1,6 +1,6 @@
 """T distribution module.
 
-This module is specilized for the ``convergence`` code and is not a general
+This module is specilized for the ``kim-convergence`` code and is not a general
 function to be used for other purposes.
 """
 
@@ -10,7 +10,7 @@ import numpy as np
 from .beta_dist import betai_cdf_ccdf
 from .normal_dist import s_normal_inv_cdf
 from .zero_rc_bounds import ZERO_RC_BOUNDS
-from convergence import CVGError
+from kim_convergence import CRError
 
 __all__ = [
     't_cdf_ccdf',
@@ -51,7 +51,7 @@ def t_cdf_ccdf(t: float, df: float) -> tuple((float, float)):
     if df < 1:
         msg = 'df = {} is wrong. Degrees of freedom, must be '.format(df)
         msg += 'positive and greater than 1.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     tt = t * t
     denom = df + tt
@@ -131,12 +131,12 @@ def t_inv_cdf(p: float,
     """
     if p <= 0.0 or p >= 1.0:
         msg = 'p = {} is not in the range (0.0 1.0).'.format(p)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if df < 1:
         msg = 'df = {} is wrong. Degrees of freedom, must be '.format(df)
         msg += 'positive and greater than 1.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x = fabs(s_normal_inv_cdf(p))
     x_sq = x * x
@@ -228,7 +228,7 @@ def t_interval(confidence_level: float,
     if confidence_level <= 0.0 or confidence_level >= 1.0:
         msg = 'confidence level = {} is not in '.format(confidence_level)
         msg += 'the range (0.0 1.0).'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     lower = (1.0 - confidence_level) / 2
     upper = (1.0 + confidence_level) / 2

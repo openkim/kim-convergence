@@ -8,17 +8,17 @@ from math import isclose
 import numpy as np
 from typing import Optional, Union, List
 
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_ABS_TOL, \
     _DEFAULT_FFT, \
     _DEFAULT_MINIMUM_CORRELATION_TIME, \
     _DEFAULT_SI
-from convergence import \
+from kim_convergence import \
     auto_covariance, \
     auto_correlate, \
     cross_correlate, \
-    CVGError, \
-    CVGSampleSizeError
+    CRError, \
+    CRSampleSizeError
 
 
 __all__ = [
@@ -83,7 +83,7 @@ def statistical_inefficiency(
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Get the length of the timeseries
     x_size = x.size
@@ -91,7 +91,7 @@ def statistical_inefficiency(
     if x_size < 2:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGSampleSizeError(msg)
+        raise CRSampleSizeError(msg)
 
     # minimum amount of correlation function to compute
     if not isinstance(minimum_correlation_time, int):
@@ -99,10 +99,10 @@ def statistical_inefficiency(
             minimum_correlation_time = 3
         else:
             msg = 'minimum_correlation_time must be an `int`.'
-            raise CVGError(msg)
+            raise CRError(msg)
     elif minimum_correlation_time < 1:
         msg = 'minimum_correlation_time must be a positive `int`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     fft = fft and x_size > 30
 
@@ -113,7 +113,7 @@ def statistical_inefficiency(
         if not np.isfinite(_std):
             msg = 'there is at least one value in the input '
             msg += 'array which is non-finite or not-number.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
             return x_size
@@ -236,14 +236,14 @@ def geyer_r_statistical_inefficiency(
     # Check inputs
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x_size = x.size
 
     if x_size < 4:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGSampleSizeError(msg)
+        raise CRSampleSizeError(msg)
 
     fft = fft and x_size > 30
 
@@ -254,7 +254,7 @@ def geyer_r_statistical_inefficiency(
         if not np.isfinite(_std):
             msg = 'there is at least one value in the input '
             msg += 'array which is non-finite or not-number.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
             return x_size
@@ -376,14 +376,14 @@ def geyer_split_r_statistical_inefficiency(
     if y is not None:
         msg = 'The split-r method, splits the x time-series data '
         msg += 'and do not use y.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x = np.array(x, copy=False)
     x_size = x.size
     if x_size < 8:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGSampleSizeError(msg)
+        raise CRSampleSizeError(msg)
     x_size //= 2
     return geyer_r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
 
@@ -423,20 +423,20 @@ def geyer_split_statistical_inefficiency(
     if y is not None:
         msg = 'the split-r method, splits the x time-series data '
         msg += 'and do not use y.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x = np.array(x, copy=False)
 
     # Check inputs
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     x_size = x.size
     if x_size < 8:
         msg = '{} input data points are not '.format(x_size)
         msg += 'sufficient to be used by this method.'
-        raise CVGSampleSizeError(msg)
+        raise CRSampleSizeError(msg)
 
     # Special case if timeseries is constant.
     _std = np.std(x)
@@ -444,7 +444,7 @@ def geyer_split_statistical_inefficiency(
     if not np.isfinite(_std):
         msg = 'there is at least one value in the input '
         msg += 'array which is non-finite or not-number.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         return x_size
@@ -593,7 +593,7 @@ def integrated_auto_correlation_time(
             msg = 'method {} not found. Valid statistical '.format(si)
             msg += 'inefficiency (si) methods are:\n\t- '
             msg += '{}'.format('\n\t- '.join(si_methods))
-            raise CVGError(msg)
+            raise CRError(msg)
 
         si_func = si_methods[si]
 
@@ -604,7 +604,7 @@ def integrated_auto_correlation_time(
     elif si < 1.0:
         msg = 'statistical inefficiency (si) must '
         msg += 'be greater than or equal one.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     # Compute the integrated auto-correlation time
     tau = (si - 1.0) / 2.0

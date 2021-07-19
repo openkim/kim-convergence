@@ -4,7 +4,7 @@ from math import fabs, isclose
 import numpy as np
 from typing import Optional, Union, List
 
-from convergence._default import \
+from kim_convergence._default import \
     _DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL, \
     _DEFAULT_CONFIDENCE_COEFFICIENT, \
     _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
@@ -24,8 +24,8 @@ from convergence._default import \
     _DEFAULT_NSKIP, \
     _DEFAULT_IGNORE_END, \
     _DEFAULT_NUMBER_OF_CORES
-from convergence import \
-    CVGError, \
+from kim_convergence import \
+    CRError, \
     estimate_equilibration_length, \
     time_series_data_si, \
     uncorrelated_time_series_data_sample_indices
@@ -376,7 +376,7 @@ class UCLBase:
                    abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL):
             msg = 'It is not possible to estimate the relative half width '
             msg += 'for the close to zero mean = {}'.format(self.mean)
-            raise CVGError(msg)
+            raise CRError(msg)
 
         relative_half_width_estimate = \
             self.upper_confidence_limit / fabs(self.mean)

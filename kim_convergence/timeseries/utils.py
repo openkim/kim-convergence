@@ -6,8 +6,8 @@ from typing import Optional, Union, List
 
 from .statistical_inefficiency import si_methods
 
-from convergence import CVGError
-from convergence._default import \
+from kim_convergence import CRError
+from kim_convergence._default import \
     _DEFAULT_SI, \
     _DEFAULT_FFT, \
     _DEFAULT_MINIMUM_CORRELATION_TIME, \
@@ -59,7 +59,7 @@ def time_series_data_si(
             msg = 'method {} not found. Valid statistical '.format(si)
             msg += 'inefficiency (si) methods are:\n\t- '
             msg += '{}'.format('\n\t- '.join(si_methods))
-            raise CVGError(msg)
+            raise CRError(msg)
 
         si_func = si_methods[si]
 
@@ -68,23 +68,23 @@ def time_series_data_si(
                 time_series_data,
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
-        except CVGError:
+        except CRError:
             msg = 'Failed to compute the statistical inefficiency '
             msg += 'for the time_series_data.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     elif isinstance(si, (float, int)):
         if si < 1.0:
             msg = 'statistical inefficiency = {} must be '.format(si)
             msg += 'greater than or equal one.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         si_value = si
 
     else:
         msg = 'statistical inefficiency (si) must be '
         msg += 'a `float` or a `str`.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     return si_value
 
@@ -182,13 +182,13 @@ def uncorrelated_time_series_data_samples(
 
     if not isinstance(sample_method, str):
         msg = 'sample_method {} is not a `str`.'.format(sample_method)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if sample_method not in SAMPLING_METHODS:
         msg = 'method {} not found. Valid '.format(sample_method)
         msg += 'sampling methods are:\n\t- '
         msg += '{}'.format('\n\t- '.join(SAMPLING_METHODS))
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if sample_method == 'uncorrelated':
         return time_series_data_uncorrelated_samples(
@@ -256,7 +256,7 @@ def time_series_data_uncorrelated_samples(
     # Check inputs
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if uncorrelated_sample_indices is None:
         try:
@@ -265,10 +265,10 @@ def time_series_data_uncorrelated_samples(
                 si=si,
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
-        except CVGError:
+        except CRError:
             msg = 'Failed to compute the indices of uncorrelated '
             msg += 'samples of the time_series_data.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     else:
         indices = np.array(uncorrelated_sample_indices, copy=False)
@@ -276,7 +276,7 @@ def time_series_data_uncorrelated_samples(
         if indices.ndim != 1:
             msg = 'uncorrelated_sample_indices is not '
             msg += 'an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     try:
         uncorrelated_samples = time_series_data[indices]
@@ -290,7 +290,7 @@ def time_series_data_uncorrelated_samples(
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
         msg += "{}".format(time_series_data_size)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     return uncorrelated_samples
 
@@ -335,7 +335,7 @@ def time_series_data_uncorrelated_random_samples(
     # Check inputs
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if uncorrelated_sample_indices is None:
         try:
@@ -344,10 +344,10 @@ def time_series_data_uncorrelated_random_samples(
                 si=si,
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
-        except CVGError:
+        except CRError:
             msg = 'Failed to compute the indices of uncorrelated '
             msg += 'samples of the time_series_data.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     else:
         indices = np.array(uncorrelated_sample_indices, copy=False)
@@ -355,7 +355,7 @@ def time_series_data_uncorrelated_random_samples(
         if indices.ndim != 1:
             msg = 'uncorrelated_sample_indices is not '
             msg += 'an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     time_series_data_size = time_series_data.size
 
@@ -368,7 +368,7 @@ def time_series_data_uncorrelated_random_samples(
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
         msg += "{}".format(time_series_data_size)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     random_samples = np.empty(indices.size, dtype=time_series_data.dtype)
 
@@ -426,7 +426,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
     # Check inputs
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     if uncorrelated_sample_indices is None:
         try:
@@ -435,10 +435,10 @@ def time_series_data_uncorrelated_block_averaged_samples(
                 si=si,
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time)
-        except CVGError:
+        except CRError:
             msg = 'Failed to compute the indices of uncorrelated '
             msg += 'samples of the time_series_data.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     else:
         indices = np.array(uncorrelated_sample_indices, copy=False)
@@ -446,7 +446,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
         if indices.ndim != 1:
             msg = 'uncorrelated_sample_indices is not '
             msg += 'an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
     time_series_data_size = time_series_data.size
 
@@ -459,7 +459,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
         msg += "{}".format(time_series_data_size)
-        raise CVGError(msg)
+        raise CRError(msg)
 
     block_averaged_samples = \
         np.empty(indices.size - 1, dtype=time_series_data.dtype)

@@ -43,7 +43,7 @@ from copy import deepcopy
 from math import fabs
 
 from .zero_rc import ZERO_RC
-from convergence import CVGError
+from kim_convergence import CRError
 
 __all__ = [
     'ZERO_RC_BOUNDS',
@@ -132,7 +132,7 @@ class ZERO_RC_BOUNDS():
                 msg = 'small={}, x={}, big={} '.format(
                     self.small, x, self.big)
                 msg += 'are not monotone.'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             self.xsave = deepcopy(x)
             self.index = 1
@@ -159,12 +159,12 @@ class ZERO_RC_BOUNDS():
                     msg += '{}.\n'.format(self.big)
                     msg += 'It means that the stepping search terminated '
                     msg += 'unsuccessfully at the highest search bound.'
-                    raise CVGError(msg)
+                    raise CRError(msg)
                 msg = 'Answer x = {}, appears to be lower than '.format(x)
                 msg += 'the lowest search bound = {}.\n'.format(self.small)
                 msg += 'It means that the stepping search terminated '
                 msg += 'unsuccessfully at the lowest search bound.'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if self.fx_small >= 0.0:
                 if fx_big <= 0.0:
@@ -176,12 +176,12 @@ class ZERO_RC_BOUNDS():
                 msg += 'the highest search bound = {}.\n'.format(self.big)
                 msg += 'It means that the stepping search terminated '
                 msg += 'unsuccessfully at the highest search bound.'
-                raise CVGError(msg)
+                raise CRError(msg)
             msg = 'Answer x = {}, appears to be lower than the '.format(x)
             msg += 'lowest search bound = {}.\n'.format(self.small)
             msg += 'It means that the stepping search terminated '
             msg += 'unsuccessfully at the lowest search bound.'
-            raise CVGError(msg)
+            raise CRError(msg)
         elif self.index == 3:
             self.yy = deepcopy(fx)
 
@@ -221,7 +221,7 @@ class ZERO_RC_BOUNDS():
                 msg += '{}.\n'.format(self.big)
                 msg += 'It means that the stepping search terminated '
                 msg += 'unsuccessfully at the highest search bound.'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             # Create an instance of ZERO_RC
             self.z = ZERO_RC(self.xlb,
@@ -263,7 +263,7 @@ class ZERO_RC_BOUNDS():
                     msg += '= {}.\n'.format(self.small)
                     msg += 'It means that the stepping search terminated '
                     msg += 'unsuccessfully at the lowest search bound.'
-                    raise CVGError(msg)
+                    raise CRError(msg)
 
                 # Create an instance of ZERO_RC
                 self.z = ZERO_RC(self.xlb,
@@ -314,4 +314,4 @@ class ZERO_RC_BOUNDS():
             msg = 'Wrong index number = {}.\n'.format(self.index)
             msg += 'This function should be called with zero status for the '
             msg += 'first time.'
-            raise CVGError(msg)
+            raise CRError(msg)

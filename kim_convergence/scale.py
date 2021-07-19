@@ -3,7 +3,7 @@
 from math import isclose, fabs, log10
 import numpy as np
 
-from .err import CVGError
+from .err import CRError
 from ._default import _DEFAULT_ABS_TOL
 
 
@@ -43,7 +43,7 @@ class MinMaxScale():
 
     Examples:
 
-    >>> from convergence import MinMaxScale, minmax_scale
+    >>> from kim_convergence import MinMaxScale, minmax_scale
     >>> data = [-1., 3.]
     >>> mms = MinMaxScale()
     >>> scaled_x = mms.scale(data)
@@ -69,7 +69,7 @@ class MinMaxScale():
         if feature_range[0] >= feature_range[1]:
             msg = "Minimum of desired feature range must be smaller "
             msg += "than maximum. Got {}".format(str(feature_range))
-            raise CVGError(msg)
+            raise CRError(msg)
         self.feature_range_ = feature_range
         self.data_min_ = None
         self.data_max_ = None
@@ -91,12 +91,12 @@ class MinMaxScale():
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if not np.all(np.isfinite(x)):
             msg = 'there is at least one value in the input '
             msg += 'array which is non-finite or not-number.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         self.data_min_ = np.min(x)
         self.data_max_ = np.max(x)
@@ -106,7 +106,7 @@ class MinMaxScale():
             msg = 'the data_range of the input array is almost zero within '
             msg += '{} precision numbers.'.format(
                 int(fabs(log10(_DEFAULT_ABS_TOL))))
-            raise CVGError(msg)
+            raise CRError(msg)
 
         self.scale_ = \
             (self.feature_range_[1] -
@@ -131,7 +131,7 @@ class MinMaxScale():
         if self.min_ is None:
             msg = "internal data-dependent state are not set, you need "
             msg += "to scale an array before trying to inverse it."
-            raise CVGError(msg)
+            raise CRError(msg)
         x = np.array(x, copy=False)
         inverse_scaled_x = x - self.min_
         inverse_scaled_x /= self.scale_
@@ -195,7 +195,7 @@ class TranslateScale():
 
     Examples:
 
-    >>> from convergence import TranslateScale
+    >>> from kim_convergence import TranslateScale
     >>> data = [1., 2., 2., 2., 3.]
     >>> tsc = TranslateScale()
     >>> scaled_x = tsc.scale(data)
@@ -231,12 +231,12 @@ class TranslateScale():
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if not np.all(np.isfinite(x)):
             msg = 'there is at least one value in the input '
             msg += 'array which is non-finite or not-number.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if self.with_centering_:
             self.center_ = x[0]
@@ -266,7 +266,7 @@ class TranslateScale():
         if self.scale_ is None and self.center_ is None:
             msg = "internal data-dependent state are not set, you need "
             msg += "to scale an array before trying to inverse it."
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if self.with_scaling_ and not isclose(
                 self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -347,7 +347,7 @@ class StandardScale():
 
     Examples:
 
-    >>> from convergence import StandardScale
+    >>> from kim_convergence import StandardScale
     >>> data = [-0.5, 6]
     >>> ssc = StandardScale()
     >>> scaled_x = ssc.scale(data)
@@ -385,7 +385,7 @@ class StandardScale():
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if self.with_centering_:
             self.mean_ = np.mean(x)
@@ -405,7 +405,7 @@ class StandardScale():
             if not np.isfinite(self.mean_1):
                 msg = 'there is at least one value in the input array which is '
                 msg += 'non-finite or not-number.'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if not isclose(self.mean_1, 0, abs_tol=_DEFAULT_ABS_TOL):
                 scaled_x -= self.mean_1
@@ -419,7 +419,7 @@ class StandardScale():
             if not np.isfinite(self.std_):
                 msg = 'there is at least one value in the input array which is '
                 msg += 'non-finite or not-number.'
-                raise CVGError(msg)
+                raise CRError(msg)
 
             if not isclose(self.std_, 0, abs_tol=_DEFAULT_ABS_TOL):
                 scaled_x /= self.std_
@@ -454,7 +454,7 @@ class StandardScale():
         if self.mean_ is None and self.std_ is None:
             msg = "internal data-dependent state are not set, you need "
             msg += "to scale an array before trying to inverse it."
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if self.with_scaling_:
             x = np.array(x, copy=False)
@@ -535,7 +535,7 @@ class RobustScale():
 
     Examples:
 
-    >>> from convergence import RobustScale
+    >>> from kim_convergence import RobustScale
     >>> data = [ 4.,  1., -2.]
     >>> rsc = RobustScale()
     >>> scaled_x = rsc.scale(data)
@@ -558,16 +558,16 @@ class RobustScale():
         if not isinstance(quantile_range, tuple) or \
                 not isinstance(quantile_range, list):
             msg = 'invalid quantile range: {}.'.format(str(quantile_range))
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if len(quantile_range) != 2:
             msg = 'invalid quantile range: {}.'.format(str(quantile_range))
-            raise CVGError(msg)
+            raise CRError(msg)
 
         q_min, q_max = quantile_range
         if not 0 <= q_min <= q_max <= 100:
             msg = 'invalid quantile range: {}.'.format(str(quantile_range))
-            raise CVGError(msg)
+            raise CRError(msg)
 
         self.quantile_range = quantile_range
         self.center_ = None
@@ -586,12 +586,12 @@ class RobustScale():
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if not np.all(np.isfinite(x)):
             msg = 'there is at least one value in the input '
             msg += 'array which is non-finite or not-number.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if self.with_centering_:
             self.center_ = np.median(x)
@@ -622,7 +622,7 @@ class RobustScale():
         if self.center_ is None and self.scale_ is None:
             msg = "internal data-dependent state are not set, you need "
             msg += "to scale an array before trying to inverse it."
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if self.with_scaling_ and not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
             x = np.array(x, copy=False)
@@ -675,7 +675,7 @@ class MaxAbsScale():
 
     Examples:
 
-    >>> from convergence import MaxAbsScale
+    >>> from kim_convergence import MaxAbsScale
     >>> data = [ 4.,  1., -9.]
     >>> mas = MaxAbsScale()
     >>> scaled_x = mas.scale(data)
@@ -718,12 +718,12 @@ class MaxAbsScale():
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if not np.all(np.isfinite(x)):
             msg = 'there is at least one value in the input '
             msg += 'array which is non-finite or not-number.'
-            raise CVGError(msg)
+            raise CRError(msg)
 
         self.scale_ = np.max(np.abs(x))
 
@@ -747,7 +747,7 @@ class MaxAbsScale():
         if self.scale_ is None:
             msg = "internal data-dependent state are not set, you need "
             msg += "to scale an array before trying to inverse it."
-            raise CVGError(msg)
+            raise CRError(msg)
 
         if not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
             x = np.array(x, copy=False)

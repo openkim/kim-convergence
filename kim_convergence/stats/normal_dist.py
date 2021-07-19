@@ -18,7 +18,7 @@ References:
 
 from math import log, fabs, sqrt, inf, nan
 
-from convergence import CVGError
+from kim_convergence import CRError
 
 __all__ = [
     's_normal_inv_cdf',
@@ -184,7 +184,7 @@ def normal_interval(confidence_level: float,
     if confidence_level <= 0.0 or confidence_level >= 1.0:
         msg = 'confidence level = {} is not in '.format(confidence_level)
         msg += 'the range (0.0 1.0).'
-        raise CVGError(msg)
+        raise CRError(msg)
 
     lower = (1.0 - confidence_level) / 2
     upper = (1.0 + confidence_level) / 2

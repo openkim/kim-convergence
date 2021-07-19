@@ -1,7 +1,7 @@
 """Test module for normal distributed data.
 
 Note:
-    The tests in this module are modified and fixed for the convergence
+    The tests in this module are modified and fixed for the kim-convergence
     package use.
 
 """
@@ -9,8 +9,8 @@ from math import sqrt, fabs
 import numpy as np
 from scipy.stats import chi2
 
-from convergence._default import _DEFAULT_CONFIDENCE_COEFFICIENT
-from convergence import cvg_check
+from kim_convergence._default import _DEFAULT_CONFIDENCE_COEFFICIENT
+from kim_convergence import cr_check
 from .t_dist import t_cdf
 
 
@@ -46,7 +46,7 @@ def t_test(
             `population_mean`.
 
     """
-    cvg_check(significance_level,
+    cr_check(significance_level,
               var_name='significance_level',
               var_lower_bound=np.finfo(np.float64).resolution)
 
@@ -88,7 +88,7 @@ def chi_square_test(
             is equal to the given population variance, `population_var`.
 
     """
-    cvg_check(significance_level,
+    cr_check(significance_level,
               var_name='significance_level',
               var_lower_bound=np.finfo(np.float64).resolution)
 
