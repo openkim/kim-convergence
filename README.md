@@ -39,6 +39,15 @@ Welcome to **kim-convergence** module!
 The kim-convergence package is designed to help in automatic equilibration
 detection & run length control.
 
+**PLEASE NOTE**:
+
+the kim-convergence code is under active development and is still in beta
+versions `0.0.2`. In general changes to the patch version (the third number)
+indicate backward compatible beta releases, but please be aware that file
+formats and APIs may change.
+
+Bug reports are also welcomed in the GitHub issues!
+
 ## Document
 
 <span style="font-size:300%; color:red; font-weight: 900;">!WORK IN PROGRESS!</span>
@@ -65,7 +74,7 @@ included with modern versions of Python.
 pip install kim-convergence
 ```
 
-**Note:**
+**NOTE:**
 
 Depending on your Python installation, you may need to use `pip3` instead of
 `pip`.
@@ -99,6 +108,7 @@ adding `conda-forge` to your channels with:
 
 ```sh
 conda config --add channels conda-forge
+conda config --set channel_priority strict
 ```
 
 Once the `conda-forge` channel has been enabled, `kim-convergence` can be
