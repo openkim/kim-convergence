@@ -3,8 +3,9 @@
 The kim-convergence package is designed to help in automatic equilibration
 detection & run length control. You can use this package in your script and
 post-process the LAMMPS output files (log file or dump files), or you can use
-the provided Python script `run_length_control.py` in this folder and use it in
-your LAMMPS input script.
+the provided Python script
+[`run_length_control.py`](https://github.com/openkim/kim-convergence/blob/main/examples/lammps/run_length_control.py)
+in this folder and use it in your LAMMPS input script.
 
 For the latter, the LAMMPS uses the
 [`python`](https://docs.lammps.org/python.html) command to define and execute a
