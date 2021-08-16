@@ -81,6 +81,8 @@ equal-style `variable`.
 
 ### Examples
 
+**[Example 1](https://github.com/openkim/kim-convergence/blob/main/examples/lammps/in.lj)**
+
 For example, to use the `pea` variable defined below as a control value to the
 Python function,
 
@@ -106,6 +108,8 @@ where `4` is the number of inputs to the Python function.
 
 The format for `SELF 1 variable pea` would be `piss`.
 
+**[Example 2](https://github.com/openkim/kim-convergence/blob/main/examples/lammps/in.lj2)**
+
 Another example is to use te `pea` variable and the `temp` compute in LAMMPS as
 a control values,
 
@@ -127,6 +131,8 @@ where `6` is the number of inputs to the Python function.
   when LAMMPS starts up
 
 The format for `SELF 1 variable pea compute thermo_temp` would be `pissss`.
+
+**[Example 3](https://github.com/openkim/kim-convergence/blob/main/examples/lammps/in.lj3)**
 
 In the third example, we use another variable `t_ub` as,
 
