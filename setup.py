@@ -15,7 +15,7 @@ setup(
     url='https://github.com/openkim/kim-convergence',
     author='Yaser Afshar',
     author_email='yafshar@openkim.org',
-    license='LGPLv2+',
+    license='LGPL-2.1-or-later',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',

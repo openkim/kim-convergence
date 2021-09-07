@@ -3,7 +3,7 @@
 [![Python package](https://github.com/openkim/kim-convergence/actions/workflows/python-package.yml/badge.svg)](https://github.com/openkim/kim-convergence/actions/workflows/python-package.yml)
 [![Anaconda-Server Badge](https://img.shields.io/conda/vn/conda-forge/kim-convergence.svg)](https://anaconda.org/conda-forge/kim-convergence)
 [![PyPI](https://img.shields.io/pypi/v/kim-convergence.svg)](https://pypi.python.org/pypi/kim-convergence)
-[![License](https://img.shields.io/badge/license-LGPLv2+-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-LGPL--2.1--or--later-blue)](LICENSE)
 
 ## How do you automatically estimate the length of the simulation required?
 
