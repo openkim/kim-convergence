@@ -139,8 +139,9 @@ class TestBatchModule(unittest.TestCase):
         x[0] = np.inf
         self.assertRaises(CRError, cr.batch, x)
 
-        x[0] = np.NaN
-        self.assertRaises(CRError, cr.batch, x)
+        if np.__version__.startswith('1.'):
+            x[0] = np.NaN
+            self.assertRaises(CRError, cr.batch, x)
 
         rng = np.random.RandomState(12345)
 
