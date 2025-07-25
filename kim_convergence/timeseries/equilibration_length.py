@@ -106,7 +106,7 @@ def estimate_equilibration_length(
                 Theory and Comp., Simulation., 12(4), p. 1799--1805.
 
     """
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
 
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
@@ -216,7 +216,7 @@ def estimate_equilibration_length(
                 minimum_correlation_time)
             for t in range(0, upper_bound, nskip))
 
-        results_array = np.array(results, copy=False)
+        results_array = np.asarray(results)
 
         # Find the maximum
         max_index = np.argmax(results_array[:, 0])

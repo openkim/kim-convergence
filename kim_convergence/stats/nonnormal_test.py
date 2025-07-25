@@ -479,7 +479,7 @@ def ks_test(
     if population_cdf in ('default', None):
         return True
 
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
 
     if time_series_data.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
@@ -603,7 +603,7 @@ def levene_test(
     if population_cdf in ('default', None):
         return False
 
-    x = np.array(time_series_data, copy=False)
+    x = np.asarray(time_series_data)
 
     if x.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
@@ -697,7 +697,7 @@ def wilcoxon_test(
     if population_cdf in ('default', None):
         return False
 
-    x = np.array(time_series_data, copy=False)
+    x = np.asarray(time_series_data)
 
     if x.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'
@@ -782,7 +782,7 @@ def kruskal_test(
     if population_cdf in ('default', None):
         return False
 
-    x = np.array(time_series_data, copy=False)
+    x = np.asarray(time_series_data)
 
     if x.ndim != 1:
         msg = 'time_series_data is not an array of one-dimension.'

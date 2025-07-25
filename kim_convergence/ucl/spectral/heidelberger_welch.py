@@ -401,7 +401,7 @@ class HeidelbergerWelch(UCLBase):
                    Operations Research, 31(6), p. 1109--1144.
 
         """
-        time_series_data = np.array(time_series_data, copy=False)
+        time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'

@@ -264,7 +264,7 @@ def cross_covariance(x: Union[np.ndarray, List[float]],
         msg += 'non-finite or not-number.'
         raise CRError(msg)
 
-    y = np.array(y, copy=False)
+    y = np.asarray(y)
 
     if x.shape != y.shape:
         msg = 'x and y time series should have the same shape.'
@@ -386,7 +386,7 @@ def cross_correlate(x: Union[np.ndarray, List[float]],
     crosscorr = cross_covariance(x, y, fft=fft)
 
     x = np.asarray(x)
-    y = np.array(y, copy=False)
+    y = np.asarray(y)
 
     sigma_xy = np.std(x) * np.std(y)
 
@@ -478,7 +478,7 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
         del _mean
 
     else:
-        dx = np.array(x, copy=False)
+        dx = np.asarray(x)
 
         if dx.ndim != 1:
             msg = 'x is not an array of one-dimension.'

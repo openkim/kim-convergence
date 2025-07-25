@@ -251,7 +251,7 @@ def time_series_data_uncorrelated_samples(
             time series data at uncorrelated uncorrelated_sample indices.
 
     """
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:
@@ -271,7 +271,7 @@ def time_series_data_uncorrelated_samples(
             raise CRError(msg)
 
     else:
-        indices = np.array(uncorrelated_sample_indices, copy=False)
+        indices = np.asarray(uncorrelated_sample_indices)
 
         if indices.ndim != 1:
             msg = 'uncorrelated_sample_indices is not '
@@ -330,7 +330,7 @@ def time_series_data_uncorrelated_random_samples(
             random data for each block after blocking the time series data.
 
     """
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:
@@ -350,7 +350,7 @@ def time_series_data_uncorrelated_random_samples(
             raise CRError(msg)
 
     else:
-        indices = np.array(uncorrelated_sample_indices, copy=False)
+        indices = np.asarray(uncorrelated_sample_indices)
 
         if indices.ndim != 1:
             msg = 'uncorrelated_sample_indices is not '
@@ -421,7 +421,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
             data.
 
     """
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:
@@ -441,7 +441,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
             raise CRError(msg)
 
     else:
-        indices = np.array(uncorrelated_sample_indices, copy=False)
+        indices = np.asarray(uncorrelated_sample_indices)
 
         if indices.ndim != 1:
             msg = 'uncorrelated_sample_indices is not '

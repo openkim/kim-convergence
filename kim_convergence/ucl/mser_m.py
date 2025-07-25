@@ -108,7 +108,7 @@ def mser_m(
         algorithm did not find any truncation point.
 
     """
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:
@@ -285,7 +285,7 @@ class MSER_m(UCLBase):
             ignore_end=ignore_end)
 
         if truncated:
-            time_series_data = np.array(time_series_data, copy=False)
+            time_series_data = np.asarray(time_series_data)
 
             self.set_si(
                 time_series_data=time_series_data[truncate_index:],
@@ -347,7 +347,7 @@ class MSER_m(UCLBase):
                     doi = 10.1109/WSC.2010.5679094
 
         """
-        time_series_data = np.array(time_series_data, copy=False)
+        time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'

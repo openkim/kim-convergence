@@ -238,7 +238,7 @@ def _get_trajectory(get_trajectory: callable,
             msg += 'simulation for {} number of steps.'.format(run_length)
             raise CRError(msg)
 
-    tsd = np.array(tsd, dtype=np.float64, copy=False)
+    tsd = np.asarray(tsd, dtype=np.float64)
 
     # Extra check
     if not np.all(np.isfinite(tsd)):
@@ -327,7 +327,7 @@ def _check_equilibration_step(
     time_series_data: Union[np.ndarray, List[float]],
     dump_trajectory: bool,
         dump_trajectory_fp) -> None:
-    equilibration_step_array = np.array(equilibration_step, copy=False)
+    equilibration_step_array = np.asarray(equilibration_step)
 
     hard_limit_crossed = np.any(
         equilibration_step_array >= maximum_equilibration_step)

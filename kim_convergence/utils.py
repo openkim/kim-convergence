@@ -152,7 +152,7 @@ def train_test_split(
         1darray, 1darray: training indices, testing indices.
 
     """
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
     n_samples = np.shape(time_series_data)[0]
     n_train, n_test = validate_split(n_samples=n_samples,
                                      train_size=train_size,

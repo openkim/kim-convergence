@@ -70,7 +70,7 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
     10.054804081191616 1.0
 
     """
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:

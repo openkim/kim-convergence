@@ -146,7 +146,7 @@ class N_SKART(UCLBase):
             index in the time series data.
 
         """
-        time_series_data = np.array(time_series_data, copy=False)
+        time_series_data = np.asarray(time_series_data)
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'
             raise CRError(msg)
@@ -335,7 +335,7 @@ class N_SKART(UCLBase):
                 Student's t-ratio.
 
         """
-        time_series_data = np.array(time_series_data, copy=False)
+        time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'

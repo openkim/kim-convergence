@@ -112,7 +112,7 @@ class MSER_m_y(MSER_m):
             float: upper_confidence_limit
 
         """
-        time_series_data = np.array(time_series_data, copy=False)
+        time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
             msg = 'time_series_data is not an array of one-dimension.'
@@ -136,7 +136,7 @@ class MSER_m_y(MSER_m):
 
         # Apply the randomness test of von Neumann
         # to the current set of batch means
-        x_batch = np.array(time_series_data, copy=False)
+        x_batch = np.asarray(time_series_data)
         random = randomness_test(x_batch, self.significance_level)
 
         dependent_data = not random
