@@ -177,7 +177,7 @@ def auto_covariance(x: Union[np.ndarray, List[float]],
         1darray: The estimated autocovariances.
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
@@ -246,7 +246,7 @@ def cross_covariance(x: Union[np.ndarray, List[float]],
     if y is x:
         return auto_covariance(x, fft=fft)
 
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
@@ -322,7 +322,7 @@ def auto_correlate(x: Union[np.ndarray, List[float]],
         ndarray: The calculated auto correlation function.
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     # Calculate (estimate) the auto covariances
     autocor = auto_covariance(x, fft=fft)
@@ -385,7 +385,7 @@ def cross_correlate(x: Union[np.ndarray, List[float]],
     # Calculate the cross covariances
     crosscorr = cross_covariance(x, y, fft=fft)
 
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
     y = np.array(y, copy=False)
 
     sigma_xy = np.std(x) * np.std(y)
@@ -459,7 +459,7 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
 
     """
     if with_mean:
-        x = np.array(x, copy=False)
+        x = np.asarray(x)
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
@@ -583,7 +583,7 @@ def summary(x: Union[np.ndarray, List[float]]):
             min, max, mean, std, median, 1stQU, 3rdQU
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
@@ -617,7 +617,7 @@ def int_power(x: Union[np.ndarray, List[float]],
         1darray: Computed power array.
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
@@ -678,7 +678,7 @@ def moment(x: Union[np.ndarray, List[float]],
         mean.
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'

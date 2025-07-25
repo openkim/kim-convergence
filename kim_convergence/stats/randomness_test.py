@@ -59,7 +59,7 @@ def randomness_test(x: Union[np.ndarray, List[float]],
                 doi: 10.1007/978-1-4612-3794-5_4
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'

@@ -87,7 +87,7 @@ class MinMaxScale():
             1darray: Scaled dataset to a given range
 
         """
-        x = np.array(x, copy=False)
+        x = np.asarray(x)
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
@@ -132,7 +132,7 @@ class MinMaxScale():
             msg = "internal data-dependent state are not set, you need "
             msg += "to scale an array before trying to inverse it."
             raise CRError(msg)
-        x = np.array(x, copy=False)
+        x = np.asarray(x)
         inverse_scaled_x = x - self.min_
         inverse_scaled_x /= self.scale_
         return inverse_scaled_x
@@ -227,7 +227,7 @@ class TranslateScale():
             1darray: Scaled dataset to a given range
 
         """
-        x = np.array(x, copy=False)
+        x = np.asarray(x)
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
@@ -270,7 +270,7 @@ class TranslateScale():
 
         if self.with_scaling_ and not isclose(
                 self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
-            x = np.array(x, copy=False)
+            x = np.asarray(x)
             inverse_scaled_x = x * self.scale_
         else:
             inverse_scaled_x = np.array(x, copy=True)
@@ -381,7 +381,7 @@ class StandardScale():
             1darray: Scaled and/or Centered dataset.
 
         """
-        x = np.array(x, copy=False)
+        x = np.asarray(x)
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
@@ -457,7 +457,7 @@ class StandardScale():
             raise CRError(msg)
 
         if self.with_scaling_:
-            x = np.array(x, copy=False)
+            x = np.asarray(x)
             if self.mean_2 is not None:
                 inverse_scaled_x = x + self.mean_2
             inverse_scaled_x *= self.std_
@@ -582,7 +582,7 @@ class RobustScale():
             The data used to compute the median and quantiles
             used for later scaling along the features axis.
         """
-        x = np.array(x, copy=False)
+        x = np.asarray(x)
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
@@ -625,7 +625,7 @@ class RobustScale():
             raise CRError(msg)
 
         if self.with_scaling_ and not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
-            x = np.array(x, copy=False)
+            x = np.asarray(x)
             inverse_scaled_x = x * self.scale_
         else:
             inverse_scaled_x = np.array(x, copy=True)
@@ -714,7 +714,7 @@ class MaxAbsScale():
             Transformer instance.
 
         """
-        x = np.array(x, copy=False)
+        x = np.asarray(x)
 
         if x.ndim != 1:
             msg = 'x is not an array of one-dimension.'
@@ -750,7 +750,7 @@ class MaxAbsScale():
             raise CRError(msg)
 
         if not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
-            x = np.array(x, copy=False)
+            x = np.asarray(x)
             inverse_scaled_x = x * self.scale_
         else:
             inverse_scaled_x = np.array(x, copy=True)

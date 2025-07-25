@@ -67,7 +67,7 @@ def geweke(x: np.ndarray,
             msg += '({}, {})'.format(first, last)
             raise CRError(msg)
 
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = "x is not an array of one-dimension."

@@ -80,7 +80,7 @@ def outlier_test(x: Union[np.ndarray, List[float]],
         1darray, or None: outliers indices, or `None` if there is no outlier
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'

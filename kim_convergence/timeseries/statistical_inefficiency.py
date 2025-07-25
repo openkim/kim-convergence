@@ -79,7 +79,7 @@ def statistical_inefficiency(
             integrated auto-correlation time).
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     if x.ndim != 1:
         msg = 'x is not an array of one-dimension.'
@@ -231,7 +231,7 @@ def geyer_r_statistical_inefficiency(
         .. [10] https://mc-stan.org/
 
     """
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     # Check inputs
     if x.ndim != 1:
@@ -378,7 +378,7 @@ def geyer_split_r_statistical_inefficiency(
         msg += 'and do not use y.'
         raise CRError(msg)
 
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
     x_size = x.size
     if x_size < 8:
         msg = '{} input data points are not '.format(x_size)
@@ -425,7 +425,7 @@ def geyer_split_statistical_inefficiency(
         msg += 'and do not use y.'
         raise CRError(msg)
 
-    x = np.array(x, copy=False)
+    x = np.asarray(x)
 
     # Check inputs
     if x.ndim != 1:
