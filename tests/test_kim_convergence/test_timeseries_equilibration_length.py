@@ -190,7 +190,10 @@ class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
         self.assertRaises(CRError,
                           cr.estimate_equilibration_length, x)
 
-        x[2] = np.NINF
+        if np.__version__.startswith('1.'):
+            x[2] = np.NINF
+        else:
+            x[2] = -np.inf
 
         self.assertRaises(CRError,
                           cr.estimate_equilibration_length, x)
