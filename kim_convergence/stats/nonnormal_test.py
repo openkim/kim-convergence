@@ -286,7 +286,7 @@ ContinuousDistributionsArgumentRequirement = {
     'halfgennorm': ContinuousDistributions['halfgennorm'] + ' takes `beta` as a shape parameter.',
     'hypsecant': ContinuousDistributions['hypsecant'] + ' takes no arguments.',
     'invgamma': ContinuousDistributions['invgamma'] + ' takes `a` as a shape parameter.',
-    'invgauss': ContinuousDistributions['invgauss'] + ' takes `\mu` as a shape parameter.',
+    'invgauss': ContinuousDistributions['invgauss'] + r' takes `\mu` as a shape parameter.',
     'invweibull': ContinuousDistributions['invweibull'] + ' takes `c` as a shape parameter.',
     'johnsonsb': ContinuousDistributions['johnsonsb'] + ' takes `a` and `b` as shape parameters.',
     'johnsonsu': ContinuousDistributions['johnsonsu'] + ' takes `a` and `b` as shape parameters.',
