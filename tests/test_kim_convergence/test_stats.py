@@ -265,7 +265,7 @@ class TestStatsModule(unittest.TestCase):
         self.assertRaises(CRError,
                           cr.cross_covariance, a, b)
 
-        a[100] = np.random.rand(1)
+        a[100] = np.random.rand()
         b[101] = np.inf
 
         self.assertRaises(CRError,
@@ -523,7 +523,7 @@ class TestStatsModule(unittest.TestCase):
 
         self.assertRaises(CRError, cr.cross_correlate, a, b)
 
-        a[1000] = np.random.rand(1)
+        a[1000] = np.random.rand()
         b[1001] = np.inf
 
         self.assertRaises(CRError, cr.cross_correlate, a, b)
