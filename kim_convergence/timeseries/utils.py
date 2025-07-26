@@ -56,9 +56,9 @@ def time_series_data_si(
 
     if isinstance(si, str):
         if si not in si_methods:
-            msg = 'method {} not found. Valid statistical '.format(si)
+            msg = f'method {si} not found. Valid statistical '
             msg += 'inefficiency (si) methods are:\n\t- '
-            msg += '{}'.format('\n\t- '.join(si_methods))
+            msg += f'{"\n\t- ".join(si_methods)}'
             raise CRError(msg)
 
         si_func = si_methods[si]
@@ -75,7 +75,7 @@ def time_series_data_si(
 
     elif isinstance(si, (float, int)):
         if si < 1.0:
-            msg = 'statistical inefficiency = {} must be '.format(si)
+            msg = f'statistical inefficiency = {si} must be '
             msg += 'greater than or equal one.'
             raise CRError(msg)
 
@@ -181,13 +181,13 @@ def uncorrelated_time_series_data_samples(
         sample_method = 'uncorrelated'
 
     if not isinstance(sample_method, str):
-        msg = 'sample_method {} is not a `str`.'.format(sample_method)
+        msg = f'sample_method {sample_method} is not a `str`.'
         raise CRError(msg)
 
     if sample_method not in SAMPLING_METHODS:
-        msg = 'method {} not found. Valid '.format(sample_method)
+        msg = f'method {sample_method} not found. Valid '
         msg += 'sampling methods are:\n\t- '
-        msg += '{}'.format('\n\t- '.join(SAMPLING_METHODS))
+        msg += f'{"\n\t- ".join(SAMPLING_METHODS)}'
         raise CRError(msg)
 
     if sample_method == 'uncorrelated':
@@ -289,7 +289,7 @@ def time_series_data_uncorrelated_samples(
         msg += '} is out ' if len(wrong_indices[0]) == 1 else '} are out '
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
-        msg += "{}".format(time_series_data_size)
+        msg += f'{time_series_data_size}'
         raise CRError(msg)
 
     return uncorrelated_samples
@@ -367,7 +367,7 @@ def time_series_data_uncorrelated_random_samples(
         msg += '} is out ' if len(wrong_indices[0]) == 1 else '} are out '
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
-        msg += "{}".format(time_series_data_size)
+        msg += f'{time_series_data_size}'
         raise CRError(msg)
 
     random_samples = np.empty(indices.size, dtype=time_series_data.dtype)
@@ -458,7 +458,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
         msg += '} is out ' if len(wrong_indices[0]) == 1 else '} are out '
         msg += 'of bound ' if len(wrong_indices[0]) == 1 else 'of bounds '
         msg += 'for time_series_data with size of '
-        msg += "{}".format(time_series_data_size)
+        msg += f'{time_series_data_size}'
         raise CRError(msg)
 
     block_averaged_samples = \

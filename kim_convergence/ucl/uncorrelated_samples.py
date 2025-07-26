@@ -129,13 +129,13 @@ class UncorrelatedSamples(UCLBase):
         time_series_data_size = time_series_data.size
 
         if time_series_data_size < 5:
-            msg = '{} input data points '.format(time_series_data_size)
+            msg = f'{time_series_data_size} input data points '
             msg += 'are not sufficient to be used by "UCL".\n'
             msg += '"UCL" at least needs 5 data points.'
             raise CRSampleSizeError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
+            msg = f'confidence_coefficient = {confidence_coefficient} '
             msg += 'is not in the range (0.0 1.0).'
             raise CRError(msg)
 
@@ -167,11 +167,11 @@ class UncorrelatedSamples(UCLBase):
 
         if uncorrelated_samples_size < 5:
             if uncorrelated_samples_size < 2:
-                msg = '{} uncorrelated '.format(uncorrelated_samples_size)
+                msg = f'{uncorrelated_samples_size} uncorrelated '
                 msg += 'sample points are not sufficient to be used by "UCL".'
                 raise CRSampleSizeError(msg)
 
-            msg = '{} uncorrelated sample '.format(uncorrelated_samples_size)
+            msg = f'{uncorrelated_samples_size} uncorrelated sample '
             msg += 'points are not sufficient to be used by "UCL".'
             cr_warning(msg)
 

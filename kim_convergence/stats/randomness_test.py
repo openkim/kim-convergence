@@ -72,7 +72,7 @@ def randomness_test(x: Union[np.ndarray, List[float]],
               var_lower_bound=np.finfo(np.float64).resolution)
 
     if x_size < 3:
-        msg = '{} input data points are not '.format(x_size)
+        msg = f'{x_size} input data points are not '
         msg += 'sufficient to be used by randomness_test method.'
         raise CRSampleSizeError(msg)
 

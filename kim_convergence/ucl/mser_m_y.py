@@ -121,13 +121,13 @@ class MSER_m_y(MSER_m):
         time_series_data_size = time_series_data.size
 
         if time_series_data_size < 10:
-            msg = '{} input data points are not '.format(time_series_data_size)
+            msg = f'{time_series_data_size} input data points are not '
             msg += 'sufficient to be used by "MSER_m_y".\n"MSER_m_y" at '
             msg += 'least needs 10 data points.'
             raise CRSampleSizeError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
+            msg = f'confidence_coefficient = {confidence_coefficient} '
             msg += 'is not in the range (0.0 1.0).'
             raise CRError(msg)
 

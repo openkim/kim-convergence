@@ -78,11 +78,11 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
         raise CRError(msg)
 
     if not isinstance(batch_size, int):
-        msg = 'batch_size = {} is not an `int`.'.format(batch_size)
+        msg = f'batch_size = {batch_size} is not an `int`.'
         raise CRError(msg)
 
     if batch_size < 1:
-        msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
+        msg = f'batch_size = {batch_size} < 1 is not valid.'
         raise CRError(msg)
 
     if not np.all(np.isfinite(time_series_data)):
@@ -96,11 +96,11 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
     number_batches = time_series_data.size // batch_size
 
     if number_batches == 0:
-        msg = 'invalid number of batches = {}.\n'.format(number_batches)
+        msg = f'invalid number of batches = {number_batches}.\n'
         msg += 'The number of input data points = '
-        msg += '{} are '.format(time_series_data.size)
+        msg += f'{time_series_data.size} are '
         msg += 'not enough to produce batches with the batch size of '
-        msg += '{} data points.'.format(batch_size)
+        msg += f'{batch_size} data points.'
         raise CRError(msg)
 
     # Correct the size of data
@@ -121,14 +121,14 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
 
     if with_centering or with_scaling:
         if not isinstance(scale, str):
-            msg = 'scale is not a `str`.\nScale = {} is not '.format(scale)
+            msg = f'scale is not a `str`.\nScale = {scale} is not '
             msg += 'a valid method to scale and standardize a dataset.'
             raise CRError(msg)
 
         if scale not in scale_methods:
-            msg = 'method "{}" not found. Valid methods '.format(scale)
+            msg = f'method "{scale}" not found. Valid methods '
             msg += 'to scale and standardize a dataset are:\n\t- '
-            msg += '{}'.format('\n\t- '.join(scale_methods))
+            msg += f'{"\n\t- ".join(scale_methods)}'
             raise CRError(msg)
 
         scale_func = scale_methods[scale]

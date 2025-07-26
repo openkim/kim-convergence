@@ -39,8 +39,7 @@ def validate_split(
 
     """
     if not isinstance(n_samples, int) or n_samples <= 0:
-        msg = 'n_samples={} is not a positive '.format(n_samples)
-        msg += '`int`.'
+        msg = f'n_samples={n_samples} is not a positive `int`.'
         raise CRError(msg)
 
     if test_size is None and train_size is None:
@@ -56,36 +55,36 @@ def validate_split(
     train_size_float = isinstance(train_size, float)
 
     if test_size_int and (test_size >= n_samples or test_size <= 0):
-        msg = 'test_size={} should be positive '.format(test_size)
-        msg += 'and smaller than the number of samples={}'.format(n_samples)
+        msg = f'test_size={test_size} should be positive '
+        msg += f'and smaller than the number of samples={n_samples}'
         raise CRError(msg)
 
     if test_size_float and (test_size <= 0 or test_size >= 1):
-        msg = 'test_size={} should be a float in '.format(test_size)
+        msg = f'test_size={test_size} should be a float in '
         msg += 'the [0, 1] range.'
         raise CRError(msg)
 
     if test_size is not None:
-        msg = 'Invalid input of test_size={}.'.format(test_size)
+        msg = f'Invalid input of test_size={test_size}.'
         raise CRError(msg)
 
     if train_size_int and (train_size >= n_samples or train_size <= 0):
-        msg = 'train_size={} should be positive '.format(train_size)
-        msg += 'and smaller than the number of samples={}'.format(n_samples)
+        msg = f'train_size={train_size} should be positive '
+        msg += f'and smaller than the number of samples={n_samples}'
         raise CRError(msg)
 
     if train_size_float and (train_size <= 0 or train_size >= 1):
-        msg = 'train_size={} should be a float '.format(test_size)
+        msg = f'train_size={test_size} should be a float '
         msg += 'in the [0, 1] range.'
         raise CRError(msg)
 
     if train_size is not None:
-        msg = 'Invalid input of train_size={}.'.format(train_size)
+        msg = f'Invalid input of train_size={train_size}.'
         raise CRError(msg)
 
     if (test_size_float and train_size_float and train_size + test_size > 1):
         msg = 'The sum of test_size and train_size = '
-        msg += '{}, should be in the '.format(train_size + test_size)
+        msg += f'{train_size + test_size}, should be in the '
         msg += '[0, 1] range. Reduce test_size and/or train_size.'
         raise CRError(msg)
 
@@ -106,8 +105,8 @@ def validate_split(
 
     if n_train + n_test > n_samples:
         msg = 'the sum of train_size and test_size = '
-        msg += '{}, should be smaller '.format(int(n_train + n_test))
-        msg += 'than the number of samples {}.'.format(int(n_samples))
+        msg += f'{int(n_train + n_test)}, should be smaller '
+        msg += f'than the number of samples {int(n_samples)}.'
         msg += 'Reduce test_size and/or train_size.'
         raise CRError(msg)
 

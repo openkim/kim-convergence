@@ -148,7 +148,7 @@ class ZERO_RC():
             else:
                 self.ext += 1
         else:
-            msg = 'Wrong index number={}.\n'.format(self.index)
+            msg = f'Wrong index number={self.index}.\n'
             msg += 'This function should be called with zero status for the '
             msg += 'first time.'
             raise CRError(msg)

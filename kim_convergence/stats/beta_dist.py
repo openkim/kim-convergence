@@ -141,9 +141,9 @@ def betacf(a: float,
         if (fabs(_del - 1.0) < eps):
             return h
 
-    msg = 'betacf failed with the current result = {}, '.format(h)
-    msg = 'where a={} or b={} are too big, or '.format(a, b)
-    msg += 'max_iteration={} is too small.'.format(max_iteration)
+    msg = f'betacf failed with the current result = {h}, '
+    msg = f'where a={a} or b={b} are too big, or '
+    msg += f'max_iteration={max_iteration} is too small.'
     raise CRError(msg)
 
 

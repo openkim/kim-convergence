@@ -129,8 +129,7 @@ class ZERO_RC_BOUNDS():
         if status == 0:
             monotone = (self.small <= x) and (x <= self.big)
             if not monotone:
-                msg = 'small={}, x={}, big={} '.format(
-                    self.small, x, self.big)
+                msg = f'small={self.small}, x={x}, big={self.big} '
                 msg += 'are not monotone.'
                 raise CRError(msg)
 
@@ -154,14 +153,14 @@ class ZERO_RC_BOUNDS():
                                         self.rel_step * fabs(self.xsave))
                         self.index = 3
                         return 1, self.xsave
-                    msg = 'Answer x = {}, appears to be higher '.format(x)
+                    msg = f'Answer x = {x}, appears to be higher '
                     msg += 'than the highest search bound = '
-                    msg += '{}.\n'.format(self.big)
+                    msg += f'{self.big}.\n'
                     msg += 'It means that the stepping search terminated '
                     msg += 'unsuccessfully at the highest search bound.'
                     raise CRError(msg)
-                msg = 'Answer x = {}, appears to be lower than '.format(x)
-                msg += 'the lowest search bound = {}.\n'.format(self.small)
+                msg = f'Answer x = {x}, appears to be lower than '
+                msg += f'the lowest search bound = {self.small}.\n'
                 msg += 'It means that the stepping search terminated '
                 msg += 'unsuccessfully at the lowest search bound.'
                 raise CRError(msg)
@@ -172,13 +171,13 @@ class ZERO_RC_BOUNDS():
                                     self.rel_step * fabs(self.xsave))
                     self.index = 3
                     return 1, self.xsave
-                msg = 'Answer x = {}, appears to be higher than '.format(x)
-                msg += 'the highest search bound = {}.\n'.format(self.big)
+                msg = f'Answer x = {x}, appears to be higher than '
+                msg += f'the highest search bound = {self.big}.\n'
                 msg += 'It means that the stepping search terminated '
                 msg += 'unsuccessfully at the highest search bound.'
                 raise CRError(msg)
-            msg = 'Answer x = {}, appears to be lower than the '.format(x)
-            msg += 'lowest search bound = {}.\n'.format(self.small)
+            msg = f'Answer x = {x}, appears to be lower than the '
+            msg += f'lowest search bound = {self.small}.\n'
             msg += 'It means that the stepping search terminated '
             msg += 'unsuccessfully at the lowest search bound.'
             raise CRError(msg)
@@ -216,9 +215,9 @@ class ZERO_RC_BOUNDS():
                 return 1, self.xub
 
             if qlim and not qbdd:
-                msg = 'Answer x = {}, appears to be higher '.format(self.big)
+                msg = f'Answer x = {self.big}, appears to be higher '
                 msg += 'or equal the highest search bound = '
-                msg += '{}.\n'.format(self.big)
+                msg += f'{self.big}.\n'
                 msg += 'It means that the stepping search terminated '
                 msg += 'unsuccessfully at the highest search bound.'
                 raise CRError(msg)
@@ -258,9 +257,9 @@ class ZERO_RC_BOUNDS():
 
             if qcond:
                 if qlim and not qbdd:
-                    msg = 'Answer x = {}, appears to be '.format(self.small)
+                    msg = f'Answer x = {self.small}, appears to be '
                     msg += 'lower than or equal to the lowest search bound '
-                    msg += '= {}.\n'.format(self.small)
+                    msg += f'= {self.small}.\n'
                     msg += 'It means that the stepping search terminated '
                     msg += 'unsuccessfully at the lowest search bound.'
                     raise CRError(msg)
@@ -311,7 +310,7 @@ class ZERO_RC_BOUNDS():
                 else:
                     return 0, self.xlo
         else:
-            msg = 'Wrong index number = {}.\n'.format(self.index)
+            msg = f'Wrong index number = {self.index}.\n'
             msg += 'This function should be called with zero status for the '
             msg += 'first time.'
             raise CRError(msg)

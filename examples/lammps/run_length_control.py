@@ -99,7 +99,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
 
     cr.cr_check(nevery, 'nevery', int, 1)
 
-    cmd = 'fix cr_fix all vector {} '.format(nevery)
+    cmd = f'fix cr_fix all vector {nevery} '
 
     # Arguments
     arguments_map = {}
@@ -148,7 +148,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 }
                 raise cr.CRError(msg[prefix] + ' is not provided.')
 
-            var_name = '{}{}'.format(prefix, arg)
+            var_name = f'{prefix}{arg}'
 
             arguments_map[argument_counter] = var_name
             argument_counter += 1
@@ -168,7 +168,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
                 msg += 'lower bound is not provided.'
                 raise cr.CRError(msg)
 
@@ -197,7 +197,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 try:
                     arg = argv[i]
                 except IndexError:
-                    msg = 'the {} {}\'s'.format(var_name, _PREFIX_NAME[prefix])
+                    msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s'
                     msg += ' upper bound is not provided.'
                     raise cr.CRError(msg)
 
@@ -219,7 +219,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
                 msg += 'upper bound is not provided.'
                 raise cr.CRError(msg)
 
@@ -242,7 +242,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
                 msg += 'population_mean is not provided.'
                 raise cr.CRError(msg)
 
@@ -266,7 +266,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
                 msg += 'population_std is not provided.'
                 raise cr.CRError(msg)
 
@@ -290,7 +290,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
                 msg += 'population_cdf is not provided.'
 
             if population_cdf is None:
@@ -303,7 +303,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
                 msg += 'population_args is not provided.'
 
             if population_args is None:
@@ -340,7 +340,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
                 msg += 'population_loc is not provided.'
 
             if population_loc is None:
@@ -363,7 +363,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = 'the {} {}\'s '.format(var_name, _PREFIX_NAME[prefix])
+                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
                 msg += 'population_scale is not provided.'
 
             if population_scale is None:
@@ -389,7 +389,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
     if ctrl_map:
         if argument_counter == 1:
             var_name = arguments_map[0]
-            msg = 'the variable "{}" is used for '.format(var_name)
+            msg = f'the variable "{var_name}" is used for '
             msg += 'controling the stability of the simulation to be '
             msg += 'bounded by lower and/or upper bound. It can not be '
             msg += 'used for the run length control at the same time.'
@@ -397,12 +397,12 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
 
         if argument_counter == len(ctrl_map):
             var_name = arguments_map[0]
-            msg = 'the variables "{}", '.format(var_name)
+            msg = f'the variables "{var_name}", '
             for i in range(1, argument_counter - 1):
                 var_name = arguments_map[i]
-                msg = '"{}", '.format(var_name)
+                msg = f'"{var_name}", '
             var_name = arguments_map[-1]
-            msg = 'and "{}" are used for '.format(var_name)
+            msg = f'and "{var_name}" are used for '
             msg += 'controling the stability of the simulation to be '
             msg += 'bounded by lower and/or upper bounds. They can not be '
             msg += 'used for the run length control at the same time.'
@@ -431,7 +431,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
         args['initialstep'] = finalstep + nevery
 
         # Run the LAMMPS simulation
-        cmd = 'run {}'.format(step)
+        cmd = f'run {step}'
         lmp.command(cmd)
 
         if ctrl_map:
@@ -449,9 +449,9 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val <= lb or val >= ub:
-                                msg = 'the "{}"\'s value = '.format(var_name)
-                                msg += '{} is out of bound of ('.format(val)
-                                msg += '{} {}). '.format(lb, ub)
+                                msg = f'the "{var_name}"\'s value = '
+                                msg += f'{val} is out of bound of ('
+                                msg += f'{lb} {ub}). '
                                 msg += 'This run is unstable.'
                                 raise cr.CRError(msg)
                         continue
@@ -459,9 +459,9 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val <= lb:
-                                msg = 'the "{}"\'s value = '.format(var_name)
-                                msg += '{} is out of bound of ('.format(val)
-                                msg += '{} ...). '.format(lb)
+                                msg = f'the "{var_name}"\'s value = '
+                                msg += f'{val} is out of bound of ('
+                                msg += f'{lb} ...). '
                                 msg += 'This run is unstable.'
                                 raise cr.CRError(msg)
                         continue
@@ -469,9 +469,9 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val >= ub:
-                                msg = 'the "{}"\'s value = '.format(var_name)
-                                msg += '{} is out of bound of ('.format(val)
-                                msg += '... {}). '.format(ub)
+                                msg = f'the "{var_name}"\'s value = '
+                                msg += f'{val} is out of bound of ('
+                                msg += f'... {ub}). '
                                 msg += 'This run is unstable.'
                                 raise cr.CRError(msg)
                         continue
@@ -614,7 +614,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             fp='return',
             fp_format='txt')
     except Exception as e:
-        msg = '{}'.format(e)
+        msg = f'{e}'
         raise cr.CRError(msg)
 
     cmd = "variable run_var string ''"

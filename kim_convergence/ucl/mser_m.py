@@ -125,11 +125,11 @@ def mser_m(
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         if not isinstance(batch_size, int):
-            msg = 'batch_size = {} is not an `int`.'.format(batch_size)
+            msg = f'batch_size = {batch_size} is not an `int`.'
             raise CRError(msg)
 
         if batch_size < 1:
-            msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
+            msg = f'batch_size = {batch_size} < 1 is not valid.'
             raise CRError(msg)
 
         if time_series_data.size < batch_size:
@@ -155,34 +155,34 @@ def mser_m(
             ignore_end = min(ignore_end, number_batches // 4)
         elif isinstance(ignore_end, float):
             if not 0.0 < ignore_end < 1.0:
-                msg = 'invalid ignore_end = {}. If '.format(ignore_end)
+                msg = f'invalid ignore_end = {ignore_end}. If '
                 msg += 'ignore_end input is a `float`, it should be in a '
                 msg += '`(0, 1)` range.'
                 raise CRError(msg)
             ignore_end *= number_batches
             ignore_end = max(1, int(ignore_end))
         else:
-            msg = 'invalid ignore_end = {}. '.format(ignore_end)
+            msg = f'invalid ignore_end = {ignore_end}. '
             msg += 'ignore_end is not an `int`, `float`, or `None`.'
             raise CRError(msg)
 
         if ignore_end < 1:
             msg = 'ignore_end is not given on input and it is automatically '
-            msg += 'set = {} using '.format(ignore_end)
-            msg += '{} number of data points '.format(time_series_data.size)
-            msg += 'and the batch size = {}.\n'.format(batch_size)
+            msg += f'set = {ignore_end} using '
+            msg += f'{time_series_data.size} number of data points '
+            msg += f'and the batch size = {batch_size}.\n'
             msg += 'ignore_end should be a positive `int`.'
             raise CRError(msg)
 
     elif ignore_end < 1:
-        msg = 'invalid ignore_end = {}. '.format(ignore_end)
+        msg = f'invalid ignore_end = {ignore_end}. '
         msg += 'ignore_end should be a positive `int`.'
         raise CRError(msg)
 
     if number_batches <= ignore_end:
-        msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
+        msg = f'invalid ignore_end = {ignore_end}.\n'
         msg += 'Wrong number of batches is requested to be ignored '
-        msg += 'from the total {} batches.'.format(number_batches)
+        msg += f'from the total {number_batches} batches.'
         raise CRSampleSizeError(msg)
 
     # To find the optimal truncation point in MSER-m
@@ -354,7 +354,7 @@ class MSER_m(UCLBase):
             raise CRError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
+            msg = f'confidence_coefficient = {confidence_coefficient} '
             msg += 'is not in the range (0.0 1.0).'
             raise CRError(msg)
 

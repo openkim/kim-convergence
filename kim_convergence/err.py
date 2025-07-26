@@ -92,40 +92,40 @@ def cr_check(var,
     if var_upper_bound is None:
         if var_type is None:
             if var < var_lower_bound:
-                msg = '"{}" must be '.format(var_name)
-                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                msg = f'"{var_name}" must be '
+                msg += f'greater than or equal {var_lower_bound}.'
                 raise CRError(msg)
         else:
             if not isinstance(var, var_type):
-                msg = '"{}" must be a `{}`.'.format(var_name, var_type)
+                msg = f'"{var_name}" must be a `{var_type}`.'
                 raise CRError(msg)
 
             if var < var_lower_bound:
-                msg = '"{}" must be a `{}` '.format(var_name, var_type)
-                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                msg = f'"{var_name}" must be a `{var_type}` '
+                msg += f'greater than or equal {var_lower_bound}.'
                 raise CRError(msg)
     else:
         if var_type is None:
             if var < var_lower_bound:
-                msg = '"{}" must be '.format(var_name)
-                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                msg = f'"{var_name}" must be '
+                msg += f'greater than or equal {var_lower_bound}.'
                 raise CRError(msg)
 
             if var > var_upper_bound:
-                msg = '"{}" must be '.format(var_name)
-                msg += 'smaller than or equal {}.'.format(var_upper_bound)
+                msg = f'"{var_name}" must be '
+                msg += f'smaller than or equal {var_upper_bound}.'
                 raise CRError(msg)
         else:
             if not isinstance(var, var_type):
-                msg = '"{}" must be a `{}`.'.format(var_name, var_type)
+                msg = f'"{var_name}" must be a `{var_type}`.'
                 raise CRError(msg)
 
             if var < var_lower_bound:
-                msg = '"{}" must be a `{}` '.format(var_name, var_type)
-                msg += 'greater than or equal {}.'.format(var_lower_bound)
+                msg = f'"{var_name}" must be a `{var_type}` '
+                msg += f'greater than or equal {var_lower_bound}.'
                 raise CRError(msg)
 
             if var > var_upper_bound:
-                msg = '"{}" must be a `{}` '.format(var_name, var_type)
-                msg += 'smaller than or equal {}.'.format(var_upper_bound)
+                msg = f'"{var_name}" must be a `{var_type}` '
+                msg += f'smaller than or equal {var_upper_bound}.'
                 raise CRError(msg)

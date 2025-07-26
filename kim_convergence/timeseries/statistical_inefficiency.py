@@ -89,7 +89,7 @@ def statistical_inefficiency(
     x_size = x.size
 
     if x_size < 2:
-        msg = '{} input data points are not '.format(x_size)
+        msg = f'{x_size} input data points are not '
         msg += 'sufficient to be used by this method.'
         raise CRSampleSizeError(msg)
 
@@ -241,7 +241,7 @@ def geyer_r_statistical_inefficiency(
     x_size = x.size
 
     if x_size < 4:
-        msg = '{} input data points are not '.format(x_size)
+        msg = f'{x_size} input data points are not '
         msg += 'sufficient to be used by this method.'
         raise CRSampleSizeError(msg)
 
@@ -381,7 +381,7 @@ def geyer_split_r_statistical_inefficiency(
     x = np.asarray(x)
     x_size = x.size
     if x_size < 8:
-        msg = '{} input data points are not '.format(x_size)
+        msg = f'{x_size} input data points are not '
         msg += 'sufficient to be used by this method.'
         raise CRSampleSizeError(msg)
     x_size //= 2
@@ -434,7 +434,7 @@ def geyer_split_statistical_inefficiency(
 
     x_size = x.size
     if x_size < 8:
-        msg = '{} input data points are not '.format(x_size)
+        msg = f'{x_size} input data points are not '
         msg += 'sufficient to be used by this method.'
         raise CRSampleSizeError(msg)
 
@@ -590,9 +590,9 @@ def integrated_auto_correlation_time(
 
     elif isinstance(si, str):
         if si not in si_methods:
-            msg = 'method {} not found. Valid statistical '.format(si)
+            msg = f'method {si} not found. Valid statistical '
             msg += 'inefficiency (si) methods are:\n\t- '
-            msg += '{}'.format('\n\t- '.join(si_methods))
+            msg += f'{"\n\t- ".join(si_methods)}'
             raise CRError(msg)
 
         si_func = si_methods[si]

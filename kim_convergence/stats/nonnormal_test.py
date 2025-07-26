@@ -355,7 +355,7 @@ def check_population_cdf_args(population_cdf: Optional[str],
         return
 
     if population_cdf not in ContinuousDistributions:
-        msg = 'The {} distribution is not supported.'.format(population_cdf)
+        msg = f'The {population_cdf} distribution is not supported.'
         msg += 'It should be the name of a distribution in:\n'
         msg += '    https://docs.scipy.org/doc/scipy/reference/stats.html#'
         msg += 'continuous-distributions'
@@ -366,26 +366,26 @@ def check_population_cdf_args(population_cdf: Optional[str],
     number_of_arguments = len(population_args)
 
     if number_of_required_arguments != number_of_arguments:
-        msg = 'The {} distribution requires '.format(population_cdf)
+        msg = f'The {population_cdf} distribution requires '
 
         if number_of_required_arguments == 0:
             msg += 'no input argument, but '
         elif number_of_required_arguments == 1:
             msg += '1 input argument, but '
         else:
-            msg += '{} arguments, but '.format(number_of_required_arguments)
+            msg += f'{number_of_required_arguments} arguments, but '
 
         if number_of_arguments == 0:
             msg += 'no input argument is provided.'
         elif number_of_arguments == 1:
             msg += '1 input argument is provided.'
         else:
-            msg += '{} input arguments '.format(number_of_arguments)
+            msg += f'{number_of_arguments} input arguments '
             msg += 'are provided.'
 
         Reference = 'https://docs.scipy.org/doc/scipy/reference/generated/'
-        Reference += 'scipy.stats.{}.html#scipy.stats.'.format(population_cdf)
-        Reference += '{}'.format(population_cdf)
+        Reference += f'scipy.stats.{population_cdf}.html#scipy.stats.'
+        Reference += f'{population_cdf}'
 
         msg += '\n('
         msg += ContinuousDistributionsArgumentRequirement[population_cdf]

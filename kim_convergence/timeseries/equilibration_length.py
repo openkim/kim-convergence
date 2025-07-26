@@ -117,9 +117,9 @@ def estimate_equilibration_length(
 
     if isinstance(si, str):
         if si not in si_methods:
-            msg = 'method {} not found. Valid statistical '.format(si)
+            msg = f'method {si} not found. Valid statistical '
             msg += 'inefficiency (si) methods are:\n\t- '
-            msg += '{}'.format('\n\t- '.join(si_methods))
+            msg += f'{"\n\t- ".join(si_methods)}'
             raise CRError(msg)
     elif si is None:
         si = 'statistical_inefficiency'
@@ -145,45 +145,45 @@ def estimate_equilibration_length(
             ignore_end = max(1, time_series_data_size // 4)
         elif isinstance(ignore_end, float):
             if not 0.0 < ignore_end < 1.0:
-                msg = 'invalid ignore_end = {}. If '.format(ignore_end)
+                msg = f'invalid ignore_end = {ignore_end}. If '
                 msg += 'ignore_end input is a `float`, it should be in a '
                 msg += '`(0, 1)` range.'
                 raise CRError(msg)
             ignore_end *= time_series_data_size
             ignore_end = max(1, int(ignore_end))
         else:
-            msg = 'invalid ignore_end = {}. '.format(ignore_end)
+            msg = f'invalid ignore_end = {ignore_end}. '
             msg += 'ignore_end is not an `int`, `float`, or `None`.'
             raise CRError(msg)
     elif ignore_end < 1:
-        msg = 'invalid ignore_end = {}. '.format(ignore_end)
+        msg = f'invalid ignore_end = {ignore_end}. '
         msg += 'ignore_end should be a positive `int`.'
         raise CRError(msg)
 
     # Upper bound check
     if si == 'geyer_r_statistical_inefficiency':
         if time_series_data_size < 4:
-            msg = '{} input data points are not '.format(time_series_data_size)
-            msg += 'sufficient to be used by "{}".'.format(si)
+            msg = f'{time_series_data_size} input data points are not '
+            msg += f'sufficient to be used by "{si}".'
             raise CRSampleSizeError(msg)
         ignore_end = max(3, ignore_end)
     elif si == 'geyer_split_r_statistical_inefficiency':
         if time_series_data_size < 8:
-            msg = '{} input data points are not '.format(time_series_data_size)
-            msg += 'sufficient to be used by "{}".'.format(si)
+            msg = f'{time_series_data_size} input data points are not '
+            msg += f'sufficient to be used by "{si}".'
             raise CRSampleSizeError(msg)
         ignore_end = max(7, ignore_end)
     elif si == 'geyer_split_statistical_inefficiency':
         if time_series_data_size < 8:
-            msg = '{} input data points are not '.format(time_series_data_size)
-            msg += 'sufficient to be used by "{}".'.format(si)
+            msg = f'{time_series_data_size} input data points are not '
+            msg += f'sufficient to be used by "{si}".'
             raise CRSampleSizeError(msg)
         ignore_end = max(7, ignore_end)
 
     if time_series_data_size <= ignore_end:
-        msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
+        msg = f'invalid ignore_end = {ignore_end}.\n'
         msg = 'Wrong number of data points is requested to be '
-        msg += 'ignored from {} total points.'.format(time_series_data_size)
+        msg += f'ignored from {time_series_data_size} total points.'
         raise CRSampleSizeError(msg)
 
     # Special case if timeseries is constant.

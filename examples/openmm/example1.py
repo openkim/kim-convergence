@@ -81,7 +81,6 @@ try:
         fp='return',
         fp_format='txt')
 except Exception as e:
-    msg = '{}'.format(e)
-    raise cr.CRError(msg)
+    raise cr.CRError(f'{e}')
 
 print(msg)

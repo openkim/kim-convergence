@@ -68,7 +68,7 @@ class MinMaxScale():
     def __init__(self, *, feature_range: tuple((float, float)) = (0, 1)):
         if feature_range[0] >= feature_range[1]:
             msg = "Minimum of desired feature range must be smaller "
-            msg += "than maximum. Got {}".format(str(feature_range))
+            msg += f"than maximum. Got {str(feature_range)}"
             raise CRError(msg)
         self.feature_range_ = feature_range
         self.data_min_ = None
@@ -104,8 +104,7 @@ class MinMaxScale():
 
         if isclose(self.data_range_, 0, abs_tol=_DEFAULT_ABS_TOL):
             msg = 'the data_range of the input array is almost zero within '
-            msg += '{} precision numbers.'.format(
-                int(fabs(log10(_DEFAULT_ABS_TOL))))
+            msg += f'{int(fabs(log10(_DEFAULT_ABS_TOL)))} precision numbers.'
             raise CRError(msg)
 
         self.scale_ = \
@@ -557,16 +556,16 @@ class RobustScale():
 
         if not isinstance(quantile_range, tuple) or \
                 not isinstance(quantile_range, list):
-            msg = 'invalid quantile range: {}.'.format(str(quantile_range))
+            msg = f'invalid quantile range: {str(quantile_range)}.'
             raise CRError(msg)
 
         if len(quantile_range) != 2:
-            msg = 'invalid quantile range: {}.'.format(str(quantile_range))
+            msg = f'invalid quantile range: {str(quantile_range)}.'
             raise CRError(msg)
 
         q_min, q_max = quantile_range
         if not 0 <= q_min <= q_max <= 100:
-            msg = 'invalid quantile range: {}.'.format(str(quantile_range))
+            msg = f'invalid quantile range: {str(quantile_range)}.'
             raise CRError(msg)
 
         self.quantile_range = quantile_range

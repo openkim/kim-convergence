@@ -57,14 +57,14 @@ def geweke(x: np.ndarray,
     """
     if first + last >= 1:
         msg = 'Invalid intervals for Geweke convergence analysis:'
-        msg += '({}, {}), '.format(first, last)
-        msg += 'where {} + {} >= 1'.format(first, last)
+        msg += f'({first}, {last}), '
+        msg += f'where {first} + {last} >= 1'
         raise CRError(msg)
 
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
             msg = 'Invalid intervals for Geweke convergence analysis:'
-            msg += '({}, {})'.format(first, last)
+            msg += f'({first}, {last})'
             raise CRError(msg)
 
     x = np.asarray(x)

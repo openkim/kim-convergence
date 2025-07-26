@@ -155,9 +155,9 @@ class N_SKART(UCLBase):
 
         # Minimum number of data points
         if time_series_data_size < self.k_number_batches:
-            msg = '{} input data points are not '.format(time_series_data_size)
+            msg = f'{time_series_data_size} input data points are not '
             msg += 'sufficient to be used by "N-Skart".\n"N-Skart" at '
-            msg += 'least needs {} data points.'.format(self.k_number_batches)
+            msg += f'least needs {self.k_number_batches} data points.'
             raise CRSampleSizeError(msg)
 
         # Reset the parameters for run-length control
@@ -268,11 +268,11 @@ class N_SKART(UCLBase):
                                     with_centering=with_centering,
                                     with_scaling=with_scaling)
                 else:
-                    msg = '{} number of input '.format(time_series_data_size)
+                    msg = f'{time_series_data_size} number of input '
                     msg += 'data points is not sufficient to be used by '
                     msg += '"N-Skart" method.\n"N-Skart" at least needs '
-                    msg += '{} = '.format(processed_sample_size)
-                    msg += '{} x {}'.format(k_number_batches, batch_size)
+                    msg += f'{processed_sample_size} = '
+                    msg += f'{k_number_batches} x {batch_size}'
                     msg += ' data points.\n'
                     cr_warning(msg)
 
@@ -346,7 +346,7 @@ class N_SKART(UCLBase):
             raise CRError(msg)
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
+            msg = f'confidence_coefficient = {confidence_coefficient} '
             msg += 'is not in the range (0.0 1.0).'
             raise CRError(msg)
 
@@ -390,9 +390,9 @@ class N_SKART(UCLBase):
 
         # Minimum number of data points
         if time_series_data_size < processed_sample_size:
-            msg = '{} input data points are '.format(time_series_data_size)
+            msg = f'{time_series_data_size} input data points are '
             msg += 'not sufficient to be used by "N-Skart".\n"N-Skart" at '
-            msg += 'least needs {} data points.'.format(processed_sample_size)
+            msg += f'least needs {processed_sample_size} data points.'
             raise CRSampleSizeError(msg)
 
         # step 5b

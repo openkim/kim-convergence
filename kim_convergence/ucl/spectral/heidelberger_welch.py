@@ -132,7 +132,7 @@ class HeidelbergerWelch(UCLBase):
 
         """
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
+            msg = f'confidence_coefficient = {confidence_coefficient} '
             msg += 'is not in the range (0.0 1.0).'
             raise CRError(msg)
 
@@ -149,14 +149,14 @@ class HeidelbergerWelch(UCLBase):
         if isinstance(heidel_welch_number_points, int):
             if heidel_welch_number_points < 25:
                 msg = 'wrong number of points heidel_welch_number_points = '
-                msg += '{} is '.format(heidel_welch_number_points)
+                msg += f'{heidel_welch_number_points} is '
                 msg = 'given to obtain the polynomial fit. According to '
                 msg += 'Heidelberger, and Welch, (1981), this procedure '
                 msg += 'at least needs to have 25 points.'
                 raise CRError(msg)
         else:
             msg = 'heidel_welch_number_points = '
-            msg += '{} '.format(heidel_welch_number_points)
+            msg += f'{heidel_welch_number_points} '
             msg += 'is the number of points and should be a positive `int`.'
             raise CRError(msg)
 
@@ -418,9 +418,9 @@ class HeidelbergerWelch(UCLBase):
         time_series_data_size = time_series_data.size
 
         if time_series_data_size < self.heidel_welch_n:
-            msg = '{} input data points are not '.format(time_series_data_size)
+            msg = f'{time_series_data_size} input data points are not '
             msg += 'sufficient to be used by this method.\n"HeidelbergerWelch" '
-            msg += 'at least needs {} data points.'.format(self.heidel_welch_n)
+            msg += f'at least needs {self.heidel_welch_n} data points.'
             raise CRSampleSizeError(msg)
 
         number_batches = self.heidel_welch_n

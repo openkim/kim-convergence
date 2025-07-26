@@ -49,7 +49,7 @@ def t_cdf_ccdf(t: float, df: float) -> tuple((float, float)):
 
     """
     if df < 1:
-        msg = 'df = {} is wrong. Degrees of freedom, must be '.format(df)
+        msg = f'df = {df} is wrong. Degrees of freedom, must be '
         msg += 'positive and greater than 1.'
         raise CRError(msg)
 
@@ -130,11 +130,11 @@ def t_inv_cdf(p: float,
 
     """
     if p <= 0.0 or p >= 1.0:
-        msg = 'p = {} is not in the range (0.0 1.0).'.format(p)
+        msg = f'p = {p} is not in the range (0.0 1.0).'
         raise CRError(msg)
 
     if df < 1:
-        msg = 'df = {} is wrong. Degrees of freedom, must be '.format(df)
+        msg = f'df = {df} is wrong. Degrees of freedom, must be '
         msg += 'positive and greater than 1.'
         raise CRError(msg)
 
@@ -226,7 +226,7 @@ def t_interval(confidence_level: float,
 
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
-        msg = 'confidence level = {} is not in '.format(confidence_level)
+        msg = f'confidence level = {confidence_level} is not in '
         msg += 'the range (0.0 1.0).'
         raise CRError(msg)
 

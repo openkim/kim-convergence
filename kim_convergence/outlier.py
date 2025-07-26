@@ -93,9 +93,9 @@ def outlier_test(x: Union[np.ndarray, List[float]],
 
     if isinstance(outlier_method, str):
         if outlier_method not in outlier_methods:
-            msg = 'method {} not found. Valid '.format(outlier_method)
+            msg = f'method {outlier_method} not found. Valid '
             msg += 'methods to detect outliers are:\n\t- '
-            msg += '{}'.format('\n\t- '.join(outlier_methods))
+            msg += f'{"\n\t- ".join(outlier_methods)}'
             raise CRError(msg)
     else:
         msg = 'Input outlier_method is not a `str`.'

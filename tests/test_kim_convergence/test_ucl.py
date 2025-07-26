@@ -716,16 +716,14 @@ class TestUCLModule(unittest.TestCase):
         self.assertTrue(truncated)
 
         print()
-        print('truncated={}, truncated_index={}'.format(
-            truncated, truncated_index))
+        print(f'{truncated=}, {truncated_index=}')
 
         y = x[truncated_index:]
 
         equilibration_index, si_value = cr.estimate_equilibration_length(y)
 
         print()
-        print('equilibration_index={}, si_value={}'.format(
-            equilibration_index, si_value))
+        print(f'{equilibration_index=}, {si_value=}')
 
         z = y[equilibration_index:]
 
@@ -734,38 +732,38 @@ class TestUCLModule(unittest.TestCase):
         ucl_heidel_welch = heidel_welch.ucl(z)
 
         print()
-        print('ucl_heidel_welch={}'.format(ucl_heidel_welch))
-        print('mean={}'.format(heidel_welch.mean))
-        print('std={}'.format(heidel_welch.std))
+        print(f'{ucl_heidel_welch=}')
+        print(f'mean={heidel_welch.mean}')
+        print(f'std={heidel_welch.std}')
 
         usamples = cr.UncorrelatedSamples()
         ucl_usamples = usamples.ucl(z)
 
         print()
-        print('ucl_usamples={}'.format(ucl_usamples))
-        print('mean={}'.format(usamples.mean))
-        print('std={}'.format(usamples.std))
+        print(f'{ucl_usamples=}')
+        print(f'mean={usamples.mean}')
+        print(f'std={usamples.std}')
 
         mser = cr.MSER_m()
         ucl_mser = mser.ucl(z)
 
         print()
-        print('ucl_mser={}'.format(ucl_mser))
-        print('mean={}'.format(mser.mean))
-        print('std={}'.format(mser.std))
+        print(f'{ucl_mser=}')
+        print(f'mean={mser.mean}')
+        print(f'std={mser.std}')
 
         mser_y = cr.MSER_m_y()
         ucl_mser_y = mser_y.ucl(z)
 
         print()
-        print('ucl_mser_y={}'.format(ucl_mser_y))
-        print('mean={}'.format(mser_y.mean))
-        print('std={}'.format(mser_y.std))
+        print(f'{ucl_mser_y=}')
+        print(f'mean={mser_y.mean}')
+        print(f'std={mser_y.std}')
 
         skart = cr.N_SKART()
         ucl_skart = skart.ucl(z)
 
         print()
-        print('ucl_skart={}'.format(ucl_skart))
-        print('mean={}'.format(skart.mean))
-        print('std={}'.format(skart.std))
+        print(f'{ucl_skart=}')
+        print(f'mean={skart.mean}')
+        print(f'std={skart.std}')

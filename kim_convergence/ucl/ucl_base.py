@@ -375,7 +375,7 @@ class UCLBase:
         if isclose(self.mean, 0,
                    abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL):
             msg = 'It is not possible to estimate the relative half width '
-            msg += 'for the close to zero mean = {}'.format(self.mean)
+            msg += f'for the close to zero mean = {self.mean}'
             raise CRError(msg)
 
         relative_half_width_estimate = \

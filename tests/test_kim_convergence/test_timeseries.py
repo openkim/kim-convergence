@@ -63,7 +63,7 @@ class TimeseriesModule(unittest.TestCase):
             if temp_size < start + step:
                 step = temp_size - start
             stop += step
-            # print('step={}, start={}, stop={}'.format(step, start, stop))
+            # print(f'{step=}, {start=}, {stop=}')
             return temp[start:stop]
 
         msg = cr.run_length_control(
@@ -187,7 +187,7 @@ class TimeseriesModule(unittest.TestCase):
             stop += step
             traj = np.concatenate((temp[start:stop],
                                    press[start:stop])).reshape((2, -1))
-            # print('step={}, start={}, stop={}'.format(step, start, stop))
+            # print(f'{step=}, {start=}, {stop=}')
             return traj
 
         msg = cr.run_length_control(
@@ -223,7 +223,7 @@ class TimeseriesModule(unittest.TestCase):
             traj = np.concatenate((temp[start:stop],
                                    press[start:stop],
                                    volume[start:stop])).reshape((3, -1))
-            # print('step={}, start={}, stop={}'.format(step, start, stop))
+            # print(f'{step=}, {start=}, {stop=}')
             return traj
 
         msg = cr.run_length_control(
