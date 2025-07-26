@@ -1,7 +1,6 @@
 # kim-convergence utility module
 
 [![Python package](https://github.com/openkim/kim-convergence/actions/workflows/python-package.yml/badge.svg)](https://github.com/openkim/kim-convergence/actions/workflows/python-package.yml)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/g3458crxb0frs0y2?svg=true)](https://ci.appveyor.com/project/yafshar/kim-convergence)
 [![Anaconda-Server Badge](https://img.shields.io/conda/vn/conda-forge/kim-convergence.svg)](https://anaconda.org/conda-forge/kim-convergence)
 [![PyPI](https://img.shields.io/pypi/v/kim-convergence.svg)](https://pypi.python.org/pypi/kim-convergence)
 [![License](https://img.shields.io/badge/license-LGPL--2.1--or--later-blue)](LICENSE)
@@ -329,7 +328,7 @@ Contributions are very welcome.
 
 ## Copyright
 
-Copyright (c) 2021, Regents of the University of Minnesota.\
+Copyright (c) 2021-2025, Regents of the University of Minnesota.\
 All Rights Reserved
 
 ## Contributors
