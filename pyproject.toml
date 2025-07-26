@@ -1,0 +1,42 @@
+[build-system]
+requires = [ "setuptools", "versioneer[toml]==0.29", "numpy>1.16", "scipy",
+             "kim-edn>1.4.0", "joblib" ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kim-convergence"
+dependencies = [ "numpy>1.16", "scipy", "kim-edn>1.4.0", "joblib" ]
+authors = [{ name = "Yaser Afshar", email = "ya.afshar@gmail.com" }]
+maintainers = [{ name = "Yaser Afshar", email = "ya.afshar@gmail.com" }]
+description = "kim-convergence designed to help in automatic equilibration detection & run length control."
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Programming Language :: Python :: 3",
+]
+dynamic = [ "version" ]
+keywords = [ "convergence", "automated equilibration detection", "run length control",
+             "upper confidence limit", "confidence interval" ]
+
+[project.urls]
+Homepage = "https://github.com/openkim/kim-convergence"
+Issues = "https://github.com/openkim/kim-convergence/issues"
+
+[tool.setuptools.packages.find]
+include = [ "kim_convergence*" ]
+
+[tool.setuptools.dynamic]
+version = { attr = "kim_convergence.__version__" }
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "kim_convergence/_version.py"
+versionfile_build = "kim_convergence/_version.py"
+tag_prefix = "v"
+parentdir_prefix = "kim_convergence-"
