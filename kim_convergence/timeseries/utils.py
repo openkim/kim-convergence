@@ -35,7 +35,7 @@ def _out_of_bounds_error_str(
     """
     n_bad = len(bad_indices)
     prefix = "Index" if n_bad == 1 else "Indices"
-    verb   = "is"    if n_bad == 1 else "are"
+    verb = "is" if n_bad == 1 else "are"
     bounds = "bound" if n_bad == 1 else "bounds"
 
     idx_str = ", ".join(map(str, bad_indices))

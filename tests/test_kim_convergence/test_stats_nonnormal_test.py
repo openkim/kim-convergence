@@ -4,8 +4,8 @@ import numpy as np
 
 try:
     import kim_convergence as cr
-except:
-    raise Exception('Failed to import `kim-convergence` utility module')
+except Exception:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError('Failed to import `kim-convergence` utility module')
 
 from kim_convergence import CRError
 
@@ -86,8 +86,9 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
     def test_levene_test(self):
         """Test levene_test function."""
         rng = np.random.RandomState(12345)
+
         shape, scale = 2., 2.
-        rvs = rng.gamma(shape, scale, size=1000)
+        rvs = rng.gamma(shape, scale, size=10_000)
         self.assertTrue(cr.levene_test(rvs,
                                        population_cdf='gamma',
                                        population_args=(shape,),
@@ -96,7 +97,7 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
                                        significance_level=0.05))
 
         shape = 1.99
-        rvs = rng.gamma(shape, 1.0, size=1000)
+        rvs = rng.gamma(shape, 1.0, size=10_000)
         self.assertTrue(cr.levene_test(rvs,
                                        population_cdf='gamma',
                                        population_args=(shape,),
@@ -104,7 +105,7 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
                                        population_scale=None,
                                        significance_level=0.05))
 
-        rvs = rng.beta(2, 2, size=1000)
+        rvs = rng.beta(2, 2, size=10_000)
         self.assertFalse(cr.levene_test(rvs,
                                         population_cdf='gamma',
                                         population_args=(shape,),

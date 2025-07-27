@@ -422,7 +422,9 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
 
     .. math::
 
-        \left \{ I\left(\frac{k}{n}\right) \right \}_{k = 1, \cdots, \left \lfloor \frac{n}{2} \right \rfloor},~ I\left( \frac{k}{n} \right) = \left| \sum_{j=0}^{j=n-1} {x(j) e^{-2\pi i j k / n}} \right|^2 / n
+        \left \{ I\left(\frac{k}{n}\right) \right \}_{k = 1, \cdots,
+        \left \lfloor \frac{n}{2} \right \rfloor},\;
+        I\left( \frac{k}{n} \right) = \left| \sum_{j=0}^{j=n-1} {x(j) e^{-2\pi i j k / n}} \right|^2 / n
 
     Args:
         x (array_like, 1d): Time series data.

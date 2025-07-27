@@ -3,7 +3,7 @@
 from .equilibration_length import estimate_equilibration_length
 from .statistical_inefficiency import \
     geyer_r_statistical_inefficiency, \
-    geyer_split_r_statistical_inefficiency,\
+    geyer_split_r_statistical_inefficiency, \
     geyer_split_statistical_inefficiency, \
     integrated_auto_correlation_time, \
     statistical_inefficiency, \

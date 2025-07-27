@@ -484,9 +484,11 @@ def ks_test(
     if time_series_data.ndim != 1:
         raise CRError('time_series_data is not an array of one-dimension.')
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     check_population_cdf_args(population_cdf, population_args)
 
@@ -495,11 +497,13 @@ def ks_test(
     args.append(population_scale if population_scale else 1)
 
     try:
-        _, pvalue = kstest(time_series_data,
-                           cdf=population_cdf,
-                           args=args,
-                           alternative='two-sided')
-    except:
+        _, pvalue = kstest(
+            time_series_data,
+            cdf=population_cdf,
+            args=args,
+            alternative='two-sided'
+        )
+    except Exception:  # noqa: BLE001  # intentional catch-all
         raise CRError('Kolmogorov-Smirnov test failed.')
 
     return significance_level < pvalue
@@ -609,9 +613,11 @@ def levene_test(
 
     x_size = x.size
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     # population
     check_population_cdf_args(population_cdf, population_args)
@@ -627,16 +633,17 @@ def levene_test(
         y = rvs(*args, size=x_size)
 
         try:
-            _, pvalue = kstest(y,
-                               cdf=population_cdf,
-                               args=args,
-                               alternative='two-sided')
-        except:
+            _, pvalue = kstest(
+                y,
+                cdf=population_cdf,
+                args=args,
+                alternative='two-sided')
+        except Exception:  # noqa: BLE001  # intentional catch-all
             raise CRError('Kolmogorov-Smirnov test failed.')
 
     try:
         _, pvalue = levene(x, y)
-    except:
+    except Exception:  # noqa: BLE001  # intentional catch-all
         raise CRError('Levene test failed.')
 
     return significance_level < pvalue
@@ -702,9 +709,11 @@ def wilcoxon_test(
 
     x_size = x.size
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     args = [arg for arg in population_args]
     args.append(population_loc if population_loc else 0)
@@ -721,7 +730,7 @@ def wilcoxon_test(
                                cdf=population_cdf,
                                args=args,
                                alternative='two-sided')
-        except:
+        except Exception:  # noqa: BLE001  # intentional catch-all
             raise CRError('Kolmogorov-Smirnov test failed.')
 
     _, pvalue = wilcoxon(x, y,
@@ -792,9 +801,11 @@ def kruskal_test(
     if x_size < 5:
         raise CRSampleSizeError('time_series_data must have at least 5 data.')
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     args = [arg for arg in population_args]
     args.append(population_loc if population_loc else 0)
@@ -811,12 +822,12 @@ def kruskal_test(
                                cdf=population_cdf,
                                args=args,
                                alternative='two-sided')
-        except:
+        except Exception:  # noqa: BLE001  # intentional catch-all
             raise CRError('Kolmogorov-Smirnov test failed.')
 
     try:
         _, pvalue = kruskal(x, y)
-    except:
+    except Exception:  # noqa: BLE001  # intentional catch-all
         raise CRError('Levene test failed.')
 
     return significance_level < pvalue

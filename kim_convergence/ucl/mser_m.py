@@ -64,7 +64,11 @@ def mser_m(
 
     .. math::
 
-        d(j)^* = \underset{n>d(j) \geq 0}{\text{argmin}}\left[\frac{1}{(n(j)-d(j))^2} \sum_{i=d}^{n}{\left(X_i(j)- \bar{X}_{n,d}(j) \right )^2}\right]
+        d(j)^* = \underset{n>d(j) \geq 0}{\text{argmin}}
+        \left[
+        \frac{1}{(n(j)-d(j))^2}
+        \sum_{i=d}^{n}{\left(X_i(j)- \bar{X}_{n,d}(j) \right )^2}
+        \right]
 
     MSER-m applies the equation to a series of batch averages instead of the
     raw series.
@@ -238,7 +242,10 @@ class MSER_m(UCLBase):
 
     .. math::
 
-        d(j)^* = \underset{n>d(j) \geq 0}{\text{argmin}}\left[\frac{1}{(n(j)-d(j))^2} \sum_{i=d}^{n}{\left(X_i(j)- \bar{X}_{n,d}(j) \right )^2}\right]
+        d(j)^* = \underset{n>d(j) \geq 0}{\text{argmin}}
+        \left[
+        \frac{1}{(n(j)-d(j))^2} \sum_{i=d}^{n}{\left(X_i(j)- \bar{X}_{n,d}(j) \right )^2}
+        \right]
 
     MSER-m applies the equation to a series of batch averages instead of the
     raw series. The CI estimators can be computed from the truncated sequence

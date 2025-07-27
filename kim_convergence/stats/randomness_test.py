@@ -66,9 +66,11 @@ def randomness_test(x: Union[np.ndarray, List[float]],
 
     x_size = x.size
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     if x_size < 3:
         raise CRSampleSizeError(

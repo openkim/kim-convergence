@@ -5,8 +5,8 @@ import numpy as np
 
 try:
     import kim_convergence as cr
-except:
-    raise Exception('Failed to import `kim-convergence` utility module')
+except Exception:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError('Failed to import `kim-convergence` utility module')
 
 from kim_convergence import CRError
 
@@ -104,7 +104,7 @@ class TestScaleModule(unittest.TestCase):
         inverse_scaled_x = msc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, self.x))
 
-        x = [ 4.,  1., -9.]
+        x = [4.0,  1.0, -9.0]
         scaled_x = msc.scale(x)
         inverse_scaled_x = msc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, x))

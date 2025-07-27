@@ -7,10 +7,9 @@ import unittest
 
 try:
     import kim_convergence as cr
-except:
+except Exception:  # noqa: BLE001  # intentional catch-all
     raise Exception('Failed to import `kim-convergence` utility module')
 
-from kim_convergence import CRError
 
 start = 0
 stop = 0
@@ -36,7 +35,7 @@ class TimeseriesModule(unittest.TestCase):
         if len(words) > 10:
             try:
                 step = float(words[0])
-            except:
+            except Exception:  # noqa: BLE001  # intentional catch-all
                 continue
             if step > len(data):
                 data.append(words)

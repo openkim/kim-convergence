@@ -1,12 +1,11 @@
 """Test ucl module."""
-from os import truncate
 import unittest
 import numpy as np
 
 try:
     import kim_convergence as cr
-except:
-    raise Exception('Failed to import `kim-convergence` utility module')
+except Exception:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError('Failed to import `kim-convergence` utility module')
 
 from kim_convergence import CRError
 
@@ -590,7 +589,7 @@ class TestUCLModule(unittest.TestCase):
         test_passed = True
 
         try:
-            ucl = mser.ucl(x[truncated_i:])
+            mser.ucl(x[truncated_i:])
         except CRError:
             test_passed = False
 
@@ -657,7 +656,7 @@ class TestUCLModule(unittest.TestCase):
         test_passed = True
 
         try:
-            ucl = mser.ucl(x[truncated_i:])
+            mser.ucl(x[truncated_i:])
         except CRError:
             test_passed = False
 
@@ -699,7 +698,7 @@ class TestUCLModule(unittest.TestCase):
         test_passed = True
 
         try:
-            ucl = skart.ucl(x[truncated_i:])
+            skart.ucl(x[truncated_i:])
         except CRError:
             test_passed = False
 
