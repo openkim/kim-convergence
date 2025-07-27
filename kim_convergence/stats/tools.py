@@ -144,7 +144,7 @@ def get_fft_optimal_size(input_size: int) -> int:
 def auto_covariance(x: Union[np.ndarray, List[float]],
                     *,
                     fft: bool = False) -> np.ndarray:
-    """Calculate biased auto-covariance estimates.
+    r"""Calculate biased auto-covariance estimates.
 
     Compute auto-covariance estimates for every lag for the input array.
     This estimator is biased.

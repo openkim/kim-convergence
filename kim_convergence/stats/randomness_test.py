@@ -14,7 +14,7 @@ __all__ = [
 
 def randomness_test(x: Union[np.ndarray, List[float]],
                     significance_level: float) -> bool:
-    """Testing for independence of observations.
+    r"""Testing for independence of observations.
 
     The von-Neumann ratio test of independence of variables is a test designed
     for checking the independence of subsequent observations.
