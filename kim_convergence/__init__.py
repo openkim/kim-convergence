@@ -2,7 +2,7 @@ r"""kim-convergence package."""
 
 from .batch import batch
 # from .geweke import geweke
-from ._default import *
+from ._default import *  # noqa: F401,F403
 from .err import \
     CRError, \
     CRSampleSizeError, \
@@ -146,7 +146,7 @@ __all__ = [
     'levene_test',
     'kruskal_test',
     'ks_test',
-    'wilcoxon_test'
+    'wilcoxon_test',
     'randomness_test',
     't_cdf_ccdf',
     't_cdf',
