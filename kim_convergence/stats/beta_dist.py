@@ -141,10 +141,10 @@ def betacf(a: float,
         if (fabs(_del - 1.0) < eps):
             return h
 
-    msg = 'betacf failed with the current result = {}, '.format(h)
-    msg = 'where a={} or b={} are too big, or '.format(a, b)
-    msg += 'max_iteration={} is too small.'.format(max_iteration)
-    raise CRError(msg)
+    raise CRError(
+        f'betacf failed with the current result = {h}, where a={a} or b={b} '
+        f'are too big, or max_iteration={max_iteration} is too small.'
+    )
 
 
 def betai(a: float, b: float, x: float) -> float:
@@ -187,7 +187,7 @@ def betai(a: float, b: float, x: float) -> float:
     return 1. - _beta
 
 
-def betai_cdf_ccdf(a: float, b: float, x: float) -> tuple((float, float)):
+def betai_cdf_ccdf(a: float, b: float, x: float) -> tuple[float, float]:
     r"""Calculate the cumulative distribution of the incomplete beta distribution.
 
     Calculate the cumulative distribution of the incomplete beta

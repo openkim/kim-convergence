@@ -4,8 +4,8 @@ import unittest
 
 try:
     import kim_convergence as cr
-except:
-    raise Exception('Failed to import `kim-convergence` utility module')
+except Exception:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError('Failed to import `kim-convergence` utility module')
 
 
 class TestStatsBetaModule(unittest.TestCase):

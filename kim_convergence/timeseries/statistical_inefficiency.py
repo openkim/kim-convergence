@@ -82,27 +82,25 @@ def statistical_inefficiency(
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     # Get the length of the timeseries
     x_size = x.size
 
     if x_size < 2:
-        msg = '{} input data points are not '.format(x_size)
-        msg += 'sufficient to be used by this method.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError(
+            f'{x_size} input data points are not sufficient to be used by '
+            'this method.'
+        )
 
     # minimum amount of correlation function to compute
     if not isinstance(minimum_correlation_time, int):
         if minimum_correlation_time is None:
             minimum_correlation_time = 3
         else:
-            msg = 'minimum_correlation_time must be an `int`.'
-            raise CRError(msg)
+            raise CRError('minimum_correlation_time must be an `int`.')
     elif minimum_correlation_time < 1:
-        msg = 'minimum_correlation_time must be a positive `int`.'
-        raise CRError(msg)
+        raise CRError('minimum_correlation_time must be a positive `int`.')
 
     fft = fft and x_size > 30
 
@@ -111,9 +109,10 @@ def statistical_inefficiency(
         _std = np.std(x)
 
         if not np.isfinite(_std):
-            msg = 'there is at least one value in the input '
-            msg += 'array which is non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input array which is '
+                'non-finite or not-number.'
+            )
 
         if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
             return x_size
@@ -235,15 +234,15 @@ def geyer_r_statistical_inefficiency(
 
     # Check inputs
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     x_size = x.size
 
     if x_size < 4:
-        msg = '{} input data points are not '.format(x_size)
-        msg += 'sufficient to be used by this method.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError(
+            f'{x_size} input data points are not sufficient to be used by '
+            'this method.'
+        )
 
     fft = fft and x_size > 30
 
@@ -252,9 +251,10 @@ def geyer_r_statistical_inefficiency(
         _std = np.std(x)
 
         if not np.isfinite(_std):
-            msg = 'there is at least one value in the input '
-            msg += 'array which is non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input '
+                'array which is non-finite or not-number.'
+            )
 
         if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
             return x_size
@@ -374,16 +374,18 @@ def geyer_split_r_statistical_inefficiency(
 
     """
     if y is not None:
-        msg = 'The split-r method, splits the x time-series data '
-        msg += 'and do not use y.'
-        raise CRError(msg)
+        raise CRError(
+            'The split-r method, splits the x time-series data '
+            'and do not use y.'
+        )
 
     x = np.asarray(x)
     x_size = x.size
     if x_size < 8:
-        msg = '{} input data points are not '.format(x_size)
-        msg += 'sufficient to be used by this method.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError(
+            f'{x_size} input data points are not sufficient to be used by '
+            'this method.'
+        )
     x_size //= 2
     return geyer_r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
 
@@ -421,30 +423,32 @@ def geyer_split_statistical_inefficiency(
 
     """
     if y is not None:
-        msg = 'the split-r method, splits the x time-series data '
-        msg += 'and do not use y.'
-        raise CRError(msg)
+        raise CRError(
+            'the split-r method, splits the x time-series data '
+            'and do not use y.'
+        )
 
     x = np.asarray(x)
 
     # Check inputs
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     x_size = x.size
     if x_size < 8:
-        msg = '{} input data points are not '.format(x_size)
-        msg += 'sufficient to be used by this method.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError(
+            f'{x_size} input data points are not sufficient to be used by '
+            'this method.'
+        )
 
     # Special case if timeseries is constant.
     _std = np.std(x)
 
     if not np.isfinite(_std):
-        msg = 'there is at least one value in the input '
-        msg += 'array which is non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array which is '
+            'non-finite or not-number.'
+        )
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         return x_size
@@ -590,10 +594,10 @@ def integrated_auto_correlation_time(
 
     elif isinstance(si, str):
         if si not in si_methods:
-            msg = 'method {} not found. Valid statistical '.format(si)
-            msg += 'inefficiency (si) methods are:\n\t- '
-            msg += '{}'.format('\n\t- '.join(si_methods))
-            raise CRError(msg)
+            raise CRError(
+                f'method {si} not found. Valid statistical inefficiency (si) '
+                'methods are:\n\t- ' + "\n\t- ".join(si_methods)
+            )
 
         si_func = si_methods[si]
 
@@ -602,9 +606,9 @@ def integrated_auto_correlation_time(
                      minimum_correlation_time=minimum_correlation_time)
 
     elif si < 1.0:
-        msg = 'statistical inefficiency (si) must '
-        msg += 'be greater than or equal one.'
-        raise CRError(msg)
+        raise CRError(
+            'statistical inefficiency (si) must be greater than or equal one.'
+        )
 
     # Compute the integrated auto-correlation time
     tau = (si - 1.0) / 2.0

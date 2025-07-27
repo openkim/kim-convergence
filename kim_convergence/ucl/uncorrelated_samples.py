@@ -123,21 +123,21 @@ class UncorrelatedSamples(UCLBase):
         time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            msg = 'time_series_data is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('time_series_data is not an array of one-dimension.')
 
         time_series_data_size = time_series_data.size
 
         if time_series_data_size < 5:
-            msg = '{} input data points '.format(time_series_data_size)
-            msg += 'are not sufficient to be used by "UCL".\n'
-            msg += '"UCL" at least needs 5 data points.'
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not sufficient '
+                'to be used by "UCL".\n"UCL" at least needs 5 data points.'
+            )
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
-            msg += 'is not in the range (0.0 1.0).'
-            raise CRError(msg)
+            raise CRError(
+                f'confidence_coefficient = {confidence_coefficient} is not '
+                'in the range (0.0 1.0).'
+            )
 
         self.si = time_series_data_si(
             time_series_data=time_series_data,
@@ -167,13 +167,15 @@ class UncorrelatedSamples(UCLBase):
 
         if uncorrelated_samples_size < 5:
             if uncorrelated_samples_size < 2:
-                msg = '{} uncorrelated '.format(uncorrelated_samples_size)
-                msg += 'sample points are not sufficient to be used by "UCL".'
-                raise CRSampleSizeError(msg)
+                raise CRSampleSizeError(
+                    f'{uncorrelated_samples_size} uncorrelated sample points '
+                    'are not sufficient to be used by "UCL".'
+                )
 
-            msg = '{} uncorrelated sample '.format(uncorrelated_samples_size)
-            msg += 'points are not sufficient to be used by "UCL".'
-            cr_warning(msg)
+            cr_warning(
+                f'{uncorrelated_samples_size} uncorrelated sample points are '
+                'not sufficient to be used by "UCL".'
+            )
 
         # compute mean
         self.mean = uncorrelated_samples.mean()
@@ -240,7 +242,7 @@ def uncorrelated_samples_ci(
         uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                            None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
-        obj: Optional[UncorrelatedSamples] = None) -> tuple((float, float)):
+        obj: Optional[UncorrelatedSamples] = None) -> tuple[float, float]:
     r"""Approximate the confidence interval of the mean.
 
     - If the population standard deviation is known, and

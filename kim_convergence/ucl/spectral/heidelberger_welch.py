@@ -132,9 +132,10 @@ class HeidelbergerWelch(UCLBase):
 
         """
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
-            msg += 'is not in the range (0.0 1.0).'
-            raise CRError(msg)
+            raise CRError(
+                f'confidence_coefficient = {confidence_coefficient} is not in '
+                'the range (0.0 1.0).'
+            )
 
         if self.heidel_welch_set and \
                 heidel_welch_number_points == self.heidel_welch_k:
@@ -148,17 +149,17 @@ class HeidelbergerWelch(UCLBase):
 
         if isinstance(heidel_welch_number_points, int):
             if heidel_welch_number_points < 25:
-                msg = 'wrong number of points heidel_welch_number_points = '
-                msg += '{} is '.format(heidel_welch_number_points)
-                msg = 'given to obtain the polynomial fit. According to '
-                msg += 'Heidelberger, and Welch, (1981), this procedure '
-                msg += 'at least needs to have 25 points.'
-                raise CRError(msg)
+                raise CRError(
+                    'wrong number of points heidel_welch_number_points = '
+                    f'{heidel_welch_number_points} is given to obtain the '
+                    'polynomial fit. According to Heidelberger, and Welch, '
+                    '(1981), this procedure at least needs to have 25 points.'
+                )
         else:
-            msg = 'heidel_welch_number_points = '
-            msg += '{} '.format(heidel_welch_number_points)
-            msg += 'is the number of points and should be a positive `int`.'
-            raise CRError(msg)
+            raise CRError(
+                f'heidel_welch_number_points = {heidel_welch_number_points} '
+                'is the number of points and should be a positive `int`.'
+            )
 
         self.heidel_welch_k = heidel_welch_number_points
         self.heidel_welch_n = heidel_welch_number_points * 4
@@ -404,8 +405,7 @@ class HeidelbergerWelch(UCLBase):
         time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            msg = 'time_series_data is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('time_series_data is not an array of one-dimension.')
 
         # We compute once and use it during iterations
         if not self.heidel_welch_set or \
@@ -418,10 +418,11 @@ class HeidelbergerWelch(UCLBase):
         time_series_data_size = time_series_data.size
 
         if time_series_data_size < self.heidel_welch_n:
-            msg = '{} input data points are not '.format(time_series_data_size)
-            msg += 'sufficient to be used by this method.\n"HeidelbergerWelch" '
-            msg += 'at least needs {} data points.'.format(self.heidel_welch_n)
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not '
+                'sufficient to be used by this method.\n"HeidelbergerWelch" '
+                f'at least needs {self.heidel_welch_n} data points.'
+            )
 
         number_batches = self.heidel_welch_n
         batch_size = time_series_data_size // number_batches
@@ -569,7 +570,7 @@ def heidelberger_welch_ci(
         fft: bool = _DEFAULT_FFT,
         test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
         train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
-        obj: Optional[HeidelbergerWelch] = None) -> tuple((float, float)):
+        obj: Optional[HeidelbergerWelch] = None) -> tuple[float, float]:
     r"""Approximate the confidence interval of the mean.
 
     Args:

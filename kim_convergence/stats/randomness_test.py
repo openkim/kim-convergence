@@ -14,7 +14,7 @@ __all__ = [
 
 def randomness_test(x: Union[np.ndarray, List[float]],
                     significance_level: float) -> bool:
-    """Testing for independence of observations.
+    r"""Testing for independence of observations.
 
     The von-Neumann ratio test of independence of variables is a test designed
     for checking the independence of subsequent observations.
@@ -62,19 +62,21 @@ def randomness_test(x: Union[np.ndarray, List[float]],
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     x_size = x.size
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     if x_size < 3:
-        msg = '{} input data points are not '.format(x_size)
-        msg += 'sufficient to be used by randomness_test method.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError(
+            f'{x_size} input data points are not sufficient to be used '
+            'by randomness_test method.'
+        )
 
     x_diff_square = np.diff(x, n=1)
     x_diff_square *= x_diff_square

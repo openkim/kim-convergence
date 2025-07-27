@@ -22,8 +22,8 @@ from .nonnormal_test import \
     levene_test, \
     ks_test, \
     kruskal_test, \
-    wilcoxon_test
-from .randomness_test import randomness_test
+    wilcoxon_test  # noqa: F401
+from .randomness_test import randomness_test  # noqa: F401
 from .t_dist import \
     t_cdf_ccdf, \
     t_cdf, \

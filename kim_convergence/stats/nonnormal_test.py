@@ -355,43 +355,43 @@ def check_population_cdf_args(population_cdf: Optional[str],
         return
 
     if population_cdf not in ContinuousDistributions:
-        msg = 'The {} distribution is not supported.'.format(population_cdf)
-        msg += 'It should be the name of a distribution in:\n'
-        msg += '    https://docs.scipy.org/doc/scipy/reference/stats.html#'
-        msg += 'continuous-distributions'
-        raise CRError(msg)
+        raise CRError(
+            f'The {population_cdf} distribution is not supported. It should '
+            'be the name of a distribution in:\n    '
+            'https://docs.scipy.org/doc/scipy/reference/stats.html#'
+            'continuous-distributions'
+        )
 
     number_of_required_arguments = \
         ContinuousDistributionsNumberOfRequiredArguments[population_cdf]
     number_of_arguments = len(population_args)
 
     if number_of_required_arguments != number_of_arguments:
-        msg = 'The {} distribution requires '.format(population_cdf)
+        msg = [f'The {population_cdf} distribution requires ']
 
         if number_of_required_arguments == 0:
-            msg += 'no input argument, but '
+            msg.append('no input argument, but ')
         elif number_of_required_arguments == 1:
-            msg += '1 input argument, but '
+            msg.append('1 input argument, but ')
         else:
-            msg += '{} arguments, but '.format(number_of_required_arguments)
+            msg.append(f'{number_of_required_arguments} input arguments, but ')
 
         if number_of_arguments == 0:
-            msg += 'no input argument is provided.'
+            msg.append('no input argument is provided.\n(')
         elif number_of_arguments == 1:
-            msg += '1 input argument is provided.'
+            msg.append('1 input argument is provided.\n(')
         else:
-            msg += '{} input arguments '.format(number_of_arguments)
-            msg += 'are provided.'
+            msg.append(
+                f'{number_of_arguments} input arguments are provided.\n('
+            )
 
-        Reference = 'https://docs.scipy.org/doc/scipy/reference/generated/'
-        Reference += 'scipy.stats.{}.html#scipy.stats.'.format(population_cdf)
-        Reference += '{}'.format(population_cdf)
+        msg.append(ContinuousDistributionsArgumentRequirement[population_cdf])
+        msg.append(
+            ')\nReference: https://docs.scipy.org/doc/scipy/reference/generated'
+            f'/scipy.stats.{population_cdf}.html#scipy.stats.{population_cdf}'
+        )
 
-        msg += '\n('
-        msg += ContinuousDistributionsArgumentRequirement[population_cdf]
-        msg += ')\nReference: '
-        msg += Reference
-        raise CRError(msg)
+        raise CRError(''.join(msg))
 
 
 def get_distribution_stats(population_cdf: Optional[str],
@@ -482,12 +482,13 @@ def ks_test(
     time_series_data = np.asarray(time_series_data)
 
     if time_series_data.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     check_population_cdf_args(population_cdf, population_args)
 
@@ -496,11 +497,13 @@ def ks_test(
     args.append(population_scale if population_scale else 1)
 
     try:
-        _, pvalue = kstest(time_series_data,
-                           cdf=population_cdf,
-                           args=args,
-                           alternative='two-sided')
-    except:
+        _, pvalue = kstest(
+            time_series_data,
+            cdf=population_cdf,
+            args=args,
+            alternative='two-sided'
+        )
+    except Exception:  # noqa: BLE001  # intentional catch-all
         raise CRError('Kolmogorov-Smirnov test failed.')
 
     return significance_level < pvalue
@@ -606,14 +609,15 @@ def levene_test(
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     x_size = x.size
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     # population
     check_population_cdf_args(population_cdf, population_args)
@@ -629,16 +633,17 @@ def levene_test(
         y = rvs(*args, size=x_size)
 
         try:
-            _, pvalue = kstest(y,
-                               cdf=population_cdf,
-                               args=args,
-                               alternative='two-sided')
-        except:
+            _, pvalue = kstest(
+                y,
+                cdf=population_cdf,
+                args=args,
+                alternative='two-sided')
+        except Exception:  # noqa: BLE001  # intentional catch-all
             raise CRError('Kolmogorov-Smirnov test failed.')
 
     try:
         _, pvalue = levene(x, y)
-    except:
+    except Exception:  # noqa: BLE001  # intentional catch-all
         raise CRError('Levene test failed.')
 
     return significance_level < pvalue
@@ -700,14 +705,15 @@ def wilcoxon_test(
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     x_size = x.size
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     args = [arg for arg in population_args]
     args.append(population_loc if population_loc else 0)
@@ -724,7 +730,7 @@ def wilcoxon_test(
                                cdf=population_cdf,
                                args=args,
                                alternative='two-sided')
-        except:
+        except Exception:  # noqa: BLE001  # intentional catch-all
             raise CRError('Kolmogorov-Smirnov test failed.')
 
     _, pvalue = wilcoxon(x, y,
@@ -785,8 +791,7 @@ def kruskal_test(
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     x_size = x.size
 
@@ -794,12 +799,13 @@ def kruskal_test(
     # of samples must not be too small. A typical rule is that time_series_data
     # must have at least 5 data.
     if x_size < 5:
-        msg = 'time_series_data must have at least 5 data.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError('time_series_data must have at least 5 data.')
 
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     args = [arg for arg in population_args]
     args.append(population_loc if population_loc else 0)
@@ -816,12 +822,12 @@ def kruskal_test(
                                cdf=population_cdf,
                                args=args,
                                alternative='two-sided')
-        except:
+        except Exception:  # noqa: BLE001  # intentional catch-all
             raise CRError('Kolmogorov-Smirnov test failed.')
 
     try:
         _, pvalue = kruskal(x, y)
-    except:
+    except Exception:  # noqa: BLE001  # intentional catch-all
         raise CRError('Levene test failed.')
 
     return significance_level < pvalue

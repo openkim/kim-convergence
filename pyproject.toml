@@ -33,6 +33,11 @@ include = [ "kim_convergence*" ]
 [tool.setuptools.dynamic]
 version = { attr = "kim_convergence.__version__" }
 
+[tool.flake8]
+per-file-ignores = [
+    "examples/openmm/example1.py: F401, F403, F405"
+]
+
 [tool.versioneer]
 VCS = "git"
 style = "pep440"
