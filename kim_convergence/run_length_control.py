@@ -221,10 +221,10 @@ def _get_trajectory(get_trajectory: callable,
     if run_length == 0:
         return np.array([], dtype=np.float64)
 
-    if type(get_trajectory_args) == dict and len(get_trajectory_args) > 0:
+    if isinstance(get_trajectory_args, dict) and get_trajectory_args:
         try:
             tsd = get_trajectory(run_length, get_trajectory_args)
-        except:
+        except Exception:  # noqa: BLE001  # intentional catch-all
             raise CRError(
                 'failed to get the time-series data or do the simulation '
                 f'for {run_length} number of steps.'
@@ -232,7 +232,7 @@ def _get_trajectory(get_trajectory: callable,
     else:
         try:
             tsd = get_trajectory(run_length)
-        except:
+        except Exception:  # noqa: BLE001  # intentional catch-all
             raise CRError(
                 'failed to get the time-series data or do the simulation '
                 f'for {run_length} number of steps.'
