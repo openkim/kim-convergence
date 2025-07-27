@@ -62,8 +62,7 @@ def randomness_test(x: Union[np.ndarray, List[float]],
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     x_size = x.size
 
@@ -72,9 +71,10 @@ def randomness_test(x: Union[np.ndarray, List[float]],
               var_lower_bound=np.finfo(np.float64).resolution)
 
     if x_size < 3:
-        msg = f'{x_size} input data points are not '
-        msg += 'sufficient to be used by randomness_test method.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError(
+            f'{x_size} input data points are not sufficient to be used '
+            'by randomness_test method.'
+        )
 
     x_diff_square = np.diff(x, n=1)
     x_diff_square *= x_diff_square

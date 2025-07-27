@@ -115,21 +115,22 @@ class MSER_m_y(MSER_m):
         time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            msg = 'time_series_data is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('time_series_data is not an array of one-dimension.')
 
         time_series_data_size = time_series_data.size
 
         if time_series_data_size < 10:
-            msg = f'{time_series_data_size} input data points are not '
-            msg += 'sufficient to be used by "MSER_m_y".\n"MSER_m_y" at '
-            msg += 'least needs 10 data points.'
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not '
+                'sufficient to be used by "MSER_m_y".\n"MSER_m_y" at '
+                'least needs 10 data points.'
+            )
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = f'confidence_coefficient = {confidence_coefficient} '
-            msg += 'is not in the range (0.0 1.0).'
-            raise CRError(msg)
+            raise CRError(
+                f'confidence_coefficient = {confidence_coefficient} is not '
+                'in the range (0.0 1.0).'
+            )
 
         batch_size = 1
         number_batches = time_series_data_size
@@ -228,7 +229,7 @@ def mser_m_y_ci(
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m_y] = None) -> tuple((float, float)):
+        obj: Optional[MSER_m_y] = None) -> tuple[float, float]:
     r"""Approximate the confidence interval of the mean [20]_.
 
     Args:

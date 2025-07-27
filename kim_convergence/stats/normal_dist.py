@@ -150,7 +150,7 @@ def normal_inv_cdf(p: float, *, loc=0.0, scale: float = 1.0) -> float:
 def normal_interval(confidence_level: float,
                     *,
                     loc: float = 0.0,
-                    scale: float = 1.0) -> tuple((float, float)):
+                    scale: float = 1.0) -> tuple[float, float]:
     r"""Compute the normal distribution confidence interval.
 
     Compute the normal-distribution confidence interval with equal areas around
@@ -182,9 +182,10 @@ def normal_interval(confidence_level: float,
 
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
-        msg = f'confidence level = {confidence_level} is not in '
-        msg += 'the range (0.0 1.0).'
-        raise CRError(msg)
+        raise CRError(
+            f'confidence level = {confidence_level} is not in the '
+            'range (0.0 1.0).'
+        )
 
     lower = (1.0 - confidence_level) / 2
     upper = (1.0 + confidence_level) / 2

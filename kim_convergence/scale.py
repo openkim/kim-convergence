@@ -65,11 +65,12 @@ class MinMaxScale():
 
     """
 
-    def __init__(self, *, feature_range: tuple((float, float)) = (0, 1)):
+    def __init__(self, *, feature_range: tuple[float, float] = (0, 1)):
         if feature_range[0] >= feature_range[1]:
-            msg = "Minimum of desired feature range must be smaller "
-            msg += f"than maximum. Got {str(feature_range)}"
-            raise CRError(msg)
+            raise CRError(
+                'Minimum of desired feature range must be smaller than '
+                f'maximum. Got {str(feature_range)}'
+            )
         self.feature_range_ = feature_range
         self.data_min_ = None
         self.data_max_ = None
@@ -90,22 +91,23 @@ class MinMaxScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            msg = 'x is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('x is not an array of one-dimension.')
 
         if not np.all(np.isfinite(x)):
-            msg = 'there is at least one value in the input '
-            msg += 'array which is non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input array which is '
+                'non-finite or not-number.'
+            )
 
         self.data_min_ = np.min(x)
         self.data_max_ = np.max(x)
         self.data_range_ = self.data_max_ - self.data_min_
 
         if isclose(self.data_range_, 0, abs_tol=_DEFAULT_ABS_TOL):
-            msg = 'the data_range of the input array is almost zero within '
-            msg += f'{int(fabs(log10(_DEFAULT_ABS_TOL)))} precision numbers.'
-            raise CRError(msg)
+            raise CRError(
+                'the data_range of the input array is almost zero within '
+                f'{int(fabs(log10(_DEFAULT_ABS_TOL)))} precision numbers.'
+            )
 
         self.scale_ = \
             (self.feature_range_[1] -
@@ -128,9 +130,10 @@ class MinMaxScale():
 
         """
         if self.min_ is None:
-            msg = "internal data-dependent state are not set, you need "
-            msg += "to scale an array before trying to inverse it."
-            raise CRError(msg)
+            raise CRError(
+                'internal data-dependent state are not set, you need '
+                'to scale an array before trying to inverse it.'
+            )
         x = np.asarray(x)
         inverse_scaled_x = x - self.min_
         inverse_scaled_x /= self.scale_
@@ -141,7 +144,7 @@ def minmax_scale(x: np.ndarray,
                  *,
                  with_centering: bool = True,
                  with_scaling: bool = True,
-                 feature_range: tuple((float, float)) = (0, 1)) -> np.ndarray:
+                 feature_range: tuple[float, float] = (0.0, 1.0)) -> np.ndarray:
     r"""Standardize/Transform a dataset by scaling it to a given range.
 
     This estimator scales and translates a dataset such that it is in the given
@@ -229,13 +232,13 @@ class TranslateScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            msg = 'x is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('x is not an array of one-dimension.')
 
         if not np.all(np.isfinite(x)):
-            msg = 'there is at least one value in the input '
-            msg += 'array which is non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input array which is '
+                'non-finite or not-number.'
+            )
 
         if self.with_centering_:
             self.center_ = x[0]
@@ -263,9 +266,10 @@ class TranslateScale():
 
         """
         if self.scale_ is None and self.center_ is None:
-            msg = "internal data-dependent state are not set, you need "
-            msg += "to scale an array before trying to inverse it."
-            raise CRError(msg)
+            raise CRError(
+                'internal data-dependent state are not set, you need to '
+                'scale an array before trying to inverse it.'
+            )
 
         if self.with_scaling_ and not isclose(
                 self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -383,8 +387,7 @@ class StandardScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            msg = 'x is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('x is not an array of one-dimension.')
 
         if self.with_centering_:
             self.mean_ = np.mean(x)
@@ -402,9 +405,10 @@ class StandardScale():
             # You may need to prescale your features.
 
             if not np.isfinite(self.mean_1):
-                msg = 'there is at least one value in the input array which is '
-                msg += 'non-finite or not-number.'
-                raise CRError(msg)
+                raise CRError(
+                    'there is at least one value in the input array which '
+                    'is non-finite or not-number.'
+                )
 
             if not isclose(self.mean_1, 0, abs_tol=_DEFAULT_ABS_TOL):
                 scaled_x -= self.mean_1
@@ -416,9 +420,10 @@ class StandardScale():
             self.std_ = np.std(x)
 
             if not np.isfinite(self.std_):
-                msg = 'there is at least one value in the input array which is '
-                msg += 'non-finite or not-number.'
-                raise CRError(msg)
+                raise CRError(
+                    'there is at least one value in the input array which '
+                    'is non-finite or not-number.'
+                )
 
             if not isclose(self.std_, 0, abs_tol=_DEFAULT_ABS_TOL):
                 scaled_x /= self.std_
@@ -451,9 +456,10 @@ class StandardScale():
 
         """
         if self.mean_ is None and self.std_ is None:
-            msg = "internal data-dependent state are not set, you need "
-            msg += "to scale an array before trying to inverse it."
-            raise CRError(msg)
+            raise CRError(
+                'internal data-dependent state are not set, you need to '
+                'scale an array before trying to inverse it.'
+            )
 
         if self.with_scaling_:
             x = np.asarray(x)
@@ -550,23 +556,20 @@ class RobustScale():
     def __init__(self, *,
                  with_centering: bool = True,
                  with_scaling: bool = True,
-                 quantile_range: tuple((float, float)) = (25.0, 75.0)):
+                 quantile_range: tuple[float, float] = (25.0, 75.0)):
         self.with_centering_ = with_centering
         self.with_scaling_ = with_scaling
 
         if not isinstance(quantile_range, tuple) or \
                 not isinstance(quantile_range, list):
-            msg = f'invalid quantile range: {str(quantile_range)}.'
-            raise CRError(msg)
+            raise CRError(f'invalid quantile range: {str(quantile_range)}.')
 
         if len(quantile_range) != 2:
-            msg = f'invalid quantile range: {str(quantile_range)}.'
-            raise CRError(msg)
+            raise CRError(f'invalid quantile range: {str(quantile_range)}.')
 
         q_min, q_max = quantile_range
         if not 0 <= q_min <= q_max <= 100:
-            msg = f'invalid quantile range: {str(quantile_range)}.'
-            raise CRError(msg)
+            raise CRError(f'invalid quantile range: {str(quantile_range)}.')
 
         self.quantile_range = quantile_range
         self.center_ = None
@@ -584,13 +587,13 @@ class RobustScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            msg = 'x is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('x is not an array of one-dimension.')
 
         if not np.all(np.isfinite(x)):
-            msg = 'there is at least one value in the input '
-            msg += 'array which is non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input array which is '
+                'non-finite or not-number.'
+            )
 
         if self.with_centering_:
             self.center_ = np.median(x)
@@ -619,9 +622,10 @@ class RobustScale():
 
         """
         if self.center_ is None and self.scale_ is None:
-            msg = "internal data-dependent state are not set, you need "
-            msg += "to scale an array before trying to inverse it."
-            raise CRError(msg)
+            raise CRError(
+                'internal data-dependent state are not set, you need to '
+                'scale an array before trying to inverse it.'
+            )
 
         if self.with_scaling_ and not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
             x = np.asarray(x)
@@ -640,7 +644,7 @@ def robust_scale(
         *,
         with_centering: bool = True,
         with_scaling: bool = True,
-        quantile_range: tuple((float, float)) = (25.0, 75.0)) -> np.ndarray:
+        quantile_range: tuple[float, float] = (25.0, 75.0)) -> np.ndarray:
     """Standardize a dataset.
 
     Standardize a dataset by centering to the median and component wise scale
@@ -716,13 +720,13 @@ class MaxAbsScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            msg = 'x is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('x is not an array of one-dimension.')
 
         if not np.all(np.isfinite(x)):
-            msg = 'there is at least one value in the input '
-            msg += 'array which is non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input array which is '
+                'non-finite or not-number.'
+            )
 
         self.scale_ = np.max(np.abs(x))
 
@@ -744,9 +748,10 @@ class MaxAbsScale():
 
         """
         if self.scale_ is None:
-            msg = "internal data-dependent state are not set, you need "
-            msg += "to scale an array before trying to inverse it."
-            raise CRError(msg)
+            raise CRError(
+                'internal data-dependent state are not set, you need to '
+                'scale an array before trying to inverse it.'
+            )
 
         if not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
             x = np.asarray(x)

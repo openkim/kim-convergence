@@ -56,22 +56,22 @@ def geweke(x: np.ndarray,
 
     """
     if first + last >= 1:
-        msg = 'Invalid intervals for Geweke convergence analysis:'
-        msg += f'({first}, {last}), '
-        msg += f'where {first} + {last} >= 1'
-        raise CRError(msg)
+        raise CRError(
+            'Invalid intervals for Geweke convergence analysis:'
+            f'({first}, {last}), where {first} + {last} >= 1'
+        )
 
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
-            msg = 'Invalid intervals for Geweke convergence analysis:'
-            msg += f'({first}, {last})'
-            raise CRError(msg)
+            raise CRError(
+                'Invalid intervals for Geweke convergence analysis:'
+                f'({first}, {last})'
+            )
 
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = "x is not an array of one-dimension."
-        raise CRError(msg)
+        raise CRError("x is not an array of one-dimension.")
 
     # Initialize list of z-scores
     zscores = []

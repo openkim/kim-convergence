@@ -129,9 +129,10 @@ class ZERO_RC_BOUNDS():
         if status == 0:
             monotone = (self.small <= x) and (x <= self.big)
             if not monotone:
-                msg = f'small={self.small}, x={x}, big={self.big} '
-                msg += 'are not monotone.'
-                raise CRError(msg)
+                raise CRError(
+                    f'small={self.small}, x={x}, big={self.big} are not '
+                    'monotone.'
+                )
 
             self.xsave = deepcopy(x)
             self.index = 1
@@ -153,17 +154,18 @@ class ZERO_RC_BOUNDS():
                                         self.rel_step * fabs(self.xsave))
                         self.index = 3
                         return 1, self.xsave
-                    msg = f'Answer x = {x}, appears to be higher '
-                    msg += 'than the highest search bound = '
-                    msg += f'{self.big}.\n'
-                    msg += 'It means that the stepping search terminated '
-                    msg += 'unsuccessfully at the highest search bound.'
-                    raise CRError(msg)
-                msg = f'Answer x = {x}, appears to be lower than '
-                msg += f'the lowest search bound = {self.small}.\n'
-                msg += 'It means that the stepping search terminated '
-                msg += 'unsuccessfully at the lowest search bound.'
-                raise CRError(msg)
+                    raise CRError(
+                        f'Answer x = {x}, appears to be higher than the '
+                        f'highest search bound = {self.big}.\nIt means '
+                        'that the stepping search terminated unsuccessfully '
+                        'at the highest search bound.'
+                    )
+                raise CRError(
+                    f'Answer x = {x}, appears to be lower than the lowest '
+                    f'search bound = {self.small}.\nIt means that the '
+                    'stepping search terminated unsuccessfully at the '
+                    'lowest search bound.'
+                )
 
             if self.fx_small >= 0.0:
                 if fx_big <= 0.0:
@@ -171,16 +173,17 @@ class ZERO_RC_BOUNDS():
                                     self.rel_step * fabs(self.xsave))
                     self.index = 3
                     return 1, self.xsave
-                msg = f'Answer x = {x}, appears to be higher than '
-                msg += f'the highest search bound = {self.big}.\n'
-                msg += 'It means that the stepping search terminated '
-                msg += 'unsuccessfully at the highest search bound.'
-                raise CRError(msg)
-            msg = f'Answer x = {x}, appears to be lower than the '
-            msg += f'lowest search bound = {self.small}.\n'
-            msg += 'It means that the stepping search terminated '
-            msg += 'unsuccessfully at the lowest search bound.'
-            raise CRError(msg)
+                raise CRError(
+                    f'Answer x = {x}, appears to be higher than the highest '
+                    f'search bound = {self.big}.\nIt means that the stepping '
+                    'search terminated unsuccessfully at the highest search '
+                    'bound.'
+                )
+            raise CRError(
+                f'Answer x = {x}, appears to be lower than the lowest search '
+                f'bound = {self.small}.\nIt means that the stepping search '
+                'terminated unsuccessfully at the lowest search bound.'
+            )
         elif self.index == 3:
             self.yy = deepcopy(fx)
 
@@ -215,12 +218,12 @@ class ZERO_RC_BOUNDS():
                 return 1, self.xub
 
             if qlim and not qbdd:
-                msg = f'Answer x = {self.big}, appears to be higher '
-                msg += 'or equal the highest search bound = '
-                msg += f'{self.big}.\n'
-                msg += 'It means that the stepping search terminated '
-                msg += 'unsuccessfully at the highest search bound.'
-                raise CRError(msg)
+                raise CRError(
+                    f'Answer x = {self.big}, appears to be higher or equal '
+                    f'the highest search bound = {self.big}.\nIt means that '
+                    'the stepping search terminated unsuccessfully at the '
+                    'highest search bound.'
+                )
 
             # Create an instance of ZERO_RC
             self.z = ZERO_RC(self.xlb,
@@ -257,12 +260,12 @@ class ZERO_RC_BOUNDS():
 
             if qcond:
                 if qlim and not qbdd:
-                    msg = f'Answer x = {self.small}, appears to be '
-                    msg += 'lower than or equal to the lowest search bound '
-                    msg += f'= {self.small}.\n'
-                    msg += 'It means that the stepping search terminated '
-                    msg += 'unsuccessfully at the lowest search bound.'
-                    raise CRError(msg)
+                    raise CRError(
+                        f'Answer x = {self.small}, appears to be lower than '
+                        f'or equal to the lowest search bound = {self.small}.'
+                        '\nIt means that the stepping search terminated '
+                        'unsuccessfully at the lowest search bound.'
+                    )
 
                 # Create an instance of ZERO_RC
                 self.z = ZERO_RC(self.xlb,
@@ -310,7 +313,7 @@ class ZERO_RC_BOUNDS():
                 else:
                     return 0, self.xlo
         else:
-            msg = f'Wrong index number = {self.index}.\n'
-            msg += 'This function should be called with zero status for the '
-            msg += 'first time.'
-            raise CRError(msg)
+            raise CRError(
+                    f'Wrong index number = {self.index}.\nThis function '
+                    'should be called with zero status for the first time.'
+                )

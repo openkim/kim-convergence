@@ -127,7 +127,7 @@ class N_SKART(UCLBase):
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
-            with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple((bool, int)):
+            with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple[bool, int]:
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
@@ -148,17 +148,17 @@ class N_SKART(UCLBase):
         """
         time_series_data = np.asarray(time_series_data)
         if time_series_data.ndim != 1:
-            msg = 'time_series_data is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('time_series_data is not an array of one-dimension.')
 
         time_series_data_size = time_series_data.size
 
         # Minimum number of data points
         if time_series_data_size < self.k_number_batches:
-            msg = f'{time_series_data_size} input data points are not '
-            msg += 'sufficient to be used by "N-Skart".\n"N-Skart" at '
-            msg += f'least needs {self.k_number_batches} data points.'
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not '
+                'sufficient to be used by "N-Skart".\n"N-Skart" at '
+                f'least needs {self.k_number_batches} data points.'
+            )
 
         # Reset the parameters for run-length control
         # cases, where we call this function in a loop
@@ -268,13 +268,12 @@ class N_SKART(UCLBase):
                                     with_centering=with_centering,
                                     with_scaling=with_scaling)
                 else:
-                    msg = f'{time_series_data_size} number of input '
-                    msg += 'data points is not sufficient to be used by '
-                    msg += '"N-Skart" method.\n"N-Skart" at least needs '
-                    msg += f'{processed_sample_size} = '
-                    msg += f'{k_number_batches} x {batch_size}'
-                    msg += ' data points.\n'
-                    cr_warning(msg)
+                    cr_warning(
+                        f'{time_series_data_size} number of input data points '
+                        'is not sufficient to be used by "N-Skart" method.\n'
+                        f'"N-Skart" at least needs {processed_sample_size} = '
+                        f'{k_number_batches} x {batch_size} data points.\n'
+                    )
 
                     sufficient_data = False
 
@@ -338,17 +337,16 @@ class N_SKART(UCLBase):
         time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            msg = 'time_series_data is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('time_series_data is not an array of one-dimension.')
 
         if not isinstance(equilibration_length_estimate, int):
-            msg = 'equilibration_length_estimate must be an `int`.'
-            raise CRError(msg)
+            raise CRError('equilibration_length_estimate must be an `int`.')
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = f'confidence_coefficient = {confidence_coefficient} '
-            msg += 'is not in the range (0.0 1.0).'
-            raise CRError(msg)
+            raise CRError(
+                f'confidence_coefficient = {confidence_coefficient} is not '
+                'in the range (0.0 1.0).'
+            )
 
         # Perform step 5 of the N-Skart algorithm
 
@@ -390,10 +388,11 @@ class N_SKART(UCLBase):
 
         # Minimum number of data points
         if time_series_data_size < processed_sample_size:
-            msg = f'{time_series_data_size} input data points are '
-            msg += 'not sufficient to be used by "N-Skart".\n"N-Skart" at '
-            msg += f'least needs {processed_sample_size} data points.'
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not '
+                'sufficient to be used by "N-Skart".\n"N-Skart" at '
+                f'least needs {processed_sample_size} data points.'
+            )
 
         # step 5b
 
@@ -486,7 +485,7 @@ def n_skart_ci(
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
         fft: bool = _DEFAULT_FFT,
-        obj: Optional[N_SKART] = None) -> tuple((float, float)):
+        obj: Optional[N_SKART] = None) -> tuple[float, float]:
     r"""Approximate the confidence interval of the mean.
 
     Args:

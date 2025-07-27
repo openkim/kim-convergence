@@ -251,7 +251,7 @@ class UCLBase:
             batch_size: int = _DEFAULT_BATCH_SIZE,
             scale: str = _DEFAULT_SCALE_METHOD,
             with_centering: bool = _DEFAULT_WITH_CENTERING,
-            with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple((bool, int)):
+            with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple[bool, int]:
         """Estimate the equilibration point in a time series data."""
         equilibration_index_estimate, si_value = estimate_equilibration_length(
             time_series_data=time_series_data,
@@ -309,7 +309,7 @@ class UCLBase:
            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
            uncorrelated_sample_indices: Union[np.ndarray, List[int],
                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-           sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> tuple((float, float)):
+           sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> tuple[float, float]:
         """Approximate the confidence interval of the mean."""
         self.upper_confidence_limit = self.ucl(
             time_series_data=time_series_data,
@@ -374,9 +374,10 @@ class UCLBase:
         # Estimat the relative half width
         if isclose(self.mean, 0,
                    abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL):
-            msg = 'It is not possible to estimate the relative half width '
-            msg += f'for the close to zero mean = {self.mean}'
-            raise CRError(msg)
+            raise CRError(
+                'It is not possible to estimate the relative half width '
+                f'for the close to zero mean = {self.mean}'
+            )
 
         relative_half_width_estimate = \
             self.upper_confidence_limit / fabs(self.mean)

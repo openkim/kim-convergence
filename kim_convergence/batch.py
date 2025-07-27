@@ -74,21 +74,19 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
 
     # Check inputs
     if time_series_data.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     if not isinstance(batch_size, int):
-        msg = f'batch_size = {batch_size} is not an `int`.'
-        raise CRError(msg)
+        raise CRError(f'batch_size = {batch_size} is not an `int`.')
 
     if batch_size < 1:
-        msg = f'batch_size = {batch_size} < 1 is not valid.'
-        raise CRError(msg)
+        raise CRError(f'batch_size = {batch_size} < 1 is not valid.')
 
     if not np.all(np.isfinite(time_series_data)):
-        msg = 'there is at least one value in the input '
-        msg += 'array which is non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array which is '
+            'non-finite or not-number.'
+        )
 
     # Initialize
 
@@ -96,12 +94,11 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
     number_batches = time_series_data.size // batch_size
 
     if number_batches == 0:
-        msg = f'invalid number of batches = {number_batches}.\n'
-        msg += 'The number of input data points = '
-        msg += f'{time_series_data.size} are '
-        msg += 'not enough to produce batches with the batch size of '
-        msg += f'{batch_size} data points.'
-        raise CRError(msg)
+        raise CRError(
+            f'invalid number of batches = {number_batches}.\nThe number of '
+            f'input data points = {time_series_data.size} are not enough to '
+            f'produce batches with the batch size of {batch_size} data points.'
+        )
 
     # Correct the size of data
     processed_sample_size = number_batches * batch_size
@@ -121,15 +118,17 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
 
     if with_centering or with_scaling:
         if not isinstance(scale, str):
-            msg = f'scale is not a `str`.\nScale = {scale} is not '
-            msg += 'a valid method to scale and standardize a dataset.'
-            raise CRError(msg)
+            raise CRError(
+                f'scale is not a `str`.\nScale = {scale} is not a valid '
+                'method to scale and standardize a dataset.'
+            )
 
         if scale not in scale_methods:
-            msg = f'method "{scale}" not found. Valid methods '
-            msg += 'to scale and standardize a dataset are:\n\t- '
-            msg += f'{"\n\t- ".join(scale_methods)}'
-            raise CRError(msg)
+            raise CRError(
+                f'method "{scale}" not found. Valid methods to scale and '
+                'standardize a dataset are:\n\t- '
+                f'{"\n\t- ".join(scale_methods)}'
+            )
 
         scale_func = scale_methods[scale]
 

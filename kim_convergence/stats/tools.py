@@ -90,13 +90,11 @@ def get_fft_optimal_size(input_size: int) -> int:
     """
     # Check inputs
     if not isinstance(input_size, int):
-        msg = 'input_size must be an `int`.'
-        raise CRError(msg)
+        raise CRError('input_size must be an `int`.')
 
     if input_size < 7:
         if input_size < 0:
-            msg = 'input_size must be a positive `int`.'
-            raise CRError(msg)
+            raise CRError('input_size must be a positive `int`.')
         return input_size
 
     # Return if it is power of 2
@@ -180,20 +178,19 @@ def auto_covariance(x: Union[np.ndarray, List[float]],
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     # Data size
     x_size = x.size
 
     if x_size < 1:
-        msg = 'x is empty.'
-        raise CRError(msg)
+        raise CRError('x is empty.')
 
     if not np.all(np.isfinite(x)):
-        msg = 'there is at least one value in the input array which is '
-        msg += 'non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array which is '
+            'non-finite or not-number.'
+        )
 
     # Fluctuations
     dx = x - np.mean(x)
@@ -249,31 +246,30 @@ def cross_covariance(x: Union[np.ndarray, List[float]],
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     # Data size
     x_size = x.size
 
     if x_size < 1:
-        msg = 'x is empty.'
-        raise CRError(msg)
+        raise CRError('x is empty.')
 
     if not np.all(np.isfinite(x)):
-        msg = 'there is at least one value in the input array x which is '
-        msg += 'non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array x which is '
+            'non-finite or not-number.'
+        )
 
     y = np.asarray(y)
 
     if x.shape != y.shape:
-        msg = 'x and y time series should have the same shape.'
-        raise CRError(msg)
+        raise CRError('x and y time series should have the same shape.')
 
     if not np.all(np.isfinite(y)):
-        msg = 'there is at least one value in the input array y which is '
-        msg += 'non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array y which is '
+            'non-finite or not-number.'
+        )
 
     # Fluctuations
     dx = x - x.mean()
@@ -328,9 +324,10 @@ def auto_correlate(x: Union[np.ndarray, List[float]],
     autocor = auto_covariance(x, fft=fft)
 
     if isclose(autocor[0], 0, abs_tol=_DEFAULT_ABS_TOL):
-        msg = 'divide by zero encountered, which means the first element of '
-        msg += 'the auto covariances of x is zero (or close to zero).'
-        raise CRError(msg)
+        raise CRError(
+            'divide by zero encountered, which means the first element of '
+            'the auto covariances of x is zero (or close to zero).'
+        )
 
     if nlags is None:
         # Calculate the auto correlation
@@ -338,12 +335,10 @@ def auto_correlate(x: Union[np.ndarray, List[float]],
     else:
         # Check input
         if not isinstance(nlags, int):
-            msg = 'nlags must be an `int`.'
-            raise CRError(msg)
+            raise CRError('nlags must be an `int`.')
 
         if nlags < 1:
-            msg = 'nlags must be a positive `int`.'
-            raise CRError(msg)
+            raise CRError('nlags must be a positive `int`.')
 
         nlags = min(nlags, x.size)
 
@@ -391,9 +386,10 @@ def cross_correlate(x: Union[np.ndarray, List[float]],
     sigma_xy = np.std(x) * np.std(y)
 
     if isclose(sigma_xy, 0, abs_tol=_DEFAULT_ABS_TOL):
-        msg = 'Divide by zero encountered, which means the multiplication '
-        msg += 'of the standard deviation of x and y is zero.'
-        raise CRError(msg)
+        raise CRError(
+            'Divide by zero encountered, which means the multiplication '
+            'of the standard deviation of x and y is zero.'
+        )
 
     if nlags is None:
         # Calculate the cross correlation
@@ -401,12 +397,10 @@ def cross_correlate(x: Union[np.ndarray, List[float]],
     else:
         # Check input
         if not isinstance(nlags, int):
-            msg = 'nlags must be an `int`.'
-            raise CRError(msg)
+            raise CRError('nlags must be an `int`.')
 
         if nlags < 1:
-            msg = 'nlags must be a positive `int`.'
-            raise CRError(msg)
+            raise CRError('nlags must be a positive `int`.')
 
         nlags = min(nlags, x.size)
 
@@ -462,16 +456,16 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
         x = np.asarray(x)
 
         if x.ndim != 1:
-            msg = 'x is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('x is not an array of one-dimension.')
 
         # Fluctuations
         _mean = np.mean(x)
 
         if not np.isfinite(_mean):
-            msg = 'there is at least one value in the input array which is '
-            msg += 'non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input array which is '
+                'non-finite or not-number.'
+            )
 
         dx = x - _mean
 
@@ -481,13 +475,13 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
         dx = np.asarray(x)
 
         if dx.ndim != 1:
-            msg = 'x is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('x is not an array of one-dimension.')
 
         if not np.all(np.isfinite(dx)):
-            msg = 'there is at least one value in the input array which is '
-            msg += 'non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input array which is '
+                'non-finite or not-number.'
+            )
 
     # Data size
     x_size = dx.size
@@ -552,8 +546,7 @@ def periodogram(x: Union[np.ndarray, List[float]],
     try:
         result = modified_periodogram(x, fft=fft, with_mean=with_mean)
     except CRError:
-        msg = 'Failed to compute a modified periodogram.'
-        raise CRError(msg)
+        raise CRError('Failed to compute a modified periodogram.')
 
     # Data size
     x_size = np.size(x)
@@ -586,8 +579,7 @@ def summary(x: Union[np.ndarray, List[float]]):
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     x_min = np.nanmin(x)
     x_max = np.nanmax(x)
@@ -620,21 +612,19 @@ def int_power(x: Union[np.ndarray, List[float]],
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     if x.size < 1:
-        msg = 'x is empty.'
-        raise CRError(msg)
+        raise CRError('x is empty.')
 
     if not isinstance(exponent, int):
-        msg = 'exponent must be an `int`.'
-        raise CRError(msg)
+        raise CRError('exponent must be an `int`.')
 
     if not np.all(np.isfinite(x)):
-        msg = 'there is at least one value in the input array x which is '
-        msg += 'non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array x which is '
+            'non-finite or not-number.'
+        )
 
     if exponent == 1:
         return x
@@ -681,21 +671,19 @@ def moment(x: Union[np.ndarray, List[float]],
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     if x.size < 1:
-        msg = 'x is empty.'
-        raise CRError(msg)
+        raise CRError('x is empty.')
 
     if not np.all(np.isfinite(x)):
-        msg = 'there is at least one value in the input array x which is '
-        msg += 'non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array x which is '
+            'non-finite or not-number.'
+        )
 
     if not isinstance(moment, int):
-        msg = 'moment must be an `int`.'
-        raise CRError(msg)
+        raise CRError('moment must be an `int`.')
 
     # The first moment about the mean is 0
     if moment == 1:

@@ -128,8 +128,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
         arg = argv[i]
 
         if arg not in _LAMMPS_ARGUMENTS:
-            msg = 'The input argument "{}" is not suppoerted.'
-            raise cr.CRError(msg)
+            raise cr.CRError(f'The input argument "{arg}" is not suppoerted.')
 
         if arg in ('variable', 'compute', 'fix'):
             # The value following the argument `variable`, `compute`, or
@@ -159,18 +158,20 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             continue
 
         if var_name is None:
-            msg = 'A `variable` or a `compute`, or a `fix` must '
-            msg += 'previously be defined.'
-            raise cr.CRError(msg)
+            raise cr.CRError(
+                'A `variable` or a `compute`, or a `fix` must previously be '
+                'defined.'
+            )
 
         if arg in ('lbound', 'lb'):
             i += 1
             try:
                 arg = argv[i]
             except IndexError:
-                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
-                msg += 'lower bound is not provided.'
-                raise cr.CRError(msg)
+                raise cr.CRError(
+                    f'the {var_name} {_PREFIX_NAME[prefix]}\'s lower bound is '
+                    'not provided.'
+                )
 
             # parse the value
             try:
@@ -180,8 +181,9 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 var_lb = lmp.extract_variable(arg, None, 0)
 
                 if var_lb is None:
-                    msg = 'lb must be followed by an equal-style variable.'
-                    raise cr.CRError(msg)
+                    raise cr.CRError(
+                        'lb must be followed by an equal-style variable.'
+                    )
 
             var_ub = None
 
@@ -197,9 +199,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 try:
                     arg = argv[i]
                 except IndexError:
-                    msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s'
-                    msg += ' upper bound is not provided.'
-                    raise cr.CRError(msg)
+                    raise cr.CRError(
+                        f'the {var_name} {_PREFIX_NAME[prefix]}\'s upper '
+                        'bound is not provided.'
+                    )
 
                 try:
                     var_ub = float(arg)
@@ -207,8 +210,9 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                     # ub can be an equal-style variable
                     var_ub = lmp.extract_variable(arg, None, 0)
                     if var_ub is None:
-                        msg = 'ub must be followed by an equal-style variable.'
-                        raise cr.CRError(msg)
+                        raise cr.CRError(
+                            'ub must be followed by an equal-style variable.'
+                        )
             else:
                 i -= 1
 
@@ -219,9 +223,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
-                msg += 'upper bound is not provided.'
-                raise cr.CRError(msg)
+                raise cr.CRError(
+                    f'the {var_name} {_PREFIX_NAME[prefix]}\'s upper bound is '
+                    'not provided.'
+                )
 
             # being here means that this ctrl variable has no lower bound
             var_lb = None
@@ -232,8 +237,9 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 # lb & ub must be equal-style variable
                 var_ub = lmp.extract_variable(arg, None, 0)
                 if var_ub is None:
-                    msg = 'ub must be followed by an equal-style variable.'
-                    raise cr.CRError(msg)
+                    raise cr.CRError(
+                        'ub must be followed by an equal-style variable.'
+                    )
 
             ctrl_map[var_name] = tuple([var_lb, var_ub])
 
@@ -242,9 +248,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
-                msg += 'population_mean is not provided.'
-                raise cr.CRError(msg)
+                raise cr.CRError(
+                    f'the {var_name} {_PREFIX_NAME[prefix]}\'s population_mean'
+                    ' is not provided.'
+                )
 
             if population_mean is None:
                 population_mean = {}
@@ -255,9 +262,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 value = lmp.extract_variable(arg, None, 0)
 
                 if value is None:
-                    msg = 'population_mean must be followed by an '
-                    msg += 'equal-style variable.'
-                    raise cr.CRError(msg)
+                    raise cr.CRError(
+                        'population_mean must be followed by an equal-style '
+                        'variable.'
+                    )
 
             population_mean[var_name] = value
 
@@ -266,9 +274,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
-                msg += 'population_std is not provided.'
-                raise cr.CRError(msg)
+                raise cr.CRError(
+                    f'the {var_name} {_PREFIX_NAME[prefix]}\'s population_std '
+                    'is not provided.'
+                )
 
             if population_std is None:
                 population_std = {}
@@ -279,9 +288,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 value = lmp.extract_variable(arg, None, 0)
 
                 if value is None:
-                    msg = 'population_std must be followed by an '
-                    msg += 'equal-style variable.'
-                    raise cr.CRError(msg)
+                    raise cr.CRError(
+                        'population_std must be followed by an equal-style '
+                        'variable.'
+                    )
 
             population_std[var_name] = value
 
@@ -290,8 +300,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
-                msg += 'population_cdf is not provided.'
+                raise cr.CRError(
+                    f'the {var_name} {_PREFIX_NAME[prefix]}\'s population_cdf '
+                    'is not provided.'
+                )
 
             if population_cdf is None:
                 population_cdf = {}
@@ -303,8 +315,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
-                msg += 'population_args is not provided.'
+                raise cr.CRError(
+                    f'the {var_name} {_PREFIX_NAME[prefix]}\'s population_args'
+                    ' is not provided.'
+                )
 
             if population_args is None:
                 population_args = {}
@@ -329,9 +343,11 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                     try:
                         value = float(arg_)
                     except ValueError:
-                        msg = 'population_args must be followed by a '
-                        msg += 'list or tuple of values(s).'
-                        raise cr.CRError(msg)
+                        raise cr.CRError(
+                            'population_args must be followed by a list or '
+                            'tuple of values(s).'
+                        )
+                    pass
 
                 population_args[var_name].append(value)
 
@@ -340,8 +356,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
-                msg += 'population_loc is not provided.'
+                raise cr.CRError(
+                    f'the {var_name} {_PREFIX_NAME[prefix]}\'s population_loc '
+                    'is not provided.'
+                )
 
             if population_loc is None:
                 population_loc = {}
@@ -352,9 +370,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 value = lmp.extract_variable(arg, None, 0)
 
                 if value is None:
-                    msg = 'population_loc must be followed by an '
-                    msg += 'equal-style variable.'
-                    raise cr.CRError(msg)
+                    raise cr.CRError(
+                        'population_loc must be followed by an equal-style '
+                        'variable.'
+                    )
 
             population_loc[var_name] = value
 
@@ -363,8 +382,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             try:
                 arg = argv[i]
             except IndexError:
-                msg = f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
-                msg += 'population_scale is not provided.'
+                raise cr.CRError(
+                    f'the {var_name} {_PREFIX_NAME[prefix]}\'s '
+                    'population_scale is not provided.'
+                )
 
             if population_scale is None:
                 population_scale = {}
@@ -375,9 +396,10 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                 value = lmp.extract_variable(arg, None, 0)
 
                 if value is None:
-                    msg = 'population_scale must be followed by an '
-                    msg += 'equal-style variable.'
-                    raise cr.CRError(msg)
+                    raise cr.CRError(
+                        'population_scale must be followed by an equal-style '
+                        'variable.'
+                    )
 
             population_scale[var_name] = value
 
@@ -388,25 +410,21 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
 
     if ctrl_map:
         if argument_counter == 1:
-            var_name = arguments_map[0]
-            msg = f'the variable "{var_name}" is used for '
-            msg += 'controling the stability of the simulation to be '
-            msg += 'bounded by lower and/or upper bound. It can not be '
-            msg += 'used for the run length control at the same time.'
-            raise cr.CRError(msg)
+            raise cr.CRError(
+                f'the variable "{arguments_map[0]}" is used for controling '
+                'the stability of the simulation to be bounded by lower '
+                'and/or upper bound. It can not be used for the run length '
+                'control at the same time.'
+            )
 
         if argument_counter == len(ctrl_map):
-            var_name = arguments_map[0]
-            msg = f'the variables "{var_name}", '
-            for i in range(1, argument_counter - 1):
-                var_name = arguments_map[i]
-                msg = f'"{var_name}", '
-            var_name = arguments_map[-1]
-            msg = f'and "{var_name}" are used for '
-            msg += 'controling the stability of the simulation to be '
-            msg += 'bounded by lower and/or upper bounds. They can not be '
-            msg += 'used for the run length control at the same time.'
-            raise cr.CRError(msg)
+            msg = ", ".join(f'"{argm}"' for argm in arguments_map[:-1])
+            raise cr.CRError(
+                f'the variables {msg} and "{arguments_map[-1]}" are used for '
+                'controling the stability of the simulation to be bounded by '
+                'lower and/or upper bounds. They can not be used for the run '
+                'length control at the same time.'
+            )
 
     def get_trajectory(step: int, args: dict) -> np.ndarray:
         """Get trajectory vector or array of values.
@@ -449,31 +467,31 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val <= lb or val >= ub:
-                                msg = f'the "{var_name}"\'s value = '
-                                msg += f'{val} is out of bound of ('
-                                msg += f'{lb} {ub}). '
-                                msg += 'This run is unstable.'
-                                raise cr.CRError(msg)
+                                raise cr.CRError(
+                                    f'the "{var_name}"\'s value = {val} is '
+                                    f'out of bound of ({lb} {ub}). This run '
+                                    'is unstable.'
+                                )
                         continue
                     elif lb:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val <= lb:
-                                msg = f'the "{var_name}"\'s value = '
-                                msg += f'{val} is out of bound of ('
-                                msg += f'{lb} ...). '
-                                msg += 'This run is unstable.'
-                                raise cr.CRError(msg)
+                                raise cr.CRError(
+                                    f'the "{var_name}"\'s value = {val} is '
+                                    f'out of bound of ({lb} ...). This run '
+                                    'is unstable.'
+                                )
                         continue
                     elif ub:
                         for _nstep in range(args['nstep'], args['nstep'] + ncountmax):
                             val = lmp.extract_fix('cr_fix', 0, 2, _nstep, j)
                             if val >= ub:
-                                msg = f'the "{var_name}"\'s value = '
-                                msg += f'{val} is out of bound of ('
-                                msg += f'... {ub}). '
-                                msg += 'This run is unstable.'
-                                raise cr.CRError(msg)
+                                raise cr.CRError(
+                                    f'the "{var_name}"\'s value = {val} is '
+                                    f'out of bound of (... {ub}). This run '
+                                    'is unstable.'
+                                )
                         continue
                 else:
                     for i, _nstep in enumerate(range(args['nstep'], args['nstep'] + ncountmax)):
@@ -614,8 +632,7 @@ def run_length_control(lmpptr, nevery: int, *argv) -> None:
             fp='return',
             fp_format='txt')
     except Exception as e:
-        msg = f'{e}'
-        raise cr.CRError(msg)
+        raise cr.CRError(f'{e}')
 
     cmd = "variable run_var string ''"
     lmp.command(cmd)

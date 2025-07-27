@@ -148,10 +148,10 @@ class ZERO_RC():
             else:
                 self.ext += 1
         else:
-            msg = f'Wrong index number={self.index}.\n'
-            msg += 'This function should be called with zero status for the '
-            msg += 'first time.'
-            raise CRError(msg)
+            raise CRError(
+                f'Wrong index number={self.index}.\nThis function should be '
+                'called with zero status for the first time.'
+            )
 
         if fabs(self.fc) < fabs(self.fb):
             if self.c != self.a:

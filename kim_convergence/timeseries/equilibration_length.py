@@ -38,7 +38,7 @@ def _estimate_equilibration_length(
         t: int,
         si_func: callable,
         fft: bool,
-        minimum_correlation_time: Optional[int]) -> tuple((float, float, int)):
+        minimum_correlation_time: Optional[int]) -> tuple[float, float, int]:
     # slice a numpy array, the memory is shared
     # between the slice and the original
     x = time_series_data[t:]
@@ -66,7 +66,7 @@ def estimate_equilibration_length(
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple((int, float)):
+        with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple[int, float]:
     """Estimate the equilibration point in a time series data.
 
     Estimate the equilibration point in a time series data using the
@@ -109,90 +109,94 @@ def estimate_equilibration_length(
     time_series_data = np.asarray(time_series_data)
 
     if time_series_data.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     # Get the length of the timeseries.
     time_series_data_size = time_series_data.size
 
     if isinstance(si, str):
         if si not in si_methods:
-            msg = f'method {si} not found. Valid statistical '
-            msg += 'inefficiency (si) methods are:\n\t- '
-            msg += f'{"\n\t- ".join(si_methods)}'
-            raise CRError(msg)
+            raise CRError(
+                f'method {si} not found. Valid statistical '
+                'inefficiency (si) methods are:\n\t- '
+                f'{"\n\t- ".join(si_methods)}'
+            )
     elif si is None:
         si = 'statistical_inefficiency'
     else:
-        msg = 'si is not a `str` or `None`.'
-        raise CRError(msg)
+        raise CRError('si is not a `str` or `None`.')
 
     si_func = si_methods[si]
 
     if not isinstance(nskip, int):
         if nskip is not None:
-            msg = 'nskip must be an `int`.'
-            raise CRError(msg)
+            raise CRError('nskip must be an `int`.')
 
         nskip = 1
 
     elif nskip < 1:
-        msg = 'nskip must be a positive `int`.'
-        raise CRError(msg)
+        raise CRError('nskip must be a positive `int`.')
 
     if not isinstance(ignore_end, int):
         if ignore_end is None:
             ignore_end = max(1, time_series_data_size // 4)
         elif isinstance(ignore_end, float):
             if not 0.0 < ignore_end < 1.0:
-                msg = f'invalid ignore_end = {ignore_end}. If '
-                msg += 'ignore_end input is a `float`, it should be in a '
-                msg += '`(0, 1)` range.'
-                raise CRError(msg)
+                raise CRError(
+                    f'invalid ignore_end = {ignore_end}. If ignore_end input '
+                    'is a `float`, it should be in a `(0, 1)` range.'
+                )
             ignore_end *= time_series_data_size
             ignore_end = max(1, int(ignore_end))
         else:
-            msg = f'invalid ignore_end = {ignore_end}. '
-            msg += 'ignore_end is not an `int`, `float`, or `None`.'
-            raise CRError(msg)
+            raise CRError(
+                f'invalid ignore_end = {ignore_end}. ignore_end is not an '
+                '`int`, `float`, or `None`.'
+            )
     elif ignore_end < 1:
-        msg = f'invalid ignore_end = {ignore_end}. '
-        msg += 'ignore_end should be a positive `int`.'
-        raise CRError(msg)
+        raise CRError(
+            f'invalid ignore_end = {ignore_end}. ignore_end should be a '
+            'positive `int`.'
+        )
 
     # Upper bound check
     if si == 'geyer_r_statistical_inefficiency':
         if time_series_data_size < 4:
-            msg = f'{time_series_data_size} input data points are not '
-            msg += f'sufficient to be used by "{si}".'
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not '
+                f'sufficient to be used by "{si}".'
+            )
         ignore_end = max(3, ignore_end)
     elif si == 'geyer_split_r_statistical_inefficiency':
         if time_series_data_size < 8:
-            msg = f'{time_series_data_size} input data points are not '
-            msg += f'sufficient to be used by "{si}".'
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not '
+                f'sufficient to be used by "{si}".'
+            )
         ignore_end = max(7, ignore_end)
     elif si == 'geyer_split_statistical_inefficiency':
         if time_series_data_size < 8:
-            msg = f'{time_series_data_size} input data points are not '
-            msg += f'sufficient to be used by "{si}".'
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not '
+                f'sufficient to be used by "{si}".'
+            )
         ignore_end = max(7, ignore_end)
 
     if time_series_data_size <= ignore_end:
-        msg = f'invalid ignore_end = {ignore_end}.\n'
-        msg = 'Wrong number of data points is requested to be '
-        msg += f'ignored from {time_series_data_size} total points.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError(
+            f'invalid ignore_end = {ignore_end}.\nWrong number of data '
+            f'points is requested to be ignored from {time_series_data_size} '
+            'total points.'
+        )
 
     # Special case if timeseries is constant.
     _std = time_series_data.std()
 
     if not np.isfinite(_std):
-        msg = 'there is at least one value in the input '
-        msg += 'array which is non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array which is '
+            'non-finite or not-number.'
+        )
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         # index and si

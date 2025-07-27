@@ -83,23 +83,22 @@ def outlier_test(x: Union[np.ndarray, List[float]],
     x = np.asarray(x)
 
     if x.ndim != 1:
-        msg = 'x is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('x is not an array of one-dimension.')
 
     if not np.all(np.isfinite(x)):
-        msg = 'there is at least one value in the input array which is '
-        msg += 'non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array which is '
+            'non-finite or not-number.'
+        )
 
     if isinstance(outlier_method, str):
         if outlier_method not in outlier_methods:
-            msg = f'method {outlier_method} not found. Valid '
-            msg += 'methods to detect outliers are:\n\t- '
-            msg += f'{"\n\t- ".join(outlier_methods)}'
-            raise CRError(msg)
+            raise CRError(
+                f'method {outlier_method} not found. Valid methods to '
+                f'detect outliers are:\n\t- {"\n\t- ".join(outlier_methods)}'
+            )
     else:
-        msg = 'Input outlier_method is not a `str`.'
-        raise CRError(msg)
+        raise CRError('Input outlier_method is not a `str`.')
 
     if outlier_method in ('iqr', 'boxplot'):
         lower_quartile, upper_quartile = np.quantile(x, [0.25, 0.75])

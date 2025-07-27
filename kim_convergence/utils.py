@@ -21,7 +21,7 @@ def validate_split(
     n_samples: int,
     train_size: Union[int, float, None],
     test_size: Union[int, float, None],
-        default_test_size: Union[int, float, None] = None) -> tuple((int, int)):
+        default_test_size: Union[int, float, None] = None) -> tuple[int, int]:
     r"""Validate test/train sizes.
 
     Helper function to validate the test/train sizes to be meaningful with
@@ -39,14 +39,14 @@ def validate_split(
 
     """
     if not isinstance(n_samples, int) or n_samples <= 0:
-        msg = f'n_samples={n_samples} is not a positive `int`.'
-        raise CRError(msg)
+        raise CRError(f'n_samples={n_samples} is not a positive `int`.')
 
     if test_size is None and train_size is None:
         if default_test_size is None:
-            msg = 'test_size, train_size, and default_test_size '
-            msg += 'can not be `None` at the same time.'
-            raise CRError(msg)
+            raise CRError(
+                'test_size, train_size, and default_test_size can not be '
+                '`None` at the same time.'
+            )
         test_size = default_test_size
 
     test_size_int = isinstance(test_size, int)
@@ -55,38 +55,39 @@ def validate_split(
     train_size_float = isinstance(train_size, float)
 
     if test_size_int and (test_size >= n_samples or test_size <= 0):
-        msg = f'test_size={test_size} should be positive '
-        msg += f'and smaller than the number of samples={n_samples}'
-        raise CRError(msg)
+        raise CRError(
+            f'test_size={test_size} should be positive and smaller than '
+            f'the number of samples={n_samples}'
+        )
 
     if test_size_float and (test_size <= 0 or test_size >= 1):
-        msg = f'test_size={test_size} should be a float in '
-        msg += 'the [0, 1] range.'
-        raise CRError(msg)
+        raise CRError(
+            f'test_size={test_size} should be a float in the [0, 1] range.'
+        )
 
     if test_size is not None:
-        msg = f'Invalid input of test_size={test_size}.'
-        raise CRError(msg)
+        raise CRError(f'Invalid input of test_size={test_size}.')
 
     if train_size_int and (train_size >= n_samples or train_size <= 0):
-        msg = f'train_size={train_size} should be positive '
-        msg += f'and smaller than the number of samples={n_samples}'
-        raise CRError(msg)
+        raise CRError(
+            f'train_size={train_size} should be positive and smaller than '
+            f'the number of samples={n_samples}'
+        )
 
     if train_size_float and (train_size <= 0 or train_size >= 1):
-        msg = f'train_size={test_size} should be a float '
-        msg += 'in the [0, 1] range.'
-        raise CRError(msg)
+        raise CRError(
+            f'train_size={test_size} should be a float in the [0, 1] range.'
+        )
 
     if train_size is not None:
-        msg = f'Invalid input of train_size={train_size}.'
-        raise CRError(msg)
+        raise CRError(f'Invalid input of train_size={train_size}.')
 
     if (test_size_float and train_size_float and train_size + test_size > 1):
-        msg = 'The sum of test_size and train_size = '
-        msg += f'{train_size + test_size}, should be in the '
-        msg += '[0, 1] range. Reduce test_size and/or train_size.'
-        raise CRError(msg)
+        raise CRError(
+            'The sum of test_size and train_size = '
+            f'{train_size + test_size}, should be in the '
+            '[0, 1] range. Reduce test_size and/or train_size.'
+        )
 
     if test_size_float:
         n_test = np.ceil(test_size * n_samples)
@@ -104,17 +105,16 @@ def validate_split(
         n_test = n_samples - n_train
 
     if n_train + n_test > n_samples:
-        msg = 'the sum of train_size and test_size = '
-        msg += f'{int(n_train + n_test)}, should be smaller '
-        msg += f'than the number of samples {int(n_samples)}.'
-        msg += 'Reduce test_size and/or train_size.'
-        raise CRError(msg)
+        raise CRError(
+            f'the sum of train_size and test_size = {int(n_train + n_test)}, '
+            f'should be smaller than the number of samples {int(n_samples)}. '
+            'Reduce test_size and/or train_size.'
+        )
 
     n_train, n_test = int(n_train), int(n_test)
 
     if n_train == 0:
-        msg = 'the resulting train set is empty.'
-        raise CRError(msg)
+        raise CRError('the resulting train set is empty.')
 
     return n_train, n_test
 
@@ -125,7 +125,7 @@ def train_test_split(
         train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
         test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
         seed: Union[int, np.random.RandomState, None] = _DEFAULT_SEED,
-        default_test_size: Union[int, float, None] = 0.1) -> tuple((np.ndarray, np.ndarray)):
+        default_test_size: Union[int, float, None] = 0.1) -> tuple[np.ndarray, np.ndarray]:
     r"""Split time_series_data into random train and test indices.
 
     Args:
@@ -163,9 +163,9 @@ def train_test_split(
     elif isinstance(seed, np.random.RandomState):
         rng = seed
     else:
-        msg = 'seed should be one of `None`, `int` or '
-        msg += '`np.random.RandomState`.'
-        raise CRError(msg)
+        raise CRError(
+            'seed should be one of `None`, `int` or `np.random.RandomState`.'
+        )
 
     # random partition
     permutation = rng.permutation(n_samples)

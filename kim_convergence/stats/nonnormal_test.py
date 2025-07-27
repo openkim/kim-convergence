@@ -355,43 +355,43 @@ def check_population_cdf_args(population_cdf: Optional[str],
         return
 
     if population_cdf not in ContinuousDistributions:
-        msg = f'The {population_cdf} distribution is not supported.'
-        msg += 'It should be the name of a distribution in:\n'
-        msg += '    https://docs.scipy.org/doc/scipy/reference/stats.html#'
-        msg += 'continuous-distributions'
-        raise CRError(msg)
+        raise CRError(
+            f'The {population_cdf} distribution is not supported. It should '
+            'be the name of a distribution in:\n    '
+            'https://docs.scipy.org/doc/scipy/reference/stats.html#'
+            'continuous-distributions'
+        )
 
     number_of_required_arguments = \
         ContinuousDistributionsNumberOfRequiredArguments[population_cdf]
     number_of_arguments = len(population_args)
 
     if number_of_required_arguments != number_of_arguments:
-        msg = f'The {population_cdf} distribution requires '
+        msg = [f'The {population_cdf} distribution requires ']
 
         if number_of_required_arguments == 0:
-            msg += 'no input argument, but '
+            msg.append('no input argument, but ')
         elif number_of_required_arguments == 1:
-            msg += '1 input argument, but '
+            msg.append('1 input argument, but ')
         else:
-            msg += f'{number_of_required_arguments} arguments, but '
+            msg.append(f'{number_of_required_arguments} input arguments, but ')
 
         if number_of_arguments == 0:
-            msg += 'no input argument is provided.'
+            msg.append('no input argument is provided.\n(')
         elif number_of_arguments == 1:
-            msg += '1 input argument is provided.'
+            msg.append('1 input argument is provided.\n(')
         else:
-            msg += f'{number_of_arguments} input arguments '
-            msg += 'are provided.'
+            msg.append(
+                f'{number_of_arguments} input arguments are provided.\n('
+            )
 
-        Reference = 'https://docs.scipy.org/doc/scipy/reference/generated/'
-        Reference += f'scipy.stats.{population_cdf}.html#scipy.stats.'
-        Reference += f'{population_cdf}'
+        msg.append(ContinuousDistributionsArgumentRequirement[population_cdf])
+        msg.append(
+            ')\nReference: https://docs.scipy.org/doc/scipy/reference/generated'
+            f'/scipy.stats.{population_cdf}.html#scipy.stats.{population_cdf}'
+        )
 
-        msg += '\n('
-        msg += ContinuousDistributionsArgumentRequirement[population_cdf]
-        msg += ')\nReference: '
-        msg += Reference
-        raise CRError(msg)
+        raise CRError(''.join(msg))
 
 
 def get_distribution_stats(population_cdf: Optional[str],
@@ -482,8 +482,7 @@ def ks_test(
     time_series_data = np.asarray(time_series_data)
 
     if time_series_data.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     cr_check(significance_level,
               var_name='significance_level',
@@ -606,8 +605,7 @@ def levene_test(
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     x_size = x.size
 
@@ -700,8 +698,7 @@ def wilcoxon_test(
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     x_size = x.size
 
@@ -785,8 +782,7 @@ def kruskal_test(
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     x_size = x.size
 
@@ -794,8 +790,7 @@ def kruskal_test(
     # of samples must not be too small. A typical rule is that time_series_data
     # must have at least 5 data.
     if x_size < 5:
-        msg = 'time_series_data must have at least 5 data.'
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError('time_series_data must have at least 5 data.')
 
     cr_check(significance_level,
               var_name='significance_level',
