@@ -301,8 +301,10 @@ def _check_accuracy(
             )
 
         if relative_accuracy is None:
-            cr_check(absolute_accuracy, 'absolute_accuracy',
-                      var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY)
+            cr_check(
+                absolute_accuracy, 'absolute_accuracy',
+                var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY
+            )
 
     else:
         if np.size(relative_accuracy) != number_of_variables:
@@ -319,9 +321,10 @@ def _check_accuracy(
 
         for index, rel_acc in enumerate(relative_accuracy):
             if rel_acc is None:
-                cr_check(absolute_accuracy[index],
-                          f'absolute_accuracy[{index}]',
-                          var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY)
+                cr_check(
+                    absolute_accuracy[index], f'absolute_accuracy[{index}]',
+                    var_lower_bound=_DEFAULT_MIN_ABSOLUTE_ACCURACY
+                )
 
 
 def _check_equilibration_step(
@@ -977,8 +980,10 @@ def run_length_control(
         )
 
     if minimum_number_of_independent_samples is not None:
-        cr_check(minimum_number_of_independent_samples,
-                  'minimum_number_of_independent_samples', int, 1)
+        cr_check(
+            minimum_number_of_independent_samples,
+            'minimum_number_of_independent_samples', int, 1
+        )
 
     if fp is None:
         fp = sys.stdout
@@ -1244,10 +1249,10 @@ def run_length_control(
 
                     effective_sample_size = time_series_data_size / ucl_obj.si
 
-                    if minimum_number_of_independent_samples is None or \
-                            effective_sample_size >= \
-                    minimum_number_of_independent_samples:
-
+                    if (
+                        minimum_number_of_independent_samples is None
+                        or effective_sample_size >= minimum_number_of_independent_samples
+                    ):
                         need_more_data = False
 
                         if population_mean is not None:
@@ -1587,10 +1592,10 @@ def run_length_control(
                         effective_sample_size[i] = \
                             time_series_data_size / ucl_obj.si
 
-                        if minimum_number_of_independent_samples is None or \
-                                effective_sample_size[i] >= \
-                        minimum_number_of_independent_samples:
-
+                        if (
+                            minimum_number_of_independent_samples is None
+                            or effective_sample_size[i] >= minimum_number_of_independent_samples
+                        ):
                             need_more_data = False
 
                             if population_mean is not None and \
