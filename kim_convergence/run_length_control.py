@@ -997,7 +997,7 @@ def run_length_control(
     if fp_format not in ('txt', 'json', 'edn'):
         raise CRError(
             'fp format is unknown. Valid formats are:\n\t- '
-            f'{"\n\t- ".join(("txt", "json", "edn"))}'
+            + "\n\t- ".join(("txt", "json", "edn"))
         )
 
     # Initialize
@@ -1034,7 +1034,7 @@ def run_length_control(
         raise CRError(
             f'method "{confidence_interval_approximation_method}" '
             'to aproximate confidence interval not found. Valid methods '
-            f'are:\n\t- {"\n\t- ".join(ucl_methods)}'
+            'are:\n\t- ' + "\n\t- ".join(ucl_methods)
         )
 
     try:

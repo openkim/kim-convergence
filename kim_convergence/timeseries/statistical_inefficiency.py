@@ -595,8 +595,8 @@ def integrated_auto_correlation_time(
     elif isinstance(si, str):
         if si not in si_methods:
             raise CRError(
-                f'method {si} not found. Valid statistical inefficiency '
-                f'(si) methods are:\n\t- {"\n\t- ".join(si_methods)}'
+                f'method {si} not found. Valid statistical inefficiency (si) '
+                'methods are:\n\t- ' + "\n\t- ".join(si_methods)
             )
 
         si_func = si_methods[si]

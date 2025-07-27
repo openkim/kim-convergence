@@ -76,8 +76,8 @@ def time_series_data_si(
     if isinstance(si, str):
         if si not in si_methods:
             raise CRError(
-                f'method {si} not found. Valid statistical inefficiency '
-                f'(si) methods are:\n\t- {"\n\t- ".join(si_methods)}'
+                f'method {si} not found. Valid statistical inefficiency (si) '
+                'methods are:\n\t- ' + "\n\t- ".join(si_methods)
             )
 
         si_func = si_methods[si]
@@ -207,7 +207,7 @@ def uncorrelated_time_series_data_samples(
     if sample_method not in SAMPLING_METHODS:
         raise CRError(
             f'method {sample_method} not found. Valid sampling methods '
-            f'are:\n\t- {"\n\t- ".join(SAMPLING_METHODS)}'
+            'are:\n\t- ' + "\n\t- ".join(SAMPLING_METHODS)
         )
 
     if sample_method == 'uncorrelated':

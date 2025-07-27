@@ -117,9 +117,8 @@ def estimate_equilibration_length(
     if isinstance(si, str):
         if si not in si_methods:
             raise CRError(
-                f'method {si} not found. Valid statistical '
-                'inefficiency (si) methods are:\n\t- '
-                f'{"\n\t- ".join(si_methods)}'
+                f'method {si} not found. Valid statistical inefficiency (si) '
+                'methods are:\n\t- ' + "\n\t- ".join(si_methods)
             )
     elif si is None:
         si = 'statistical_inefficiency'
