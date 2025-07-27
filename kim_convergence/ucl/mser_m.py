@@ -48,7 +48,7 @@ def mser_m(
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END) -> tuple((bool, int)):
+        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END) -> tuple[bool, int]:
     r"""Determine the truncation point using marginal standard error rules.
 
     Determine the truncation point using marginal standard error rules
@@ -64,7 +64,11 @@ def mser_m(
 
     .. math::
 
-        d(j)^* = \underset{n>d(j) \geq 0}{\text{argmin}}\left[\frac{1}{(n(j)-d(j))^2} \sum_{i=d}^{n}{\left(X_i(j)- \bar{X}_{n,d}(j) \right )^2}\right]
+        d(j)^* = \underset{n>d(j) \geq 0}{\text{argmin}}
+        \left[
+        \frac{1}{(n(j)-d(j))^2}
+        \sum_{i=d}^{n}{\left(X_i(j)- \bar{X}_{n,d}(j) \right )^2}
+        \right]
 
     MSER-m applies the equation to a series of batch averages instead of the
     raw series.
@@ -108,29 +112,27 @@ def mser_m(
         algorithm did not find any truncation point.
 
     """
-    time_series_data = np.array(time_series_data, copy=False)
+    time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:
-        msg = 'time_series_data is not an array of one-dimension.'
-        raise CRError(msg)
+        raise CRError('time_series_data is not an array of one-dimension.')
 
     # Special case if timeseries is constant.
     _std = np.std(time_series_data)
 
     if not np.isfinite(_std):
-        msg = 'there is at least one value in the input array which is '
-        msg += 'non-finite or not-number.'
-        raise CRError(msg)
+        raise CRError(
+            'there is at least one value in the input array which is '
+            'non-finite or not-number.'
+        )
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         if not isinstance(batch_size, int):
-            msg = 'batch_size = {} is not an `int`.'.format(batch_size)
-            raise CRError(msg)
+            raise CRError(f'batch_size = {batch_size} is not an `int`.')
 
         if batch_size < 1:
-            msg = 'batch_size = {} < 1 is not valid.'.format(batch_size)
-            raise CRError(msg)
+            raise CRError(f'batch_size = {batch_size} < 1 is not valid.')
 
         if time_series_data.size < batch_size:
             return False, 0
@@ -155,35 +157,37 @@ def mser_m(
             ignore_end = min(ignore_end, number_batches // 4)
         elif isinstance(ignore_end, float):
             if not 0.0 < ignore_end < 1.0:
-                msg = 'invalid ignore_end = {}. If '.format(ignore_end)
-                msg += 'ignore_end input is a `float`, it should be in a '
-                msg += '`(0, 1)` range.'
-                raise CRError(msg)
+                raise CRError(
+                    f'invalid ignore_end = {ignore_end}. If ignore_end input '
+                    'is a `float`, it should be in a `(0, 1)` range.'
+                )
             ignore_end *= number_batches
             ignore_end = max(1, int(ignore_end))
         else:
-            msg = 'invalid ignore_end = {}. '.format(ignore_end)
-            msg += 'ignore_end is not an `int`, `float`, or `None`.'
-            raise CRError(msg)
+            raise CRError(
+                f'invalid ignore_end = {ignore_end}. ignore_end is not an '
+                '`int`, `float`, or `None`.'
+            )
 
         if ignore_end < 1:
-            msg = 'ignore_end is not given on input and it is automatically '
-            msg += 'set = {} using '.format(ignore_end)
-            msg += '{} number of data points '.format(time_series_data.size)
-            msg += 'and the batch size = {}.\n'.format(batch_size)
-            msg += 'ignore_end should be a positive `int`.'
-            raise CRError(msg)
+            raise CRError(
+                'ignore_end is not given on input and it is automatically '
+                f'set = {ignore_end} using {time_series_data.size} number of '
+                f'data points and the batch size = {batch_size}.\nignore_end '
+                'should be a positive `int`.'
+            )
 
     elif ignore_end < 1:
-        msg = 'invalid ignore_end = {}. '.format(ignore_end)
-        msg += 'ignore_end should be a positive `int`.'
-        raise CRError(msg)
+        raise CRError(
+            f'invalid ignore_end = {ignore_end}. ignore_end should be a '
+            'positive `int`.'
+        )
 
     if number_batches <= ignore_end:
-        msg = 'invalid ignore_end = {}.\n'.format(ignore_end)
-        msg += 'Wrong number of batches is requested to be ignored '
-        msg += 'from the total {} batches.'.format(number_batches)
-        raise CRSampleSizeError(msg)
+        raise CRSampleSizeError(
+            f'invalid ignore_end = {ignore_end}.\nWrong number of batches is '
+            f'requested to be ignored from the total {number_batches} batches.'
+        )
 
     # To find the optimal truncation point in MSER-m
 
@@ -238,7 +242,10 @@ class MSER_m(UCLBase):
 
     .. math::
 
-        d(j)^* = \underset{n>d(j) \geq 0}{\text{argmin}}\left[\frac{1}{(n(j)-d(j))^2} \sum_{i=d}^{n}{\left(X_i(j)- \bar{X}_{n,d}(j) \right )^2}\right]
+        d(j)^* = \underset{n>d(j) \geq 0}{\text{argmin}}
+        \left[
+        \frac{1}{(n(j)-d(j))^2} \sum_{i=d}^{n}{\left(X_i(j)- \bar{X}_{n,d}(j) \right )^2}
+        \right]
 
     MSER-m applies the equation to a series of batch averages instead of the
     raw series. The CI estimators can be computed from the truncated sequence
@@ -274,7 +281,7 @@ class MSER_m(UCLBase):
         si: Union[str, float, int, None] = _DEFAULT_SI,
         nskip: Optional[int] = _DEFAULT_NSKIP,
         fft: bool = _DEFAULT_FFT,
-            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> tuple((bool, int)):
+            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> tuple[bool, int]:
         """Estimate the equilibration point in a time series data."""
         truncated, truncate_index = mser_m(
             time_series_data=time_series_data,
@@ -285,7 +292,7 @@ class MSER_m(UCLBase):
             ignore_end=ignore_end)
 
         if truncated:
-            time_series_data = np.array(time_series_data, copy=False)
+            time_series_data = np.asarray(time_series_data)
 
             self.set_si(
                 time_series_data=time_series_data[truncate_index:],
@@ -347,16 +354,16 @@ class MSER_m(UCLBase):
                     doi = 10.1109/WSC.2010.5679094
 
         """
-        time_series_data = np.array(time_series_data, copy=False)
+        time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            msg = 'time_series_data is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('time_series_data is not an array of one-dimension.')
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
-            msg += 'is not in the range (0.0 1.0).'
-            raise CRError(msg)
+            raise CRError(
+                f'confidence_coefficient = {confidence_coefficient} is not '
+                'in the range (0.0 1.0).'
+            )
 
         # Initialize
         x_batch = batch(time_series_data,
@@ -420,7 +427,7 @@ def mser_m_ci(
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m] = None) -> tuple((float, float)):
+        obj: Optional[MSER_m] = None) -> tuple[float, float]:
     r"""Approximate the confidence interval of the mean [20]_.
 
     Args:

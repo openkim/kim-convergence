@@ -46,9 +46,11 @@ def t_test(
             `population_mean`.
 
     """
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     nomin = sample_mean - population_mean
     denom = sample_std / sqrt(sample_size)
@@ -88,9 +90,11 @@ def chi_square_test(
             is equal to the given population variance, `population_var`.
 
     """
-    cr_check(significance_level,
-              var_name='significance_level',
-              var_lower_bound=np.finfo(np.float64).resolution)
+    cr_check(
+        significance_level,
+        var_name='significance_level',
+        var_lower_bound=np.finfo(np.float64).resolution
+    )
 
     df = sample_size - 1
     t = df * sample_var / population_var

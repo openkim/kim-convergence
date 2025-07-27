@@ -4,8 +4,8 @@ import numpy as np
 
 try:
     import kim_convergence as cr
-except:
-    raise Exception('Failed to import `kim-convergence` utility module')
+except Exception:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError('Failed to import `kim-convergence` utility module')
 
 from kim_convergence import CRError
 
@@ -144,7 +144,10 @@ class TestStatsModule(unittest.TestCase):
 
         self.assertRaises(CRError, cr.auto_covariance, a)
 
-        a[100] = np.NINF
+        if np.__version__.startswith('1.'):
+            a[100] = np.NINF
+        else:
+            a[100] = -np.inf
 
         self.assertRaises(CRError, cr.auto_covariance, a)
 
@@ -254,12 +257,15 @@ class TestStatsModule(unittest.TestCase):
         self.assertRaises(CRError,
                           cr.cross_covariance, a, b)
 
-        a[100] = np.NINF
+        if np.__version__.startswith('1.'):
+            a[100] = np.NINF
+        else:
+            a[100] = -np.inf
 
         self.assertRaises(CRError,
                           cr.cross_covariance, a, b)
 
-        a[100] = np.random.rand(1)
+        a[100] = np.random.rand()
         b[101] = np.inf
 
         self.assertRaises(CRError,
@@ -270,7 +276,10 @@ class TestStatsModule(unittest.TestCase):
         self.assertRaises(CRError,
                           cr.cross_covariance, a, b)
 
-        b[101] = np.NINF
+        if np.__version__.startswith('1.'):
+            a[101] = np.NINF
+        else:
+            a[101] = -np.inf
 
         self.assertRaises(CRError,
                           cr.cross_covariance, a, b)
@@ -371,7 +380,10 @@ class TestStatsModule(unittest.TestCase):
         self.assertRaises(CRError,
                           cr.auto_correlate, a)
 
-        a[10] = np.NINF
+        if np.__version__.startswith('1.'):
+            a[10] = np.NINF
+        else:
+            a[10] = -np.inf
 
         self.assertRaises(CRError,
                           cr.auto_correlate, a)
@@ -504,11 +516,14 @@ class TestStatsModule(unittest.TestCase):
 
         self.assertRaises(CRError, cr.cross_correlate, a, b)
 
-        a[1000] = np.NINF
+        if np.__version__.startswith('1.'):
+            a[1000] = np.NINF
+        else:
+            a[1000] = -np.inf
 
         self.assertRaises(CRError, cr.cross_correlate, a, b)
 
-        a[1000] = np.random.rand(1)
+        a[1000] = np.random.rand()
         b[1001] = np.inf
 
         self.assertRaises(CRError, cr.cross_correlate, a, b)
@@ -517,7 +532,10 @@ class TestStatsModule(unittest.TestCase):
 
         self.assertRaises(CRError, cr.cross_correlate, a, b)
 
-        b[1001] = np.NINF
+        if np.__version__.startswith('1.'):
+            a[1001] = np.NINF
+        else:
+            a[1001] = -np.inf
 
         self.assertRaises(CRError,
                           cr.cross_correlate, a, b)
@@ -586,7 +604,10 @@ class TestStatsModule(unittest.TestCase):
 
         self.assertRaises(CRError, cr.periodogram, x)
 
-        x[2] = np.NINF
+        if np.__version__.startswith('1.'):
+            x[2] = np.NINF
+        else:
+            x[2] = -np.inf
 
         self.assertRaises(CRError, cr.periodogram, x)
 

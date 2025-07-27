@@ -112,31 +112,32 @@ class MSER_m_y(MSER_m):
             float: upper_confidence_limit
 
         """
-        time_series_data = np.array(time_series_data, copy=False)
+        time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            msg = 'time_series_data is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('time_series_data is not an array of one-dimension.')
 
         time_series_data_size = time_series_data.size
 
         if time_series_data_size < 10:
-            msg = '{} input data points are not '.format(time_series_data_size)
-            msg += 'sufficient to be used by "MSER_m_y".\n"MSER_m_y" at '
-            msg += 'least needs 10 data points.'
-            raise CRSampleSizeError(msg)
+            raise CRSampleSizeError(
+                f'{time_series_data_size} input data points are not '
+                'sufficient to be used by "MSER_m_y".\n"MSER_m_y" at '
+                'least needs 10 data points.'
+            )
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
-            msg = 'confidence_coefficient = {} '.format(confidence_coefficient)
-            msg += 'is not in the range (0.0 1.0).'
-            raise CRError(msg)
+            raise CRError(
+                f'confidence_coefficient = {confidence_coefficient} is not '
+                'in the range (0.0 1.0).'
+            )
 
         batch_size = 1
         number_batches = time_series_data_size
 
         # Apply the randomness test of von Neumann
         # to the current set of batch means
-        x_batch = np.array(time_series_data, copy=False)
+        x_batch = np.asarray(time_series_data)
         random = randomness_test(x_batch, self.significance_level)
 
         dependent_data = not random
@@ -228,7 +229,7 @@ def mser_m_y_ci(
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m_y] = None) -> tuple((float, float)):
+        obj: Optional[MSER_m_y] = None) -> tuple[float, float]:
     r"""Approximate the confidence interval of the mean [20]_.
 
     Args:

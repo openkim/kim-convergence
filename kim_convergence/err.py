@@ -56,8 +56,7 @@ def cr_warning(msg: str) -> None:
 def _check_ndim(func: callable) -> callable:
     def wrapper(x, *args, **kwargs):
         if np.ndim(x) != 1:
-            msg = 'input data is not an array of one-dimension.'
-            raise CRError(msg)
+            raise CRError('input data is not an array of one-dimension.')
         return func(x, *args, **kwargs)
     return wrapper
 
@@ -65,9 +64,10 @@ def _check_ndim(func: callable) -> callable:
 def _check_isfinite(func: callable) -> callable:
     def wrapper(x, *args, **kwargs):
         if not np.all(np.isfinite(x)):
-            msg = 'there is at least one value in the input '
-            msg += 'array which is non-finite or not-number.'
-            raise CRError(msg)
+            raise CRError(
+                'there is at least one value in the input array which is '
+                'non-finite or not-number.'
+            )
         return func(x, *args, **kwargs)
     return wrapper
 
@@ -92,40 +92,44 @@ def cr_check(var,
     if var_upper_bound is None:
         if var_type is None:
             if var < var_lower_bound:
-                msg = '"{}" must be '.format(var_name)
-                msg += 'greater than or equal {}.'.format(var_lower_bound)
-                raise CRError(msg)
+                raise CRError(
+                    f'"{var_name}" must be greater than or equal '
+                    f'{var_lower_bound}.'
+                )
         else:
             if not isinstance(var, var_type):
-                msg = '"{}" must be a `{}`.'.format(var_name, var_type)
-                raise CRError(msg)
+                raise CRError(f'"{var_name}" must be a `{var_type}`.')
 
             if var < var_lower_bound:
-                msg = '"{}" must be a `{}` '.format(var_name, var_type)
-                msg += 'greater than or equal {}.'.format(var_lower_bound)
-                raise CRError(msg)
+                raise CRError(
+                    f'"{var_name}" must be a `{var_type}` greater than '
+                    f'or equal {var_lower_bound}.'
+                )
     else:
         if var_type is None:
             if var < var_lower_bound:
-                msg = '"{}" must be '.format(var_name)
-                msg += 'greater than or equal {}.'.format(var_lower_bound)
-                raise CRError(msg)
+                raise CRError(
+                    f'"{var_name}" must be greater than or '
+                    f'equal {var_lower_bound}.'
+                )
 
             if var > var_upper_bound:
-                msg = '"{}" must be '.format(var_name)
-                msg += 'smaller than or equal {}.'.format(var_upper_bound)
-                raise CRError(msg)
+                raise CRError(
+                    f'"{var_name}" must be smaller than or '
+                    f'equal {var_upper_bound}.'
+                )
         else:
             if not isinstance(var, var_type):
-                msg = '"{}" must be a `{}`.'.format(var_name, var_type)
-                raise CRError(msg)
+                raise CRError(f'"{var_name}" must be a `{var_type}`.')
 
             if var < var_lower_bound:
-                msg = '"{}" must be a `{}` '.format(var_name, var_type)
-                msg += 'greater than or equal {}.'.format(var_lower_bound)
-                raise CRError(msg)
+                raise CRError(
+                    f'"{var_name}" must be a `{var_type}` greater than '
+                    f'or equal {var_lower_bound}.'
+                )
 
             if var > var_upper_bound:
-                msg = '"{}" must be a `{}` '.format(var_name, var_type)
-                msg += 'smaller than or equal {}.'.format(var_upper_bound)
-                raise CRError(msg)
+                raise CRError(
+                    f'"{var_name}" must be a `{var_type}` smaller than '
+                    f'or equal {var_upper_bound}.'
+                )

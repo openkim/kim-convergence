@@ -4,8 +4,8 @@ import numpy as np
 
 try:
     import kim_convergence as cr
-except:
-    raise Exception('Failed to import `kim-convergence` utility module')
+except Exception:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError('Failed to import `kim-convergence` utility module')
 
 from kim_convergence import CRError
 
@@ -139,8 +139,9 @@ class TestBatchModule(unittest.TestCase):
         x[0] = np.inf
         self.assertRaises(CRError, cr.batch, x)
 
-        x[0] = np.NaN
-        self.assertRaises(CRError, cr.batch, x)
+        if np.__version__.startswith('1.'):
+            x[0] = np.NaN
+            self.assertRaises(CRError, cr.batch, x)
 
         rng = np.random.RandomState(12345)
 

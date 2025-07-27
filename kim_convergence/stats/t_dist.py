@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 
-def t_cdf_ccdf(t: float, df: float) -> tuple((float, float)):
+def t_cdf_ccdf(t: float, df: float) -> tuple[float, float]:
     r"""Compute the cumulative distribution of the t-distribution.
 
     The cumulative distribution of the t-distribution for t > 0, can be
@@ -49,9 +49,10 @@ def t_cdf_ccdf(t: float, df: float) -> tuple((float, float)):
 
     """
     if df < 1:
-        msg = 'df = {} is wrong. Degrees of freedom, must be '.format(df)
-        msg += 'positive and greater than 1.'
-        raise CRError(msg)
+        raise CRError(
+            f'df = {df} is wrong. Degrees of freedom, must be positive and '
+            'greater than 1.'
+        )
 
     tt = t * t
     denom = df + tt
@@ -130,13 +131,13 @@ def t_inv_cdf(p: float,
 
     """
     if p <= 0.0 or p >= 1.0:
-        msg = 'p = {} is not in the range (0.0 1.0).'.format(p)
-        raise CRError(msg)
+        raise CRError(f'p = {p} is not in the range (0.0 1.0).')
 
     if df < 1:
-        msg = 'df = {} is wrong. Degrees of freedom, must be '.format(df)
-        msg += 'positive and greater than 1.'
-        raise CRError(msg)
+        raise CRError(
+            f'df = {df} is wrong. Degrees of freedom, must be positive and '
+            'greater than 1.'
+        )
 
     x = fabs(s_normal_inv_cdf(p))
     x_sq = x * x
@@ -193,7 +194,7 @@ def t_inv_cdf(p: float,
 def t_interval(confidence_level: float,
                df: float, *,
                loc: float = 0.0,
-               scale: float = 1.0) -> tuple((float, float)):
+               scale: float = 1.0) -> tuple[float, float]:
     r"""Compute the t_distribution confidence interval.
 
     Compute the t_distribution confidence interval with equal areas around
@@ -226,9 +227,10 @@ def t_interval(confidence_level: float,
 
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
-        msg = 'confidence level = {} is not in '.format(confidence_level)
-        msg += 'the range (0.0 1.0).'
-        raise CRError(msg)
+        raise CRError(
+            f'confidence level = {confidence_level} is not in the range '
+            '(0.0 1.0).'
+        )
 
     lower = (1.0 - confidence_level) / 2
     upper = (1.0 + confidence_level) / 2

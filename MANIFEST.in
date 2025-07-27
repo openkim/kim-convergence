@@ -1,3 +1,2 @@
-include versioneer.py
 include kim_convergence/_version.py
-include doc/files/*
+recursive-include doc/files/ *

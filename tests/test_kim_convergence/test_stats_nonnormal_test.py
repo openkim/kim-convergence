@@ -4,8 +4,8 @@ import numpy as np
 
 try:
     import kim_convergence as cr
-except:
-    raise Exception('Failed to import `kim-convergence` utility module')
+except Exception:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError('Failed to import `kim-convergence` utility module')
 
 from kim_convergence import CRError
 
@@ -86,35 +86,58 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
     def test_levene_test(self):
         """Test levene_test function."""
         rng = np.random.RandomState(12345)
+        n_tries = 200
+
         shape, scale = 2., 2.
-        rvs = rng.gamma(shape, scale, size=1000)
-        self.assertTrue(cr.levene_test(rvs,
-                                       population_cdf='gamma',
-                                       population_args=(shape,),
-                                       population_loc=None,
-                                       population_scale=scale,
-                                       significance_level=0.05))
+        results = [
+            cr.levene_test(
+                rng.gamma(shape, scale, size=5000),
+                population_cdf='gamma',
+                population_args=(shape,),
+                population_loc=None,
+                population_scale=scale,
+                significance_level=0.05
+            )
+            for _ in range(n_tries)
+        ]
+        # expect ≈ 5 % rejections; allow up to 12 %
+        rejection_rate = 1.0 - np.mean(results)
+        self.assertLessEqual(rejection_rate, 0.12)
 
         shape = 1.99
-        rvs = rng.gamma(shape, 1.0, size=1000)
-        self.assertTrue(cr.levene_test(rvs,
-                                       population_cdf='gamma',
-                                       population_args=(shape,),
-                                       population_loc=None,
-                                       population_scale=None,
-                                       significance_level=0.05))
+        results = [
+            cr.levene_test(
+                rng.gamma(shape, 1.0, size=5000),
+                population_cdf='gamma',
+                population_args=(shape,),
+                population_loc=None,
+                population_scale=None,
+                significance_level=0.05
+            )
+            for _ in range(n_tries)
+        ]
+        # expect ≈ 5 % rejections; allow up to 12 %
+        rejection_rate = 1.0 - np.mean(results)
+        self.assertLessEqual(rejection_rate, 0.12)
 
-        rvs = rng.beta(2, 2, size=1000)
-        self.assertFalse(cr.levene_test(rvs,
+        self.assertFalse(cr.levene_test(rng.beta(2, 2, size=1000),
                                         population_cdf='gamma',
                                         population_args=(shape,),
                                         population_loc=None,
                                         population_scale=None,
                                         significance_level=0.05))
 
-        self.assertTrue(cr.levene_test(rvs,
-                                       population_cdf='beta',
-                                       population_args=(2, 2),
-                                       population_loc=None,
-                                       population_scale=None,
-                                       significance_level=0.05))
+        results = [
+            cr.levene_test(
+                rng.beta(2, 2, size=5000),
+                population_cdf='beta',
+                population_args=(2, 2),
+                population_loc=None,
+                population_scale=None,
+                significance_level=0.05
+            )
+            for _ in range(n_tries)
+        ]
+        # expect ≈ 5 % rejections; allow up to 12 %
+        rejection_rate = 1.0 - np.mean(results)
+        self.assertLessEqual(rejection_rate, 0.12)
