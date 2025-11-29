@@ -7,7 +7,7 @@ uncorrelated samples.
 
 """
 
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, parallel_backend
 from math import isclose
 import numpy as np
 from typing import Optional, Union, List
@@ -209,15 +209,16 @@ def estimate_equilibration_length(
     nskip = min(nskip, upper_bound)
 
     if number_of_cores != 1:
-        # Compute the statitical inefficiency of a time series
-        results = Parallel(n_jobs=number_of_cores)(
-            delayed(_estimate_equilibration_length)(
-                time_series_data,
-                t,
-                si_func,
-                fft,
-                minimum_correlation_time)
-            for t in range(0, upper_bound, nskip))
+        with parallel_backend('loky', n_jobs=number_of_cores):
+            # Compute the statitical inefficiency of a time series
+            results = Parallel()(
+                delayed(_estimate_equilibration_length)(
+                    time_series_data,
+                    t,
+                    si_func,
+                    fft,
+                    minimum_correlation_time)
+                for t in range(0, upper_bound, nskip))
 
         results_array = np.asarray(results)
 

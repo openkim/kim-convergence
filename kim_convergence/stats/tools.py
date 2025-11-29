@@ -6,6 +6,7 @@ Helper functions for time series analysis.
 from bisect import bisect_left
 from math import isclose, pi, sqrt
 import numpy as np
+from threadpoolctl import threadpool_limits
 from typing import Optional, Union, List
 
 from kim_convergence._default import _DEFAULT_ABS_TOL
@@ -195,22 +196,23 @@ def auto_covariance(x: Union[np.ndarray, List[float]],
     # Fluctuations
     dx = x - np.mean(x)
 
-    if fft:
-        # Find the optimal size for the FFT solver
-        optimal_size = get_fft_optimal_size(2 * x_size)
+    with threadpool_limits(limits=1, user_api='blas'):
+        if fft:
+            # Find the optimal size for the FFT solver
+            optimal_size = get_fft_optimal_size(2 * x_size)
 
-        # Compute the one-dimensional discrete Fourier Transform
-        dft = np.fft.rfft(dx, n=optimal_size)
-        dft *= np.conjugate(dft)
+            # Compute the one-dimensional discrete Fourier Transform
+            dft = np.fft.rfft(dx, n=optimal_size)
+            dft *= np.conjugate(dft)
 
-        # Compute the one-dimensional inverse discrete Fourier Transform
-        autocov = np.fft.irfft(dft, n=optimal_size)[:x_size]
+            # Compute the one-dimensional inverse discrete Fourier Transform
+            autocov = np.fft.irfft(dft, n=optimal_size)[:x_size]
 
-        # Get the real part
-        autocov = autocov.real
-    else:
-        # Auto correlation of a one-dimensional sequence
-        autocov = np.correlate(dx, dx, 'full')[x_size - 1:]
+            # Get the real part
+            autocov = autocov.real
+        else:
+            # Auto correlation of a one-dimensional sequence
+            autocov = np.correlate(dx, dx, 'full')[x_size - 1:]
 
     autocov /= float(x_size)
 
@@ -275,23 +277,24 @@ def cross_covariance(x: Union[np.ndarray, List[float]],
     dx = x - x.mean()
     dy = y - y.mean()
 
-    if fft:
-        # Find the optimal size for the FFT solver
-        optimal_size = get_fft_optimal_size(2 * x_size)
+    with threadpool_limits(limits=1, user_api='blas'):
+        if fft:
+            # Find the optimal size for the FFT solver
+            optimal_size = get_fft_optimal_size(2 * x_size)
 
-        # Compute the one-dimensional discrete Fourier Transform
-        dftx = np.fft.rfft(dx, n=optimal_size)
-        dfty = np.fft.rfft(dy, n=optimal_size)
-        dftx *= np.conjugate(dfty)
+            # Compute the one-dimensional discrete Fourier Transform
+            dftx = np.fft.rfft(dx, n=optimal_size)
+            dfty = np.fft.rfft(dy, n=optimal_size)
+            dftx *= np.conjugate(dfty)
 
-        # Compute the one-dimensional inverse discrete Fourier Transform
-        crosscov = np.fft.irfft(dftx, n=optimal_size)[:x_size]
+            # Compute the one-dimensional inverse discrete Fourier Transform
+            crosscov = np.fft.irfft(dftx, n=optimal_size)[:x_size]
 
-        # Get the real part
-        crosscov = crosscov.real
-    else:
-        # Cross-correlation of two one-dimensional sequences
-        crosscov = np.correlate(dx, dy, 'full')[x_size - 1:]
+            # Get the real part
+            crosscov = crosscov.real
+        else:
+            # Cross-correlation of two one-dimensional sequences
+            crosscov = np.correlate(dx, dy, 'full')[x_size - 1:]
 
     crosscov /= float(x_size)
 
