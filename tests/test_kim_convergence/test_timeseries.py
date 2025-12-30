@@ -1,14 +1,16 @@
 """Test timeseries module."""
+
 import json
 import kim_edn
 import numpy as np
 import os
+from typing import Any
 import unittest
 
 try:
     import kim_convergence as cr
 except Exception:  # noqa: BLE001  # intentional catch-all
-    raise Exception('Failed to import `kim-convergence` utility module')
+    raise Exception("Failed to import `kim-convergence` utility module")
 
 
 start = 0
@@ -19,16 +21,16 @@ class TimeseriesModule(unittest.TestCase):
     """Test timeseries module components."""
 
     # Read the trajectory file
-    traj_file = os.path.join('tests', 'fixtures', 'lmp_T293.15.log')
-    with open(traj_file, 'r') as f_in:
+    traj_file = os.path.join("tests", "fixtures", "lmp_T293.15.log")
+    with open(traj_file, "r") as f_in:
         lines = f_in.readlines()
     header = None
-    data = []
+    lst = []
     for line in lines:
         words = line.strip().split()
         if len(words) < 1:
             continue
-        if words[0] == 'Step':
+        if words[0] == "Step":
             if header is None:
                 header = line.strip().split()
             continue
@@ -37,9 +39,9 @@ class TimeseriesModule(unittest.TestCase):
                 step = float(words[0])
             except Exception:  # noqa: BLE001  # intentional catch-all
                 continue
-            if step > len(data):
-                data.append(words)
-    data = np.array(data, dtype=np.float64).reshape((len(data), len(data[0])))
+            if step > len(lst):
+                lst.append(words)
+    data = np.array(lst, dtype=np.float64).reshape((len(lst), len(lst[0])))
 
     def test_timeseries_default(self):
         """Test run_length_control function."""
@@ -51,7 +53,7 @@ class TimeseriesModule(unittest.TestCase):
         press_size = press.size
         volume = self.data[:, 7]
 
-        print('\n')
+        print("\n")
 
         start = 0
         stop = 0
@@ -76,16 +78,19 @@ class TimeseriesModule(unittest.TestCase):
             relative_accuracy=0.01,
             absolute_accuracy=None,
             confidence_coefficient=0.95,
-            confidence_interval_approximation_method='uncorrelated_sample',
-            fp='return',
-            fp_format='edn')
+            confidence_interval_approximation_method="uncorrelated_sample",
+            fp="return",
+            fp_format="edn",
+        )
 
-        kim_obj = kim_edn.loads(msg)
+        self.assertIsInstance(msg, str)
+        assert isinstance(msg, str)
+        kim_obj: Any = kim_edn.loads(msg)
 
-        subsample_effective_sample_size = kim_obj['effective_sample_size']
-        subsample_equilibration_step = kim_obj['equilibration_step']
+        subsample_effective_sample_size = kim_obj["effective_sample_size"]
+        subsample_equilibration_step = kim_obj["equilibration_step"]
 
-        self.assertTrue(kim_obj['converged'])
+        self.assertTrue(kim_obj["converged"])
         self.assertTrue(subsample_effective_sample_size < 35)
         self.assertTrue(subsample_equilibration_step < 1300)
 
@@ -103,16 +108,18 @@ class TimeseriesModule(unittest.TestCase):
             relative_accuracy=0.01,
             absolute_accuracy=None,
             confidence_coefficient=0.95,
-            confidence_interval_approximation_method='uncorrelated_sample',
-            fp='return',
-            fp_format='json')
+            confidence_interval_approximation_method="uncorrelated_sample",
+            fp="return",
+            fp_format="json",
+        )
 
+        self.assertIsInstance(msg, str)
+        assert isinstance(msg, str)
         json_obj = json.loads(msg)
 
-        self.assertTrue(json_obj['converged'])
-        self.assertTrue(json_obj['effective_sample_size'] >= 30)
-        self.assertTrue(subsample_equilibration_step ==
-                        json_obj['equilibration_step'])
+        self.assertTrue(json_obj["converged"])
+        self.assertTrue(json_obj["effective_sample_size"] >= 30)
+        self.assertTrue(subsample_equilibration_step == json_obj["equilibration_step"])
 
         # heidel_welch
         start = 0
@@ -129,20 +136,23 @@ class TimeseriesModule(unittest.TestCase):
             relative_accuracy=0.01,
             absolute_accuracy=None,
             confidence_coefficient=0.95,
-            confidence_interval_approximation_method='heidel_welch',
-            fp='return',
-            fp_format='edn')
+            confidence_interval_approximation_method="heidel_welch",
+            fp="return",
+            fp_format="edn",
+        )
 
+        self.assertIsInstance(msg, str)
+        assert isinstance(msg, str)
         kim_obj = kim_edn.loads(msg)
 
-        heidel_welch_effective_sample_size = kim_obj['effective_sample_size']
-        heidel_welch_equilibration_step = kim_obj['equilibration_step']
+        heidel_welch_effective_sample_size = kim_obj["effective_sample_size"]
+        heidel_welch_equilibration_step = kim_obj["equilibration_step"]
 
-        self.assertTrue(kim_obj['converged'])
-        self.assertTrue(heidel_welch_effective_sample_size ==
-                        subsample_effective_sample_size)
-        self.assertTrue(heidel_welch_equilibration_step ==
-                        subsample_equilibration_step)
+        self.assertTrue(kim_obj["converged"])
+        self.assertTrue(
+            heidel_welch_effective_sample_size == subsample_effective_sample_size
+        )
+        self.assertTrue(heidel_welch_equilibration_step == subsample_equilibration_step)
 
         start = 0
         stop = 0
@@ -166,14 +176,18 @@ class TimeseriesModule(unittest.TestCase):
             relative_accuracy=0.10,
             absolute_accuracy=None,
             confidence_coefficient=0.95,
-            confidence_interval_approximation_method='uncorrelated_sample',
-            fp='return',
-            fp_format='edn')
+            confidence_interval_approximation_method="uncorrelated_sample",
+            fp="return",
+            fp_format="edn",
+        )
 
+        self.assertIsInstance(msg, str)
+        assert isinstance(msg, str)
         kim_obj = kim_edn.loads(msg)
-        self.assertFalse(kim_obj['converged'])
-        self.assertTrue(kim_obj['equilibration_detected'])
-        self.assertTrue(kim_obj['effective_sample_size'] >= 300)
+
+        self.assertFalse(kim_obj["converged"])
+        self.assertTrue(kim_obj["equilibration_detected"])
+        self.assertTrue(kim_obj["effective_sample_size"] >= 300)
 
         start = 0
         stop = 0
@@ -184,8 +198,9 @@ class TimeseriesModule(unittest.TestCase):
             if press_size < start + step:
                 step = press_size - start
             stop += step
-            traj = np.concatenate((temp[start:stop],
-                                   press[start:stop])).reshape((2, -1))
+            traj = np.concatenate((temp[start:stop], press[start:stop])).reshape(
+                (2, -1)
+            )
             # print(f'{step=}, {start=}, {stop=}')
             return traj
 
@@ -200,15 +215,19 @@ class TimeseriesModule(unittest.TestCase):
             relative_accuracy=0.10,
             absolute_accuracy=None,
             confidence_coefficient=0.95,
-            confidence_interval_approximation_method='uncorrelated_sample',
-            fp='return',
-            fp_format='edn')
+            confidence_interval_approximation_method="uncorrelated_sample",
+            fp="return",
+            fp_format="edn",
+        )
 
+        self.assertIsInstance(msg, str)
+        assert isinstance(msg, str)
         kim_obj = kim_edn.loads(msg)
-        self.assertFalse(kim_obj['converged'])
-        self.assertTrue(kim_obj['equilibration_detected'])
-        self.assertTrue(kim_obj['0']['effective_sample_size'] >= 150)
-        self.assertTrue(kim_obj['1']['effective_sample_size'] >= 300)
+
+        self.assertFalse(kim_obj["converged"])
+        self.assertTrue(kim_obj["equilibration_detected"])
+        self.assertTrue(kim_obj["0"]["effective_sample_size"] >= 150)
+        self.assertTrue(kim_obj["1"]["effective_sample_size"] >= 300)
 
         start = 0
         stop = 0
@@ -219,9 +238,9 @@ class TimeseriesModule(unittest.TestCase):
             if press_size < start + step:
                 step = press_size - start
             stop += step
-            traj = np.concatenate((temp[start:stop],
-                                   press[start:stop],
-                                   volume[start:stop])).reshape((3, -1))
+            traj = np.concatenate(
+                (temp[start:stop], press[start:stop], volume[start:stop])
+            ).reshape((3, -1))
             # print(f'{step=}, {start=}, {stop=}')
             return traj
 
@@ -236,14 +255,17 @@ class TimeseriesModule(unittest.TestCase):
             relative_accuracy=[0.10, None, 0.1],
             absolute_accuracy=[None, 0.1, None],
             confidence_coefficient=0.95,
-            confidence_interval_approximation_method='uncorrelated_sample',
-            fp='return',
-            fp_format='edn')
+            confidence_interval_approximation_method="uncorrelated_sample",
+            fp="return",
+            fp_format="edn",
+        )
 
+        self.assertIsInstance(msg, str)
+        assert isinstance(msg, str)
         kim_obj = kim_edn.loads(msg)
 
-        self.assertFalse(kim_obj['converged'])
-        self.assertTrue(kim_obj['equilibration_detected'])
-        self.assertTrue(kim_obj['0']['effective_sample_size'] >= 150)
-        self.assertTrue(kim_obj['1']['effective_sample_size'] >= 300)
-        self.assertTrue(kim_obj['2']['effective_sample_size'] >= 250)
+        self.assertFalse(kim_obj["converged"])
+        self.assertTrue(kim_obj["equilibration_detected"])
+        self.assertTrue(kim_obj["0"]["effective_sample_size"] >= 150)
+        self.assertTrue(kim_obj["1"]["effective_sample_size"] >= 300)
+        self.assertTrue(kim_obj["2"]["effective_sample_size"] >= 250)

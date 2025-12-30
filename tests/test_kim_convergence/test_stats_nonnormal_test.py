@@ -1,11 +1,12 @@
 """Test stats non-normal test module."""
+
 import unittest
 import numpy as np
 
 try:
     import kim_convergence as cr
 except Exception:  # noqa: BLE001  # intentional catch-all
-    raise RuntimeError('Failed to import `kim-convergence` utility module')
+    raise RuntimeError("Failed to import `kim-convergence` utility module")
 
 from kim_convergence import CRError
 
@@ -15,68 +16,89 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
 
     def test_check_population_cdf_args(self):
         """Test check_population_cdf_args function."""
-        population_cdf = 'unknown'
+        population_cdf = "unknown"
         population_args = ()
-        self.assertRaises(CRError, cr.check_population_cdf_args,
-                          population_cdf=population_cdf,
-                          population_args=population_args)
+        self.assertRaises(
+            CRError,
+            cr.check_population_cdf_args,
+            population_cdf=population_cdf,
+            population_args=population_args,
+        )
 
-        population_cdf = 'alpha'
+        population_cdf = "alpha"
         population_args = ()
-        self.assertRaises(CRError, cr.check_population_cdf_args,
-                          population_cdf=population_cdf,
-                          population_args=population_args)
+        self.assertRaises(
+            CRError,
+            cr.check_population_cdf_args,
+            population_cdf=population_cdf,
+            population_args=population_args,
+        )
 
-        population_cdf = 'alpha'
+        population_cdf = "alpha"
         population_args = (2, 2)
-        self.assertRaises(CRError, cr.check_population_cdf_args,
-                          population_cdf=population_cdf,
-                          population_args=population_args)
+        self.assertRaises(
+            CRError,
+            cr.check_population_cdf_args,
+            population_cdf=population_cdf,
+            population_args=population_args,
+        )
 
         population_args = ()
-        self.assertRaises(CRError, cr.check_population_cdf_args,
-                          population_cdf=population_cdf,
-                          population_args=population_args)
+        self.assertRaises(
+            CRError,
+            cr.check_population_cdf_args,
+            population_cdf=population_cdf,
+            population_args=population_args,
+        )
 
         for cdf in cr.ContinuousDistributions.keys():
             args = np.arange(
-                cr.ContinuousDistributionsNumberOfRequiredArguments[cdf] + 1)
-            self.assertRaises(CRError, cr.check_population_cdf_args,
-                              population_cdf=cdf,
-                              population_args=args)
+                cr.ContinuousDistributionsNumberOfRequiredArguments[cdf] + 1
+            )
+            self.assertRaises(
+                CRError,
+                cr.check_population_cdf_args,
+                population_cdf=cdf,
+                population_args=args,
+            )
 
     def test_get_distribution_stats(self):
         """Test get_distribution_stats function."""
-        population_cdf = 'unknown'
+        population_cdf = "unknown"
         population_args = ()
         population_loc = None
         population_scale = None
-        self.assertRaises(CRError, cr.get_distribution_stats,
-                          population_cdf=population_cdf,
-                          population_args=population_args,
-                          population_loc=population_loc,
-                          population_scale=population_scale)
+        self.assertRaises(
+            CRError,
+            cr.get_distribution_stats,
+            population_cdf=population_cdf,
+            population_args=population_args,
+            population_loc=population_loc,
+            population_scale=population_scale,
+        )
 
-        population_cdf = 'alpha'
+        population_cdf = "alpha"
         population_args = (2,)
         median, mean, var, std = cr.get_distribution_stats(
             population_cdf=population_cdf,
             population_args=population_args,
             population_loc=population_loc,
-            population_scale=population_scale)
+            population_scale=population_scale,
+        )
 
         self.assertAlmostEqual(median, 0.49297099121602045)
         self.assertTrue(mean == np.inf)
         self.assertTrue(var == np.inf)
         self.assertTrue(std == np.inf)
 
-        population_cdf = 'beta'
+        population_cdf = "beta"
         population_args = (2.31, 0.627)
         median, mean, var, std = cr.get_distribution_stats(
             population_cdf=population_cdf,
             population_args=population_args,
             population_loc=population_loc,
-            population_scale=population_scale)
+            population_scale=population_scale,
+        )
 
         self.assertAlmostEqual(median, 0.852865976189898)
         self.assertAlmostEqual(mean, 0.7865168539325842)
@@ -88,15 +110,15 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
         rng = np.random.RandomState(12345)
         n_tries = 200
 
-        shape, scale = 2., 2.
+        shape, scale = 2.0, 2.0
         results = [
             cr.levene_test(
                 rng.gamma(shape, scale, size=5000),
-                population_cdf='gamma',
+                population_cdf="gamma",
                 population_args=(shape,),
                 population_loc=None,
                 population_scale=scale,
-                significance_level=0.05
+                significance_level=0.05,
             )
             for _ in range(n_tries)
         ]
@@ -108,11 +130,11 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
         results = [
             cr.levene_test(
                 rng.gamma(shape, 1.0, size=5000),
-                population_cdf='gamma',
+                population_cdf="gamma",
                 population_args=(shape,),
                 population_loc=None,
                 population_scale=None,
-                significance_level=0.05
+                significance_level=0.05,
             )
             for _ in range(n_tries)
         ]
@@ -120,21 +142,25 @@ class TestStatsNonNormalTestModule(unittest.TestCase):
         rejection_rate = 1.0 - np.mean(results)
         self.assertLessEqual(rejection_rate, 0.12)
 
-        self.assertFalse(cr.levene_test(rng.beta(2, 2, size=1000),
-                                        population_cdf='gamma',
-                                        population_args=(shape,),
-                                        population_loc=None,
-                                        population_scale=None,
-                                        significance_level=0.05))
+        self.assertFalse(
+            cr.levene_test(
+                rng.beta(2, 2, size=1000),
+                population_cdf="gamma",
+                population_args=(shape,),
+                population_loc=None,
+                population_scale=None,
+                significance_level=0.05,
+            )
+        )
 
         results = [
             cr.levene_test(
                 rng.beta(2, 2, size=5000),
-                population_cdf='beta',
+                population_cdf="beta",
                 population_args=(2, 2),
                 population_loc=None,
                 population_scale=None,
-                significance_level=0.05
+                significance_level=0.05,
             )
             for _ in range(n_tries)
         ]
