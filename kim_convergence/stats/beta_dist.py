@@ -7,18 +7,18 @@ import numpy as np
 from kim_convergence import CRError
 
 __all__ = [
-    'beta',
-    'betacf',
-    'betai',
-    'betai_cdf_ccdf',
-    'betai_cdf',
+    "beta",
+    "betacf",
+    "betai",
+    "betai_cdf_ccdf",
+    "betai_cdf",
 ]
 
 
 def beta(a: float, b: float) -> float:
     r"""Beta function.
 
-    Beta function [7]_ is defined as,
+    Beta function [numrec2007]_ is defined as,
 
     .. math::
 
@@ -33,26 +33,24 @@ def beta(a: float, b: float) -> float:
     Returns:
         float: Beta function value.
 
-    References:
-        .. [7] "Numerical Recipes: The Art of Scientific Computing, Third
-            Edition," (2007).
-
     """
     _beta = exp(lgamma(a) + lgamma(b) - lgamma(a + b))
     return _beta
 
 
-def betacf(a: float,
-           b: float,
-           x: float,
-           *,
-           eps: float = np.finfo(np.float64).resolution,
-           max_iteration: int = 200,
-           _fpmin: float = 1.0e-30) -> float:
-    """Continued fraction for incomplete beta function by modified Lentz’s method.
+def betacf(
+    a: float,
+    b: float,
+    x: float,
+    *,
+    eps: float = float(np.finfo(np.float64).resolution),
+    max_iteration: int = 200,
+    _fpmin: float = 1.0e-30,
+) -> float:
+    r"""Continued fraction for incomplete beta function by modified Lentz’s method.
 
     Evaluates continued fraction for incomplete beta function by modified
-    Lentz’s method [7]_.
+    Lentz’s method [numrec2007]_.
 
     Args:
         a (float): First parameter of the beta distribution.
@@ -69,7 +67,7 @@ def betacf(a: float,
         float: Continued fraction for incomplete beta function.
 
     """
-    _fpmax = 1. / _fpmin
+    _fpmax = 1.0 / _fpmin
 
     # These q’s will be used in factors
     qab = a + b
@@ -80,7 +78,7 @@ def betacf(a: float,
     d = 1.0 - qab * x / qap
     c = 1.0
 
-    if (fabs(d) < _fpmin):
+    if fabs(d) < _fpmin:
         d = deepcopy(_fpmax)
         h = deepcopy(_fpmax)
     else:
@@ -138,19 +136,19 @@ def betacf(a: float,
             _del = d * c
         h *= _del
 
-        if (fabs(_del - 1.0) < eps):
+        if fabs(_del - 1.0) < eps:
             return h
 
     raise CRError(
-        f'betacf failed with the current result = {h}, where a={a} or b={b} '
-        f'are too big, or max_iteration={max_iteration} is too small.'
+        f"betacf failed with the current result = {h}, where a={a} or b={b} "
+        f"are too big, or max_iteration={max_iteration} is too small."
     )
 
 
 def betai(a: float, b: float, x: float) -> float:
     r"""Incomplete beta function.
 
-    Incomplete beta function [7]_ is defined as,
+    Incomplete beta function [numrec2007]_ is defined as,
 
     .. math::
 
@@ -171,11 +169,10 @@ def betai(a: float, b: float, x: float) -> float:
     if x == 0.0 or x == 1.0:
         return x
 
-    _beta = lgamma(a + b) - lgamma(a) - lgamma(b) + \
-        a * log(x) + b * log(1.0 - x)
+    _beta = lgamma(a + b) - lgamma(a) - lgamma(b) + a * log(x) + b * log(1.0 - x)
     _beta = exp(_beta)
 
-    frac = (a + 1.) / (a + b + 2.)
+    frac = (a + 1.0) / (a + b + 2.0)
 
     if x < frac:
         _beta *= betacf(a, b, x)
@@ -184,7 +181,7 @@ def betai(a: float, b: float, x: float) -> float:
 
     _beta *= betacf(b, a, 1.0 - x)
     _beta /= b
-    return 1. - _beta
+    return 1.0 - _beta
 
 
 def betai_cdf_ccdf(a: float, b: float, x: float) -> tuple[float, float]:

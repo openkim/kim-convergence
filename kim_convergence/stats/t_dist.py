@@ -12,12 +12,7 @@ from .normal_dist import s_normal_inv_cdf
 from .zero_rc_bounds import ZERO_RC_BOUNDS
 from kim_convergence import CRError
 
-__all__ = [
-    't_cdf_ccdf',
-    't_cdf',
-    't_inv_cdf',
-    't_interval'
-]
+__all__ = ["t_cdf_ccdf", "t_cdf", "t_inv_cdf", "t_interval"]
 
 
 def t_cdf_ccdf(t: float, df: float) -> tuple[float, float]:
@@ -50,8 +45,8 @@ def t_cdf_ccdf(t: float, df: float) -> tuple[float, float]:
     """
     if df < 1:
         raise CRError(
-            f'df = {df} is wrong. Degrees of freedom, must be positive and '
-            'greater than 1.'
+            f"df = {df} is wrong. Degrees of freedom, must be positive and "
+            "greater than 1."
         )
 
     tt = t * t
@@ -100,14 +95,16 @@ def t_cdf(t: float, df: float) -> float:
     return cdf
 
 
-def t_inv_cdf(p: float,
-              df: float,
-              *,
-              loc: float = 0.0,
-              scale: float = 1.0,
-              _tol: float = 1.0e-8,
-              _atol: float = 1.0e-50,
-              _rtinf: float = 1.0e100) -> float:
+def t_inv_cdf(
+    p: float,
+    df: float,
+    *,
+    loc: float = 0.0,
+    scale: float = 1.0,
+    _tol: float = 1.0e-8,
+    _atol: float = 1.0e-50,
+    _rtinf: float = 1.0e100,
+) -> float:
     """Compute the t_distribution inverse cumulative distribution function.
 
     Compute the inverse cumulative distribution function (percent point
@@ -131,24 +128,30 @@ def t_inv_cdf(p: float,
 
     """
     if p <= 0.0 or p >= 1.0:
-        raise CRError(f'p = {p} is not in the range (0.0 1.0).')
+        raise CRError(f"p = {p} is not in the range (0.0 1.0).")
 
     if df < 1:
         raise CRError(
-            f'df = {df} is wrong. Degrees of freedom, must be positive and '
-            'greater than 1.'
+            f"df = {df} is wrong. Degrees of freedom, must be positive and "
+            "greater than 1."
         )
 
     x = fabs(s_normal_inv_cdf(p))
     x_sq = x * x
 
     num = np.array(
-        ((1.0e+0 * x_sq + 1.0e+0) * x,
-         ((5.0e+0 * x_sq + 16.0e+0) * x_sq + 3.0e+0) * x,
-         (((3.0e+0 * x_sq + 19.0e+0) * x_sq + 17.0) * x_sq - 15.0e+0) * x,
-         ((((79.0e+0 * x_sq + 776.0e+0) * x_sq + 1482.0)
-           * x_sq - 1920.0e+0) * x_sq - 945.0e+0) * x
-         ), dtype=np.float64)
+        (
+            (1.0e0 * x_sq + 1.0e0) * x,
+            ((5.0e0 * x_sq + 16.0e0) * x_sq + 3.0e0) * x,
+            (((3.0e0 * x_sq + 19.0e0) * x_sq + 17.0) * x_sq - 15.0e0) * x,
+            (
+                (((79.0e0 * x_sq + 776.0e0) * x_sq + 1482.0) * x_sq - 1920.0e0) * x_sq
+                - 945.0e0
+            )
+            * x,
+        ),
+        dtype=np.float64,
+    )
 
     _df = np.array((df, df, df, df), dtype=np.float64)
     denpow = np.multiply.accumulate(_df)
@@ -165,8 +168,7 @@ def t_inv_cdf(p: float,
 
     q = 1.0 - p
 
-    d = ZERO_RC_BOUNDS(-_rtinf, _rtinf, 0.5, 0.5,
-                       5.0, abs_tol=_atol, rel_tol=_tol)
+    d = ZERO_RC_BOUNDS(-_rtinf, _rtinf, 0.5, 0.5, 5.0, abs_tol=_atol, rel_tol=_tol)
 
     status = 0
     fx = 0.0
@@ -191,10 +193,9 @@ def t_inv_cdf(p: float,
     return x * scale + loc
 
 
-def t_interval(confidence_level: float,
-               df: float, *,
-               loc: float = 0.0,
-               scale: float = 1.0) -> tuple[float, float]:
+def t_interval(
+    confidence_level: float, df: float, *, loc: float = 0.0, scale: float = 1.0
+) -> tuple[float, float]:
     r"""Compute the t_distribution confidence interval.
 
     Compute the t_distribution confidence interval with equal areas around
@@ -228,8 +229,7 @@ def t_interval(confidence_level: float,
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
         raise CRError(
-            f'confidence level = {confidence_level} is not in the range '
-            '(0.0 1.0).'
+            f"confidence level = {confidence_level} is not in the range " "(0.0 1.0)."
         )
 
     lower = (1.0 - confidence_level) / 2

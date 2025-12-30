@@ -1,56 +1,58 @@
-"""N-SKART UCL module."""
+r"""N-SKART UCL module."""
 
 from math import ceil, floor, fabs, sqrt
 import numpy as np
-from typing import Optional, Union, List
+from typing import Optional, Union
 
-from kim_convergence._default import \
-    _DEFAULT_CONFIDENCE_COEFFICIENT, \
-    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
-    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
-    _DEFAULT_BATCH_SIZE, \
-    _DEFAULT_FFT, \
-    _DEFAULT_SCALE_METHOD, \
-    _DEFAULT_WITH_CENTERING, \
-    _DEFAULT_WITH_SCALING, \
-    _DEFAULT_TEST_SIZE, \
-    _DEFAULT_TRAIN_SIZE, \
-    _DEFAULT_POPULATION_STANDARD_DEVIATION, \
-    _DEFAULT_SI, \
-    _DEFAULT_MINIMUM_CORRELATION_TIME, \
-    _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
-    _DEFAULT_SAMPLE_METHOD, \
-    _DEFAULT_NSKIP, \
-    _DEFAULT_IGNORE_END, \
-    _DEFAULT_NUMBER_OF_CORES
+from kim_convergence._default import (
+    _DEFAULT_CONFIDENCE_COEFFICIENT,
+    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+    _DEFAULT_BATCH_SIZE,
+    _DEFAULT_FFT,
+    _DEFAULT_SCALE_METHOD,
+    _DEFAULT_WITH_CENTERING,
+    _DEFAULT_WITH_SCALING,
+    _DEFAULT_TEST_SIZE,
+    _DEFAULT_TRAIN_SIZE,
+    _DEFAULT_POPULATION_STANDARD_DEVIATION,
+    _DEFAULT_SI,
+    _DEFAULT_MINIMUM_CORRELATION_TIME,
+    _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+    _DEFAULT_SAMPLE_METHOD,
+    _DEFAULT_NSKIP,
+    _DEFAULT_IGNORE_END,
+    _DEFAULT_NUMBER_OF_CORES,
+)
 from .ucl_base import UCLBase
-from kim_convergence import \
-    batch, \
-    CRError, \
-    CRSampleSizeError, \
-    cr_warning, \
-    skew, \
-    randomness_test, \
-    auto_correlate, \
-    t_inv_cdf
+from kim_convergence import (
+    batch,
+    CRError,
+    CRSampleSizeError,
+    cr_warning,
+    skew,
+    randomness_test,
+    auto_correlate,
+    t_inv_cdf,
+)
 
 
 __all__ = [
-    'N_SKART',
-    'n_skart_ucl',
-    'n_skart_ci',
-    'n_skart_relative_half_width_estimate',
+    "N_SKART",
+    "n_skart_ucl",
+    "n_skart_ci",
+    "n_skart_relative_half_width_estimate",
 ]
 
 
 class N_SKART(UCLBase):
-    r"""N-Skart class.
+    r"""N-Skart algorithm.
 
-    N-Skart is a nonsequential procedure designed to compute a half the width
-    of the `confidence_coefficient%` probability interval (CI) (confidence
-    interval, or credible interval) around the time-series mean.
+    N-Skart [tafazzoli2011]_ is a nonsequential procedure designed to compute a
+    half the width of the `confidence_coefficient%` probability interval (CI)
+    (confidence interval, or credible interval) around the time-series mean.
 
-    Notes:
+    Note:
         N-Skart is a variant of the method of batch means.
 
         N-Skart makes some modifications to the confidence interval (CI).
@@ -69,25 +71,19 @@ class N_SKART(UCLBase):
         significance_level (float): Significance level. A probability threshold
             below which the null hypothesis will be rejected.
         randomness_test_counter (int): counter for applying the randomness test
-            of von Neumann [14]_ [15]_.
-
-    References:
-        .. [19] Tafazzoli, A. and Steiger, N.M. and  Wilson, J.R., (2011)
-                "N-Skart: A Nonsequential Skewness- and Autoregression-Adjusted
-                Batch-Means Procedure for Simulation Analysis," IEEE
-                Transactions on Automatic Control, 56(2), 254-264.
+            of von Neumann [vonneumann1941]_ [vonneumann1941b]_.
 
     """
 
     def __init__(self):
-        """Initialize the N_SKART class.
+        r"""Initialize the N_SKART class.
 
         Initialize a N_SKART object and set the constants.
 
         """
         UCLBase.__init__(self)
 
-        self.name = 'n_skart'
+        self.name = "n_skart"
 
         self._reset()
 
@@ -114,7 +110,7 @@ class N_SKART(UCLBase):
 
     def estimate_equilibration_length(
         self,
-        time_series_data: Union[np.ndarray, List[float]],
+        time_series_data: Union[np.ndarray, list[float]],
         *,
         # unused input parmeters in N-SKART UCL module
         # estimate_equilibration_length interface
@@ -127,7 +123,8 @@ class N_SKART(UCLBase):
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
-            with_scaling: bool = _DEFAULT_WITH_SCALING) -> tuple[bool, int]:
+        with_scaling: bool = _DEFAULT_WITH_SCALING,
+    ) -> tuple[bool, int]:
         r"""Estimate the equilibration point in a time series data.
 
         Estimate the equilibration point in a time series data using the
@@ -148,16 +145,16 @@ class N_SKART(UCLBase):
         """
         time_series_data = np.asarray(time_series_data)
         if time_series_data.ndim != 1:
-            raise CRError('time_series_data is not an array of one-dimension.')
+            raise CRError("time_series_data is not an array of one-dimension.")
 
         time_series_data_size = time_series_data.size
 
         # Minimum number of data points
         if time_series_data_size < self.k_number_batches:
             raise CRSampleSizeError(
-                f'{time_series_data_size} input data points are not '
+                f"{time_series_data_size} input data points are not "
                 'sufficient to be used by "N-Skart".\n"N-Skart" at '
-                f'least needs {self.k_number_batches} data points.'
+                f"least needs {self.k_number_batches} data points."
             )
 
         # Reset the parameters for run-length control
@@ -184,11 +181,13 @@ class N_SKART(UCLBase):
         processed_sample_size = self.k_number_batches * self.batch_size
 
         # Batch the data, Y_j(m) : j = 1 ... k
-        x_batch = batch(time_series_data[:processed_sample_size],
-                        batch_size=self.batch_size,
-                        scale=scale,
-                        with_centering=with_centering,
-                        with_scaling=with_scaling)
+        x_batch = batch(
+            time_series_data[:processed_sample_size],
+            batch_size=self.batch_size,
+            scale=scale,
+            with_centering=with_centering,
+            with_scaling=with_scaling,
+        )
 
         dependent_data = True
         sufficient_data = True
@@ -200,8 +199,7 @@ class N_SKART(UCLBase):
             idx = self.k_number_batches // 5
 
             last_80_percent_x_batch = x_batch[idx:]
-            last_80_percent_x_batch_skewness = skew(last_80_percent_x_batch,
-                                                    bias=False)
+            last_80_percent_x_batch_skewness = skew(last_80_percent_x_batch, bias=False)
 
             if fabs(last_80_percent_x_batch_skewness) > 0.5:
                 # reset the maximum number of batches, d* <- 3
@@ -220,22 +218,23 @@ class N_SKART(UCLBase):
                 dependent_data = False
 
             # step 3b - 3d
-            while dependent_data and \
-                    self.number_batches_per_spacer < \
-                    self.maximum_number_batches_per_spacer:
+            while (
+                dependent_data
+                and self.number_batches_per_spacer
+                < self.maximum_number_batches_per_spacer
+            ):
 
                 # d <- d + 1
                 self.number_batches_per_spacer += 1
 
                 idx = self.number_batches_per_spacer
 
-                spaced_x_batch = x_batch[idx::idx + 1]
+                spaced_x_batch = x_batch[idx :: idx + 1]
 
                 # k'
                 self.kp_number_batches = spaced_x_batch.size
 
-                random = randomness_test(spaced_x_batch,
-                                         self.significance_level)
+                random = randomness_test(spaced_x_batch, self.significance_level)
 
                 dependent_data = not random
 
@@ -243,7 +242,7 @@ class N_SKART(UCLBase):
             if dependent_data:
                 # step 4
                 # m <- ceil(sqrt(2) * m)
-                batch_size = ceil(sqrt(2.) * self.batch_size)
+                batch_size = ceil(sqrt(2.0) * self.batch_size)
                 # k <- ceil(0.9 * k)
                 k_number_batches = ceil(0.9 * self.k_number_batches)
                 # n <- k * m
@@ -262,17 +261,19 @@ class N_SKART(UCLBase):
                     self.randomness_test_counter += 1
 
                     # Rebatch the data
-                    x_batch = batch(time_series_data[:processed_sample_size],
-                                    batch_size=self.batch_size,
-                                    scale=scale,
-                                    with_centering=with_centering,
-                                    with_scaling=with_scaling)
+                    x_batch = batch(
+                        time_series_data[:processed_sample_size],
+                        batch_size=self.batch_size,
+                        scale=scale,
+                        with_centering=with_centering,
+                        with_scaling=with_scaling,
+                    )
                 else:
                     cr_warning(
-                        f'{time_series_data_size} number of input data points '
+                        f"{time_series_data_size} number of input data points "
                         'is not sufficient to be used by "N-Skart" method.\n'
                         f'"N-Skart" at least needs {processed_sample_size} = '
-                        f'{k_number_batches} x {batch_size} data points.\n'
+                        f"{k_number_batches} x {batch_size} data points.\n"
                     )
 
                     sufficient_data = False
@@ -286,34 +287,40 @@ class N_SKART(UCLBase):
                 time_series_data=time_series_data[truncate_index:],
                 si=si,
                 fft=fft,
-                minimum_correlation_time=minimum_correlation_time)
+                minimum_correlation_time=minimum_correlation_time,
+            )
 
             return True, truncate_index
 
         self.si = None
         return False, time_series_data_size
 
-    def ucl(self,
-            time_series_data: Union[np.ndarray, List[float]],
-            *,
-            confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-            fft: bool = _DEFAULT_FFT,
-            # unused input parmeters in
-            # N_SKART ucl interface
-            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-            batch_size: int = _DEFAULT_BATCH_SIZE,
-            scale: str = _DEFAULT_SCALE_METHOD,
-            with_centering: bool = _DEFAULT_WITH_CENTERING,
-            with_scaling: bool = _DEFAULT_WITH_SCALING,
-            test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
-            train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
-            population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si: Union[str, float, int, None] = _DEFAULT_SI,
-            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: Union[np.ndarray, List[int],
-                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
+    def _ucl_impl(
+        self,
+        time_series_data: Union[np.ndarray, list[float]],
+        *,
+        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+        fft: bool = _DEFAULT_FFT,
+        # unused input parmeters in
+        # N_SKART ucl interface
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        population_standard_deviation: Optional[
+            float
+        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Union[
+            np.ndarray, list[int], None
+        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
+    ) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
         Args:
@@ -337,15 +344,15 @@ class N_SKART(UCLBase):
         time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            raise CRError('time_series_data is not an array of one-dimension.')
+            raise CRError("time_series_data is not an array of one-dimension.")
 
         if not isinstance(equilibration_length_estimate, int):
-            raise CRError('equilibration_length_estimate must be an `int`.')
+            raise CRError("equilibration_length_estimate must be an `int`.")
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             raise CRError(
-                f'confidence_coefficient = {confidence_coefficient} is not '
-                'in the range (0.0 1.0).'
+                f"confidence_coefficient = {confidence_coefficient} is not "
+                "in the range (0.0 1.0)."
             )
 
         # Perform step 5 of the N-Skart algorithm
@@ -356,8 +363,9 @@ class N_SKART(UCLBase):
 
         if self.kp_number_batches != self.k_number_batches:
             # Reinflate the batch count, k' <- min(ceil(k'(1 / 0.9)^b), k)
-            kp = ceil(self.kp_number_batches *
-                      (1.0 / 0.9) ** self.randomness_test_counter)
+            kp = ceil(
+                self.kp_number_batches * (1.0 / 0.9) ** self.randomness_test_counter
+            )
 
             self.kp_number_batches = min(kp, self.k_number_batches)
 
@@ -388,11 +396,13 @@ class N_SKART(UCLBase):
 
         # Minimum number of data points
         if time_series_data_size < processed_sample_size:
-            raise CRSampleSizeError(
-                f'{time_series_data_size} input data points are not '
+            msg = (
+                f"{time_series_data_size} input data points are not "
                 'sufficient to be used by "N-Skart".\n"N-Skart" at '
-                f'least needs {processed_sample_size} data points.'
+                f"least needs {processed_sample_size} data points."
             )
+            cr_warning(msg)
+            raise CRSampleSizeError(msg)
 
         # step 5b
 
@@ -405,11 +415,13 @@ class N_SKART(UCLBase):
         sliced_time = time_series_data[idx:]
 
         # Batch the data
-        x_batch = batch(sliced_time,
-                        batch_size=self.batch_size,
-                        scale=scale,
-                        with_centering=with_centering,
-                        with_scaling=with_scaling)
+        x_batch = batch(
+            sliced_time,
+            batch_size=self.batch_size,
+            scale=scale,
+            with_centering=with_centering,
+            with_scaling=with_scaling,
+        )
 
         # Perform step 6 of the N-Skart algorithm
 
@@ -423,24 +435,24 @@ class N_SKART(UCLBase):
 
         # compute the sample estimator of the lag-one correlation
         lag1_correlation = auto_correlate(
-            x_batch, nlags=1, fft=(fft and x_batch.size > 30))[1]
+            x_batch, nlags=1, fft=(fft and x_batch.size > 30)
+        )[1]
 
         # compute the correlation adjustment A <- (1 + \phi) / (1 - \phi)
-        correlation_adjustment = \
-            (1 + lag1_correlation) / (1 - lag1_correlation)
+        correlation_adjustment = (1 + lag1_correlation) / (1 - lag1_correlation)
 
         # Perform step 7 of the N-Skart algorithm
 
         # number of batches per spacer, d' <- ceil(w / m)
-        batches_per_spacer = \
-            ceil(equilibration_length_estimate / self.batch_size)
+        batches_per_spacer = ceil(equilibration_length_estimate / self.batch_size)
 
         # modification to the original paper
-        spaced_x_batch = x_batch[batches_per_spacer::batches_per_spacer+1]
+        spaced_x_batch = x_batch[batches_per_spacer :: batches_per_spacer + 1]
 
         # number of spaced batches, k'' = 1 + floor((k' - 1) / (d' + 1))
-        spaced_x_batch_size = 1 + \
-            (self.kp_number_batches - 1) // (batches_per_spacer + 1)
+        spaced_x_batch_size = 1 + (self.kp_number_batches - 1) // (
+            batches_per_spacer + 1
+        )
         # spaced_x_batch_size = spaced_x_batch.size
 
         # compute skewness
@@ -454,38 +466,44 @@ class N_SKART(UCLBase):
         upper_p = (1.0 + confidence_coefficient) / 2
         upper = t_inv_cdf(upper_p, spaced_x_batch_size - 1)
 
-        skewness_adjustment = (
-            (1 + 6 * beta * (upper - beta))**(1 / 3) - 1) / (2 * beta)
+        skewness_adjustment = ((1 + 6 * beta * (upper - beta)) ** (1 / 3) - 1) / (
+            2 * beta
+        )
 
-        self.upper_confidence_limit = skewness_adjustment * \
-            sqrt(correlation_adjustment * x_batch_var / self.kp_number_batches)
-        return self.upper_confidence_limit
+        self.upper_confidence_limit = skewness_adjustment * sqrt(
+            correlation_adjustment * x_batch_var / self.kp_number_batches
+        )
+        assert isinstance(self.upper_confidence_limit, float)
+        return float(self.upper_confidence_limit)
 
 
 def n_skart_ucl(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-        fft: bool = _DEFAULT_FFT,
-        obj: Optional[N_SKART] = None) -> float:
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+    equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+    fft: bool = _DEFAULT_FFT,
+    obj: Optional[N_SKART] = None,
+) -> float:
     """Approximate the upper confidence limit of the mean."""
     n_skart = N_SKART() if obj is None else obj
     upper_confidence_limit = n_skart.ucl(
         time_series_data=time_series_data,
         equilibration_length_estimate=equilibration_length_estimate,
         confidence_coefficient=confidence_coefficient,
-        fft=fft)
+        fft=fft,
+    )
     return upper_confidence_limit
 
 
 def n_skart_ci(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-        fft: bool = _DEFAULT_FFT,
-        obj: Optional[N_SKART] = None) -> tuple[float, float]:
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+    equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+    fft: bool = _DEFAULT_FFT,
+    obj: Optional[N_SKART] = None,
+) -> tuple[float, float]:
     r"""Approximate the confidence interval of the mean.
 
     Args:
@@ -510,17 +528,19 @@ def n_skart_ci(
         time_series_data=time_series_data,
         equilibration_length_estimate=equilibration_length_estimate,
         confidence_coefficient=confidence_coefficient,
-        fft=fft)
+        fft=fft,
+    )
     return confidence_limits
 
 
 def n_skart_relative_half_width_estimate(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-        fft: bool = _DEFAULT_FFT,
-        obj: Optional[N_SKART] = None) -> float:
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+    equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+    fft: bool = _DEFAULT_FFT,
+    obj: Optional[N_SKART] = None,
+) -> float:
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval
@@ -552,7 +572,8 @@ def n_skart_relative_half_width_estimate(
             time_series_data=time_series_data,
             equilibration_length_estimate=equilibration_length_estimate,
             confidence_coefficient=confidence_coefficient,
-            fft=fft)
+            fft=fft,
+        )
     except CRError:
-        raise CRError('Failed to get the relative_half_width_estimate.')
+        raise CRError("Failed to get the relative_half_width_estimate.")
     return relative_half_width_estimate

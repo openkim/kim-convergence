@@ -1,4 +1,4 @@
-"""Time series statistical inefficiency module.
+r"""Time series statistical inefficiency module.
 
 The statistical inefficiency is the limiting number of steps to obtain
 uncorrelated configurations.
@@ -6,37 +6,40 @@ uncorrelated configurations.
 
 from math import isclose
 import numpy as np
-from typing import Optional, Union, List
+from typing import Optional, Union
 
-from kim_convergence._default import \
-    _DEFAULT_ABS_TOL, \
-    _DEFAULT_FFT, \
-    _DEFAULT_MINIMUM_CORRELATION_TIME, \
-    _DEFAULT_SI
-from kim_convergence import \
-    auto_covariance, \
-    auto_correlate, \
-    cross_correlate, \
-    CRError, \
-    CRSampleSizeError
+from kim_convergence._default import (
+    _DEFAULT_ABS_TOL,
+    _DEFAULT_FFT,
+    _DEFAULT_MINIMUM_CORRELATION_TIME,
+    _DEFAULT_SI,
+)
+from kim_convergence import (
+    auto_covariance,
+    auto_correlate,
+    cross_correlate,
+    CRError,
+    CRSampleSizeError,
+)
 
 
 __all__ = [
-    'statistical_inefficiency',
-    'geyer_r_statistical_inefficiency',
-    'geyer_split_r_statistical_inefficiency',
-    'geyer_split_statistical_inefficiency',
-    'integrated_auto_correlation_time',
-    'si_methods',
+    "statistical_inefficiency",
+    "geyer_r_statistical_inefficiency",
+    "geyer_split_r_statistical_inefficiency",
+    "geyer_split_statistical_inefficiency",
+    "integrated_auto_correlation_time",
+    "si_methods",
 ]
 
 
 def statistical_inefficiency(
-        x: Union[np.ndarray, List[float]],
-        y: Union[np.ndarray, List[float], None] = None,
-        *,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+    x: Union[np.ndarray, list[float]],
+    y: Union[np.ndarray, list[float], None] = None,
+    *,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+) -> float:
     r"""Compute the statistical inefficiency.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
@@ -82,15 +85,15 @@ def statistical_inefficiency(
     x = np.asarray(x)
 
     if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
+        raise CRError("x is not an array of one-dimension.")
 
     # Get the length of the timeseries
     x_size = x.size
 
     if x_size < 2:
         raise CRSampleSizeError(
-            f'{x_size} input data points are not sufficient to be used by '
-            'this method.'
+            f"{x_size} input data points are not sufficient to be used by "
+            "this method."
         )
 
     # minimum amount of correlation function to compute
@@ -98,9 +101,9 @@ def statistical_inefficiency(
         if minimum_correlation_time is None:
             minimum_correlation_time = 3
         else:
-            raise CRError('minimum_correlation_time must be an `int`.')
+            raise CRError("minimum_correlation_time must be an `int`.")
     elif minimum_correlation_time < 1:
-        raise CRError('minimum_correlation_time must be a positive `int`.')
+        raise CRError("minimum_correlation_time must be a positive `int`.")
 
     fft = fft and x_size > 30
 
@@ -110,8 +113,8 @@ def statistical_inefficiency(
 
         if not np.isfinite(_std):
             raise CRError(
-                'there is at least one value in the input array which is '
-                'non-finite or not-number.'
+                "there is at least one value in the input array which is "
+                "non-finite or not-number."
             )
 
         if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -127,7 +130,7 @@ def statistical_inefficiency(
         # cross correlation function
         _corr = cross_correlate(x, y, fft=fft)[1:]
 
-    _time = np.arange(1., 0., -1.0 / float(x_size))[1:]
+    _time = np.arange(1.0, 0.0, -1.0 / float(x_size))[1:]
 
     end_ind = min(_corr.size, _time.size)
 
@@ -136,11 +139,10 @@ def statistical_inefficiency(
     corr = _corr[:end_ind]
     time = _time[:end_ind]
 
-    minimum_correlation_time = \
-        1. - min(minimum_correlation_time, x_size) / float(x_size)
+    mct = 1.0 - min(minimum_correlation_time, x_size) / float(x_size)
 
     try:
-        ind = np.where((corr <= 0) & (time < minimum_correlation_time))[0][0]
+        ind = np.where((corr <= 0) & (time < mct))[0][0]
     except IndexError:
         ind = end_ind
 
@@ -150,26 +152,28 @@ def statistical_inefficiency(
     tau_eq = np.sum(_tau_eq)
 
     # Compute the statistical inefficiency
-    si = 1.0 + 2.0 * tau_eq
+    si = 1.0 + 2.0 * float(tau_eq)
 
     # Statistical inefficiency (si) must be greater than or equal one.
     return max(1.0, si)
 
-# .. [11] Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-# .. [12] https://mc-stan.org/docs/2_22/reference-manual/effective-sample-size-section.html
-# .. [13] Gelman et al. BDA (2014) Formula 11.8
+
+# .. [vehtari2019] Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
+# .. [mcstaness] https://mc-stan.org/docs/2_22/reference-manual/effective-sample-size-section.html
+# .. [gelman2014] Gelman et al. BDA (2014) Formula 11.8
 
 
 def geyer_r_statistical_inefficiency(
-        x: Union[np.ndarray, List[float]],
-        y: Union[np.ndarray, List[float], None] = None,
-        *,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+    x: Union[np.ndarray, list[float]],
+    y: Union[np.ndarray, list[float], None] = None,
+    *,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+) -> float:
     r"""Compute the statistical inefficiency.
 
-    Compute the statistical inefficiency using the Geyer’s [8]_, [9]_ initial
-    monotone sequence criterion.
+    Compute the statistical inefficiency using the Geyer’s [geyer1992]_,
+    [geyer2011]_ initial monotone sequence criterion.
 
     Note:
         The behavior is updated. Suppose the time series data is an array of
@@ -196,9 +200,9 @@ def geyer_r_statistical_inefficiency(
         minimum of the preceding ones so that the estimated sequence is
         monotone.
 
-        The current implementation is similar to Stan [10]_, which
-        uses Geyer's initial monotone sequence criterion (Geyer, 1992 [8]_;
-        Geyer, 2011 [9]_).
+        The current implementation is similar to Stan [mcstan]_, which
+        uses Geyer's initial monotone sequence criterion (Geyer, 1992
+        [geyer1992]_; Geyer, 2011 [geyer2011]_).
 
     Args:
         x (array_like, 1d): time series data. Using this method, statistical
@@ -220,28 +224,19 @@ def geyer_r_statistical_inefficiency(
             (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
             :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
 
-    References:
-        .. [8] Geyer, Charles J. (1992). "Practical Markov Chain Monte Carlo."
-               Statistical Science, 473–83.
-        .. [9] Geyer, Charles J. (2011). "Introduction to Markov Chain Monte
-               Carlo." In Handbook of Markov Chain Monte Carlo, edited by
-               Steve Brooks, Andrew Gelman, Galin L. Jones, and Xiao-Li Meng,
-               3–48. Chapman; Hall/CRC.
-        .. [10] https://mc-stan.org/
-
     """
     x = np.asarray(x)
 
     # Check inputs
     if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
+        raise CRError("x is not an array of one-dimension.")
 
     x_size = x.size
 
     if x_size < 4:
         raise CRSampleSizeError(
-            f'{x_size} input data points are not sufficient to be used by '
-            'this method.'
+            f"{x_size} input data points are not sufficient to be used by "
+            "this method."
         )
 
     fft = fft and x_size > 30
@@ -252,8 +247,8 @@ def geyer_r_statistical_inefficiency(
 
         if not np.isfinite(_std):
             raise CRError(
-                'there is at least one value in the input '
-                'array which is non-finite or not-number.'
+                "there is at least one value in the input "
+                "array which is non-finite or not-number."
             )
 
         if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -311,7 +306,7 @@ def geyer_r_statistical_inefficiency(
     for s in range(1, max_s - 2, 2):
         _sum = rho_hat_s[s - 1] + rho_hat_s[s]
         if (rho_hat_s[s + 1] + rho_hat_s[s + 2]) > _sum:
-            rho_hat_s[s + 1] = _sum / 2.
+            rho_hat_s[s + 1] = _sum / 2.0
             rho_hat_s[s + 2] = rho_hat_s[s + 1]
 
     # Geyer's truncated estimator for the asymptotic variance. Improved
@@ -323,15 +318,16 @@ def geyer_r_statistical_inefficiency(
 
 
 def geyer_split_r_statistical_inefficiency(
-        x: Union[np.ndarray, List[float]],
-        y: Union[np.ndarray, List[float], None] = None,
-        *,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+    x: Union[np.ndarray, list[float]],
+    y: Union[np.ndarray, list[float], None] = None,
+    *,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+) -> float:
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the split-r method of
-    Geyer’s [8]_, [9]_ initial monotone sequence criterion.
+    Geyer’s [geyer1992]_, [geyer2011]_ initial monotone sequence criterion.
 
     Note:
         The effective sample size is computed by:
@@ -351,9 +347,9 @@ def geyer_split_r_statistical_inefficiency(
         minimum of the preceding ones so that the estimated sequence is
         monotone.
 
-        The current implementation is similar to Stan [10]_, which
-        uses Geyer's initial monotone sequence criterion (Geyer, 1992 [8]_;
-        Geyer, 2011 [9]_).
+        The current implementation is similar to Stan [mcstan]_, which
+        uses Geyer's initial monotone sequence criterion (Geyer, 1992
+        [geyer1992]_; Geyer, 2011 [geyer2011]_).
 
     Args:
         x (array_like, 1d): time series data.
@@ -375,27 +371,27 @@ def geyer_split_r_statistical_inefficiency(
     """
     if y is not None:
         raise CRError(
-            'The split-r method, splits the x time-series data '
-            'and do not use y.'
+            "The split-r method, splits the x time-series data " "and do not use y."
         )
 
     x = np.asarray(x)
     x_size = x.size
     if x_size < 8:
         raise CRSampleSizeError(
-            f'{x_size} input data points are not sufficient to be used by '
-            'this method.'
+            f"{x_size} input data points are not sufficient to be used by "
+            "this method."
         )
     x_size //= 2
-    return geyer_r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
+    return geyer_r_statistical_inefficiency(x[:x_size], x[x_size : 2 * x_size], fft=fft)
 
 
 def geyer_split_statistical_inefficiency(
-        x: Union[np.ndarray, List[float]],
-        y: Union[np.ndarray, List[float], None] = None,
-        *,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+    x: Union[np.ndarray, list[float]],
+    y: Union[np.ndarray, list[float], None] = None,
+    *,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+) -> float:
     r"""Compute the statistical inefficiency.
 
     Computes the effective sample size. The value returned is the minimum of
@@ -424,21 +420,20 @@ def geyer_split_statistical_inefficiency(
     """
     if y is not None:
         raise CRError(
-            'the split-r method, splits the x time-series data '
-            'and do not use y.'
+            "the split-r method, splits the x time-series data " "and do not use y."
         )
 
     x = np.asarray(x)
 
     # Check inputs
     if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
+        raise CRError("x is not an array of one-dimension.")
 
     x_size = x.size
     if x_size < 8:
         raise CRSampleSizeError(
-            f'{x_size} input data points are not sufficient to be used by '
-            'this method.'
+            f"{x_size} input data points are not sufficient to be used by "
+            "this method."
         )
 
     # Special case if timeseries is constant.
@@ -446,8 +441,8 @@ def geyer_split_statistical_inefficiency(
 
     if not np.isfinite(_std):
         raise CRError(
-            'there is at least one value in the input array which is '
-            'non-finite or not-number.'
+            "there is at least one value in the input array which is "
+            "non-finite or not-number."
         )
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -460,10 +455,10 @@ def geyer_split_statistical_inefficiency(
     fft = fft and x_size > 30
 
     acov_1 = auto_covariance(x[:x_size], fft=fft)
-    acov_2 = auto_covariance(x[x_size:2 * x_size], fft=fft)
+    acov_2 = auto_covariance(x[x_size : 2 * x_size], fft=fft)
 
     chain_mean_1 = np.mean(x[:x_size])
-    chain_mean_2 = np.mean(x[x_size:2 * x_size])
+    chain_mean_2 = np.mean(x[x_size : 2 * x_size])
 
     n_n_1 = float(x_size) / (x_size - 1.0)
     n_1_n = (x_size - 1.0) / float(x_size)
@@ -486,8 +481,7 @@ def geyer_split_statistical_inefficiency(
     rho_hat_even = 1.0
     rho_hat_s[0] = rho_hat_even
 
-    rho_hat_odd = 1.0 - \
-        (mean_var - (acov_s_1 + acov_s_2) / 2.0) * var_plus_inv
+    rho_hat_odd = 1.0 - (mean_var - (acov_s_1 + acov_s_2) / 2.0) * var_plus_inv
     rho_hat_s[1] = rho_hat_odd
 
     # Convert raw auto-covariance estimators into Geyer's initial positive
@@ -502,14 +496,12 @@ def geyer_split_statistical_inefficiency(
         acov_s_1 = acov_1[s + 1]
         acov_s_2 = acov_2[s + 1]
 
-        rho_hat_even = 1.0 - \
-            (mean_var - (acov_s_1 + acov_s_2) / 2.0) * var_plus_inv
+        rho_hat_even = 1.0 - (mean_var - (acov_s_1 + acov_s_2) / 2.0) * var_plus_inv
 
         acov_s_1 = acov_1[s + 2]
         acov_s_2 = acov_2[s + 2]
 
-        rho_hat_odd = 1.0 - \
-            (mean_var - (acov_s_1 + acov_s_2) / 2.0) * var_plus_inv
+        rho_hat_odd = 1.0 - (mean_var - (acov_s_1 + acov_s_2) / 2.0) * var_plus_inv
 
         _sum = rho_hat_even + rho_hat_odd
 
@@ -531,7 +523,7 @@ def geyer_split_statistical_inefficiency(
     for s in range(1, max_s - 2, 2):
         _sum = rho_hat_s[s - 1] + rho_hat_s[s]
         if (rho_hat_s[s + 1] + rho_hat_s[s + 2]) > _sum:
-            rho_hat_s[s + 1] = _sum / 2.
+            rho_hat_s[s + 1] = _sum / 2.0
             rho_hat_s[s + 2] = rho_hat_s[s + 1]
 
     x_size *= 2
@@ -545,20 +537,21 @@ def geyer_split_statistical_inefficiency(
 
 
 si_methods = {
-    'statistical_inefficiency': statistical_inefficiency,
-    'geyer_r_statistical_inefficiency': geyer_r_statistical_inefficiency,
-    'geyer_split_r_statistical_inefficiency': geyer_split_r_statistical_inefficiency,
-    'geyer_split_statistical_inefficiency': geyer_split_statistical_inefficiency,
+    "statistical_inefficiency": statistical_inefficiency,
+    "geyer_r_statistical_inefficiency": geyer_r_statistical_inefficiency,
+    "geyer_split_r_statistical_inefficiency": geyer_split_r_statistical_inefficiency,
+    "geyer_split_statistical_inefficiency": geyer_split_statistical_inefficiency,
 }
 
 
 def integrated_auto_correlation_time(
-        x: Union[np.ndarray, List[float]],
-        y: Union[np.ndarray, List[float], None] = None,
-        *,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
+    x: Union[np.ndarray, list[float]],
+    y: Union[np.ndarray, list[float], None] = None,
+    *,
+    si: Union[str, float, int, None] = _DEFAULT_SI,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+) -> float:
     r"""Estimate the integrated auto-correlation time.
 
     The statistical inefficiency :math:`si` of the observable :math:`x`
@@ -589,25 +582,24 @@ def integrated_auto_correlation_time(
     if si is None:
         # Compute the statistical inefficiency
         si = statistical_inefficiency(
-            x, y=y, fft=fft,
-            minimum_correlation_time=minimum_correlation_time)
+            x, y=y, fft=fft, minimum_correlation_time=minimum_correlation_time
+        )
 
     elif isinstance(si, str):
         if si not in si_methods:
             raise CRError(
-                f'method {si} not found. Valid statistical inefficiency (si) '
-                'methods are:\n\t- ' + "\n\t- ".join(si_methods)
+                f"method {si} not found. Valid statistical inefficiency (si) "
+                "methods are:\n\t- " + "\n\t- ".join(si_methods)
             )
 
         si_func = si_methods[si]
 
         # Compute the statistical inefficiency
-        si = si_func(x, y=y, fft=fft,
-                     minimum_correlation_time=minimum_correlation_time)
+        si = si_func(x, y=y, fft=fft, minimum_correlation_time=minimum_correlation_time)
 
     elif si < 1.0:
         raise CRError(
-            'statistical inefficiency (si) must be greater than or equal one.'
+            "statistical inefficiency (si) must be greater than or equal one."
         )
 
     # Compute the integrated auto-correlation time

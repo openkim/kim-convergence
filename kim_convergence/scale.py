@@ -2,27 +2,28 @@
 
 from math import isclose, fabs, log10
 import numpy as np
+from typing import cast, Union
 
 from .err import CRError
 from ._default import _DEFAULT_ABS_TOL
 
 
 __all__ = [
-    'MinMaxScale',
-    'minmax_scale',
-    'TranslateScale',
-    'translate_scale',
-    'StandardScale',
-    'standard_scale',
-    'RobustScale',
-    'robust_scale',
-    'MaxAbsScale',
-    'maxabs_scale',
-    'scale_methods',
+    "MinMaxScale",
+    "minmax_scale",
+    "TranslateScale",
+    "translate_scale",
+    "StandardScale",
+    "standard_scale",
+    "RobustScale",
+    "robust_scale",
+    "MaxAbsScale",
+    "maxabs_scale",
+    "scale_methods",
 ]
 
 
-class MinMaxScale():
+class MinMaxScale:
     r"""Standardize/Transform a dataset by scaling it to a given range.
 
     This estimator scales and translates a dataset such that it is in the given
@@ -68,8 +69,8 @@ class MinMaxScale():
     def __init__(self, *, feature_range: tuple[float, float] = (0, 1)):
         if feature_range[0] >= feature_range[1]:
             raise CRError(
-                'Minimum of desired feature range must be smaller than '
-                f'maximum. Got {str(feature_range)}'
+                "Minimum of desired feature range must be smaller than "
+                f"maximum. Got {str(feature_range)}"
             )
         self.feature_range_ = feature_range
         self.data_min_ = None
@@ -78,8 +79,8 @@ class MinMaxScale():
         self.scale_ = None
         self.min_ = None
 
-    def scale(self, x: np.ndarray) -> np.ndarray:
-        """Standardize a dataset by scaling it to a given range.
+    def scale(self, x: Union[np.ndarray, list]) -> np.ndarray:
+        r"""Standardize a dataset by scaling it to a given range.
 
         Args:
             x (array_like, 1d): Time series data.
@@ -91,12 +92,12 @@ class MinMaxScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            raise CRError('x is not an array of one-dimension.')
+            raise CRError("x is not an array of one-dimension.")
 
         if not np.all(np.isfinite(x)):
             raise CRError(
-                'there is at least one value in the input array which is '
-                'non-finite or not-number.'
+                "there is at least one value in the input array which is "
+                "non-finite or not-number."
             )
 
         self.data_min_ = np.min(x)
@@ -105,13 +106,13 @@ class MinMaxScale():
 
         if isclose(self.data_range_, 0, abs_tol=_DEFAULT_ABS_TOL):
             raise CRError(
-                'the data_range of the input array is almost zero within '
-                f'{int(fabs(log10(_DEFAULT_ABS_TOL)))} precision numbers.'
+                "the data_range of the input array is almost zero within "
+                f"{int(fabs(log10(_DEFAULT_ABS_TOL)))} precision numbers."
             )
 
-        self.scale_ = \
-            (self.feature_range_[1] -
-             self.feature_range_[0]) / self.data_range_
+        self.scale_ = (
+            self.feature_range_[1] - self.feature_range_[0]
+        ) / self.data_range_
 
         self.min_ = self.feature_range_[0] - self.data_min_ * self.scale_
 
@@ -120,7 +121,7 @@ class MinMaxScale():
         return scaled_x
 
     def inverse(self, x: np.ndarray) -> np.ndarray:
-        """Undo the scaling of dataset to its original range.
+        r"""Undo the scaling of dataset to its original range.
 
         Args:
             x (array_like, 1d): Time series data.
@@ -131,8 +132,8 @@ class MinMaxScale():
         """
         if self.min_ is None:
             raise CRError(
-                'internal data-dependent state are not set, you need '
-                'to scale an array before trying to inverse it.'
+                "internal data-dependent state are not set, you need "
+                "to scale an array before trying to inverse it."
             )
         x = np.asarray(x)
         inverse_scaled_x = x - self.min_
@@ -140,11 +141,13 @@ class MinMaxScale():
         return inverse_scaled_x
 
 
-def minmax_scale(x: np.ndarray,
-                 *,
-                 with_centering: bool = True,
-                 with_scaling: bool = True,
-                 feature_range: tuple[float, float] = (0.0, 1.0)) -> np.ndarray:
+def minmax_scale(
+    x: np.ndarray,
+    *,
+    with_centering: bool = True,
+    with_scaling: bool = True,
+    feature_range: tuple[float, float] = (0.0, 1.0),
+) -> np.ndarray:
     r"""Standardize/Transform a dataset by scaling it to a given range.
 
     This estimator scales and translates a dataset such that it is in the given
@@ -172,7 +175,7 @@ def minmax_scale(x: np.ndarray,
     return mms.scale(x)
 
 
-class TranslateScale():
+class TranslateScale:
     r"""Standardize a dataset.
 
     Standardize a dataset by translating the data set so that :math:`x[0]=0`
@@ -210,17 +213,14 @@ class TranslateScale():
 
     """
 
-    def __init__(self,
-                 *,
-                 with_centering: bool = True,
-                 with_scaling: bool = True):
+    def __init__(self, *, with_centering: bool = True, with_scaling: bool = True):
         self.with_centering_ = with_centering
         self.with_scaling_ = with_scaling
         self.center_ = None
         self.scale_ = None
 
-    def scale(self, x: np.ndarray) -> np.ndarray:
-        """Standardize a dataset by scaling it to a given range.
+    def scale(self, x: Union[np.ndarray, list]) -> np.ndarray:
+        r"""Standardize a dataset by scaling it to a given range.
 
         Args:
             x (array_like, 1d): Time series data.
@@ -232,12 +232,12 @@ class TranslateScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            raise CRError('x is not an array of one-dimension.')
+            raise CRError("x is not an array of one-dimension.")
 
         if not np.all(np.isfinite(x)):
             raise CRError(
-                'there is at least one value in the input array which is '
-                'non-finite or not-number.'
+                "there is at least one value in the input array which is "
+                "non-finite or not-number."
             )
 
         if self.with_centering_:
@@ -256,7 +256,7 @@ class TranslateScale():
         return scaled_x
 
     def inverse(self, x: np.ndarray) -> np.ndarray:
-        """Undo the scaling of dataset to its original range.
+        r"""Undo the scaling of dataset to its original range.
 
         Args:
             x (array_like, 1d): Time series data.
@@ -267,27 +267,27 @@ class TranslateScale():
         """
         if self.scale_ is None and self.center_ is None:
             raise CRError(
-                'internal data-dependent state are not set, you need to '
-                'scale an array before trying to inverse it.'
+                "internal data-dependent state are not set, you need to "
+                "scale an array before trying to inverse it."
             )
 
         if self.with_scaling_ and not isclose(
-                self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
+            cast(float, self.scale_), 0, abs_tol=_DEFAULT_ABS_TOL
+        ):
             x = np.asarray(x)
             inverse_scaled_x = x * self.scale_
         else:
             inverse_scaled_x = np.array(x, copy=True)
 
         if self.with_centering_:
-            inverse_scaled_x += self.center_
+            inverse_scaled_x += cast(float, self.center_)
 
         return inverse_scaled_x
 
 
-def translate_scale(x: np.ndarray,
-                    *,
-                    with_centering: bool = True,
-                    with_scaling: bool = True) -> np.ndarray:
+def translate_scale(
+    x: np.ndarray, *, with_centering: bool = True, with_scaling: bool = True
+) -> np.ndarray:
     r"""Standardize a dataset.
 
     Standardize a dataset by translating the data set so that :math:`x[0]=0`
@@ -315,12 +315,11 @@ def translate_scale(x: np.ndarray,
         1darray: Scaled dataset
 
     """
-    tsc = TranslateScale(with_centering=with_centering,
-                         with_scaling=with_scaling)
+    tsc = TranslateScale(with_centering=with_centering, with_scaling=with_scaling)
     return tsc.scale(x)
 
 
-class StandardScale():
+class StandardScale:
     r"""Standardize a dataset.
 
     Standardize a dataset by removing the mean and scaling to unit variance.
@@ -363,10 +362,7 @@ class StandardScale():
 
     """
 
-    def __init__(self,
-                 *,
-                 with_centering: bool = True,
-                 with_scaling: bool = True):
+    def __init__(self, *, with_centering: bool = True, with_scaling: bool = True):
         self.with_centering_ = with_centering
         self.with_scaling_ = with_scaling
         self.std_ = None
@@ -374,8 +370,8 @@ class StandardScale():
         self.mean_1 = None
         self.mean_2 = None
 
-    def scale(self, x: np.ndarray) -> np.ndarray:
-        """Standardize a dataset.
+    def scale(self, x: Union[np.ndarray, list]) -> np.ndarray:
+        r"""Standardize a dataset.
 
         Args:
             x (array_like, 1d): The data to center and scale.
@@ -387,7 +383,7 @@ class StandardScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            raise CRError('x is not an array of one-dimension.')
+            raise CRError("x is not an array of one-dimension.")
 
         if self.with_centering_:
             self.mean_ = np.mean(x)
@@ -406,8 +402,8 @@ class StandardScale():
 
             if not np.isfinite(self.mean_1):
                 raise CRError(
-                    'there is at least one value in the input array which '
-                    'is non-finite or not-number.'
+                    "there is at least one value in the input array which "
+                    "is non-finite or not-number."
                 )
 
             if not isclose(self.mean_1, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -421,8 +417,8 @@ class StandardScale():
 
             if not np.isfinite(self.std_):
                 raise CRError(
-                    'there is at least one value in the input array which '
-                    'is non-finite or not-number.'
+                    "there is at least one value in the input array which "
+                    "is non-finite or not-number."
                 )
 
             if not isclose(self.std_, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -446,7 +442,7 @@ class StandardScale():
         return scaled_x
 
     def inverse(self, x: np.ndarray) -> np.ndarray:
-        """Undo the scaling of dataset to its original range.
+        r"""Undo the scaling of dataset to its original range.
 
         Args:
             x (array_like, 1d): Time series data.
@@ -457,11 +453,12 @@ class StandardScale():
         """
         if self.mean_ is None and self.std_ is None:
             raise CRError(
-                'internal data-dependent state are not set, you need to '
-                'scale an array before trying to inverse it.'
+                "internal data-dependent state are not set, you need to "
+                "scale an array before trying to inverse it."
             )
 
         if self.with_scaling_:
+            assert isinstance(self.std_, float)
             x = np.asarray(x)
             if self.mean_2 is not None:
                 inverse_scaled_x = x + self.mean_2
@@ -470,17 +467,18 @@ class StandardScale():
             inverse_scaled_x = np.array(x, copy=True)
 
         if self.with_centering_:
+            assert isinstance(self.mean_1, float)
+            assert isinstance(self.mean_, float)
             if not isclose(self.mean_1, 0, abs_tol=_DEFAULT_ABS_TOL):
                 inverse_scaled_x += self.mean_1
             inverse_scaled_x += self.mean_
 
-        return inverse_scaled_x
+        return inverse_scaled_x  # type: ignore[arg-type]
 
 
-def standard_scale(x: np.ndarray,
-                   *,
-                   with_centering: bool = True,
-                   with_scaling: bool = True) -> np.ndarray:
+def standard_scale(
+    x: np.ndarray, *, with_centering: bool = True, with_scaling: bool = True
+) -> np.ndarray:
     r"""Standardize a dataset.
 
     Standardize a dataset by removing the mean and scaling to unit variance.
@@ -511,12 +509,11 @@ def standard_scale(x: np.ndarray,
         deviation.
 
     """
-    ssc = StandardScale(with_centering=with_centering,
-                        with_scaling=with_scaling)
+    ssc = StandardScale(with_centering=with_centering, with_scaling=with_scaling)
     return ssc.scale(x)
 
 
-class RobustScale():
+class RobustScale:
     r"""Standardize a dataset.
 
     Standardize a dataset by centering to the median and component wise scale
@@ -553,30 +550,34 @@ class RobustScale():
 
     """
 
-    def __init__(self, *,
-                 with_centering: bool = True,
-                 with_scaling: bool = True,
-                 quantile_range: tuple[float, float] = (25.0, 75.0)):
+    def __init__(
+        self,
+        *,
+        with_centering: bool = True,
+        with_scaling: bool = True,
+        quantile_range: tuple[float, float] = (25.0, 75.0),
+    ):
         self.with_centering_ = with_centering
         self.with_scaling_ = with_scaling
 
-        if not isinstance(quantile_range, tuple) or \
-                not isinstance(quantile_range, list):
-            raise CRError(f'invalid quantile range: {str(quantile_range)}.')
+        if not isinstance(quantile_range, tuple) or not isinstance(
+            quantile_range, list
+        ):
+            raise CRError(f"invalid quantile range: {str(quantile_range)}.")
 
         if len(quantile_range) != 2:
-            raise CRError(f'invalid quantile range: {str(quantile_range)}.')
+            raise CRError(f"invalid quantile range: {str(quantile_range)}.")
 
         q_min, q_max = quantile_range
         if not 0 <= q_min <= q_max <= 100:
-            raise CRError(f'invalid quantile range: {str(quantile_range)}.')
+            raise CRError(f"invalid quantile range: {str(quantile_range)}.")
 
         self.quantile_range = quantile_range
         self.center_ = None
         self.scale_ = None
 
-    def scale(self, x: np.ndarray) -> np.ndarray:
-        """Compute the median and quantiles to be used for scaling.
+    def scale(self, x: Union[np.ndarray, list]) -> np.ndarray:
+        r"""Compute the median and quantiles to be used for scaling.
 
         Parameters
         ----------
@@ -587,12 +588,12 @@ class RobustScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            raise CRError('x is not an array of one-dimension.')
+            raise CRError("x is not an array of one-dimension.")
 
         if not np.all(np.isfinite(x)):
             raise CRError(
-                'there is at least one value in the input array which is '
-                'non-finite or not-number.'
+                "there is at least one value in the input array which is "
+                "non-finite or not-number."
             )
 
         if self.with_centering_:
@@ -612,7 +613,7 @@ class RobustScale():
         return scaled_x
 
     def inverse(self, x: np.ndarray) -> np.ndarray:
-        """Undo the scaling of dataset to its original range.
+        r"""Undo the scaling of dataset to its original range.
 
         Args:
             x (array_like, 1d): Time series data.
@@ -623,11 +624,13 @@ class RobustScale():
         """
         if self.center_ is None and self.scale_ is None:
             raise CRError(
-                'internal data-dependent state are not set, you need to '
-                'scale an array before trying to inverse it.'
+                "internal data-dependent state are not set, you need to "
+                "scale an array before trying to inverse it."
             )
 
-        if self.with_scaling_ and not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
+        if self.with_scaling_ and not isclose(
+            cast(float, self.scale_), 0, abs_tol=_DEFAULT_ABS_TOL
+        ):
             x = np.asarray(x)
             inverse_scaled_x = x * self.scale_
         else:
@@ -640,12 +643,13 @@ class RobustScale():
 
 
 def robust_scale(
-        x: np.ndarray,
-        *,
-        with_centering: bool = True,
-        with_scaling: bool = True,
-        quantile_range: tuple[float, float] = (25.0, 75.0)) -> np.ndarray:
-    """Standardize a dataset.
+    x: np.ndarray,
+    *,
+    with_centering: bool = True,
+    with_scaling: bool = True,
+    quantile_range: tuple[float, float] = (25.0, 75.0),
+) -> np.ndarray:
+    r"""Standardize a dataset.
 
     Standardize a dataset by centering to the median and component wise scale
     according to the inter-quartile range.
@@ -664,13 +668,15 @@ def robust_scale(
         1darray: scaled dataset
 
     """
-    rsc = RobustScale(with_centering=with_centering,
-                      with_scaling=with_scaling,
-                      quantile_range=quantile_range)
+    rsc = RobustScale(
+        with_centering=with_centering,
+        with_scaling=with_scaling,
+        quantile_range=quantile_range,
+    )
     return rsc.scale(x)
 
 
-class MaxAbsScale():
+class MaxAbsScale:
     r"""Standardize a dataset to the [-1, 1] range.
 
     Standardize a dataset to the [-1, 1] range such that the maximal absolute
@@ -694,8 +700,8 @@ class MaxAbsScale():
     def __init__(self):
         self.scale_ = None
 
-    def scale(self, x: np.ndarray) -> np.ndarray:
-        """
+    def scale(self, x: Union[np.ndarray, list]) -> np.ndarray:
+        r"""
         Online computation of max absolute value of X for later scaling.
 
         All of X is processed as a single batch. This is intended for cases
@@ -720,12 +726,12 @@ class MaxAbsScale():
         x = np.asarray(x)
 
         if x.ndim != 1:
-            raise CRError('x is not an array of one-dimension.')
+            raise CRError("x is not an array of one-dimension.")
 
         if not np.all(np.isfinite(x)):
             raise CRError(
-                'there is at least one value in the input array which is '
-                'non-finite or not-number.'
+                "there is at least one value in the input array which is "
+                "non-finite or not-number."
             )
 
         self.scale_ = np.max(np.abs(x))
@@ -738,7 +744,7 @@ class MaxAbsScale():
         return scaled_x
 
     def inverse(self, x: np.ndarray) -> np.ndarray:
-        """Undo the scaling of dataset to its original range.
+        r"""Undo the scaling of dataset to its original range.
 
         Args:
             x (array_like, 1d): Time series data.
@@ -749,8 +755,8 @@ class MaxAbsScale():
         """
         if self.scale_ is None:
             raise CRError(
-                'internal data-dependent state are not set, you need to '
-                'scale an array before trying to inverse it.'
+                "internal data-dependent state are not set, you need to "
+                "scale an array before trying to inverse it."
             )
 
         if not isclose(self.scale_, 0, abs_tol=_DEFAULT_ABS_TOL):
@@ -762,11 +768,10 @@ class MaxAbsScale():
         return inverse_scaled_x
 
 
-def maxabs_scale(x: np.ndarray,
-                 *,
-                 with_centering: bool = True,
-                 with_scaling: bool = True) -> np.ndarray:
-    """Standardize a dataset to the [-1, 1] range.
+def maxabs_scale(
+    x: np.ndarray, *, with_centering: bool = True, with_scaling: bool = True
+) -> np.ndarray:
+    r"""Standardize a dataset to the [-1, 1] range.
 
     Standardize a dataset to the [-1, 1] range such that the maximal absolute
     value in the data set will be 1.0.
@@ -783,9 +788,9 @@ def maxabs_scale(x: np.ndarray,
 
 
 scale_methods = {
-    'minmax_scale': minmax_scale,
-    'translate_scale': translate_scale,
-    'standard_scale': standard_scale,
-    'robust_scale': robust_scale,
-    'maxabs_scale': maxabs_scale,
+    "minmax_scale": minmax_scale,
+    "translate_scale": translate_scale,
+    "standard_scale": standard_scale,
+    "robust_scale": robust_scale,
+    "maxabs_scale": maxabs_scale,
 }

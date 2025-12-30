@@ -1,98 +1,102 @@
-"""MSER-m_y UCL module."""
+r"""MSER-m_y UCL module."""
 
 from math import ceil, sqrt
 import numpy as np
-from typing import Optional, Union, List
+from typing import Optional, Union
 
 from .mser_m import MSER_m
-from kim_convergence._default import \
-    _DEFAULT_CONFIDENCE_COEFFICIENT, \
-    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
-    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
-    _DEFAULT_BATCH_SIZE, \
-    _DEFAULT_FFT, \
-    _DEFAULT_SCALE_METHOD, \
-    _DEFAULT_WITH_CENTERING, \
-    _DEFAULT_WITH_SCALING, \
-    _DEFAULT_TEST_SIZE, \
-    _DEFAULT_TRAIN_SIZE, \
-    _DEFAULT_POPULATION_STANDARD_DEVIATION, \
-    _DEFAULT_SI, \
-    _DEFAULT_MINIMUM_CORRELATION_TIME, \
-    _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
-    _DEFAULT_SAMPLE_METHOD
-from kim_convergence import \
-    batch, \
-    CRError, \
-    CRSampleSizeError, \
-    randomness_test, \
-    t_inv_cdf
+from kim_convergence._default import (
+    _DEFAULT_CONFIDENCE_COEFFICIENT,
+    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+    _DEFAULT_BATCH_SIZE,
+    _DEFAULT_FFT,
+    _DEFAULT_SCALE_METHOD,
+    _DEFAULT_WITH_CENTERING,
+    _DEFAULT_WITH_SCALING,
+    _DEFAULT_TEST_SIZE,
+    _DEFAULT_TRAIN_SIZE,
+    _DEFAULT_POPULATION_STANDARD_DEVIATION,
+    _DEFAULT_SI,
+    _DEFAULT_MINIMUM_CORRELATION_TIME,
+    _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+    _DEFAULT_SAMPLE_METHOD,
+)
+from kim_convergence import (
+    batch,
+    CRError,
+    CRSampleSizeError,
+    randomness_test,
+    t_inv_cdf,
+)
 
 
 __all__ = [
-    'MSER_m_y',
-    'mser_m_y_ucl',
-    'mser_m_y_ci',
-    'mser_m_y_relative_half_width_estimate',
+    "MSER_m_y",
+    "mser_m_y_ucl",
+    "mser_m_y_ci",
+    "mser_m_y_relative_half_width_estimate",
 ]
 
 
 class MSER_m_y(MSER_m):
     r"""MSER_m_y algorithm.
 
-    MSER_m_y [21]_ computes k batch means of size m to evaluate the MSER-m
-    statistic as described in [4]_ and detect the trucation point. If the
-    truncation is detected, the point estimator of the mean is the sample mean
-    of all observations in the truncated data set.
+    MSER_m_y [yousefi2011]_ computes k batch means of size m to evaluate the
+    MSER-m statistic as described in [spratt1998]_ and detect the trucation
+    point. If the truncation is detected, the point estimator of the mean is
+    the sample mean of all observations in the truncated data set.
+
     To compute the UCL, the MSER_m_y applies the von Neumann randomness test
-    [14]_, [15]_ to the truncated data to find a new batch size :math:`m^*` for
-    which the new batch means are approximately independent. It checks the
-    randomness test on successively larger batch sizes until the test is
-    finally passed and the batch means are finally determined to be
-    approximately independent of each other. It starts by setting the initial
-    batch size m as 1, and calculate the number of batches k′ accordingly.
+    [vonneumann1941]_, [vonneumann1941b]_ to the truncated data to find a new
+    batch size :math:`m^*` for which the new batch means are approximately
+    independent. It checks the randomness test on successively larger batch
+    sizes until the test is finally passed and the batch means are finally
+    determined to be approximately independent of each other. It starts by
+    setting the initial batch size m as 1, and calculate the number of batches
+    k′ accordingly.
 
     Attributes:
         significance_level (float): Significance level. A probability threshold
             below which the null hypothesis will be rejected.
-
-    References:
-        .. [21] Yousefi, S., (2011) "MSER-5Y: An Improved Version of MSER-5
-                with Automatic Confidence Interval Estimation," MSc thesis,
-                http://www.lib.ncsu.edu/resolver/1840.16/6923
 
     """
 
     def __init__(self):
         MSER_m.__init__(self)
 
-        self.name = 'mser_m_y'
+        self.name = "mser_m_y"
 
         # randomness test significance level \alpha = 0.2
         self.significance_level = 0.2
 
-    def ucl(self,
-            time_series_data: Union[np.ndarray, List[float]],
-            *,
-            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
-            batch_size: int = _DEFAULT_BATCH_SIZE,
-            scale: str = _DEFAULT_SCALE_METHOD,
-            with_centering: bool = _DEFAULT_WITH_CENTERING,
-            with_scaling: bool = _DEFAULT_WITH_SCALING,
-            # unused input parmeters in
-            # MSER_m ucl interface
-            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-            fft: bool = _DEFAULT_FFT,
-            test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
-            train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
-            population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si: Union[str, float, int, None] = _DEFAULT_SI,
-            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: Union[np.ndarray, List[int],
-                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
-        r"""Approximate the upper confidence limit of the mean [20]_.
+    def _ucl_impl(
+        self,
+        time_series_data: Union[np.ndarray, list[float]],
+        *,
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING,
+        # unused input parmeters in
+        # MSER_m ucl interface
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        fft: bool = _DEFAULT_FFT,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        population_standard_deviation: Optional[
+            float
+        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Union[
+            np.ndarray, list[int], None
+        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
+    ) -> float:
+        r"""Approximate the upper confidence limit of the mean [mokashi2010]_.
 
         Args:
             time_series_data (array_like, 1d): time series data.
@@ -115,21 +119,21 @@ class MSER_m_y(MSER_m):
         time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            raise CRError('time_series_data is not an array of one-dimension.')
+            raise CRError("time_series_data is not an array of one-dimension.")
 
         time_series_data_size = time_series_data.size
 
         if time_series_data_size < 10:
             raise CRSampleSizeError(
-                f'{time_series_data_size} input data points are not '
+                f"{time_series_data_size} input data points are not "
                 'sufficient to be used by "MSER_m_y".\n"MSER_m_y" at '
-                'least needs 10 data points.'
+                "least needs 10 data points."
             )
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             raise CRError(
-                f'confidence_coefficient = {confidence_coefficient} is not '
-                'in the range (0.0 1.0).'
+                f"confidence_coefficient = {confidence_coefficient} is not "
+                "in the range (0.0 1.0)."
             )
 
         batch_size = 1
@@ -150,11 +154,13 @@ class MSER_m_y(MSER_m):
 
             if processed_sample_size <= time_series_data_size:
                 # Batch the data
-                x_batch = batch(time_series_data[:processed_sample_size],
-                                batch_size=batch_size,
-                                scale=scale,
-                                with_centering=with_centering,
-                                with_scaling=with_scaling)
+                x_batch = batch(
+                    time_series_data[:processed_sample_size],
+                    batch_size=batch_size,
+                    scale=scale,
+                    with_centering=with_centering,
+                    with_scaling=with_scaling,
+                )
 
                 random = randomness_test(x_batch, self.significance_level)
 
@@ -169,11 +175,13 @@ class MSER_m_y(MSER_m):
             processed_sample_size = number_batches * batch_size
 
             # Batch the data
-            x_batch = batch(time_series_data[:processed_sample_size],
-                            batch_size=batch_size,
-                            scale=scale,
-                            with_centering=with_centering,
-                            with_scaling=with_scaling)
+            x_batch = batch(
+                time_series_data[:processed_sample_size],
+                batch_size=batch_size,
+                scale=scale,
+                with_centering=with_centering,
+                with_scaling=with_scaling,
+            )
 
         number_batches = x_batch.size
 
@@ -197,18 +205,20 @@ class MSER_m_y(MSER_m):
         upper = t_inv_cdf(p_up, number_batches - 1)
 
         self.upper_confidence_limit = upper * standard_error_of_mean
-        return self.upper_confidence_limit
+        assert isinstance(self.upper_confidence_limit, float)
+        return float(self.upper_confidence_limit)
 
 
 def mser_m_y_ucl(
-    time_series_data: Union[np.ndarray, List[float]],
+    time_series_data: Union[np.ndarray, list[float]],
     *,
     confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
     batch_size: int = _DEFAULT_BATCH_SIZE,
     scale: str = _DEFAULT_SCALE_METHOD,
     with_centering: bool = _DEFAULT_WITH_CENTERING,
     with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m_y] = None) -> float:
+    obj: Optional[MSER_m_y] = None,
+) -> float:
     """Approximate the upper confidence limit of the mean."""
     mser = MSER_m_y() if obj is None else obj
     upper_confidence_limit = mser.ucl(
@@ -217,20 +227,22 @@ def mser_m_y_ucl(
         batch_size=batch_size,
         scale=scale,
         with_centering=with_centering,
-        with_scaling=with_scaling)
+        with_scaling=with_scaling,
+    )
     return upper_confidence_limit
 
 
 def mser_m_y_ci(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
-        batch_size: int = _DEFAULT_BATCH_SIZE,
-        scale: str = _DEFAULT_SCALE_METHOD,
-        with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m_y] = None) -> tuple[float, float]:
-    r"""Approximate the confidence interval of the mean [20]_.
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+    batch_size: int = _DEFAULT_BATCH_SIZE,
+    scale: str = _DEFAULT_SCALE_METHOD,
+    with_centering: bool = _DEFAULT_WITH_CENTERING,
+    with_scaling: bool = _DEFAULT_WITH_SCALING,
+    obj: Optional[MSER_m_y] = None,
+) -> tuple[float, float]:
+    r"""Approximate the confidence interval of the mean [mokashi2010]_.
 
     Args:
         time_series_data (array_like, 1d): time series data.
@@ -258,19 +270,21 @@ def mser_m_y_ci(
         batch_size=batch_size,
         scale=scale,
         with_centering=with_centering,
-        with_scaling=with_scaling)
+        with_scaling=with_scaling,
+    )
     return confidence_limits
 
 
 def mser_m_y_relative_half_width_estimate(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
-        batch_size: int = _DEFAULT_BATCH_SIZE,
-        scale: str = _DEFAULT_SCALE_METHOD,
-        with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m_y] = None) -> float:
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+    batch_size: int = _DEFAULT_BATCH_SIZE,
+    scale: str = _DEFAULT_SCALE_METHOD,
+    with_centering: bool = _DEFAULT_WITH_CENTERING,
+    with_scaling: bool = _DEFAULT_WITH_SCALING,
+    obj: Optional[MSER_m_y] = None,
+) -> float:
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval
@@ -307,7 +321,8 @@ def mser_m_y_relative_half_width_estimate(
             batch_size=batch_size,
             scale=scale,
             with_centering=with_centering,
-            with_scaling=with_scaling)
+            with_scaling=with_scaling,
+        )
     except CRError:
-        raise CRError('Failed to get the relative_half_width_estimate.')
+        raise CRError("Failed to get the relative_half_width_estimate.")
     return relative_half_width_estimate

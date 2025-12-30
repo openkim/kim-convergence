@@ -1,29 +1,30 @@
-"""Batch module."""
+r"""Batch module."""
 
 import numpy as np
-from typing import Union, List
+from typing import Callable, Union
 
 from .err import CRError
-from ._default import \
-    _DEFAULT_BATCH_SIZE, \
-    _DEFAULT_SCALE_METHOD, \
-    _DEFAULT_WITH_CENTERING, \
-    _DEFAULT_WITH_SCALING
+from ._default import (
+    _DEFAULT_BATCH_SIZE,
+    _DEFAULT_SCALE_METHOD,
+    _DEFAULT_WITH_CENTERING,
+    _DEFAULT_WITH_SCALING,
+)
 from .scale import scale_methods
 
 
-__all__ = [
-    'batch',
-]
+__all__ = ["batch"]
 
 
-def batch(time_series_data: Union[np.ndarray, List[float]],
-          *,
-          batch_size: int = _DEFAULT_BATCH_SIZE,
-          func: callable = np.mean,
-          scale: str = _DEFAULT_SCALE_METHOD,
-          with_centering: bool = _DEFAULT_WITH_CENTERING,
-          with_scaling: bool = _DEFAULT_WITH_SCALING) -> np.ndarray:
+def batch(
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    batch_size: int = _DEFAULT_BATCH_SIZE,
+    func: Callable = np.mean,
+    scale: str = _DEFAULT_SCALE_METHOD,
+    with_centering: bool = _DEFAULT_WITH_CENTERING,
+    with_scaling: bool = _DEFAULT_WITH_SCALING,
+) -> np.ndarray:
     r"""Batch the time series data.
 
     Args:
@@ -74,18 +75,18 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
 
     # Check inputs
     if time_series_data.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
     if not isinstance(batch_size, int):
-        raise CRError(f'batch_size = {batch_size} is not an `int`.')
+        raise CRError(f"batch_size = {batch_size} is not an `int`.")
 
     if batch_size < 1:
-        raise CRError(f'batch_size = {batch_size} < 1 is not valid.')
+        raise CRError(f"batch_size = {batch_size} < 1 is not valid.")
 
     if not np.all(np.isfinite(time_series_data)):
         raise CRError(
-            'there is at least one value in the input array which is '
-            'non-finite or not-number.'
+            "there is at least one value in the input array which is "
+            "non-finite or not-number."
         )
 
     # Initialize
@@ -95,9 +96,9 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
 
     if number_batches == 0:
         raise CRError(
-            f'invalid number of batches = {number_batches}.\nThe number of '
-            f'input data points = {time_series_data.size} are not enough to '
-            f'produce batches with the batch size of {batch_size} data points.'
+            f"invalid number of batches = {number_batches}.\nThe number of "
+            f"input data points = {time_series_data.size} are not enough to "
+            f"produce batches with the batch size of {batch_size} data points."
         )
 
     # Correct the size of data
@@ -109,31 +110,34 @@ def batch(time_series_data: Union[np.ndarray, List[float]],
     try:
         batched_time_series_data = func(
             time_series_data[:processed_sample_size].reshape((-1, batch_size)),
-            axis=1, dtype=np.float64)
+            axis=1,
+            dtype=np.float64,
+        )
     # Reduction function like median has no dtype args
     except TypeError:
         batched_time_series_data = func(
-            time_series_data[:processed_sample_size].reshape((-1, batch_size)),
-            axis=1)
+            time_series_data[:processed_sample_size].reshape((-1, batch_size)), axis=1
+        )
 
     if with_centering or with_scaling:
         if not isinstance(scale, str):
             raise CRError(
-                f'scale is not a `str`.\nScale = {scale} is not a valid '
-                'method to scale and standardize a dataset.'
+                f"scale is not a `str`.\nScale = {scale} is not a valid "
+                "method to scale and standardize a dataset."
             )
 
         if scale not in scale_methods:
             raise CRError(
                 f'method "{scale}" not found. Valid methods to scale and '
-                'standardize a dataset are:\n\t- '
-                + "\n\t- ".join(scale_methods)
+                "standardize a dataset are:\n\t- " + "\n\t- ".join(scale_methods)
             )
 
         scale_func = scale_methods[scale]
 
-        batched_time_series_data = scale_func(batched_time_series_data,
-                                              with_centering=with_centering,
-                                              with_scaling=with_scaling)
+        batched_time_series_data = scale_func(
+            batched_time_series_data,
+            with_centering=with_centering,
+            with_scaling=with_scaling,
+        )
 
     return batched_time_series_data

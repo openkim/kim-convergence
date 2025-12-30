@@ -1,60 +1,124 @@
-"""MSER-m UCL module."""
+r"""MSER-m UCL module."""
 
 from math import isclose, sqrt
 import numpy as np
-from typing import Optional, Union, List
+from typing import Optional, Union
 
-from kim_convergence._default import \
-    _DEFAULT_ABS_TOL, \
-    _DEFAULT_CONFIDENCE_COEFFICIENT, \
-    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE, \
-    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS, \
-    _DEFAULT_BATCH_SIZE, \
-    _DEFAULT_FFT, \
-    _DEFAULT_SCALE_METHOD, \
-    _DEFAULT_WITH_CENTERING, \
-    _DEFAULT_WITH_SCALING, \
-    _DEFAULT_TEST_SIZE, \
-    _DEFAULT_TRAIN_SIZE, \
-    _DEFAULT_POPULATION_STANDARD_DEVIATION, \
-    _DEFAULT_SI, \
-    _DEFAULT_MINIMUM_CORRELATION_TIME, \
-    _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
-    _DEFAULT_SAMPLE_METHOD, \
-    _DEFAULT_IGNORE_END, \
-    _DEFAULT_NSKIP, \
-    _DEFAULT_NUMBER_OF_CORES
+from kim_convergence._default import (
+    _DEFAULT_ABS_TOL,
+    _DEFAULT_CONFIDENCE_COEFFICIENT,
+    _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+    _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+    _DEFAULT_BATCH_SIZE,
+    _DEFAULT_FFT,
+    _DEFAULT_SCALE_METHOD,
+    _DEFAULT_WITH_CENTERING,
+    _DEFAULT_WITH_SCALING,
+    _DEFAULT_TEST_SIZE,
+    _DEFAULT_TRAIN_SIZE,
+    _DEFAULT_POPULATION_STANDARD_DEVIATION,
+    _DEFAULT_SI,
+    _DEFAULT_MINIMUM_CORRELATION_TIME,
+    _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+    _DEFAULT_SAMPLE_METHOD,
+    _DEFAULT_IGNORE_END,
+    _DEFAULT_NSKIP,
+    _DEFAULT_NUMBER_OF_CORES,
+)
 from .ucl_base import UCLBase
-from kim_convergence import \
-    batch, \
-    CRError, \
-    CRSampleSizeError, \
-    t_inv_cdf
+from kim_convergence import batch, CRError, CRSampleSizeError, t_inv_cdf
 
 
 __all__ = [
-    'mser_m',
-    'MSER_m',
-    'mser_m_ucl',
-    'mser_m_ci',
-    'mser_m_relative_half_width_estimate',
+    "mser_m",
+    "MSER_m",
+    "mser_m_ucl",
+    "mser_m_ci",
+    "mser_m_relative_half_width_estimate",
 ]
 
 
+def _normalize_ignore_end(
+    ignore_end: Union[int, float, None],
+    batch_size: int,
+    number_batches: int,
+    data_size: int,
+) -> int:
+    r"""
+    Validate *ignore_end* and return the positive number of batches to ignore.
+
+    *None* is converted to ``max(1, batch_size, number_batches // 4)``.
+    A *float* in ``(0, 1)`` is interpreted as a fraction of the total batches.
+    An *int* must be ≥ 1.
+
+    Returns
+    -------
+    int
+        Positive number of batches to ignore from the end.
+
+    Raises
+    ------
+    CRError
+        If *ignore_end* has wrong type, wrong range, or is < 1.
+    CRSampleSizeError
+        If *ignore_end* >= *number_batches*.
+    """
+
+    if not isinstance(ignore_end, int):
+        if ignore_end is None:
+            ignore_end = max(1, batch_size)
+            ignore_end = min(ignore_end, number_batches // 4)
+        elif isinstance(ignore_end, float):
+            if not 0.0 < ignore_end < 1.0:
+                raise CRError(
+                    f"invalid ignore_end = {ignore_end}. If ignore_end input "
+                    "is a `float`, it should be in a `(0, 1)` range."
+                )
+            ignore_end *= number_batches
+            ignore_end = max(1, int(ignore_end))
+        else:
+            raise CRError(
+                f"invalid ignore_end = {ignore_end}. ignore_end is not an "
+                "`int`, `float`, or `None`."
+            )
+
+        if ignore_end < 1:
+            raise CRError(
+                "ignore_end is not given on input and it is automatically set = "
+                f"{ignore_end} using {data_size} number of data points and the "
+                f"batch size = {batch_size}.\nignore_end should be a positive `int`."
+            )
+
+    elif ignore_end < 1:
+        raise CRError(
+            f"invalid ignore_end = {ignore_end}. ignore_end should be a "
+            "positive `int`."
+        )
+
+    if number_batches <= ignore_end:
+        raise CRSampleSizeError(
+            f"invalid ignore_end = {ignore_end}.\nWrong number of batches is "
+            f"requested to be ignored from the total {number_batches} batches."
+        )
+
+    return ignore_end
+
+
 def mser_m(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        batch_size: int = _DEFAULT_BATCH_SIZE,
-        scale: str = _DEFAULT_SCALE_METHOD,
-        with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING,
-        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END) -> tuple[bool, int]:
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    batch_size: int = _DEFAULT_BATCH_SIZE,
+    scale: str = _DEFAULT_SCALE_METHOD,
+    with_centering: bool = _DEFAULT_WITH_CENTERING,
+    with_scaling: bool = _DEFAULT_WITH_SCALING,
+    ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
+) -> tuple[bool, int]:
     r"""Determine the truncation point using marginal standard error rules.
 
     Determine the truncation point using marginal standard error rules
-    (MSER). The MSER [3]_ and MSER-5 [4]_ rules determine the truncation
-    point as the value of :math:`d` that best balances the tradeoff between
-    improved accuracy (elimination of bias) and decreased precision
+    (MSER). The MSER [white1997]_ and MSER-5 [spratt1998]_ rules determine the
+    truncation point as the value of :math:`d` that best balances the tradeoff
+    between improved accuracy (elimination of bias) and decreased precision
     (reduction in the sample size) for the input series. They select a
     truncation point that minimizes the width of the marginal confidence
     interval about the truncated sample mean. The marginal confidence
@@ -116,23 +180,23 @@ def mser_m(
 
     # Check inputs
     if time_series_data.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
     # Special case if timeseries is constant.
     _std = np.std(time_series_data)
 
     if not np.isfinite(_std):
         raise CRError(
-            'there is at least one value in the input array which is '
-            'non-finite or not-number.'
+            "there is at least one value in the input array which is "
+            "non-finite or not-number."
         )
 
     if isclose(_std, 0, abs_tol=_DEFAULT_ABS_TOL):
         if not isinstance(batch_size, int):
-            raise CRError(f'batch_size = {batch_size} is not an `int`.')
+            raise CRError(f"batch_size = {batch_size} is not an `int`.")
 
         if batch_size < 1:
-            raise CRError(f'batch_size = {batch_size} < 1 is not valid.')
+            raise CRError(f"batch_size = {batch_size} < 1 is not valid.")
 
         if time_series_data.size < batch_size:
             return False, 0
@@ -142,56 +206,24 @@ def mser_m(
     del _std
 
     # Initialize
-    x_batch = batch(time_series_data,
-                    batch_size=batch_size,
-                    scale=scale,
-                    with_centering=with_centering,
-                    with_scaling=with_scaling)
+    x_batch = batch(
+        time_series_data,
+        batch_size=batch_size,
+        scale=scale,
+        with_centering=with_centering,
+        with_scaling=with_scaling,
+    )
 
     # Number of batches
     number_batches = x_batch.size
 
-    if not isinstance(ignore_end, int):
-        if ignore_end is None:
-            ignore_end = max(1, batch_size)
-            ignore_end = min(ignore_end, number_batches // 4)
-        elif isinstance(ignore_end, float):
-            if not 0.0 < ignore_end < 1.0:
-                raise CRError(
-                    f'invalid ignore_end = {ignore_end}. If ignore_end input '
-                    'is a `float`, it should be in a `(0, 1)` range.'
-                )
-            ignore_end *= number_batches
-            ignore_end = max(1, int(ignore_end))
-        else:
-            raise CRError(
-                f'invalid ignore_end = {ignore_end}. ignore_end is not an '
-                '`int`, `float`, or `None`.'
-            )
-
-        if ignore_end < 1:
-            raise CRError(
-                'ignore_end is not given on input and it is automatically '
-                f'set = {ignore_end} using {time_series_data.size} number of '
-                f'data points and the batch size = {batch_size}.\nignore_end '
-                'should be a positive `int`.'
-            )
-
-    elif ignore_end < 1:
-        raise CRError(
-            f'invalid ignore_end = {ignore_end}. ignore_end should be a '
-            'positive `int`.'
-        )
-
-    if number_batches <= ignore_end:
-        raise CRSampleSizeError(
-            f'invalid ignore_end = {ignore_end}.\nWrong number of batches is '
-            f'requested to be ignored from the total {number_batches} batches.'
-        )
+    ignore_end = _normalize_ignore_end(
+        ignore_end, batch_size, number_batches, time_series_data.size
+    )
 
     # To find the optimal truncation point in MSER-m
 
-    number_batches_minus_d_inv = 1. / np.arange(number_batches, 0, -1)
+    number_batches_minus_d_inv = 1.0 / np.arange(number_batches, 0, -1)
 
     x_batch_sum = np.add.accumulate(x_batch[::-1])[::-1]
     x_batch_sum_sq = x_batch_sum * x_batch_sum
@@ -230,13 +262,13 @@ def mser_m(
 class MSER_m(UCLBase):
     r"""MSER-m algorithm.
 
-    The MSER [3]_ and MSER-5 [4]_ rules determine the truncation point as the
-    value of :math:`d` that best balances the tradeoff between improved
-    accuracy (elimination of bias) and decreased precision (reduction in the
-    sample size) for the input series. They select a truncation point that
-    minimizes the width of the marginal confidence interval about the truncated
-    sample mean. The marginal confidence interval is a measure of the
-    homogeneity of the truncated series.
+    The MSER [white1997]_ and MSER-5 [spratt1998]_ rules determine the
+    truncation point as the value of :math:`d` that best balances the tradeoff
+    between improved accuracy (elimination of bias) and decreased precision
+    (reduction in the sample size) for the input series. They select a
+    truncation point that minimizes the width of the marginal confidence
+    interval about the truncated sample mean. The marginal confidence interval
+    is a measure of the homogeneity of the truncated series.
     The optimal truncation point :math:`d(j)^*` selected by MSER-m can be
     expressed as:
 
@@ -251,24 +283,16 @@ class MSER_m(UCLBase):
     raw series. The CI estimators can be computed from the truncated sequence
     of batch means.
 
-    References:
-        .. [3] White, K.P., Jr., (1997). "An effective truncation heuristic
-               for bias reduction in simulation output.". Simulation.,
-               69(6), p. 323--334.
-        .. [4] Spratt, S. C., (1998). "Heuristics for the startup problem."
-               M.S. Thesis, Department OS Systems Engineering, University
-               of Virginia.
-
     """
 
     def __init__(self):
         UCLBase.__init__(self)
 
-        self.name = 'mser_m'
+        self.name = "mser_m"
 
     def estimate_equilibration_length(
         self,
-        time_series_data: Union[np.ndarray, List[float]],
+        time_series_data: Union[np.ndarray, list[float]],
         *,
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
@@ -281,15 +305,17 @@ class MSER_m(UCLBase):
         si: Union[str, float, int, None] = _DEFAULT_SI,
         nskip: Optional[int] = _DEFAULT_NSKIP,
         fft: bool = _DEFAULT_FFT,
-            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> tuple[bool, int]:
-        """Estimate the equilibration point in a time series data."""
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    ) -> tuple[bool, int]:
+        r"""Estimate the equilibration point in a time series data."""
         truncated, truncate_index = mser_m(
             time_series_data=time_series_data,
             batch_size=batch_size,
             scale=scale,
             with_centering=with_centering,
             with_scaling=with_scaling,
-            ignore_end=ignore_end)
+            ignore_end=ignore_end,
+        )
 
         if truncated:
             time_series_data = np.asarray(time_series_data)
@@ -298,35 +324,41 @@ class MSER_m(UCLBase):
                 time_series_data=time_series_data[truncate_index:],
                 si=si,
                 fft=fft,
-                minimum_correlation_time=minimum_correlation_time)
+                minimum_correlation_time=minimum_correlation_time,
+            )
 
             return True, truncate_index
 
         self.si = None
         return False, truncate_index
 
-    def ucl(self,
-            time_series_data: Union[np.ndarray, List[float]],
-            *,
-            confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
-            batch_size: int = _DEFAULT_BATCH_SIZE,
-            scale: str = _DEFAULT_SCALE_METHOD,
-            with_centering: bool = _DEFAULT_WITH_CENTERING,
-            with_scaling: bool = _DEFAULT_WITH_SCALING,
-            # unused input parmeters in
-            # MSER_m ucl interface
-            equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-            heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-            fft: bool = _DEFAULT_FFT,
-            test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
-            train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
-            population_standard_deviation: Optional[float] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-            si: Union[str, float, int, None] = _DEFAULT_SI,
-            minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-            uncorrelated_sample_indices: Union[np.ndarray, List[int],
-                                               None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-            sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> float:
-        r"""Approximate the upper confidence limit of the mean [20]_.
+    def _ucl_impl(
+        self,
+        time_series_data: Union[np.ndarray, list[float]],
+        *,
+        confidence_coefficient: float = _DEFAULT_CONFIDENCE_COEFFICIENT,
+        batch_size: int = _DEFAULT_BATCH_SIZE,
+        scale: str = _DEFAULT_SCALE_METHOD,
+        with_centering: bool = _DEFAULT_WITH_CENTERING,
+        with_scaling: bool = _DEFAULT_WITH_SCALING,
+        # unused input parmeters in
+        # MSER_m ucl interface
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+        fft: bool = _DEFAULT_FFT,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        population_standard_deviation: Optional[
+            float
+        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
+        si: Union[str, float, int, None] = _DEFAULT_SI,
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        uncorrelated_sample_indices: Union[
+            np.ndarray, list[int], None
+        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
+    ) -> float:
+        r"""Approximate the upper confidence limit of the mean [mokashi2010]_.
 
         Args:
             time_series_data (array_like, 1d): time series data.
@@ -345,32 +377,26 @@ class MSER_m(UCLBase):
         Returns:
             float: upper_confidence_limit
 
-        References:
-            .. [20] Mokashi, A. C. and Tejada, J. J. and Yousefi, S. and
-                    Tafazzoli, A. and Xu, T. and Wilson, J. R. and Steiger,
-                    N. M., (2010). "Performance comparison of MSER-5 and
-                    N-Skart on the simulation start-up problem," Proceedings of
-                    the 2010 Winter Simulation Conference, p. 971--982.
-                    doi = 10.1109/WSC.2010.5679094
-
         """
         time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
-            raise CRError('time_series_data is not an array of one-dimension.')
+            raise CRError("time_series_data is not an array of one-dimension.")
 
         if confidence_coefficient <= 0.0 or confidence_coefficient >= 1.0:
             raise CRError(
-                f'confidence_coefficient = {confidence_coefficient} is not '
-                'in the range (0.0 1.0).'
+                f"confidence_coefficient = {confidence_coefficient} is not "
+                "in the range (0.0 1.0)."
             )
 
         # Initialize
-        x_batch = batch(time_series_data,
-                        batch_size=batch_size,
-                        scale=scale,
-                        with_centering=with_centering,
-                        with_scaling=with_scaling)
+        x_batch = batch(
+            time_series_data,
+            batch_size=batch_size,
+            scale=scale,
+            with_centering=with_centering,
+            with_scaling=with_scaling,
+        )
 
         # Number of batches
         number_batches = x_batch.size
@@ -385,29 +411,31 @@ class MSER_m(UCLBase):
 
         # Compute the standard deviation of the mean within the dataset. The
         # standard_error_of_mean provides a measurement for spread. The smaller
-        # the spread the more accurate. Please see ref [20]_
+        # the spread the more accurate. Please see ref [mokashi2010]_
         standard_error_of_mean = self.std / sqrt(number_batches)
 
         # Compute the t_distribution confidence interval. When using the
         # t-distribution to compute a confidence interval, df = n - 1.
         p_up = (1 + confidence_coefficient) / 2
-        # Please see ref [20]_
+        # Please see ref [mokashi2010]_
         upper = t_inv_cdf(p_up, number_batches - 1)
 
         self.upper_confidence_limit = upper * standard_error_of_mean
-        return self.upper_confidence_limit
+        assert isinstance(self.upper_confidence_limit, float)
+        return float(self.upper_confidence_limit)
 
 
 def mser_m_ucl(
-    time_series_data: Union[np.ndarray, List[float]],
+    time_series_data: Union[np.ndarray, list[float]],
     *,
     confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
     batch_size: int = _DEFAULT_BATCH_SIZE,
     scale: str = _DEFAULT_SCALE_METHOD,
     with_centering: bool = _DEFAULT_WITH_CENTERING,
     with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m] = None) -> float:
-    """Approximate the upper confidence limit of the mean."""
+    obj: Optional[MSER_m] = None,
+) -> float:
+    r"""Approximate the upper confidence limit of the mean."""
     mser = MSER_m() if obj is None else obj
     upper_confidence_limit = mser.ucl(
         time_series_data=time_series_data,
@@ -415,20 +443,22 @@ def mser_m_ucl(
         batch_size=batch_size,
         scale=scale,
         with_centering=with_centering,
-        with_scaling=with_scaling)
+        with_scaling=with_scaling,
+    )
     return upper_confidence_limit
 
 
 def mser_m_ci(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        batch_size: int = _DEFAULT_BATCH_SIZE,
-        scale: str = _DEFAULT_SCALE_METHOD,
-        with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m] = None) -> tuple[float, float]:
-    r"""Approximate the confidence interval of the mean [20]_.
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+    batch_size: int = _DEFAULT_BATCH_SIZE,
+    scale: str = _DEFAULT_SCALE_METHOD,
+    with_centering: bool = _DEFAULT_WITH_CENTERING,
+    with_scaling: bool = _DEFAULT_WITH_SCALING,
+    obj: Optional[MSER_m] = None,
+) -> tuple[float, float]:
+    r"""Approximate the confidence interval of the mean [mokashi2010]_.
 
     Args:
         time_series_data (array_like, 1d): time series data.
@@ -456,19 +486,21 @@ def mser_m_ci(
         batch_size=batch_size,
         scale=scale,
         with_centering=with_centering,
-        with_scaling=with_scaling)
+        with_scaling=with_scaling,
+    )
     return confidence_limits
 
 
 def mser_m_relative_half_width_estimate(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
-        batch_size: int = _DEFAULT_BATCH_SIZE,
-        scale: str = _DEFAULT_SCALE_METHOD,
-        with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING,
-        obj: Optional[MSER_m] = None) -> float:
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
+    batch_size: int = _DEFAULT_BATCH_SIZE,
+    scale: str = _DEFAULT_SCALE_METHOD,
+    with_centering: bool = _DEFAULT_WITH_CENTERING,
+    with_scaling: bool = _DEFAULT_WITH_SCALING,
+    obj: Optional[MSER_m] = None,
+) -> float:
     r"""Get the relative half width estimate.
 
     The relative half width estimate is the confidence interval
@@ -499,14 +531,14 @@ def mser_m_relative_half_width_estimate(
     """
     mser = MSER_m() if obj is None else obj
     try:
-        relative_half_width_estimate = \
-            mser.relative_half_width_estimate(
-                time_series_data=time_series_data,
-                confidence_coefficient=confidence_coefficient,
-                batch_size=batch_size,
-                scale=scale,
-                with_centering=with_centering,
-                with_scaling=with_scaling)
+        relative_half_width_estimate = mser.relative_half_width_estimate(
+            time_series_data=time_series_data,
+            confidence_coefficient=confidence_coefficient,
+            batch_size=batch_size,
+            scale=scale,
+            with_centering=with_centering,
+            with_scaling=with_scaling,
+        )
     except CRError:
-        raise CRError('Failed to get the relative_half_width_estimate.')
+        raise CRError("Failed to get the relative_half_width_estimate.")
     return relative_half_width_estimate

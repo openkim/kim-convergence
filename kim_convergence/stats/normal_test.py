@@ -5,6 +5,7 @@ Note:
     package use.
 
 """
+
 from math import sqrt, fabs
 import numpy as np
 from scipy.stats import chi2
@@ -15,17 +16,18 @@ from .t_dist import t_cdf
 
 
 __all__ = [
-    't_test',
-    'chi_square_test',
+    "t_test",
+    "chi_square_test",
 ]
 
 
 def t_test(
-        sample_mean: float,
-        sample_std: float,
-        sample_size: int,
-        population_mean: float,
-        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+    sample_mean: float,
+    sample_std: float,
+    sample_size: int,
+    population_mean: float,
+    significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT,
+) -> bool:
     """T-test for the mean.
 
     Calculate the T-test for the mean. This is a two-sided test for the null
@@ -48,8 +50,8 @@ def t_test(
     """
     cr_check(
         significance_level,
-        var_name='significance_level',
-        var_lower_bound=np.finfo(np.float64).resolution
+        var_name="significance_level",
+        var_lower_bound=np.finfo(np.float64).resolution,  # type: ignore[assignment]
     )
 
     nomin = sample_mean - population_mean
@@ -61,10 +63,11 @@ def t_test(
 
 
 def chi_square_test(
-        sample_var: float,
-        sample_size: int,
-        population_var: float,
-        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+    sample_var: float,
+    sample_size: int,
+    population_var: float,
+    significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT,
+) -> bool:
     r"""Chi-square test for the variance.
 
     Calculate the chi-square test for the variance. This is a two-sided test.
@@ -92,8 +95,8 @@ def chi_square_test(
     """
     cr_check(
         significance_level,
-        var_name='significance_level',
-        var_lower_bound=np.finfo(np.float64).resolution
+        var_name="significance_level",
+        var_lower_bound=np.finfo(np.float64).resolution,
     )
 
     df = sample_size - 1

@@ -45,19 +45,21 @@ from math import copysign, fabs, nan
 from kim_convergence import CRError
 
 __all__ = [
-    'ZERO_RC',
+    "ZERO_RC",
 ]
 
 
-class ZERO_RC():
+class ZERO_RC:
     """Zero finding class by reverse communication."""
 
-    def __init__(self,
-                 xlo: float,
-                 xhi: float,
-                 *,
-                 abs_tol: float = 1.0e-50,
-                 rel_tol: float = 1.0e-8):
+    def __init__(
+        self,
+        xlo: float,
+        xhi: float,
+        *,
+        abs_tol: float = 1.0e-50,
+        rel_tol: float = 1.0e-8,
+    ):
         """Initialize parameters.
 
         Args:
@@ -149,8 +151,8 @@ class ZERO_RC():
                 self.ext += 1
         else:
             raise CRError(
-                f'Wrong index number={self.index}.\nThis function should be '
-                'called with zero status for the first time.'
+                f"Wrong index number={self.index}.\nThis function should be "
+                "called with zero status for the first time."
             )
 
         if fabs(self.fc) < fabs(self.fb):
@@ -185,8 +187,9 @@ class ZERO_RC():
 
         if fabs(self.mb) <= self.tol:
             xhi = deepcopy(self.c)
-            qrzero = (self.fc >= 0.0 and self.fb <= 0.0) or \
-                (self.fc < 0.0 and self.fb >= 0.0)
+            qrzero = (self.fc >= 0.0 and self.fb <= 0.0) or (
+                self.fc < 0.0 and self.fb >= 0.0
+            )
             if qrzero:
                 return 0, x, xlo, xhi
             else:

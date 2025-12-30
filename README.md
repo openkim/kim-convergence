@@ -4,8 +4,11 @@
 [![Anaconda-Server Badge](https://img.shields.io/conda/vn/conda-forge/kim-convergence.svg)](https://anaconda.org/conda-forge/kim-convergence)
 [![PyPI](https://img.shields.io/pypi/v/kim-convergence.svg)](https://pypi.python.org/pypi/kim-convergence)
 [![License](https://img.shields.io/badge/license-LGPL--2.1--or--later-blue)](LICENSE)
+[![Documentation Status](https://readthedocs.org/projects/kim-convergence/badge/?version=latest)](https://kim-convergence.readthedocs.io/en/latest/?badge=latest)
 
 ## How do you automatically estimate the length of the simulation required?
+
+### Problem: Estimating Simulation Length
 
 <table>
   <tr>
@@ -23,6 +26,12 @@
   </tr>
 </table>
 
+**Key observations:**
+
+- Different observables converge at different rates
+- Visual inspection alone cannot determine statistical reliability
+- Running too short leads to bias, too long wastes computational resources
+
 It is desirable to simulate the minimum amount of time necessary to reach an
 acceptable amount of uncertainty in the quantity of interest.
 
@@ -36,21 +45,23 @@ acceptable amount of uncertainty in the quantity of interest.
 
 Welcome to **kim-convergence** module!
 
-The kim-convergence package is designed to help in automatic equilibration
-detection & run length control.
+`kim-convergence` package solves this by providing
+**automatic equilibration detection** and **adaptive run length control** based
+on statistical confidence intervals.
 
-**PLEASE NOTE**:
+## Features
 
-the kim-convergence code is under active development and is still in beta
-versions `0.0.2`. In general changes to the patch version (the third number)
-indicate backward compatible beta releases, but please be aware that file
-formats and APIs may change.
-
-Bug reports are also welcomed in the GitHub issues!
-
-## Document
-
-<span style="font-size:300%; color:red; font-weight: 900;">!WORK IN PROGRESS!</span>
+- **Automatic Equilibration Detection**: Identify when simulations reach
+  steady-state using MSER-m and related algorithms
+- **Adaptive Run Length Control**: Extend simulations only until desired
+  statistical accuracy is achieved
+- **Multiple UCL Methods**: MSER-m, Heidelberger-Welch, N-SKART, and
+  uncorrelated samples
+- **Time Series Analysis**: Statistical inefficiency, autocorrelation, effective
+  sample size
+- **Integration Support**: Callbacks for LAMMPS, OpenMM, and custom simulators
+- **Multiple Observables**: Handle different convergence rates for different
+  quantities
 
 ## Installing kim-convergence
 
@@ -313,6 +324,19 @@ and a confidence interval is calculated for each sample, the proportion of
 those intervals that will include the true population mean is
 `confidence_coefficient`.
 
+## Documentation
+
+Complete documentation is available at: https://kim-convergence.readthedocs.io/
+
+The documentation includes:
+
+- **Getting Started**: Installation and basic usage
+- **Best Practices**: Guidelines for accuracy requirements and method selection
+- **Theory**: Statistical background and algorithm details
+- **Examples**: Copy-paste ready code snippets
+- **API Reference**: Complete function documentation
+- **Troubleshooting**: Common issues and solutions
+
 ## Contact us
 
 If something is not working as you think it should or would like it to, please
@@ -328,7 +352,7 @@ Contributions are very welcome.
 
 ## Copyright
 
-Copyright (c) 2021-2025, Regents of the University of Minnesota.\
+Copyright (c) 2021-2026, Regents of the University of Minnesota.\
 All Rights Reserved
 
 ## Contributors
