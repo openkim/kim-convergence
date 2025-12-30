@@ -1,26 +1,54 @@
-.. kim-convergence documentation master file, created by
-   sphinx-quickstart on Mon May 18 13:47:42 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to kim-convergence's documentation!
-=======================================
+.. include:: overview.rst
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Getting Started
+
+   getting_started
+   troubleshooting
 
 .. toctree::
-   kim_convergence
    :maxdepth: 2
-   :caption: Package reference:
+   :caption: Best Practices
 
+   best_practices
 
-Indices and tables
-==================
+.. toctree::
+   :maxdepth: 2
+   :caption: Theory and Background
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   theory
 
-.. _`github page`: https://github.com/yafshar/kim-convergence
+.. toctree::
+   :maxdepth: 2
+   :caption: Core Modules
+
+   modules/run_length_control
+   modules/ucl
+   modules/stats
+   modules/timeseries
+   modules/other_utils
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples
+
+   examples
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference
+
+   api
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Community
+
+   contributing
+
+.. toctree::
+   :maxdepth: 2
+   :caption: References
+
+   references
