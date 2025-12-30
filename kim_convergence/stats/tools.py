@@ -1,27 +1,62 @@
-"""Tools module.
+r"""Tools module.
 
 Helper functions for time series analysis.
+
+Environment Variables
+---------------------
+
+``KIM_CONV_FORCE_SUBPROC``
+    If set (to any value), forces correlation and periodogram computations
+    to run in isolated subprocesses using ``multiprocessing`` with the "spawn"
+    start method.
+
+    This is primarily intended to avoid threading conflicts when kim-convergence
+    is used inside heavily multi-threaded simulation codes (e.g., LAMMPS with
+    OpenMP). It prevents nested parallelism issues that can cause deadlocks or
+    severe performance degradation.
+
+    **Performance warning**:
+    - In production simulations with large datasets: moderate overhead
+      (typically 10–30% slower).
+    - In unit tests, small datasets, or frequent calls: **extremely high
+      overhead** (can be 1000x or more slower, especially on macOS) due to
+      repeated process spawning and data copying.
+
+    **Never set this variable when running unit tests or during development.**
+    It is intended **only** as an escape hatch for real simulation runs that
+    exhibit threading deadlocks.
+
+    Example usage (only when needed):
+
+    .. code-block:: bash
+
+        export KIM_CONV_FORCE_SUBPROC=1
+        mpirun -np 8 lmp -in in.my_simulation   # or similar
+
+    This flag is optional and should remain unset in nearly all cases.
 """
 
 from bisect import bisect_left
 from math import isclose, pi, sqrt
+import multiprocessing as mp
 import numpy as np
-from typing import Optional, Union, List
+import os
+from typing import Optional, Union
 
 from kim_convergence._default import _DEFAULT_ABS_TOL
 from kim_convergence import CRError
 
 __all__ = [
-    'get_fft_optimal_size',
-    'auto_covariance',
-    'auto_correlate',
-    'cross_covariance',
-    'cross_correlate',
-    'modified_periodogram',
-    'periodogram',
-    'int_power',
-    'moment',
-    'skew',
+    "get_fft_optimal_size",
+    "auto_covariance",
+    "auto_correlate",
+    "cross_covariance",
+    "cross_correlate",
+    "modified_periodogram",
+    "periodogram",
+    "int_power",
+    "moment",
+    "skew",
 ]
 
 
@@ -64,13 +99,13 @@ FFTURN = (8, 9, 10, 12, 15, 16, 18, 20,
           78125, 78732, 80000, 81000, 81920, 82944, 84375, 86400,
           87480, 90000, 91125, 92160, 93312, 93750, 96000, 97200,
           98304, 98415, 100000)
-"""tuple: FFT unique regular numbers."""
+r"""tuple: FFT unique regular numbers."""
 
 
 def get_fft_optimal_size(input_size: int) -> int:
-    """Find the optimal size for the FFT solver.
+    r"""Find the optimal size for the FFT solver.
 
-    Get the next regular number greater than or equal to input_size [1]_.
+    Get the next regular number greater than or equal to input_size [statsmodels]_.
     Regular numbers are composites of the prime factors 2, 3, and 5. Also
     known as 5-smooth numbers or Hamming numbers, these are the optimal size
     for inputs to FFT solvers.
@@ -83,18 +118,14 @@ def get_fft_optimal_size(input_size: int) -> int:
     Returns:
         int: The first 5-smooth number greater than or equal to `input_size`.
 
-    References:
-        .. [1] Statsmodels: statistical modeling and econometrics in Python
-               http://www.statsmodels.org
-
     """
     # Check inputs
     if not isinstance(input_size, int):
-        raise CRError('input_size must be an `int`.')
+        raise CRError("input_size must be an `int`.")
 
     if input_size < 7:
         if input_size < 0:
-            raise CRError('input_size must be a positive `int`.')
+            raise CRError("input_size must be a positive `int`.")
         return input_size
 
     # Return if it is power of 2
@@ -105,7 +136,7 @@ def get_fft_optimal_size(input_size: int) -> int:
     if input_size < 100001:
         return FFTURN[bisect_left(FFTURN, input_size)]
 
-    optimal_size = float('inf')
+    optimal_size = float("inf")
     power_5 = 1
 
     while power_5 < input_size:
@@ -138,12 +169,153 @@ def get_fft_optimal_size(input_size: int) -> int:
     if power_5 < optimal_size:
         optimal_size = power_5
 
-    return optimal_size
+    return optimal_size  # type: ignore[arg-type]
 
 
-def auto_covariance(x: Union[np.ndarray, List[float]],
-                    *,
-                    fft: bool = False) -> np.ndarray:
+def _fft_corr(dx: np.ndarray, dy: Optional[np.ndarray] = None) -> np.ndarray:
+    r"""Compute (auto/cross) correlation using FFT (unnormalized)."""
+    dx_size = dx.size
+
+    # Find the optimal size for the FFT solver
+    optimal_size = get_fft_optimal_size(2 * dx_size)
+
+    dftx = np.fft.rfft(dx, n=optimal_size)
+
+    if dy is None:
+        # Auto-covariance
+        dft = dftx * np.conjugate(dftx)
+    else:
+        # Cross-covariance
+        dfty = np.fft.rfft(dy, n=optimal_size)
+        dft = dftx * np.conjugate(dfty)
+
+    # Compute the one-dimensional inverse discrete Fourier Transform
+    result = np.fft.irfft(dft, n=optimal_size)[:dx_size]
+    return result.real
+
+
+def _direct_corr(dx: np.ndarray, dy: Optional[np.ndarray] = None) -> np.ndarray:
+    r"""Compute (auto/cross) correlation using direct method (numpy.correlate)."""
+    if dy is None:
+        # Auto correlation of a one-dimensional sequence
+        return np.correlate(dx, dx, mode="full")[dx.size - 1 :]
+    else:
+        # Cross-correlation of two one-dimensional sequences
+        return np.correlate(dx, dy, mode="full")[dx.size - 1 :]
+
+
+def _subproc_corr(
+    dx_bytes: bytes,
+    dx_size: int,
+    dy_bytes: Optional[bytes],
+    fft: bool,
+    q: mp.Queue,
+) -> None:
+    r"""Compute correlation in isolated subprocess."""
+    dx = np.frombuffer(dx_bytes, dtype=np.float64, count=dx_size)
+
+    if dy_bytes is None:
+        dy = None
+    else:
+        dy = np.frombuffer(dy_bytes, dtype=np.float64, count=dx_size)
+
+    if fft:
+        corr = _fft_corr(dx, dy)
+    else:
+        corr = _direct_corr(dx, dy)
+
+    q.put(corr)
+
+
+def _isolate(
+    dx: np.ndarray, dy: Optional[np.ndarray] = None, *, fft: bool = False
+) -> np.ndarray:
+    r"""Spawn subprocess to isolate BLAS calls."""
+    ctx = mp.get_context("spawn")
+    q = ctx.Queue()
+
+    dx_bytes = dx.tobytes()
+    dy_bytes = None if dy is None else dy.tobytes()
+
+    p = ctx.Process(
+        target=_subproc_corr,
+        args=(dx_bytes, dx.size, dy_bytes, fft, q),
+    )
+
+    p.start()
+    result = q.get()
+    p.join()
+
+    return result
+
+
+def _subproc_perio(dx_bytes: bytes, dx_size: int, q: mp.Queue) -> None:
+    r"""Compute modified periodogram in isolated subprocess."""
+    dx = np.frombuffer(dx_bytes, dtype=np.float64, count=dx_size)
+
+    # Compute the one-dimensional discrete Fourier Transform
+    dft = np.fft.rfft(dx)[1:]
+    result = dft * np.conjugate(dft)
+
+    q.put(result)
+
+
+def _isolate_perio(dx: np.ndarray) -> np.ndarray:
+    r"""Spawn subprocess to isolate BLAS calls for periodogram."""
+    ctx = mp.get_context("spawn")
+    q = ctx.Queue()
+
+    dx_bytes = dx.tobytes()
+
+    p = ctx.Process(
+        target=_subproc_perio,
+        args=(dx_bytes, dx.size, q),
+    )
+
+    p.start()
+    result = q.get()
+    p.join()
+
+    return result
+
+
+def _validate_and_prepare_input(
+    x: Union[np.ndarray, list[float]],
+    y: Optional[Union[np.ndarray, list[float]]] = None,
+) -> tuple[np.ndarray, Optional[np.ndarray]]:
+    r"""Validate inputs and convert to numpy arrays."""
+    x = np.asarray(x, dtype=np.float64)
+
+    if x.ndim != 1:
+        raise CRError("x is not an array of one-dimension.")
+
+    if x.size < 1:
+        raise CRError("x is empty.")
+
+    if not np.all(np.isfinite(x)):
+        raise CRError(
+            "there is at least one value in the input array x which is "
+            "non-finite or not-number."
+        )
+
+    if y is not None:
+        y = np.asarray(y, dtype=np.float64)
+
+        if x.shape != y.shape:
+            raise CRError("x and y time series should have the same shape.")
+
+        if not np.all(np.isfinite(y)):
+            raise CRError(
+                "there is at least one value in the input array y which is "
+                "non-finite or not-number."
+            )
+
+    return x, y
+
+
+def auto_covariance(
+    x: Union[np.ndarray, list[float]], *, fft: bool = False
+) -> np.ndarray:
     r"""Calculate biased auto-covariance estimates.
 
     Compute auto-covariance estimates for every lag for the input array.
@@ -151,7 +323,7 @@ def auto_covariance(x: Union[np.ndarray, List[float]],
 
     .. math::
 
-        \gamma_k = \frac{1}{N}\sum\limits_{t=1}^{N-K}(x_t-\Bar{x})(x_{t+K}-\Bar{x})
+        \gamma_k = \frac{1}{N}\sum\limits_{t=1}^{N-K}(x_t-\bar{x})(x_{t+K}-\bar{x})
 
 
     Note:
@@ -160,7 +332,7 @@ def auto_covariance(x: Union[np.ndarray, List[float]],
 
         .. math::
 
-            \gamma_k = \frac{1}{N-K}\sum\limits_{t=1}^{N-K}(x_t-\Bar{x})(x_{t+K}-\Bar{x})
+            \gamma_k = \frac{1}{N-K}\sum\limits_{t=1}^{N-K}(x_t-\bar{x})(x_{t+K}-\bar{x})
 
         This definition has less bias, than the one used here. But the
         :math:`\frac{1}{N}` formulation has some desirable statistical
@@ -174,54 +346,29 @@ def auto_covariance(x: Union[np.ndarray, List[float]],
     Returns:
         1darray: The estimated autocovariances.
 
+    Raises:
+        CRError: If input validation fails.
     """
-    x = np.asarray(x)
+    x, _ = _validate_and_prepare_input(x)
 
-    if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
-
-    # Data size
-    x_size = x.size
-
-    if x_size < 1:
-        raise CRError('x is empty.')
-
-    if not np.all(np.isfinite(x)):
-        raise CRError(
-            'there is at least one value in the input array which is '
-            'non-finite or not-number.'
-        )
-
-    # Fluctuations
+    # Fluctuations (Center the data)
     dx = x - np.mean(x)
 
-    if fft:
-        # Find the optimal size for the FFT solver
-        optimal_size = get_fft_optimal_size(2 * x_size)
-
-        # Compute the one-dimensional discrete Fourier Transform
-        dft = np.fft.rfft(dx, n=optimal_size)
-        dft *= np.conjugate(dft)
-
-        # Compute the one-dimensional inverse discrete Fourier Transform
-        autocov = np.fft.irfft(dft, n=optimal_size)[:x_size]
-
-        # Get the real part
-        autocov = autocov.real
+    if os.getenv("KIM_CONV_FORCE_SUBPROC"):
+        corr = _isolate(dx, fft=fft)
     else:
-        # Auto correlation of a one-dimensional sequence
-        autocov = np.correlate(dx, dx, 'full')[x_size - 1:]
+        corr = _fft_corr(dx) if fft else _direct_corr(dx)
 
-    autocov /= float(x_size)
-
-    return autocov
+    return corr / float(x.size)
 
 
-def cross_covariance(x: Union[np.ndarray, List[float]],
-                     y: Union[np.ndarray, List[float], None],
-                     *,
-                     fft: bool = False) -> np.ndarray:
-    """Calculate the biased cross covariance estimate between two time series.
+def cross_covariance(
+    x: Union[np.ndarray, list[float]],
+    y: Union[np.ndarray, list[float], None],
+    *,
+    fft: bool = False,
+) -> np.ndarray:
+    r"""Calculate the biased cross covariance estimate between two time series.
 
     Calculate the cross covariance between two time series for every lag for
     the input arrays. This estimator is biased.
@@ -235,6 +382,9 @@ def cross_covariance(x: Union[np.ndarray, List[float]],
     Returns:
         1darray: The calculated cross covariances.
 
+    Raises:
+        CRError: If input validation fails.
+
     """
     if y is None:
         return auto_covariance(x, fft=fft)
@@ -243,66 +393,26 @@ def cross_covariance(x: Union[np.ndarray, List[float]],
     if y is x:
         return auto_covariance(x, fft=fft)
 
-    x = np.asarray(x)
+    x, y = _validate_and_prepare_input(x, y)
 
-    if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
-
-    # Data size
-    x_size = x.size
-
-    if x_size < 1:
-        raise CRError('x is empty.')
-
-    if not np.all(np.isfinite(x)):
-        raise CRError(
-            'there is at least one value in the input array x which is '
-            'non-finite or not-number.'
-        )
-
-    y = np.asarray(y)
-
-    if x.shape != y.shape:
-        raise CRError('x and y time series should have the same shape.')
-
-    if not np.all(np.isfinite(y)):
-        raise CRError(
-            'there is at least one value in the input array y which is '
-            'non-finite or not-number.'
-        )
+    assert isinstance(y, np.ndarray)
 
     # Fluctuations
     dx = x - x.mean()
     dy = y - y.mean()
 
-    if fft:
-        # Find the optimal size for the FFT solver
-        optimal_size = get_fft_optimal_size(2 * x_size)
-
-        # Compute the one-dimensional discrete Fourier Transform
-        dftx = np.fft.rfft(dx, n=optimal_size)
-        dfty = np.fft.rfft(dy, n=optimal_size)
-        dftx *= np.conjugate(dfty)
-
-        # Compute the one-dimensional inverse discrete Fourier Transform
-        crosscov = np.fft.irfft(dftx, n=optimal_size)[:x_size]
-
-        # Get the real part
-        crosscov = crosscov.real
+    if os.getenv("KIM_CONV_FORCE_SUBPROC"):
+        corr = _isolate(dx, dy, fft=fft)
     else:
-        # Cross-correlation of two one-dimensional sequences
-        crosscov = np.correlate(dx, dy, 'full')[x_size - 1:]
+        corr = _fft_corr(dx, dy) if fft else _direct_corr(dx, dy)
 
-    crosscov /= float(x_size)
-
-    return crosscov
+    return corr / float(x.size)
 
 
-def auto_correlate(x: Union[np.ndarray, List[float]],
-                   *,
-                   nlags: Optional[int] = None,
-                   fft: bool = False) -> np.ndarray:
-    """Calculate the auto-correlation function.
+def auto_correlate(
+    x: Union[np.ndarray, list[float]], *, nlags: Optional[int] = None, fft: bool = False
+) -> np.ndarray:
+    r"""Calculate the auto-correlation function.
 
     Calculate the auto-correlation function for `nlags` lag for the input
     array. This estimator is biased.
@@ -318,15 +428,15 @@ def auto_correlate(x: Union[np.ndarray, List[float]],
         ndarray: The calculated auto correlation function.
 
     """
-    x = np.asarray(x)
+    x = np.asarray(x, dtype=np.float64)
 
     # Calculate (estimate) the auto covariances
     autocor = auto_covariance(x, fft=fft)
 
     if isclose(autocor[0], 0, abs_tol=_DEFAULT_ABS_TOL):
         raise CRError(
-            'divide by zero encountered, which means the first element of '
-            'the auto covariances of x is zero (or close to zero).'
+            "divide by zero encountered, which means the first element of "
+            "the auto covariances of x is zero (or close to zero)."
         )
 
     if nlags is None:
@@ -335,25 +445,27 @@ def auto_correlate(x: Union[np.ndarray, List[float]],
     else:
         # Check input
         if not isinstance(nlags, int):
-            raise CRError('nlags must be an `int`.')
+            raise CRError("nlags must be an `int`.")
 
         if nlags < 1:
-            raise CRError('nlags must be a positive `int`.')
+            raise CRError("nlags must be a positive `int`.")
 
         nlags = min(nlags, x.size)
 
         # Calculate the auto correlation
-        autocor = autocor[:nlags + 1] / autocor[0]
+        autocor = autocor[: nlags + 1] / autocor[0]
 
     return autocor
 
 
-def cross_correlate(x: Union[np.ndarray, List[float]],
-                    y: Union[np.ndarray, List[float], None],
-                    *,
-                    nlags: Optional[int] = None,
-                    fft: bool = False) -> np.ndarray:
-    """Calculate the cross-correlation function.
+def cross_correlate(
+    x: Union[np.ndarray, list[float]],
+    y: Union[np.ndarray, list[float], None],
+    *,
+    nlags: Optional[int] = None,
+    fft: bool = False,
+) -> np.ndarray:
+    r"""Calculate the cross-correlation function.
 
     Calculate the cross-correlation function for `nlags` lag for the input
     array. This estimator is biased.
@@ -377,18 +489,18 @@ def cross_correlate(x: Union[np.ndarray, List[float]],
     if y is x:
         return auto_correlate(x, nlags=nlags, fft=fft)
 
+    x = np.asarray(x, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+
     # Calculate the cross covariances
     crosscorr = cross_covariance(x, y, fft=fft)
-
-    x = np.asarray(x)
-    y = np.asarray(y)
 
     sigma_xy = np.std(x) * np.std(y)
 
     if isclose(sigma_xy, 0, abs_tol=_DEFAULT_ABS_TOL):
         raise CRError(
-            'Divide by zero encountered, which means the multiplication '
-            'of the standard deviation of x and y is zero.'
+            "Divide by zero encountered, which means the multiplication "
+            "of the standard deviation of x and y is zero."
         )
 
     if nlags is None:
@@ -397,28 +509,27 @@ def cross_correlate(x: Union[np.ndarray, List[float]],
     else:
         # Check input
         if not isinstance(nlags, int):
-            raise CRError('nlags must be an `int`.')
+            raise CRError("nlags must be an `int`.")
 
         if nlags < 1:
-            raise CRError('nlags must be a positive `int`.')
+            raise CRError("nlags must be a positive `int`.")
 
         nlags = min(nlags, x.size)
 
         # Calculate the cross correlation
-        crosscorr = crosscorr[:nlags + 1] / sigma_xy
+        crosscorr = crosscorr[: nlags + 1] / sigma_xy
 
     return crosscorr
 
 
-def modified_periodogram(x: Union[np.ndarray, List[float]],
-                         *,
-                         fft: bool = False,
-                         with_mean: bool = False) -> np.ndarray:
+def modified_periodogram(
+    x: Union[np.ndarray, list[float]], *, fft: bool = False, with_mean: bool = False
+) -> np.ndarray:
     r"""Compute a modified periodogram to estimate the power spectrum.
 
     Estimate the power spectrum using a modified periodogram.
-    A periodogram [2]_ is an estimate of the spectral density of a signal
-    and it is defined as,
+    A periodogram [heidelberger1981]_ is an estimate of the spectral density of
+    a signal and it is defined as,
 
     .. math::
 
@@ -448,42 +559,15 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
 
         >>> f = np.arange(1., x.size//2 + 1) / x.size
 
-    References:
-        .. [2] Heidelberger, P. and Welch, P.D. (1981). "A Spectral Method
-               for Confidence Interval Generation and Run Length Control in
-               Simulations". Comm. ACM., 24, p. 233--245.
-
+    Raises:
+        CRError: If input validation fails.
     """
+    x, _ = _validate_and_prepare_input(x)
+
     if with_mean:
-        x = np.asarray(x)
-
-        if x.ndim != 1:
-            raise CRError('x is not an array of one-dimension.')
-
-        # Fluctuations
-        _mean = np.mean(x)
-
-        if not np.isfinite(_mean):
-            raise CRError(
-                'there is at least one value in the input array which is '
-                'non-finite or not-number.'
-            )
-
-        dx = x - _mean
-
-        del _mean
-
+        dx = x - np.mean(x)
     else:
-        dx = np.asarray(x)
-
-        if dx.ndim != 1:
-            raise CRError('x is not an array of one-dimension.')
-
-        if not np.all(np.isfinite(dx)):
-            raise CRError(
-                'there is at least one value in the input array which is '
-                'non-finite or not-number.'
-            )
+        dx = x
 
     # Data size
     x_size = dx.size
@@ -492,11 +576,14 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
 
     # Perform the fft
     if fft:
-        # Compute the one-dimensional discrete Fourier Transform
-        result = np.fft.rfft(dx)[1:]
-        result *= np.conjugate(result)
+        if os.getenv("KIM_CONV_FORCE_SUBPROC"):
+            result = _isolate_perio(dx)
+        else:
+            # Compute the one-dimensional discrete Fourier Transform
+            dft = np.fft.rfft(dx)[1:]
+            result = dft * np.conjugate(dft)
     else:
-        # The periodogram is defined in [2]_ as,
+        # The periodogram is defined in [heidelberger1981]_ as,
         # I(k/n) = | \sum_{j=0}^{j=n-1} {x(j) e^{-2\pi i j k / n}} |^2 / n
         # k = 1, n // 2
         arg = np.arange(1, x_size // 2 + 1, dtype=np.float64)
@@ -511,15 +598,14 @@ def modified_periodogram(x: Union[np.ndarray, List[float]],
         sumc = sumc.sum(axis=1)
         result = sumc * np.conjugate(sumc)
 
-    result = result.real
+    result = result.real  # type: ignore[arg-type]
     result *= scale
     return result
 
 
-def periodogram(x: Union[np.ndarray, List[float]],
-                *,
-                fft: bool = False,
-                with_mean: bool = False) -> np.ndarray:
+def periodogram(
+    x: Union[np.ndarray, list[float]], *, fft: bool = False, with_mean: bool = False
+) -> np.ndarray:
     r"""Compute a periodogram to estimate the power spectrum.
 
     Args:
@@ -548,7 +634,7 @@ def periodogram(x: Union[np.ndarray, List[float]],
     try:
         result = modified_periodogram(x, fft=fft, with_mean=with_mean)
     except CRError:
-        raise CRError('Failed to compute a modified periodogram.')
+        raise CRError("Failed to compute a modified periodogram.")
 
     # Data size
     x_size = np.size(x)
@@ -567,8 +653,8 @@ def periodogram(x: Union[np.ndarray, List[float]],
     return result
 
 
-def summary(x: Union[np.ndarray, List[float]]):
-    """Return the summary of the time series data.
+def summary(x: Union[np.ndarray, list[float]]):
+    r"""Return the summary of the time series data.
 
     Args:
         x(array_like, 1d): Time series data.
@@ -581,7 +667,7 @@ def summary(x: Union[np.ndarray, List[float]]):
     x = np.asarray(x)
 
     if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
+        raise CRError("x is not an array of one-dimension.")
 
     x_min = np.nanmin(x)
     x_max = np.nanmax(x)
@@ -589,19 +675,11 @@ def summary(x: Union[np.ndarray, List[float]]):
     x_std = np.nanstd(x)
     x_median = np.nanmedian(x)
     x_1st_quartile, x_3rd_quartile = np.nanquantile(x, [0.25, 0.75])
-    return \
-        x_min, \
-        x_max, \
-        x_mean, \
-        x_std, \
-        x_median, \
-        x_1st_quartile, \
-        x_3rd_quartile
+    return x_min, x_max, x_mean, x_std, x_median, x_1st_quartile, x_3rd_quartile
 
 
-def int_power(x: Union[np.ndarray, List[float]],
-              exponent: int) -> np.ndarray:
-    """Array elements raised to the power exponent.
+def int_power(x: Union[np.ndarray, list[float]], exponent: int) -> np.ndarray:
+    r"""Array elements raised to the power exponent.
 
     Args:
         x (array_like, 1d): The bases.
@@ -614,18 +692,18 @@ def int_power(x: Union[np.ndarray, List[float]],
     x = np.asarray(x)
 
     if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
+        raise CRError("x is not an array of one-dimension.")
 
     if x.size < 1:
-        raise CRError('x is empty.')
+        raise CRError("x is empty.")
 
     if not isinstance(exponent, int):
-        raise CRError('exponent must be an `int`.')
+        raise CRError("exponent must be an `int`.")
 
     if not np.all(np.isfinite(x)):
         raise CRError(
-            'there is at least one value in the input array x which is '
-            'non-finite or not-number.'
+            "there is at least one value in the input array x which is "
+            "non-finite or not-number."
         )
 
     if exponent == 1:
@@ -646,9 +724,7 @@ def int_power(x: Union[np.ndarray, List[float]],
     return 1.0 / yy
 
 
-def moment(x: Union[np.ndarray, List[float]],
-           *,
-           moment: int = 1) -> float:
+def moment(x: Union[np.ndarray, list[float]], *, moment: int = 1) -> float:
     r"""Calculates the nth moment about the mean for a sample.
 
     Args:
@@ -670,22 +746,10 @@ def moment(x: Union[np.ndarray, List[float]],
         mean.
 
     """
-    x = np.asarray(x)
-
-    if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
-
-    if x.size < 1:
-        raise CRError('x is empty.')
-
-    if not np.all(np.isfinite(x)):
-        raise CRError(
-            'there is at least one value in the input array x which is '
-            'non-finite or not-number.'
-        )
+    x, _ = _validate_and_prepare_input(x)
 
     if not isinstance(moment, int):
-        raise CRError('moment must be an `int`.')
+        raise CRError("moment must be an `int`.")
 
     # The first moment about the mean is 0
     if moment == 1:
@@ -696,10 +760,8 @@ def moment(x: Union[np.ndarray, List[float]],
     return dx_power_moment.mean()
 
 
-def skew(x: Union[np.ndarray, List[float]],
-         *,
-         bias: bool = False) -> float:
-    r"""Compute the time series data set skewness.
+def skew(x: Union[np.ndarray, list[float]], *, bias: bool = False) -> float:
+    r"""Compute the time series data set skewness [zwillinger2000]_.
 
     ``skewness`` is a measure of the asymmetry of the probability distribution
     of a real-valued random variable about its mean.
@@ -728,12 +790,6 @@ def skew(x: Union[np.ndarray, List[float]],
 
             G_1 = \frac{k_3}{k_2^{3/2}} = \frac{\sqrt{N(N-1)}}{N-2} \frac{m_3}{m_2^{3/2}}.
 
-
-    References:
-        .. [13] Zwillinger, D. and Kokoska, S., (2000). "CRC Standard
-                Probability and Statistics Tables and Formulae," Chapman &
-                Hall:New York. 2000. Section 2.2.24.1
-
     """
     x_size = np.size(x)
     if x_size in (1, 2):
@@ -741,7 +797,7 @@ def skew(x: Union[np.ndarray, List[float]],
     moment_2 = moment(x, moment=2)
     if moment_2 != 0:
         moment_3 = moment(x, moment=3)
-        val = moment_3 / moment_2 ** 1.5
+        val = moment_3 / moment_2**1.5
         if bias:
             return val
     else:
