@@ -8,6 +8,7 @@ project = "kim-convergence"
 version = "0.0.2"
 author = "Yaser Afshar"
 copyright = f"2021-{datetime.now().year}, Regents of the University of Minnesota"
+rst_epilog = f'.. |copyright| replace:: {copyright}'
 
 try:
     import kim_convergence

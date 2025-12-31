@@ -112,7 +112,7 @@ License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see https://www.gnu.org/licenses/.
 
-Copyright (c) 2021-2026, Regents of the University of Minnesota.
+|copyright|
 
 **Contributions**
 
