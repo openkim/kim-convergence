@@ -16,6 +16,7 @@ Environment Variables
     severe performance degradation.
 
     **Performance warning**:
+
     - In production simulations with large datasets: moderate overhead
       (typically 10–30% slower).
     - In unit tests, small datasets, or frequent calls: **extremely high

@@ -5,19 +5,25 @@
    :caption: Getting Started
 
    getting_started
-   troubleshooting
 
 .. toctree::
    :maxdepth: 2
-   :caption: Best Practices
+   :caption: Examples
 
-   best_practices
+   examples
 
 .. toctree::
    :maxdepth: 2
    :caption: Theory and Background
 
    theory
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Practical Guidance
+
+   best_practices
+   troubleshooting
 
 .. toctree::
    :maxdepth: 2
@@ -28,12 +34,6 @@
    modules/stats
    modules/timeseries
    modules/other_utils
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Examples
-
-   examples
 
 .. toctree::
    :maxdepth: 2

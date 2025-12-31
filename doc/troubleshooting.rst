@@ -146,6 +146,7 @@ This forces correlation and FFT computations into isolated subprocesses,
 preventing threading conflicts with the host simulator's parallelism.
 
 **Important performance note**:
+
 - In production simulations with large datasets: moderate overhead (typically
   10–30%).
 - In unit tests or with small data: **extremely high overhead** (can be 1000x
