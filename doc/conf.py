@@ -8,7 +8,7 @@ project = "kim-convergence"
 version = "0.0.2"
 author = "Yaser Afshar"
 copyright = f"2021-{datetime.now().year}, Regents of the University of Minnesota"
-rst_epilog = f'.. |copyright| replace:: {copyright}'
+rst_epilog = f".. |copyright| replace:: {copyright}"
 
 try:
     import kim_convergence
@@ -57,3 +57,12 @@ myst_enable_extensions = [
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static", "files"]
+
+# conf.py
+html_context = {
+    "display_github": True,
+    "github_user": "openkim",
+    "github_repo": "kim-convergence",
+    "github_version": "main",
+    "conf_py_path": "/docs/",
+}
