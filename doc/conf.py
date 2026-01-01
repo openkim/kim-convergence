@@ -2,7 +2,7 @@ import os
 import sys
 from datetime import datetime
 
-sys.path.insert(0, os.path.abspath("../../"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 project = "kim-convergence"
 version = "0.0.2"
