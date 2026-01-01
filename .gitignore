@@ -70,9 +70,6 @@ instance/
 
 # Sphinx documentation
 docs/_build/
-docs/_build/.gitkeep
-docs/_static/.gitkeep
-docs/_templates/.gitkeep
 
 # PyBuilder
 target/
