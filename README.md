@@ -1,10 +1,10 @@
 # kim-convergence
 
 [![Python package](https://github.com/openkim/kim-convergence/actions/workflows/python-package.yml/badge.svg)](https://github.com/openkim/kim-convergence/actions/workflows/python-package.yml)
+[![Documentation Status](https://readthedocs.org/projects/kim-convergence/badge/?version=latest)](https://kim-convergence.readthedocs.io/en/latest/?badge=latest)
 [![Anaconda-Server Badge](https://img.shields.io/conda/vn/conda-forge/kim-convergence.svg)](https://anaconda.org/conda-forge/kim-convergence)
 [![PyPI](https://img.shields.io/pypi/v/kim-convergence.svg)](https://pypi.python.org/pypi/kim-convergence)
 [![License](https://img.shields.io/badge/license-LGPL--2.1--or--later-blue)](LICENSE)
-[![Documentation Status](https://readthedocs.org/projects/kim-convergence/badge/?version=latest)](https://kim-convergence.readthedocs.io/en/latest/?badge=latest)
 
 **Stop guessing how long your simulation should run.**
 
