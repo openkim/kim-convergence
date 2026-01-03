@@ -105,14 +105,14 @@ def _setup_algorithm(
     if confidence_interval_approximation_method not in ucl_methods:
         raise CRError(
             f'method "{confidence_interval_approximation_method}" to '
-            "aproximate confidence interval not found. Valid methods are:"
+            "approximate confidence interval not found. Valid methods are:"
             "\n\t- " + "\n\t- ".join(ucl_methods)
         )
 
     try:
         ucl_obj = ucl_methods[confidence_interval_approximation_method]()
-    except CRError:
-        raise CRError("Failed to initialize the UCL object.")
+    except CRError as e:
+        raise CRError("Failed to initialize the UCL object.") from e
 
     if ucl_obj.name == "heidel_welch":
         ucl_obj.set_heidel_welch_constants(

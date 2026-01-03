@@ -299,7 +299,7 @@ class MSER_m(UCLBase):
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
         ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
-        # unused input parmeters in MSER-m UCL module
+        # unused input parameters in MSER-m module
         # estimate_equilibration_length interface
         number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
         si: Union[str, float, int, None] = _DEFAULT_SI,
@@ -341,8 +341,8 @@ class MSER_m(UCLBase):
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        # unused input parmeters in
-        # MSER_m ucl interface
+        # unused input parameters in MSER_m module
+        # _ucl_impl interface
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
         fft: bool = _DEFAULT_FFT,
@@ -539,6 +539,6 @@ def mser_m_relative_half_width_estimate(
             with_centering=with_centering,
             with_scaling=with_scaling,
         )
-    except CRError:
-        raise CRError("Failed to get the relative_half_width_estimate.")
+    except CRError as e:
+        raise CRError("Failed to get the relative_half_width_estimate.") from e
     return relative_half_width_estimate

@@ -36,9 +36,6 @@ Note:
 Contents
 --------
 
-.. toctree::
-   :maxdepth: 2
-
 1. :ref:`Available Methods <ucl-methods>`
 2. :ref:`Base Class <ucl-base-class>`
 3. :ref:`MSER-m Algorithm <ucl-mser-m>`

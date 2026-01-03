@@ -247,8 +247,8 @@ def _compute_ucl_and_check_accuracy(
     except CRSampleSizeError:
         # do not have enough data and need more
         return (None, 0.0, False)
-    except CRError:
-        raise CRError(f"Failed to compute the ucl for variable number = {i + 1}.")
+    except CRError as e:
+        raise CRError(f"Failed to compute the ucl for variable number = {i + 1}.") from e
 
     if final_pass:
         if ucl_obj.name != "uncorrelated_sample":
@@ -353,7 +353,7 @@ def _convergence_stage(
     -------
     converged : bool
         True if all variables fully converged.
-    total_run_length: itn
+    total_run_length: int
         Total number of steps in the trajectory.
     mean : list[Optional[float]]
         Estimated means (None only if UCL computation failed entirely).

@@ -21,7 +21,7 @@ All symbols in this module are private implementation details of the
 
 import kim_edn
 import numpy as np
-from typing import Any, Callable, Optional, Sequence, Union
+from typing import Callable, Optional, Sequence, Union
 
 from kim_convergence import (
     CRError,
@@ -300,24 +300,21 @@ def _equilibration_stage(
 
                 tsd = np.concatenate((tsd, ext_tsd), axis=ndim - 1)
 
-    del extra_check
-    del truncated_flag
-
     # 3. Finalize primary result
-    equilibration_step: list[int] = [index for index in truncate_index]
+    equilibration_step: list[int] = list(truncate_index)
     equilibration_detected: bool = bool(truncated)
 
     # 4. Secondary refinement using Integrated Autocorrelation Time (if successful)
     if equilibration_detected:
         # refine with secondary method (integrated autocorrelation time)
 
-        method: str = "MSER + Integrated Autocorrelation Time refinement"
+        method = "MSER + Integrated Autocorrelation Time refinement"
 
         for i in range(number_of_variables):
             # slice a numpy array, the memory is shared
             # between the slice and the original
             series = (
-                tsd[i, truncate_index[i] :] if ndim == 2 else tsd[truncate_index[i] :]
+                tsd[i, truncate_index[i]:] if ndim == 2 else tsd[truncate_index[i]:]
             )
 
             # check to get the more accurate estimate of the
@@ -334,8 +331,6 @@ def _equilibration_stage(
 
             # Correct the equilibration step
             equilibration_step[i] += equilibration_index_estimate
-
-    del truncate_index
 
     # 5. Enforce hard limits and final checks
     _check_equilibration_step(

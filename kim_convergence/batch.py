@@ -17,10 +17,10 @@ __all__ = ["batch"]
 
 
 def batch(
-    time_series_data: Union[np.ndarray, list[float]],
+    time_series_data: Union[np.ndarray, list],
     *,
     batch_size: int = _DEFAULT_BATCH_SIZE,
-    func: Callable = np.mean,
+    func: Callable[..., np.ndarray] = np.mean,
     scale: str = _DEFAULT_SCALE_METHOD,
     with_centering: bool = _DEFAULT_WITH_CENTERING,
     with_scaling: bool = _DEFAULT_WITH_SCALING,
@@ -116,7 +116,8 @@ def batch(
     # Reduction function like median has no dtype args
     except TypeError:
         batched_time_series_data = func(
-            time_series_data[:processed_sample_size].reshape((-1, batch_size)), axis=1
+            time_series_data[:processed_sample_size].reshape((-1, batch_size)),
+            axis=1,
         )
 
     if with_centering or with_scaling:
@@ -129,7 +130,8 @@ def batch(
         if scale not in scale_methods:
             raise CRError(
                 f'method "{scale}" not found. Valid methods to scale and '
-                "standardize a dataset are:\n\t- " + "\n\t- ".join(scale_methods)
+                "standardize a dataset are:\n\t- "
+                f'{"\n\t- ".join(scale_methods)}'
             )
 
         scale_func = scale_methods[scale]

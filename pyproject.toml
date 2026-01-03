@@ -58,7 +58,7 @@ parentdir_prefix = "kim_convergence-"
 
 [project.optional-dependencies]
 doc = [
-    "sphinx>=5",
+    "sphinx>=8.0,<9.0",
     "sphinx-rtd-theme",
     "numpydoc",
     "myst-parser",

@@ -13,8 +13,8 @@ from .nonnormal_test import (
     ks_test,
     kruskal_test,
     wilcoxon_test,
-)  # noqa: F401
-from .randomness_test import randomness_test  # noqa: F401
+)
+from .randomness_test import randomness_test
 from .t_dist import t_cdf_ccdf, t_cdf, t_inv_cdf, t_interval
 from .tools import (
     get_fft_optimal_size,

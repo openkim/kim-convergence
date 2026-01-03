@@ -56,7 +56,7 @@ __all__ = ["run_length_control"]
 
 def run_length_control(
     get_trajectory: Callable,
-    get_trajectory_args: dict = {},
+    get_trajectory_args: Optional[dict] = None,
     *,
     number_of_variables: int = 1,
     initial_run_length: int = 10000,
@@ -491,6 +491,8 @@ def run_length_control(
         population_cdf, number_of_variables
     )
     if number_of_variables == 1:
+        # Wrap in tuple so _make_variable_list treats args as a single element,
+        # not as a sequence to broadcast
         population_args = (population_args,)
     population_args_list: list[Optional[tuple]] = _make_variable_list(
         population_args, number_of_variables
@@ -511,6 +513,9 @@ def run_length_control(
         population_loc_list,
         population_scale_list,
     )
+
+    if get_trajectory_args is None:
+        get_trajectory_args = {}
 
     # 3. Equilibration stage: detect stationary region
     tsd, run_length, total_run_length, equilibration_step, equilibration_detected = (

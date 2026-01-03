@@ -6,8 +6,8 @@ from typing import cast
 
 try:
     import kim_convergence as cr
-except Exception:  # noqa: BLE001  # intentional catch-all
-    raise RuntimeError("Failed to import `kim-convergence` utility module")
+except Exception as e:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 from kim_convergence import CRError
 
@@ -116,7 +116,7 @@ class TestUCLModule(unittest.TestCase):
 
         self.assertTrue(test_passed)
         self.assertIsInstance(ucl_base.indices, np.ndarray)
-        assert isinstance(ucl_base.indices, np.ndarray)
+        assert isinstance(ucl_base.indices, np.ndarray)  # keeps mypy happy
         self.assertEqual(x_cut.size, ucl_base.indices.size)
 
         self.assertRaises(NotImplementedError, ucl_base.ucl, x_cut)

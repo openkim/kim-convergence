@@ -58,7 +58,7 @@ acceptable amount of uncertainty in the quantity of interest.
 
 <table>
   <tr>
-    <td> <img src="./doc/files/vid1_T_Eq.gif?raw=true" width="200" height="200"> </td>
+    <td> <img src="./doc/files/vid1_T_Eq.gif?raw=true" width="200" height="200" alt="Temperature equilibration detection animation"> </td>
   </tr>
 </table>
 
@@ -131,9 +131,9 @@ practices, troubleshooting tips, and the full API reference, see the
 ## Contributing
 
 Bug reports, feature requests, pull requests:
-https://github.com/openkim/kim-convergence/issues
+[GitHub Issues](https://github.com/openkim/kim-convergence/issues)
 
-Guidelines: https://kim-convergence.readthedocs.io/en/latest/contributing.html
+Guidelines: [Contributing Guide](https://kim-convergence.readthedocs.io/en/latest/contributing.html)
 
 ## License
 

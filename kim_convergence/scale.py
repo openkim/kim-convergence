@@ -144,8 +144,8 @@ class MinMaxScale:
 def minmax_scale(
     x: np.ndarray,
     *,
-    with_centering: bool = True,
-    with_scaling: bool = True,
+    with_centering: bool = True,  # kept for API compatibility
+    with_scaling: bool = True,  # kept for API compatibility
     feature_range: tuple[float, float] = (0.0, 1.0),
 ) -> np.ndarray:
     r"""Standardize/Transform a dataset by scaling it to a given range.
@@ -170,6 +170,12 @@ def minmax_scale(
     Returns:
         1darray: Scaled dataset to a given range
 
+
+    Notes
+    -----
+    `with_centering` and `with_scaling` exist only to provide the same
+    signature as the other scaling helpers; they are **ignored** because
+    MinMaxScale always centres and scales by construction.
     """
     mms = MinMaxScale(feature_range=feature_range)
     return mms.scale(x)
@@ -461,8 +467,9 @@ class StandardScale:
             assert isinstance(self.std_, float)
             x = np.asarray(x)
             if self.mean_2 is not None:
-                inverse_scaled_x = x + self.mean_2
-            inverse_scaled_x *= self.std_
+                inverse_scaled_x = (x + self.mean_2) * self.std_
+            else:
+                inverse_scaled_x = x * self.std_
         else:
             inverse_scaled_x = np.array(x, copy=True)
 
@@ -560,9 +567,7 @@ class RobustScale:
         self.with_centering_ = with_centering
         self.with_scaling_ = with_scaling
 
-        if not isinstance(quantile_range, tuple) or not isinstance(
-            quantile_range, list
-        ):
+        if not isinstance(quantile_range, (tuple, list)):
             raise CRError(f"invalid quantile range: {str(quantile_range)}.")
 
         if len(quantile_range) != 2:
@@ -769,7 +774,10 @@ class MaxAbsScale:
 
 
 def maxabs_scale(
-    x: np.ndarray, *, with_centering: bool = True, with_scaling: bool = True
+    x: np.ndarray,
+    *,
+    with_centering: bool = True,  # kept for API compatibility
+    with_scaling: bool = True,  # kept for API compatibility
 ) -> np.ndarray:
     r"""Standardize a dataset to the [-1, 1] range.
 
@@ -782,6 +790,12 @@ def maxabs_scale(
     Returns:
         1darray: scaled dataset
 
+    Notes
+    -----
+    `with_centering` and `with_scaling` exist only to provide the same
+    signature as the other scaling helpers; they are **ignored** because
+    MaxAbsScale only performs absolute-max scaling and has no separate
+    centre/scale flags.
     """
     mas = MaxAbsScale()
     return mas.scale(x)

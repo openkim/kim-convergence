@@ -88,11 +88,11 @@ def time_series_data_si(
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time,
             )
-        except CRError:
+        except CRError as e:
             raise CRError(
                 "Failed to compute the statistical inefficiency for the "
                 "time_series_data."
-            )
+            ) from e
 
     elif isinstance(si, (float, int)):
         if si < 1.0:
@@ -268,9 +268,6 @@ def time_series_data_uncorrelated_samples(
         uncorrelated_sample_indices (array_like, 1d, optional): indices
             of uncorrelated subsamples of the time series data.
             (default: None)
-        uncorrelated_sample_indices (array_like, 1d, optional): indices
-            of uncorrelated subsamples of the time series data.
-            (default: None)
 
     Returns:
         1darray: uncorrelated_sample of the time series data.
@@ -291,11 +288,11 @@ def time_series_data_uncorrelated_samples(
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time,
             )
-        except CRError:
+        except CRError as e:
             raise CRError(
                 "Failed to compute the indices of uncorrelated samples of"
                 "the time_series_data."
-            )
+            ) from e
 
     else:
         indices = np.asarray(uncorrelated_sample_indices)
@@ -307,7 +304,7 @@ def time_series_data_uncorrelated_samples(
 
     try:
         uncorrelated_samples = time_series_data[indices]
-    except IndexError:
+    except IndexError as e:
         time_series_data_size = time_series_data.size
         mask = indices >= time_series_data_size
         wrong_indices = np.where(mask)
@@ -315,7 +312,7 @@ def time_series_data_uncorrelated_samples(
             _out_of_bounds_error_str(
                 bad_indices=indices[wrong_indices], size=time_series_data_size  # type: ignore[arg-type]
             )
-        )
+        ) from e
 
     return uncorrelated_samples
 
@@ -330,7 +327,7 @@ def time_series_data_uncorrelated_random_samples(
         np.ndarray, list[int], None
     ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
 ) -> np.ndarray:
-    r"""Retuen random data for each block after blocking the data.
+    r"""Return random data for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
     where each block contains ``si`` successive data points. If si
@@ -371,11 +368,11 @@ def time_series_data_uncorrelated_random_samples(
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time,
             )
-        except CRError:
+        except CRError as e:
             raise CRError(
                 "Failed to compute the indices of uncorrelated samples of "
                 "the time_series_data."
-            )
+            ) from e
 
     else:
         indices = np.asarray(uncorrelated_sample_indices)
@@ -396,16 +393,13 @@ def time_series_data_uncorrelated_random_samples(
             )
         )
 
-    random_samples = np.empty(indices.size, dtype=time_series_data.dtype)
+    random_samples = np.empty(indices.size - 1, dtype=time_series_data.dtype)
 
-    index_s = 0
-    for index, index_e in enumerate(indices[1:-1]):
+    index_s = indices[0]
+    for index, index_e in enumerate(indices[1:]):
         rand_index = randint(index_s, index_e - 1)
         random_samples[index] = time_series_data[rand_index]
         index_s = index_e
-
-    rand_index = randint(index_s, indices[-1])
-    random_samples[-1] = time_series_data[rand_index]
 
     return random_samples
 
@@ -420,7 +414,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
         np.ndarray, list[int], None
     ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
 ) -> np.ndarray:
-    """Retuen average value for each block after blocking the data.
+    """Return average value for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
     where each block contains ``si`` successive data points. If si
@@ -463,11 +457,11 @@ def time_series_data_uncorrelated_block_averaged_samples(
                 fft=fft,
                 minimum_correlation_time=minimum_correlation_time,
             )
-        except CRError:
+        except CRError as e:
             raise CRError(
                 "Failed to compute the indices of uncorrelated samples of "
                 "the time_series_data."
-            )
+            ) from e
 
     else:
         indices = np.asarray(uncorrelated_sample_indices)

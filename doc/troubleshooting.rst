@@ -79,15 +79,32 @@ Edge Cases
 Constant or Near-Constant Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Many statistical methods require finite variance. For testing or degenerate cases:
+Many statistical methods require finite variance. For testing or degenerate
+cases you can **temporarily** inject numerical noise, but be aware that you are
+**altering the physics**:
+
+.. warning::
+   Adding artificial noise makes the *algorithm* happy, **not** the science.
+   Always investigate **why** your simulation returns constant data and choose
+   the noise magnitude **relative to the physical scale** of the observable.
+
+A minimal helper that keeps you in control:
 
 .. code-block:: python
 
-   def get_trajectory(nstep):
-       data = your_simulation(nstep)
-       # Add tiny noise if variance is below machine precision
-       if np.std(data) < 1e-10:
-           data += np.random.normal(0, 1e-8, nstep)
+   def get_trajectory(step: int, args: dict) -> np.ndarray:
+       """Run the simulation and return the time-series."""
+       data = your_simulation(step, **args)      # shape (step,)
+
+       # Let the caller decide whether to perturb
+       noise = args.get("noise", 1e-8)           # physical scale
+       if np.std(data) < noise:
+           warnings.warn(
+               "Constant data detected – adding artificial noise of magnitude "
+               f"{noise}. Review science before production.", UserWarning,
+               stacklevel=2
+           )
+           data = data + np.random.normal(0.0, noise, step)
        return data
 
 Insufficient Sample Size

@@ -19,13 +19,6 @@ except ImportError:
     pass
 
 
-def setup(app):
-    from numpydoc import __version__
-
-    # remove the relabeller from the event loop
-    app.disconnect(app.events.listeners["doctree-read"][-1])
-
-
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
@@ -64,5 +57,5 @@ html_context = {
     "github_user": "openkim",
     "github_repo": "kim-convergence",
     "github_version": "main",
-    "conf_py_path": "/docs/",
+    "conf_py_path": "/doc/",
 }

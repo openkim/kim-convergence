@@ -5,8 +5,8 @@ import numpy as np
 
 try:
     import kim_convergence as cr
-except Exception:  # noqa: BLE001  # intentional catch-all
-    raise RuntimeError("Failed to import `kim-convergence` utility module")
+except Exception as e:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 from kim_convergence import CRError
 

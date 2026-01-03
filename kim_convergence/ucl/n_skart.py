@@ -112,7 +112,7 @@ class N_SKART(UCLBase):
         self,
         time_series_data: Union[np.ndarray, list[float]],
         *,
-        # unused input parmeters in N-SKART UCL module
+        # unused input parameters in N-SKART module
         # estimate_equilibration_length interface
         si: Union[str, float, int, None] = _DEFAULT_SI,
         nskip: Optional[int] = _DEFAULT_NSKIP,
@@ -229,7 +229,7 @@ class N_SKART(UCLBase):
 
                 idx = self.number_batches_per_spacer
 
-                spaced_x_batch = x_batch[idx :: idx + 1]
+                spaced_x_batch = x_batch[idx::idx + 1]
 
                 # k'
                 self.kp_number_batches = spaced_x_batch.size
@@ -302,8 +302,8 @@ class N_SKART(UCLBase):
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
         fft: bool = _DEFAULT_FFT,
-        # unused input parmeters in
-        # N_SKART ucl interface
+        # unused input parameters in N_SKART module
+        # _ucl_impl interface
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
@@ -447,7 +447,7 @@ class N_SKART(UCLBase):
         batches_per_spacer = ceil(equilibration_length_estimate / self.batch_size)
 
         # modification to the original paper
-        spaced_x_batch = x_batch[batches_per_spacer :: batches_per_spacer + 1]
+        spaced_x_batch = x_batch[batches_per_spacer::batches_per_spacer + 1]
 
         # number of spaced batches, k'' = 1 + floor((k' - 1) / (d' + 1))
         spaced_x_batch_size = 1 + (self.kp_number_batches - 1) // (
@@ -574,6 +574,6 @@ def n_skart_relative_half_width_estimate(
             confidence_coefficient=confidence_coefficient,
             fft=fft,
         )
-    except CRError:
-        raise CRError("Failed to get the relative_half_width_estimate.")
+    except CRError as e:
+        raise CRError("Failed to get the relative_half_width_estimate.") from e
     return relative_half_width_estimate

@@ -1,6 +1,5 @@
 """Beta distribution module."""
 
-from copy import deepcopy
 from math import lgamma, log, fabs, exp, nan
 import numpy as np
 
@@ -79,11 +78,11 @@ def betacf(
     c = 1.0
 
     if fabs(d) < _fpmin:
-        d = deepcopy(_fpmax)
-        h = deepcopy(_fpmax)
+        d = _fpmax
+        h = _fpmax
     else:
         d = 1.0 / d
-        h = deepcopy(d)
+        h = d
 
     for m in range(1, max_iteration + 1):
         m2 = 2 * m
@@ -98,14 +97,14 @@ def betacf(
         _c = fabs(c) < _fpmin
 
         if _d and _c:
-            d = deepcopy(_fpmax)
-            c = deepcopy(_fpmin)
+            d = _fpmax
+            c = _fpmin
             _del = 1.0
         elif _d:
-            d = deepcopy(_fpmax)
+            d = _fpmax
             _del = _fpmax * c
         elif _c:
-            c = deepcopy(_fpmin)
+            c = _fpmin
             _del = _fpmin / d
         else:
             d = 1.0 / d
@@ -122,14 +121,14 @@ def betacf(
         _c = fabs(c) < _fpmin
 
         if _d and _c:
-            d = deepcopy(_fpmax)
-            c = deepcopy(_fpmin)
+            d = _fpmax
+            c = _fpmin
             _del = 1.0
         elif _d:
-            d = deepcopy(_fpmax)
+            d = _fpmax
             _del = _fpmax * c
         elif _c:
-            c = deepcopy(_fpmin)
+            c = _fpmin
             _del = _fpmin / d
         else:
             d = 1.0 / d

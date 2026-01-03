@@ -10,8 +10,8 @@ import unittest
 
 try:
     import kim_convergence as cr
-except Exception:  # noqa: BLE001  # intentional catch-all
-    raise Exception("Failed to import `kim-convergence` utility module")
+except Exception as e:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 from kim_convergence import CRError
 
@@ -286,7 +286,7 @@ class TestRunLengthControl(unittest.TestCase):
         )
 
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         json_obj = json.loads(msg)
 
         self.assertTrue(json_obj["converged"])
@@ -314,7 +314,7 @@ class TestRunLengthControl(unittest.TestCase):
             fp_format="json",
         )
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         obj = json.loads(msg)
 
         self.assertTrue(obj["converged"])
@@ -366,7 +366,8 @@ class TestRunLengthControl(unittest.TestCase):
     def test_dump_and_edn_on_failure(self):
         """When convergence fails the full trajectory must be written to the requested file."""
 
-        tmp = tempfile.mktemp(suffix=".edn")
+        with tempfile.NamedTemporaryFile(suffix=".edn", delete=False) as f:
+            tmp = f.name
 
         # a constant trajectory
         def constant_trajectory(step) -> np.ndarray:
@@ -450,7 +451,7 @@ class TestRunLengthControl(unittest.TestCase):
             fp_format="json",
         )
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         obj = json.loads(msg)
 
         self.assertTrue(obj["converged"])
@@ -539,7 +540,7 @@ class TestRunLengthControl(unittest.TestCase):
             fp_format="json",
         )
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         obj = json.loads(msg)
 
         self.assertFalse(obj["converged"])
@@ -606,7 +607,7 @@ class TestRunLengthControl(unittest.TestCase):
             fp_format="json",
         )
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         obj = json.loads(msg)
 
         self.assertTrue(obj["converged"])
@@ -944,8 +945,10 @@ class TestRunLengthControl(unittest.TestCase):
         def constant_trajectory(step: int) -> np.ndarray:
             return np.full(step, 77.0)
 
-        traj_file = tempfile.mktemp(suffix=".edn")
-        report_file = tempfile.mktemp(suffix=".json")
+        with tempfile.NamedTemporaryFile(suffix=".edn", delete=False) as f:
+            traj_file = f.name
+        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:
+            report_file = f.name
 
         try:
             # Open report file and keep it open during the call

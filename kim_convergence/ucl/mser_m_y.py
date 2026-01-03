@@ -79,8 +79,8 @@ class MSER_m_y(MSER_m):
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        # unused input parmeters in
-        # MSER_m ucl interface
+        # unused input parameters in MSER_m_y module
+        # _ucl_impl interface
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
         fft: bool = _DEFAULT_FFT,
@@ -323,6 +323,6 @@ def mser_m_y_relative_half_width_estimate(
             with_centering=with_centering,
             with_scaling=with_scaling,
         )
-    except CRError:
-        raise CRError("Failed to get the relative_half_width_estimate.")
+    except CRError as e:
+        raise CRError("Failed to get the relative_half_width_estimate.") from e
     return relative_half_width_estimate

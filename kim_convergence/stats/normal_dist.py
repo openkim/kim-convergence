@@ -27,7 +27,7 @@ def s_normal_inv_cdf(p: float) -> float:
     function or quantile function) for standard normal distribution
     [pythonstats]_, [wichura1988]_.
 
-    Ars:
+    Args:
         p {float} -- Probability (must be between 0.0 and 1.0)
 
     Returns:
@@ -114,10 +114,11 @@ def s_normal_inv_cdf(p: float) -> float:
         return -x
     return x
 
+
 def normal_inv_cdf(p: float, *, loc=0.0, scale: float = 1.0) -> float:
     r"""Compute the normal distribution inverse cumulative distribution function.
 
-    Ars:
+    Args:
         p {float} -- Probability (must be between 0.0 and 1.0)
         loc (float, optional): location parameter (default: 0.0)
         scale (float, optional): scale parameter (default: 1.0)

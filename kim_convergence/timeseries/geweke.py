@@ -87,8 +87,8 @@ def geweke(
     # Loop over start indices
     for start in start_indices:
         # Calculate slices
-        first_slice = x[start : start + int(first * (end - start))]
-        last_slice = x[int(end - last * (end - start)) :]
+        first_slice = x[start:start + int(first * (end - start))]
+        last_slice = x[int(end - last * (end - start)):]
         z_score = first_slice.mean() - last_slice.mean()
         scale_ = first_slice.var() + last_slice.var()
         if scale_ > 0.0:

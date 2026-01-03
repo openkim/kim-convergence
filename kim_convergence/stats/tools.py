@@ -18,7 +18,7 @@ Environment Variables
     **Performance warning**:
 
     - In production simulations with large datasets: moderate overhead
-      (typically 10–30% slower).
+      (typically 10-30% slower).
     - In unit tests, small datasets, or frequent calls: **extremely high
       overhead** (can be 1000x or more slower, especially on macOS) due to
       repeated process spawning and data copying.
@@ -42,6 +42,7 @@ from math import isclose, pi, sqrt
 import multiprocessing as mp
 import numpy as np
 import os
+from queue import Empty
 from typing import Optional, Union
 
 from kim_convergence._default import _DEFAULT_ABS_TOL
@@ -199,10 +200,10 @@ def _direct_corr(dx: np.ndarray, dy: Optional[np.ndarray] = None) -> np.ndarray:
     r"""Compute (auto/cross) correlation using direct method (numpy.correlate)."""
     if dy is None:
         # Auto correlation of a one-dimensional sequence
-        return np.correlate(dx, dx, mode="full")[dx.size - 1 :]
+        return np.correlate(dx, dx, mode="full")[dx.size - 1:]
     else:
         # Cross-correlation of two one-dimensional sequences
-        return np.correlate(dx, dy, mode="full")[dx.size - 1 :]
+        return np.correlate(dx, dy, mode="full")[dx.size - 1:]
 
 
 def _subproc_corr(
@@ -213,19 +214,22 @@ def _subproc_corr(
     q: mp.Queue,
 ) -> None:
     r"""Compute correlation in isolated subprocess."""
-    dx = np.frombuffer(dx_bytes, dtype=np.float64, count=dx_size)
+    try:
+        dx = np.frombuffer(dx_bytes, dtype=np.float64, count=dx_size)
 
-    if dy_bytes is None:
-        dy = None
-    else:
-        dy = np.frombuffer(dy_bytes, dtype=np.float64, count=dx_size)
+        if dy_bytes is None:
+            dy = None
+        else:
+            dy = np.frombuffer(dy_bytes, dtype=np.float64, count=dx_size)
 
-    if fft:
-        corr = _fft_corr(dx, dy)
-    else:
-        corr = _direct_corr(dx, dy)
+        if fft:
+            corr = _fft_corr(dx, dy)
+        else:
+            corr = _direct_corr(dx, dy)
 
-    q.put(corr)
+        q.put(corr)
+    except Exception as e:  # noqa: BLE001  # intentional catch-all
+        q.put(CRError(str(e)))
 
 
 def _isolate(
@@ -244,21 +248,33 @@ def _isolate(
     )
 
     p.start()
-    result = q.get()
-    p.join()
+    p.join()  # wait until subprocess terminates
 
+    if p.exitcode != 0:  # crash, kill -9, segfault, etc.
+        raise CRError(f"Correlation worker died (exitcode {p.exitcode}).")
+
+    try:
+        result = q.get_nowait()
+    except Empty:  # child exited without putting anything
+        raise CRError("Correlation worker produced no result.")
+
+    if isinstance(result, CRError):  # remote Python exception
+        raise result
     return result
 
 
 def _subproc_perio(dx_bytes: bytes, dx_size: int, q: mp.Queue) -> None:
     r"""Compute modified periodogram in isolated subprocess."""
-    dx = np.frombuffer(dx_bytes, dtype=np.float64, count=dx_size)
+    try:
+        dx = np.frombuffer(dx_bytes, dtype=np.float64, count=dx_size)
 
-    # Compute the one-dimensional discrete Fourier Transform
-    dft = np.fft.rfft(dx)[1:]
-    result = dft * np.conjugate(dft)
+        # Compute the one-dimensional discrete Fourier Transform
+        dft = np.fft.rfft(dx)[1:]
+        result = dft * np.conjugate(dft)
 
-    q.put(result)
+        q.put(result)
+    except Exception as e:  # noqa: BLE001  # intentional catch-all
+        q.put(CRError(str(e)))
 
 
 def _isolate_perio(dx: np.ndarray) -> np.ndarray:
@@ -274,9 +290,18 @@ def _isolate_perio(dx: np.ndarray) -> np.ndarray:
     )
 
     p.start()
-    result = q.get()
-    p.join()
+    p.join()  # wait until subprocess terminates
 
+    if p.exitcode != 0:  # crash, kill -9, segfault, etc.
+        raise CRError(f"Periodogram worker died (exitcode {p.exitcode}).")
+
+    try:
+        result = q.get_nowait()
+    except Empty:  # child exited without putting anything
+        raise CRError("Periodogram worker produced no result.")
+
+    if isinstance(result, CRError):  # remote Python exception
+        raise result
     return result
 
 
@@ -634,8 +659,8 @@ def periodogram(
     """
     try:
         result = modified_periodogram(x, fft=fft, with_mean=with_mean)
-    except CRError:
-        raise CRError("Failed to compute a modified periodogram.")
+    except CRError as e:
+        raise CRError("Failed to compute a modified periodogram.") from e
 
     # Data size
     x_size = np.size(x)

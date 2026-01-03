@@ -318,8 +318,8 @@ class HeidelbergerWelch(UCLBase):
         fft: bool = _DEFAULT_FFT,
         test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
         train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
-        # unused input parmeters in
-        # Heidelberger and Welch ucl interface
+        # unused input parameters in HeidelbergerWelch module
+        # _ucl_impl interface
         batch_size: int = _DEFAULT_BATCH_SIZE,
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
         scale: str = _DEFAULT_SCALE_METHOD,
@@ -773,6 +773,6 @@ def heidelberger_welch_relative_half_width_estimate(
             test_size=test_size,
             train_size=train_size,
         )
-    except CRError:
-        raise CRError("Failed to get the relative_half_width_estimate.")
+    except CRError as e:
+        raise CRError("Failed to get the relative_half_width_estimate.") from e
     return relative_half_width_estimate

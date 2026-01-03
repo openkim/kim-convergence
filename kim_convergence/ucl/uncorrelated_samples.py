@@ -65,8 +65,8 @@ class UncorrelatedSamples(UCLBase):
             np.ndarray, list[int], None
         ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
-        # unused input parmeters in
-        # UncorrelatedSamples ucl interface
+        # unused input parameters in UncorrelatedSamples module
+        # _ucl_impl interface
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
         heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
         batch_size: int = _DEFAULT_BATCH_SIZE,
@@ -407,6 +407,6 @@ def uncorrelated_samples_relative_half_width_estimate(
                 sample_method=sample_method,
             )
         )
-    except CRError:
-        raise CRError("Failed to get the relative_half_width_estimate.")
+    except CRError as e:
+        raise CRError("Failed to get the relative_half_width_estimate.") from e
     return relative_half_width_estimate

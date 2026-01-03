@@ -168,7 +168,7 @@ def geyer_r_statistical_inefficiency(
     y: Union[np.ndarray, list[float], None] = None,
     *,
     fft: bool = _DEFAULT_FFT,
-    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,  # unused (API compatibility)
 ) -> float:
     r"""Compute the statistical inefficiency.
 
@@ -213,10 +213,6 @@ def geyer_r_statistical_inefficiency(
             (default: None)
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: True)
-        minimum_correlation_time (int, optional): minimum amount of correlation
-            function to compute. The algorithm terminates after computing the
-            correlation time out to minimum_correlation_time when the
-            correlation function first goes negative. (default: None)
 
     Returns:
         float: estimated statistical inefficiency.
@@ -322,7 +318,7 @@ def geyer_split_r_statistical_inefficiency(
     y: Union[np.ndarray, list[float], None] = None,
     *,
     fft: bool = _DEFAULT_FFT,
-    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,  # unused (API compatibility)
 ) -> float:
     r"""Compute the statistical inefficiency.
 
@@ -357,10 +353,6 @@ def geyer_split_r_statistical_inefficiency(
             with less than eight data points.
         fft (bool, optional): if ``True``, use FFT convolution. FFT should be
             preferred for long time series. (default: True)
-        minimum_correlation_time (int, optional): minimum amount of correlation
-            function to compute. The algorithm terminates after computing the
-            correlation time out to minimum_correlation_time when the
-            correlation function first goes negative. (default: None)
 
     Returns:
         float: estimated statistical inefficiency.
@@ -382,7 +374,7 @@ def geyer_split_r_statistical_inefficiency(
             "this method."
         )
     x_size //= 2
-    return geyer_r_statistical_inefficiency(x[:x_size], x[x_size : 2 * x_size], fft=fft)
+    return geyer_r_statistical_inefficiency(x[:x_size], x[x_size:2 * x_size], fft=fft)
 
 
 def geyer_split_statistical_inefficiency(
@@ -390,7 +382,7 @@ def geyer_split_statistical_inefficiency(
     y: Union[np.ndarray, list[float], None] = None,
     *,
     fft: bool = _DEFAULT_FFT,
-    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,  # unused (API compatibility)
 ) -> float:
     r"""Compute the statistical inefficiency.
 
@@ -455,10 +447,10 @@ def geyer_split_statistical_inefficiency(
     fft = fft and x_size > 30
 
     acov_1 = auto_covariance(x[:x_size], fft=fft)
-    acov_2 = auto_covariance(x[x_size : 2 * x_size], fft=fft)
+    acov_2 = auto_covariance(x[x_size:2 * x_size], fft=fft)
 
     chain_mean_1 = np.mean(x[:x_size])
-    chain_mean_2 = np.mean(x[x_size : 2 * x_size])
+    chain_mean_2 = np.mean(x[x_size:2 * x_size])
 
     n_n_1 = float(x_size) / (x_size - 1.0)
     n_1_n = (x_size - 1.0) / float(x_size)

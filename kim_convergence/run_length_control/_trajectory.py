@@ -17,7 +17,7 @@ All symbols in this module are private implementation details of the
 """
 
 import numpy as np
-from typing import Callable
+from typing import Callable, Optional
 
 from kim_convergence import CRError
 
@@ -41,27 +41,31 @@ def _get_trajectory(
     run_length: int,
     ndim: int,
     number_of_variables: int = 1,
-    get_trajectory_args: dict = {},
+    get_trajectory_args: Optional[dict] = None,
 ) -> np.ndarray:
     if run_length == 0:
         return np.array([], dtype=np.float64)
 
-    if isinstance(get_trajectory_args, dict) and get_trajectory_args:
+    if (
+        get_trajectory_args is not None
+        and isinstance(get_trajectory_args, dict)
+        and get_trajectory_args
+    ):
         try:
             tsd = get_trajectory(run_length, get_trajectory_args)
-        except Exception:  # noqa: BLE001  # intentional catch-all
+        except Exception as e:  # noqa: BLE001  # intentional catch-all
             raise CRError(
                 "failed to get the time-series data or do the simulation "
                 f"for {run_length} number of steps."
-            )
+            ) from e
     else:
         try:
             tsd = get_trajectory(run_length)
-        except Exception:  # noqa: BLE001  # intentional catch-all
+        except Exception as e:  # noqa: BLE001  # intentional catch-all
             raise CRError(
                 "failed to get the time-series data or do the simulation "
                 f"for {run_length} number of steps."
-            )
+            ) from e
 
     tsd = np.asarray(tsd, dtype=np.float64)
 

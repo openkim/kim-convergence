@@ -22,15 +22,17 @@ def _get_caller_name(offset: int = 1) -> str:
     if frame is None:
         return "<unknown>"
 
-    # Go back 'offset + 1' because this function itself is one frame
-    caller_frame = frame
-    for _ in range(offset + 1):
-        caller_frame = caller_frame.f_back
-        if caller_frame is None:
-            return "<unknown>"
+    try:
+        # Go back 'offset + 1' because this function itself is one frame
+        caller_frame = frame
+        for _ in range(offset + 1):
+            caller_frame = caller_frame.f_back
+            if caller_frame is None:
+                return "<unknown>"
 
-    code = caller_frame.f_code
-    return code.co_name
+        return caller_frame.f_code.co_name
+    finally:
+        del frame
 
 
 class CRError(Exception):

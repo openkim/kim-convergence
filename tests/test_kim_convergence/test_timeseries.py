@@ -9,8 +9,8 @@ import unittest
 
 try:
     import kim_convergence as cr
-except Exception:  # noqa: BLE001  # intentional catch-all
-    raise Exception("Failed to import `kim-convergence` utility module")
+except Exception as e:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 
 start = 0
@@ -84,7 +84,7 @@ class TimeseriesModule(unittest.TestCase):
         )
 
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         kim_obj: Any = kim_edn.loads(msg)
 
         subsample_effective_sample_size = kim_obj["effective_sample_size"]
@@ -114,7 +114,7 @@ class TimeseriesModule(unittest.TestCase):
         )
 
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         json_obj = json.loads(msg)
 
         self.assertTrue(json_obj["converged"])
@@ -142,7 +142,7 @@ class TimeseriesModule(unittest.TestCase):
         )
 
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         kim_obj = kim_edn.loads(msg)
 
         heidel_welch_effective_sample_size = kim_obj["effective_sample_size"]
@@ -182,7 +182,7 @@ class TimeseriesModule(unittest.TestCase):
         )
 
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         kim_obj = kim_edn.loads(msg)
 
         self.assertFalse(kim_obj["converged"])
@@ -221,7 +221,7 @@ class TimeseriesModule(unittest.TestCase):
         )
 
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         kim_obj = kim_edn.loads(msg)
 
         self.assertFalse(kim_obj["converged"])
@@ -261,7 +261,7 @@ class TimeseriesModule(unittest.TestCase):
         )
 
         self.assertIsInstance(msg, str)
-        assert isinstance(msg, str)
+        assert isinstance(msg, str)  # keeps mypy happy
         kim_obj = kim_edn.loads(msg)
 
         self.assertFalse(kim_obj["converged"])

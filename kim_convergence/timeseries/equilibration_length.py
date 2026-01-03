@@ -144,7 +144,7 @@ def estimate_equilibration_length(
     minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
     ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
     number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
-    # unused input parmeters in Time series module
+    # unused input parameters in equilibration length estimation module
     # estimate_equilibration_length interface
     batch_size: int = _DEFAULT_BATCH_SIZE,
     scale: str = _DEFAULT_SCALE_METHOD,

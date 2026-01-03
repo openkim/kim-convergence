@@ -73,8 +73,8 @@ def outlier_test(
 
     Args:
         x (array_like, 1d): Time series data.
-        method (str, optional): Method to detect what are outliers in the data.
-            (default: 'iqr')
+        outlier_method (str, optional): Method to detect what are outliers in
+            the data. (default: 'iqr')
 
     Returns:
         1darray, or None: outliers indices, or `None` if there is no outlier
@@ -120,6 +120,9 @@ def outlier_test(
     elif outlier_method == "modified_z_score":
         x_median = np.median(x)
         x_median_absolute_deviation = np.median(np.abs(x - x_median))
+        if np.isclose(x_median_absolute_deviation, 0.0):
+            # All values identical -> no outlier can be declared
+            return None
         modified_z_score = 0.6745 * (x - x_median) / x_median_absolute_deviation
         outliers_indices = np.where(np.abs(modified_z_score) > 3.5)
 

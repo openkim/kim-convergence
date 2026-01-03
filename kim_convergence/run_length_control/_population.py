@@ -84,32 +84,34 @@ def _validate_population_params(
                 check_population_cdf_args(population_cdf=cdf_name, population_args=args)
             except Exception as e:
                 raise CRError(
-                    f"Variable {i}: invalid distribution specification: {e}"
+                    f"Variable {i + 1}: invalid distribution specification: {e}"
                 ) from e
 
             # For custom distributions: mean and std must NOT be provided
             if mean is not None:
                 raise CRError(
-                    f"Variable {i}: population_mean must be None when "
+                    f"Variable {i + 1}: population_mean must be None when "
                     f"population_cdf='{cdf_name}' is given. Use population_loc "
                     "and population_scale instead."
                 )
             if std is not None:
                 raise CRError(
-                    f"Variable {i}: population_standard_deviation must be None when "
-                    f"population_cdf='{cdf_name}' is given. Use population_scale "
-                    "to control spread."
+                    f"Variable {i + 1}: population_standard_deviation must be "
+                    f"None when population_cdf='{cdf_name}' is given. Use "
+                    "population_scale to control spread."
                 )
 
             # loc and scale are optional but must be valid if given
             if loc is not None and not np.isfinite(loc):
                 raise CRError(
-                    f"Variable {i}: population_loc must be finite (got {loc})."
+                    f"Variable {i + 1}: population_loc must be finite (got "
+                    f"{loc})."
                 )
             if scale is not None:
                 if not np.isfinite(scale) or scale <= 0:
                     raise CRError(
-                        f"Variable {i}: population_scale must be > 0 (got {scale})."
+                        f"Variable {i + 1}: population_scale must be > 0 (got "
+                        f"{scale})."
                     )
 
         # Case B: No distribution specified -> assume normal distribution
@@ -117,28 +119,32 @@ def _validate_population_params(
             # args, loc and scale are not allowed for normal case
             if args is not None:
                 raise CRError(
-                    f"Variable {i}: population_args cannot be used without population_cdf."
+                    f"Variable {i + 1}: population_args cannot be used without "
+                    "population_cdf."
                 )
             if loc is not None:
                 raise CRError(
-                    f"Variable {i}: population_loc cannot be used without population_cdf."
+                    f"Variable {i + 1}: population_loc cannot be used without "
+                    "population_cdf."
                 )
             if scale is not None:
                 raise CRError(
-                    f"Variable {i}: population_scale cannot be used without population_cdf."
+                    f"Variable {i + 1}: population_scale cannot be used "
+                    "without population_cdf."
                 )
 
             # mean must be finite if provided
             if mean is not None and not np.isfinite(mean):
                 raise CRError(
-                    f"Variable {i}: population_mean must be finite (got {mean})."
+                    f"Variable {i + 1}: population_mean must be finite (got "
+                    f"{mean})."
                 )
 
             # std must be finite, and positive, if provided
             if std is not None and (not np.isfinite(std) or std <= 0):
                 raise CRError(
-                    f"Variable {i}: population_standard_deviation must be finite and > 0 "
-                    f"(got {std})."
+                    f"Variable {i + 1}: population_standard_deviation must be "
+                    f"finite and > 0 (got {std})."
                 )
 
 

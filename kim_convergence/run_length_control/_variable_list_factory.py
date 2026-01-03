@@ -17,7 +17,7 @@ All symbols are private implementation details of the
 import numpy as np
 from typing import Any, Optional, Sequence, Union
 
-from kim_convergence import CRError
+from kim_convergence import CRError, cr_warning
 
 __all__ = []  # private module
 
@@ -40,8 +40,8 @@ def _clean_numeric_scalar(value: Any) -> Optional[Any]:
     try:
         if not np.isfinite(value):
             return None
-    except Exception:  # Defensive: some weird types might fail
-        pass
+    except (TypeError, ValueError):
+        cr_warning(f"np.isfinite failed for {value!r} (type {type(value).__name__})")
     return value
 
 

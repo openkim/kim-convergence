@@ -289,7 +289,7 @@ class UCLBase:
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
         ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
         number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
-        # unused input parmeters in
+        # unused input parameters in UCLBase module
         # estimate_equilibration_length interface
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
@@ -483,7 +483,7 @@ class UCLBase:
         )
 
         assert isinstance(self.mean, float)
-        # Estimat the relative half width
+        # Estimate the relative half width
         if isclose(self.mean, 0, abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL):
             raise CRError(
                 "It is not possible to estimate the relative half width "

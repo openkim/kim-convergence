@@ -5,8 +5,8 @@ import numpy as np
 
 try:
     import kim_convergence as cr
-except Exception:  # noqa: BLE001  # intentional catch-all
-    raise RuntimeError("Failed to import `kim-convergence` utility module")
+except Exception as e:  # noqa: BLE001  # intentional catch-all
+    raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 
 class TestOutlierModule(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestOutlierModule(unittest.TestCase):
         outlier_indices = cr.outlier_test(x, outlier_method="iqr")
         outlier_x = x[outlier_indices]
         self.assertIsInstance(outlier_indices, np.ndarray)
-        assert isinstance(outlier_indices, np.ndarray)
+        assert isinstance(outlier_indices, np.ndarray)  # keeps mypy happy
         self.assertTrue(outlier_indices.size == 2)
         self.assertTrue(outlier_x[0] == 159)
         self.assertTrue(outlier_x[1] == 313)
@@ -29,20 +29,20 @@ class TestOutlierModule(unittest.TestCase):
         outlier_indices = cr.outlier_test(x, outlier_method="extreme_iqr")
         outlier_x = x[outlier_indices]
         self.assertIsInstance(outlier_indices, np.ndarray)
-        assert isinstance(outlier_indices, np.ndarray)
+        assert isinstance(outlier_indices, np.ndarray)  # keeps mypy happy
         self.assertTrue(outlier_indices.size == 1)
         self.assertTrue(outlier_x[0] == 313)
 
         outlier_indices = cr.outlier_test(x, outlier_method="z_score")
         outlier_x = x[outlier_indices]
         self.assertIsInstance(outlier_indices, np.ndarray)
-        assert isinstance(outlier_indices, np.ndarray)
+        assert isinstance(outlier_indices, np.ndarray)  # keeps mypy happy
         self.assertTrue(outlier_indices.size == 1)
         self.assertTrue(outlier_x[0] == 313)
 
         outlier_indices = cr.outlier_test(x, outlier_method="modified_z_score")
         outlier_x = x[outlier_indices]
         self.assertIsInstance(outlier_indices, np.ndarray)
-        assert isinstance(outlier_indices, np.ndarray)
+        assert isinstance(outlier_indices, np.ndarray)  # keeps mypy happy
         self.assertTrue(outlier_indices.size == 1)
         self.assertTrue(outlier_x[0] == 313)

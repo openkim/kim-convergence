@@ -39,7 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
 
-from copy import deepcopy
 from math import fabs
 
 from .zero_rc import ZERO_RC
@@ -91,13 +90,13 @@ class ZERO_RC_BOUNDS:
         self.yy = 0.0
         self.index = 0
         self.qincr = False
-        self.small = deepcopy(small)
-        self.big = deepcopy(big)
-        self.abs_step = deepcopy(abs_step)
-        self.rel_step = deepcopy(rel_step)
-        self.step_mul = deepcopy(step_mul)
-        self.abs_tol = deepcopy(abs_tol)
-        self.rel_tol = deepcopy(rel_tol)
+        self.small = small
+        self.big = big
+        self.abs_step = abs_step
+        self.rel_step = rel_step
+        self.step_mul = step_mul
+        self.abs_tol = abs_tol
+        self.rel_tol = rel_tol
         self.z = None
 
     def zero(self, status: int, x: float, fx: float):
@@ -135,16 +134,16 @@ class ZERO_RC_BOUNDS:
                     f"small={self.small}, x={x}, big={self.big} are not " "monotone."
                 )
 
-            self.xsave = deepcopy(x)
+            self.xsave = x
             self.index = 1
             return 1, self.small
 
         if self.index == 1:
-            self.fx_small = deepcopy(fx)
+            self.fx_small = fx
             self.index = 2
             return 1, self.big
         elif self.index == 2:
-            fx_big = deepcopy(fx)
+            fx_big = fx
 
             self.qincr = fx_big > self.fx_small
 
@@ -184,7 +183,7 @@ class ZERO_RC_BOUNDS:
                 "terminated unsuccessfully at the lowest search bound."
             )
         elif self.index == 3:
-            self.yy = deepcopy(fx)
+            self.yy = fx
 
             if self.yy == 0.0:
                 return 0, x
@@ -194,17 +193,17 @@ class ZERO_RC_BOUNDS:
             )
 
             if qup:
-                self.xlb = deepcopy(self.xsave)
+                self.xlb = self.xsave
                 self.xub = min(self.xlb + self.step, self.big)
                 self.index = 4
                 return 1, self.xub
 
-            self.xub = deepcopy(self.xsave)
+            self.xub = self.xsave
             self.xlb = max(self.xub - self.step, self.small)
             self.index = 5
             return 1, self.xlb
         elif self.index == 4:
-            self.yy = deepcopy(fx)
+            self.yy = fx
             qbdd = (self.qincr and (self.yy >= 0.0)) or (
                 not self.qincr and (self.yy <= 0.0)
             )
@@ -213,7 +212,7 @@ class ZERO_RC_BOUNDS:
 
             if not qcond:
                 self.step *= self.step_mul
-                self.xlb = deepcopy(self.xub)
+                self.xlb = self.xub
                 self.xub = min(self.xlb + self.step, self.big)
                 self.index = 4
                 return 1, self.xub
@@ -248,7 +247,7 @@ class ZERO_RC_BOUNDS:
                 else:
                     return 0, self.xlo
         elif self.index == 5:
-            self.yy = deepcopy(fx)
+            self.yy = fx
             qbdd = (self.qincr and (self.yy <= 0.0)) or (
                 not self.qincr and (self.yy >= 0.0)
             )
@@ -289,7 +288,7 @@ class ZERO_RC_BOUNDS:
                         return 0, self.xlo
             else:
                 self.step = self.step_mul * self.step
-                self.xub = deepcopy(self.xlb)
+                self.xub = self.xlb
                 self.xlb = max(self.xub - self.step, self.small)
 
             self.index = 5

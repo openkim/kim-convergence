@@ -12,7 +12,7 @@ from .normal_dist import s_normal_inv_cdf
 from .zero_rc_bounds import ZERO_RC_BOUNDS
 from kim_convergence import CRError
 
-__all__ = ["t_cdf_ccdf", "t_cdf", "t_inv_cdf", "t_interval"]
+__all__ = ["t_cdf", "t_cdf_ccdf", "t_interval", "t_inv_cdf"]
 
 
 def t_cdf_ccdf(t: float, df: float) -> tuple[float, float]:

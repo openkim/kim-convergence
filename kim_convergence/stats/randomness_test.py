@@ -74,6 +74,7 @@ def randomness_test(
         1.0 - significance_level, loc=von_neumann_mean, scale=von_neumann_std
     )
 
-    von_neumann_ratio = x_diff_square_mean / x.var()
+    # denominator must be sample variance (n-1) to match the documented formula
+    von_neumann_ratio = x_diff_square_mean / x.var(ddof=1)
 
     return lower_interval < von_neumann_ratio < upper_interval
