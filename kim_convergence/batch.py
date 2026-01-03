@@ -131,7 +131,7 @@ def batch(
             raise CRError(
                 f'method "{scale}" not found. Valid methods to scale and '
                 "standardize a dataset are:\n\t- "
-                f'{"\n\t- ".join(scale_methods)}'
+                + "\n\t- ".join(scale_methods)
             )
 
         scale_func = scale_methods[scale]
