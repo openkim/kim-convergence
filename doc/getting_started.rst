@@ -40,7 +40,7 @@ Installation
 ------------
 
 Requirements
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 ``kim-convergence`` requires **Python 3.9 or later**. Download installers for
 all platforms from the `official Python website <https://www.python.org/getit/>`_.
@@ -81,7 +81,7 @@ To install into an existing environment:
    `uv installation guide <https://docs.astral.sh/uv/getting-started/installation/>`_.
 
 Using pip
-~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -97,14 +97,14 @@ Using pip
        python -m pip install kim-convergence
 
 Install from source
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
     pip install git+https://github.com/openkim/kim-convergence.git
 
 Using pixi or conda
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 **pixi** (fast and reproducible):
 

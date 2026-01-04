@@ -27,7 +27,7 @@ Distribution Functions
 ----------------------
 
 Beta Distribution
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: kim_convergence.stats.beta_dist
    :members:
@@ -46,7 +46,7 @@ Normal Distribution
 The inverse CDF computation uses the algorithm by Wichura [wichura1988]_.
 
 t-Distribution
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: kim_convergence.stats.t_dist
    :members:
@@ -61,7 +61,7 @@ Hypothesis Tests
 ----------------
 
 Tests for Normally Distributed Data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: kim_convergence.stats.normal_test
    :members:
@@ -177,7 +177,7 @@ Performance Considerations
 --------------------------
 
 FFT Optimization
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 For long time series, always use ``fft=True`` in autocorrelation functions:
 
@@ -200,20 +200,20 @@ Sample Size Requirements
 - **KS test**: Most effective with moderate to large sample sizes (>30)
 
 Numerical Stability
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Use ``bias=False`` in ``skew()`` function for unbiased estimation
 - Distribution functions handle edge cases (e.g., p=0, p=1) appropriately
 
 Memory Usage
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - FFT-based functions create temporary arrays of optimal FFT size
 - Auto/cross-covariance functions return arrays of length N (not 2N-1)
 - Consider using ``nlags`` parameter to limit output size for long series
 
 Error Handling
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 All functions raise appropriate exceptions:
 

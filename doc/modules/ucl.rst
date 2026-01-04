@@ -142,7 +142,7 @@ Algorithm Flow
 4. Iteratively increase batch size until batch means are independent
 
 Key Features
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 - Automatic detection of independent batch size
 - Significance level (probability threshold below which the null hypothesis
@@ -258,7 +258,7 @@ value. This value depends on the `confidence_coefficient` and the degrees of
 freedom, which is found by subtracting one from the number of observations.
 
 Sampling Methods
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 - ``uncorrelated``: Systematic sampling based on statistical inefficiency
 - ``random``: Random sampling
@@ -270,7 +270,7 @@ Usage Examples
 --------------
 
 Basic Usage Pattern
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -297,7 +297,7 @@ Basic Usage Pattern
    relative_width = mser.relative_half_width_estimate(data, confidence_coefficient=0.95)
 
 Comparing Different Methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -375,7 +375,7 @@ Choosing the Right Method
 +----------------------+----------------+----------------+----------------+----------------+----------------------+
 
 Quick Decision Tree
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. **Is your data approximately normal and stationary?**
    - Yes -> Use **MSER-m** or **Uncorrelated Samples**
@@ -396,7 +396,7 @@ Performance Considerations
 --------------------------
 
 Memory Usage
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 +----------------------+----------------+------------------------------------------------+
 | Method               | Memory Usage   | Notes                                          |
@@ -430,7 +430,7 @@ Computational Complexity
 +----------------------+----------------+------------------------------------------------+
 
 Best Practices
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Data Preparation**
 
@@ -453,7 +453,7 @@ Best Practices
 3. Use ``relative_half_width_estimate()`` to assess precision
 
 Error Handling
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 All functions raise appropriate exceptions:
 
@@ -483,7 +483,7 @@ where :math:`s_b^2` is the sample variance of batch means and :math:`k` is the
 number of batches.
 
 Spectral Methods (Heidelberger-Welch)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Spectral methods estimate the variance of the mean via the spectral density
 function. For a covariance stationary process:
@@ -495,7 +495,7 @@ function. For a covariance stationary process:
 where :math:`\gamma(k)` is the autocovariance at lag k.
 
 Direct Methods (Uncorrelated Samples)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Direct methods use the classical formula for the variance of the mean,
 adjusted for effective sample size when data is correlated:
@@ -506,4 +506,3 @@ adjusted for effective sample size when data is correlated:
 
 where :math:`g` is the statistical inefficiency and :math:`N_{\text{eff}}` is
 the effective sample size.
-

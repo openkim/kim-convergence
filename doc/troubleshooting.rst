@@ -5,7 +5,7 @@ Common Issues
 -------------
 
 "Equilibration Not Detected"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Problem**: The algorithm fails to identify a stationary region, or returns an
 unexpectedly large equilibration index.
@@ -20,7 +20,7 @@ unexpectedly large equilibration index.
 5. Use ``ignore_end`` to exclude non-stationary tail behavior
 
 "Failed to Compute UCL"
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Problem**: Insufficient data for reliable uncertainty quantification, or the
 UCL method cannot produce a valid estimate.
@@ -34,7 +34,7 @@ UCL method cannot produce a valid estimate.
 5. Try a different UCL method (MSER-m, Heidelberger-Welch, etc.)
 
 "Relative Accuracy Ill-Defined"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Problem**: The confidence interval includes zero, making relative accuracy
 calculations meaningless.
@@ -44,7 +44,7 @@ calculations meaningless.
 1. Use ``absolute_accuracy`` instead of ``relative_accuracy``
 
 "Performance Issues with Large Datasets"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Problem**: Long simulations or high-frequency sampling cause slow computation.
 
@@ -77,7 +77,7 @@ Edge Cases
 ----------
 
 Constant or Near-Constant Data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Many statistical methods require finite variance. For testing or degenerate
 cases you can **temporarily** inject numerical noise, but be aware that you are
@@ -108,7 +108,7 @@ A minimal helper that keeps you in control:
        return data
 
 Insufficient Sample Size
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Error**: "not enough data points" or CRSampleSizeError.
 
@@ -119,7 +119,7 @@ Insufficient Sample Size
 - Increase data collection before calling analysis functions
 
 Non-Finite Values (NaN/inf)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Error**: "non-finite or not-number" detected.
 
@@ -139,7 +139,7 @@ Non-Finite Values (NaN/inf)
        return data
 
 Unexpected Convergence Behavior
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If convergence seems too fast or too slow:
 

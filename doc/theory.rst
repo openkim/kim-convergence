@@ -73,7 +73,7 @@ autocorrelation time or Geyer's initial monotone sequence, then adjusts
 confidence intervals accordingly.
 
 Confidence Intervals (Measuring Uncertainty)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Because we have finite data, our estimate of the mean has uncertainty.
 A **confidence interval** gives a range where the true mean likely lies.
@@ -88,7 +88,7 @@ A **confidence interval** gives a range where the true mean likely lies.
 (see below), accounting for correlations via statistical inefficiency.
 
 Accuracy Requirements (When to Stop)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You specify how precise you need your results:
 
@@ -123,7 +123,7 @@ Detailed Algorithm Explanations
 -------------------------------
 
 Equilibration Detection
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a simulation starts from non-equilibrium conditions (e.g., minimized
 structure, wrong temperature), it goes through a *transient* phase before
@@ -188,7 +188,7 @@ where :math:`\rho(\tau)` is the normalized autocorrelation at lag :math:`\tau`.
    with >1000 points. It's much faster with the same accuracy.
 
 Uncertainty Quantification Methods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Upper Confidence Limits (UCLs) estimate the uncertainty in mean values.
 Different methods are available for different situations:
@@ -259,7 +259,7 @@ provide ``population_mean=2.7`` and ``population_standard_deviation=0.1``. The
 simulation will continue until statistically consistent with these values.
 
 Non-Normal Distributions
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For observables with non-normal distributions (e.g., gamma-distributed
 energies), specify the distribution via:
@@ -302,7 +302,7 @@ Connecting Concepts to Configuration
   custom distributions
 
 Key Statistical Trade-offs
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. **Accuracy vs. Runtime**: Tighter accuracy (smaller ``relative_accuracy``)
    requires exponentially longer runs but yields more precise estimates.
@@ -322,7 +322,7 @@ Key Statistical Trade-offs
    ``absolute_accuracy=0.05``.
 
 Interpreting the Convergence Report
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Key fields to check:
 
@@ -334,7 +334,7 @@ Key fields to check:
 - ``converged``: Whether all statistical criteria were satisfied
 
 Next Steps
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Try the copy-paste examples in :doc:`examples`
 - See :doc:`best_practices` for production workflows

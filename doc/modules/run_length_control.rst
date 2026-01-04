@@ -96,7 +96,7 @@ Equilibration Detection
 3. **Integrated autocorrelation time** refines the truncation point.
 
 Convergence Checking
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 After discarding the warm-up period, the algorithm repeatedly
 
@@ -138,7 +138,7 @@ Usage Examples
 --------------
 
 Single Variable, 5% Relative Accuracy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -194,7 +194,7 @@ Mean Close to Zero with Relative Accuracy
    )
 
 Overly Strict Accuracy Requirements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -221,14 +221,14 @@ Factor      # UCL calls     Overhead
    Actual overhead depends on UCL method, trajectory length, and hardware.
 
 Memory Footprint
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Single variable: 1-D array, 8 bytes x ``total_steps``
 * Multiple variables: 2-D array, 8 bytes x ``n_vars x total_steps``
 * Use ``dump_trajectory=True`` to stream very long runs to disk
 
 UCL Method Trade-off
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ============================== =========== =========== ===========
 Method                         Correlation Skewness    Speed
