@@ -571,6 +571,10 @@ def _output_convergence_report(
 
     Raises:
         CRError: If ``fp`` or ``fp_format`` is invalid.
+
+    Note:
+        When ``fp_format="txt"`` the output is EDN-encoded text; no special
+        human-readable layout is used.
     """
     if fp is None:
         fp = sys.stdout

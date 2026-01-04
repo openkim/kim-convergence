@@ -267,6 +267,12 @@ def _resolve_and_validate_indices(
                 "uncorrelated_sample_indices is not an array of one-dimension."
             )
 
+    if indices.size > 1 and (indices[:-1] >= indices[1:]).any():
+        raise CRError(
+            "uncorrelated_sample_indices must be monotonically increasing "
+            "(sorted in time order)."
+        )
+
     time_series_data_size = time_series_data.size
 
     wrong_indices = np.where(indices >= time_series_data_size)
@@ -308,7 +314,8 @@ def time_series_data_uncorrelated_samples(
             (default: None)
         uncorrelated_sample_indices (array_like, 1d, optional): indices
             of uncorrelated subsamples of the time series data.
-            (default: None)
+            **must be monotonically increasing**. If None they are computed
+            automatically. (default: None)
 
     Returns:
         1darray
@@ -364,7 +371,8 @@ def time_series_data_uncorrelated_random_samples(
             (default: None)
         uncorrelated_sample_indices (array_like, 1d, optional): indices
             of uncorrelated subsamples of the time series data.
-            (default: None)
+            **must be monotonically increasing**. If None they are computed
+            automatically. (default: None)
 
     Returns:
         1darray
@@ -433,7 +441,8 @@ def time_series_data_uncorrelated_block_averaged_samples(
             (default: None)
         uncorrelated_sample_indices (array_like, 1d, optional): indices
             of uncorrelated subsamples of the time series data.
-            (default: None)
+            **must be monotonically increasing**. If None they are computed
+            automatically. (default: None)
 
     Returns:
         1darray
