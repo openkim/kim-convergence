@@ -39,6 +39,27 @@ outlier_test
 
 .. autofunction:: kim_convergence.outlier_test
 
+Scaler classes
+~~~~~~~~~~~~~~
+
+.. autoclass:: kim_convergence.MinMaxScale
+   :members:
+
+.. autoclass:: kim_convergence.TranslateScale
+   :members:
+
+.. autoclass:: kim_convergence.StandardScale
+   :members:
+
+.. autoclass:: kim_convergence.RobustScale
+   :members:
+
+.. autoclass:: kim_convergence.MaxAbsScale
+   :members:
+
+Convenience functions
+~~~~~~~~~~~~~~~~~~~~~
+
 minmax_scale
 ~~~~~~~~~~~~
 

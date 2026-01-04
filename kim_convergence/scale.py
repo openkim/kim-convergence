@@ -29,40 +29,42 @@ class MinMaxScale:
     This estimator scales and translates a dataset such that it is in the given
     range, e.g. between zero and one.
 
-    The transformation is given by::
+    The transformation is given by:
 
     .. math::
 
-        \nonumber x\_std = \frac{x - np.min(x)}{np.max(x) - np.min(x)} \\
-        \nonumber scaled\_x = x\_std * (max - min) + min
+        x_{\text{std}} = \frac{x - \min(x)}{\max(x) - \min(x)} \\
+        \text{scaled}_x = x_{\text{std}} \cdot (\text{max} - \text{min}) + \text{min}
 
     where min, max = feature_range.
 
     Args:
-        feature_range (tuple, optional): tuple (min, max). (default: (0, 1))
+        feature_range (tuple, optional): tuple (min, max). (default: (0, 1)).
             Desired range of transformed data.
 
     Examples:
 
-    >>> from kim_convergence import MinMaxScale, minmax_scale
-    >>> data = [-1., 3.]
-    >>> mms = MinMaxScale()
-    >>> scaled_x = mms.scale(data)
-    >>> print(scaled_x)
-    [0. 1.]
+        >>> from kim_convergence import MinMaxScale, minmax_scale
+        >>> data = [-1., 3.]
+        >>> mms = MinMaxScale()
+        >>> scaled_x = mms.scale(data)
+        >>> print(scaled_x)
+            [0. 1.]
 
-    >>> x = mms.inverse(scaled_x)
-    >>> print(x)
-    [-1.  3.]
+        >>> x = mms.inverse(scaled_x)
+        >>> print(x)
+            [-1.  3.]
 
-    >>> data = [-1., 3., 100.]
-    >>> scaled_x = minmax_scale(data)
-    >>> print(x)
-    [0. 0.03960396 1.]
+        >>> data = [-1., 3., 100.]
+        >>> scaled_x = minmax_scale(data)
+        >>> print(scaled_x)
+            [0. 0.03960396 1.]
 
-    >>> x = mms.inverse(scaled_x)
-    >>> print(x)
-    [ -1. 3. 100.]
+        >>> mms = MinMaxScale()
+        >>> scaled_x = mms.scale(data)
+        >>> x = mms.inverse(scaled_x)
+        >>> print(x)
+            [ -1. 3. 100.]
 
     """
 
@@ -86,7 +88,7 @@ class MinMaxScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Scaled dataset to a given range
+            1darray: Scaled dataset to a given range.
 
         """
         x = np.asarray(x)
@@ -144,8 +146,8 @@ class MinMaxScale:
 def minmax_scale(
     x: np.ndarray,
     *,
-    with_centering: bool = True,  # kept for API compatibility
-    with_scaling: bool = True,  # kept for API compatibility
+    with_centering: bool = True,  # unused (API compatibility)
+    with_scaling: bool = True,  # unused (API compatibility)
     feature_range: tuple[float, float] = (0.0, 1.0),
 ) -> np.ndarray:
     r"""Standardize/Transform a dataset by scaling it to a given range.
@@ -153,12 +155,12 @@ def minmax_scale(
     This estimator scales and translates a dataset such that it is in the given
     range, e.g. between zero and one.
 
-    The transformation is given by::
+    The transformation is given by:
 
     .. math::
 
-        \nonumber x\_std = \frac{x - np.min(x)}{np.max(x) - np.min(x)} \\
-        \nonumber scaled\_x = x\_std * (max - min) + min
+        x_{\text{std}} = \frac{x - \min(x)}{\max(x) - \min(x)} \\
+        \text{scaled}_x = x_{\text{std}} \cdot (\text{max} - \text{min}) + \text{min}
 
     where min, max = feature_range.
 
@@ -168,13 +170,11 @@ def minmax_scale(
             Desired range of transformed data.
 
     Returns:
-        1darray: Scaled dataset to a given range
-
+        1darray: Scaled dataset to a given range.
 
     Note:
-        `with_centering` and `with_scaling` exist only to provide the same
-        signature as the other scaling helpers; they are **ignored** because
-        MinMaxScale always centres and scales by construction.
+        with_centering, and with_scaling are accepted for API compatibility but
+        are not used by this method.
     """
     mms = MinMaxScale(feature_range=feature_range)
     return mms.scale(x)
@@ -205,16 +205,16 @@ class TranslateScale:
 
     Examples:
 
-    >>> from kim_convergence import TranslateScale
-    >>> data = [1., 2., 2., 2., 3.]
-    >>> tsc = TranslateScale()
-    >>> scaled_x = tsc.scale(data)
-    >>> print(scaled_x)
-    [0. 1. 1. 1. 2.]
+        >>> from kim_convergence import TranslateScale
+        >>> data = [1., 2., 2., 2., 3.]
+        >>> tsc = TranslateScale()
+        >>> scaled_x = tsc.scale(data)
+        >>> print(scaled_x)
+            [0. 1. 1. 1. 2.]
 
-    >>> x = tsc.inverse(scaled_x)
-    >>> print(x)
-    [1. 2. 2. 2. 3.]
+        >>> x = tsc.inverse(scaled_x)
+        >>> print(x)
+            [1. 2. 2. 2. 3.]
 
     """
 
@@ -231,7 +231,7 @@ class TranslateScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Scaled dataset to a given range
+            1darray: Scaled dataset to a given range.
 
         """
         x = np.asarray(x)
@@ -317,7 +317,7 @@ def translate_scale(
             (default: True)
 
     Returns:
-        1darray: Scaled dataset
+        1darray: Scaled dataset.
 
     """
     tsc = TranslateScale(with_centering=with_centering, with_scaling=with_scaling)
@@ -354,16 +354,16 @@ class StandardScale:
 
     Examples:
 
-    >>> from kim_convergence import StandardScale
-    >>> data = [-0.5, 6]
-    >>> ssc = StandardScale()
-    >>> scaled_x = ssc.scale(data)
-    >>> print(scaled_x)
-    [-1.  1.]
+        >>> from kim_convergence import StandardScale
+        >>> data = [-0.5, 6]
+        >>> ssc = StandardScale()
+        >>> scaled_x = ssc.scale(data)
+        >>> print(scaled_x)
+            [-1.  1.]
 
-    >>> x = ssc.inverse(scaled_x)
-    >>> print(x)
-    [-0.5  6. ]
+        >>> x = ssc.inverse(scaled_x)
+        >>> print(x)
+            [-0.5  6. ]
 
     """
 
@@ -548,16 +548,16 @@ class RobustScale:
 
     Examples:
 
-    >>> from kim_convergence import RobustScale
-    >>> data = [ 4.,  1., -2.]
-    >>> rsc = RobustScale()
-    >>> scaled_x = rsc.scale(data)
-    >>> print(scaled_x)
-    [ 1.22474487  0.         -1.22474487]
+        >>> from kim_convergence import RobustScale
+        >>> data = [ 4.,  1., -2.]
+        >>> rsc = RobustScale()
+        >>> scaled_x = rsc.scale(data)
+        >>> print(scaled_x)
+            [ 1.22474487  0.         -1.22474487]
 
-    >>> x = rsc.inverse(scaled_x)
-    >>> print(x)
-    [ 4.  1. -2.]
+        >>> x = rsc.inverse(scaled_x)
+        >>> print(x)
+            [ 4.  1. -2.]
 
     """
 
@@ -586,13 +586,14 @@ class RobustScale:
         self.scale_ = None
 
     def scale(self, x: Union[np.ndarray, list]) -> np.ndarray:
-        r"""Compute the median and quantiles to be used for scaling.
+        r"""Standardize a dataset using median and quantile range.
 
-        Parameters
-        ----------
-        X : array-like, shape [n_samples, n_features]
-            The data used to compute the median and quantiles
-            used for later scaling along the features axis.
+        Args:
+            x (array_like, 1d): The data to center and scale.
+
+        Returns:
+            1darray: Scaled dataset.
+
         """
         x = np.asarray(x)
 
@@ -674,7 +675,7 @@ def robust_scale(
             (default: (25.0, 75.0) = (1st quantile, 3rd quantile))
 
     Returns:
-        1darray: scaled dataset
+        1darray: Scaled dataset.
 
     """
     rsc = RobustScale(
@@ -693,16 +694,16 @@ class MaxAbsScale:
 
     Examples:
 
-    >>> from kim_convergence import MaxAbsScale
-    >>> data = [ 4.,  1., -9.]
-    >>> mas = MaxAbsScale()
-    >>> scaled_x = mas.scale(data)
-    >>> print(scaled_x)
-    [ 0.44444444  0.11111111 -1.        ]
+        >>> from kim_convergence import MaxAbsScale
+        >>> data = [ 4.,  1., -9.]
+        >>> mas = MaxAbsScale()
+        >>> scaled_x = mas.scale(data)
+        >>> print(scaled_x)
+            [ 0.44444444  0.11111111 -1.        ]
 
-    >>> x = mas.inverse(scaled_x)
-    >>> print(x)
-    [ 4.  1. -9.]
+        >>> x = mas.inverse(scaled_x)
+        >>> print(x)
+            [ 4.  1. -9.]
 
     """
 
@@ -711,25 +712,17 @@ class MaxAbsScale:
 
     def scale(self, x: Union[np.ndarray, list]) -> np.ndarray:
         r"""
-        Online computation of max absolute value of X for later scaling.
+        Online computation of max absolute value of x for later scaling.
 
-        All of X is processed as a single batch. This is intended for cases
+        All of x is processed as a single batch. This is intended for cases
         when :meth:`fit` is not feasible due to very large number of
         `n_samples` or because X is read from a continuous stream.
 
-        Parameters
-        ----------
-        X : {array-like, sparse matrix}, shape [n_samples, n_features]
-            The data used to compute the mean and standard deviation
-            used for later scaling along the features axis.
+        Args:
+            x (array_like, 1d): The data to scale.
 
-        y : None
-            Ignored.
-
-        Returns
-        -------
-        self : object
-            Transformer instance.
+        Returns:
+            1darray: Scaled dataset.
 
         """
         x = np.asarray(x)
@@ -780,8 +773,8 @@ class MaxAbsScale:
 def maxabs_scale(
     x: np.ndarray,
     *,
-    with_centering: bool = True,  # kept for API compatibility
-    with_scaling: bool = True,  # kept for API compatibility
+    with_centering: bool = True,  # unused (API compatibility)
+    with_scaling: bool = True,  # unused (API compatibility)
 ) -> np.ndarray:
     r"""Standardize a dataset to the [-1, 1] range.
 
@@ -792,13 +785,11 @@ def maxabs_scale(
         x (array_like, 1d): The data to center and scale.
 
     Returns:
-        1darray: scaled dataset
+        1darray: Scaled dataset.
 
     Note:
-        `with_centering` and `with_scaling` exist only to provide the same
-        signature as the other scaling helpers; they are **ignored** because
-        MaxAbsScale only performs absolute-max scaling and has no separate
-        centre/scale flags.
+        with_centering, and with_scaling are accepted for API compatibility but
+        are not used by this method.
     """
     mas = MaxAbsScale()
     return mas.scale(x)
