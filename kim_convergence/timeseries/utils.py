@@ -239,6 +239,47 @@ def uncorrelated_time_series_data_samples(
     )
 
 
+def _resolve_and_validate_indices(
+    time_series_data: np.ndarray,
+    uncorrelated_sample_indices: Union[np.ndarray, list[int], None],
+    si: Union[str, float, int, None],
+    fft: bool,
+    minimum_correlation_time: Optional[int],
+) -> np.ndarray:
+    """Resolve and validate uncorrelated sample indices."""
+    if uncorrelated_sample_indices is None:
+        try:
+            indices = uncorrelated_time_series_data_sample_indices(
+                time_series_data=time_series_data,
+                si=si,
+                fft=fft,
+                minimum_correlation_time=minimum_correlation_time,
+            )
+        except CRError as e:
+            raise CRError(
+                "Failed to compute the indices of uncorrelated samples of "
+                "the time_series_data."
+            ) from e
+    else:
+        indices = np.asarray(uncorrelated_sample_indices)
+        if indices.ndim != 1:
+            raise CRError(
+                "uncorrelated_sample_indices is not an array of one-dimension."
+            )
+
+    time_series_data_size = time_series_data.size
+
+    wrong_indices = np.where(indices >= time_series_data_size)
+
+    if len(wrong_indices[0]) > 0:
+        raise CRError(
+            _out_of_bounds_error_str(
+                bad_indices=indices[wrong_indices], size=time_series_data_size
+            )
+        )
+    return indices
+
+
 def time_series_data_uncorrelated_samples(
     time_series_data: Union[np.ndarray, list[float]],
     *,
@@ -280,39 +321,15 @@ def time_series_data_uncorrelated_samples(
     if time_series_data.ndim != 1:
         raise CRError("time_series_data is not an array of one-dimension.")
 
-    if uncorrelated_sample_indices is None:
-        try:
-            indices = uncorrelated_time_series_data_sample_indices(
-                time_series_data=time_series_data,
-                si=si,
-                fft=fft,
-                minimum_correlation_time=minimum_correlation_time,
-            )
-        except CRError as e:
-            raise CRError(
-                "Failed to compute the indices of uncorrelated samples of "
-                "the time_series_data."
-            ) from e
+    indices = _resolve_and_validate_indices(
+        time_series_data,
+        uncorrelated_sample_indices,
+        si,
+        fft,
+        minimum_correlation_time,
+    )
 
-    else:
-        indices = np.asarray(uncorrelated_sample_indices)
-
-        if indices.ndim != 1:
-            raise CRError(
-                "uncorrelated_sample_indices is not an array of one-dimension."
-            )
-
-    try:
-        uncorrelated_samples = time_series_data[indices]
-    except IndexError as e:
-        time_series_data_size = time_series_data.size
-        mask = indices >= time_series_data_size
-        wrong_indices = np.where(mask)
-        raise CRError(
-            _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size
-            )
-        ) from e
+    uncorrelated_samples = time_series_data[indices]
 
     return uncorrelated_samples
 
@@ -360,37 +377,18 @@ def time_series_data_uncorrelated_random_samples(
     if time_series_data.ndim != 1:
         raise CRError("time_series_data is not an array of one-dimension.")
 
-    if uncorrelated_sample_indices is None:
-        try:
-            indices = uncorrelated_time_series_data_sample_indices(
-                time_series_data=time_series_data,
-                si=si,
-                fft=fft,
-                minimum_correlation_time=minimum_correlation_time,
-            )
-        except CRError as e:
-            raise CRError(
-                "Failed to compute the indices of uncorrelated samples of "
-                "the time_series_data."
-            ) from e
+    indices = _resolve_and_validate_indices(
+        time_series_data,
+        uncorrelated_sample_indices,
+        si,
+        fft,
+        minimum_correlation_time,
+    )
 
-    else:
-        indices = np.asarray(uncorrelated_sample_indices)
-
-        if indices.ndim != 1:
-            raise CRError(
-                "uncorrelated_sample_indices is not an array of one-dimension."
-            )
-
-    time_series_data_size = time_series_data.size
-
-    wrong_indices = np.where(indices >= time_series_data_size)
-
-    if len(wrong_indices[0]) > 0:
+    if indices.size < 2:
         raise CRError(
-            _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size
-            )
+            "uncorrelated_sample_indices must contain at least 2 elements "
+            "to define block boundaries."
         )
 
     random_samples = np.empty(indices.size - 1, dtype=time_series_data.dtype)
@@ -449,37 +447,18 @@ def time_series_data_uncorrelated_block_averaged_samples(
     if time_series_data.ndim != 1:
         raise CRError("time_series_data is not an array of one-dimension.")
 
-    if uncorrelated_sample_indices is None:
-        try:
-            indices = uncorrelated_time_series_data_sample_indices(
-                time_series_data=time_series_data,
-                si=si,
-                fft=fft,
-                minimum_correlation_time=minimum_correlation_time,
-            )
-        except CRError as e:
-            raise CRError(
-                "Failed to compute the indices of uncorrelated samples of "
-                "the time_series_data."
-            ) from e
+    indices = _resolve_and_validate_indices(
+        time_series_data,
+        uncorrelated_sample_indices,
+        si,
+        fft,
+        minimum_correlation_time,
+    )
 
-    else:
-        indices = np.asarray(uncorrelated_sample_indices)
-
-        if indices.ndim != 1:
-            raise CRError(
-                "uncorrelated_sample_indices is not an array of one-dimension."
-            )
-
-    time_series_data_size = time_series_data.size
-
-    wrong_indices = np.where(indices >= time_series_data_size)
-
-    if len(wrong_indices[0]) > 0:
+    if indices.size < 2:
         raise CRError(
-            _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size
-            )
+            "uncorrelated_sample_indices must contain at least 2 elements "
+            "to define block boundaries."
         )
 
     block_averaged_samples = np.empty(indices.size - 1, dtype=time_series_data.dtype)

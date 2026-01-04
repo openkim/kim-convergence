@@ -572,14 +572,14 @@ class RobustScale:
         self.with_scaling_ = with_scaling
 
         if not isinstance(quantile_range, (tuple, list)):
-            raise CRError(f"invalid quantile range: {str(quantile_range)}.")
+            raise CRError(f"invalid quantile range: {quantile_range!s}.")
 
         if len(quantile_range) != 2:
-            raise CRError(f"invalid quantile range: {str(quantile_range)}.")
+            raise CRError(f"invalid quantile range: {quantile_range!s}.")
 
         q_min, q_max = quantile_range
         if not 0 <= q_min <= q_max <= 100:
-            raise CRError(f"invalid quantile range: {str(quantile_range)}.")
+            raise CRError(f"invalid quantile range: {quantile_range!s}.")
 
         self.quantile_range = quantile_range
         self.center_ = None
