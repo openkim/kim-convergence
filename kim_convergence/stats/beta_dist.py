@@ -68,12 +68,12 @@ def betacf(
     """
     _fpmax = 1.0 / _fpmin
 
-    # These q’s will be used in factors
+    # These q's will be used in factors
     qab = a + b
     qap = a + 1.0
     qam = a - 1.0
 
-    # First step of Lentz’s method.
+    # First step of Lentz's method.
     d = 1.0 - qab * x / qap
     c = 1.0
 

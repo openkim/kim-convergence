@@ -5,7 +5,7 @@ import numpy as np
 import sys
 from typing import Callable
 
-__all__ = ["CRError", "CRSampleSizeError", "cr_warning", "cr_check"]
+__all__ = ["CRError", "CRSampleSizeError", "cr_check", "cr_warning"]
 
 
 def _get_caller_name(offset: int = 1) -> str:

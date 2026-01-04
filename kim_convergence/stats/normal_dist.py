@@ -17,7 +17,7 @@ from math import log, fabs, sqrt, inf, nan
 
 from kim_convergence import CRError
 
-__all__ = ["s_normal_inv_cdf", "normal_inv_cdf", "normal_interval"]
+__all__ = ["normal_interval", "normal_inv_cdf", "s_normal_inv_cdf"]
 
 
 def s_normal_inv_cdf(p: float) -> float:

@@ -22,17 +22,17 @@ MSER-m for equilibration and adaptive confidence intervals for precision.
 
 <table>
   <tr>
-    <td> <img src="./doc/files/vid1_T.gif?raw=true" width="200" height="200"> </td>
-    <td> <img src="./doc/files/vid1_P.gif?raw=true" width="200" height="200"> </td>
-    <td> <img src="./doc/files/vid1_V.gif?raw=true" width="200" height="200"> </td>
+    <td> <img src="./doc/files/vid1_T.gif?raw=true" width="200" height="200" alt="Temperature fluctuations over a 10 ps NPT trajectory"> </td>
+    <td> <img src="./doc/files/vid1_P.gif?raw=true" width="200" height="200" alt="Pressure fluctuations over a 10 ps NPT trajectory"> </td>
+    <td> <img src="./doc/files/vid1_V.gif?raw=true" width="200" height="200" alt="Volume fluctuations over a 10 ps NPT trajectory"> </td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td> <img src="./doc/files/vid2_T.gif?raw=true" width="200" height="200"> </td>
-    <td> <img src="./doc/files/vid2_P.gif?raw=true" width="200" height="200"> </td>
-    <td> <img src="./doc/files/vid2_V.gif?raw=true" width="200" height="200"> </td>
+    <td> <img src="./doc/files/vid2_T.gif?raw=true" width="200" height="200" alt="Temperature fluctuations over a 50 ps NPT trajectory"> </td>
+    <td> <img src="./doc/files/vid2_P.gif?raw=true" width="200" height="200" alt="Pressure fluctuations over a 50 ps NPT trajectory"> </td>
+    <td> <img src="./doc/files/vid2_V.gif?raw=true" width="200" height="200" alt="Volume fluctuations over a 50 ps NPT trajectory"> </td>
   </tr>
 </table>
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     print(result)
 ```
 
-That’s it—head to the [docs](https://kim-convergence.readthedocs.io/) for
+That's it—head to the [docs](https://kim-convergence.readthedocs.io/) for
 platform notes, developer install, LAMMPS/OpenMM integration, multi-observable
 examples, etc.
 

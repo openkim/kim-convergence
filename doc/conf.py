@@ -16,7 +16,10 @@ try:
     version = ".".join(release.split(".")[:2])
 except ImportError:
     import warnings
-    warnings.warn("Could not import kim_convergence; using fallback version")
+
+    warnings.warn(
+        "Could not import kim_convergence; using fallback version", stacklevel=2
+    )
     version = "0.0.3"
 
 

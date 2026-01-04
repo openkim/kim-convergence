@@ -49,15 +49,15 @@ from kim_convergence._default import _DEFAULT_ABS_TOL
 from kim_convergence import CRError
 
 __all__ = [
-    "get_fft_optimal_size",
-    "auto_covariance",
     "auto_correlate",
-    "cross_covariance",
+    "auto_covariance",
     "cross_correlate",
-    "modified_periodogram",
-    "periodogram",
+    "cross_covariance",
+    "get_fft_optimal_size",
     "int_power",
+    "modified_periodogram",
     "moment",
+    "periodogram",
     "skew",
 ]
 

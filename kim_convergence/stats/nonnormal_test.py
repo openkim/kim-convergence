@@ -16,14 +16,14 @@ from kim_convergence import CRError, CRSampleSizeError, cr_check
 
 __all__ = [
     "ContinuousDistributions",
-    "ContinuousDistributionsNumberOfRequiredArguments",
     "ContinuousDistributionsArgumentRequirement",
+    "ContinuousDistributionsNumberOfRequiredArguments",
     "check_population_cdf_args",
     "get_distribution_stats",
+    "kruskal_test",
     "ks_test",
     "levene_test",
     "wilcoxon_test",
-    "kruskal_test",
 ]
 
 r"""Continuous distributions [scipystats]_.
@@ -105,7 +105,7 @@ ContinuousDistributions = {
     "nakagami": "Nakagami distribution",
     "ncx2": "Non-central chi-squared distribution",
     "ncf": "Non-central F distribution distribution",
-    "nct": "Non-central Student’s t distribution",
+    "nct": "Non-central Student's t distribution",
     "norm": "Normal distribution",
     "norminvgauss": "Normal Inverse Gaussian distribution",
     "pareto": "Pareto distribution",
@@ -119,7 +119,7 @@ ContinuousDistributions = {
     "recipinvgauss": "Reciprocal inverse Gaussian distribution",
     "semicircular": "Semicircular distribution",
     "skewnorm": "Skew-normal distribution",
-    "t": "Student’s t distribution",
+    "t": "Student's t distribution",
     "trapezoid": "Trapezoidal distribution",
     "triang": "Triangular distribution",
     "truncexpon": "Truncated exponential distribution",

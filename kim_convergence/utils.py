@@ -7,10 +7,7 @@ from ._default import _DEFAULT_TEST_SIZE, _DEFAULT_TRAIN_SIZE, _DEFAULT_SEED
 from kim_convergence import CRError
 
 
-__all__ = [
-    "validate_split",
-    "train_test_split",
-]
+__all__ = ["train_test_split", "validate_split"]
 
 
 def validate_split(
@@ -158,9 +155,7 @@ def train_test_split(
     elif isinstance(seed, np.random.RandomState):
         rng = seed
     else:
-        raise CRError(
-            "seed should be one of `None`, `int` or `np.random.RandomState`."
-        )
+        raise CRError("seed should be one of `None`, `int` or `np.random.RandomState`.")
 
     # random partition
     permutation = rng.permutation(n_samples)

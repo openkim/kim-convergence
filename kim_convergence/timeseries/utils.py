@@ -17,11 +17,11 @@ from kim_convergence._default import (
 
 __all__ = [
     "time_series_data_si",
+    "time_series_data_uncorrelated_block_averaged_samples",
+    "time_series_data_uncorrelated_random_samples",
+    "time_series_data_uncorrelated_samples",
     "uncorrelated_time_series_data_sample_indices",
     "uncorrelated_time_series_data_samples",
-    "time_series_data_uncorrelated_samples",
-    "time_series_data_uncorrelated_random_samples",
-    "time_series_data_uncorrelated_block_averaged_samples",
 ]
 
 SAMPLING_METHODS = ("uncorrelated", "random", "block_averaged")

@@ -30,11 +30,11 @@ from kim_convergence import batch, CRError, CRSampleSizeError, t_inv_cdf
 
 
 __all__ = [
-    "mser_m",
     "MSER_m",
-    "mser_m_ucl",
+    "mser_m",
     "mser_m_ci",
     "mser_m_relative_half_width_estimate",
+    "mser_m_ucl",
 ]
 
 
@@ -80,13 +80,6 @@ def _normalize_ignore_end(
             raise CRError(
                 f"invalid ignore_end = {ignore_end}. ignore_end is not an "
                 "`int`, `float`, or `None`."
-            )
-
-        if ignore_end < 1:
-            raise CRError(
-                "ignore_end is not given on input and it is automatically set = "
-                f"{ignore_end} using {data_size} number of data points and the "
-                f"batch size = {batch_size}.\nignore_end should be a positive `int`."
             )
 
     elif ignore_end < 1:

@@ -39,9 +39,9 @@ from kim_convergence import (
 
 __all__ = [
     "N_SKART",
-    "n_skart_ucl",
     "n_skart_ci",
     "n_skart_relative_half_width_estimate",
+    "n_skart_ucl",
 ]
 
 
@@ -58,7 +58,7 @@ class N_SKART(UCLBase):
         N-Skart makes some modifications to the confidence interval (CI).
         These modifications account for the skewness (non-normality), and
         autocorrelation of the batch means which affect the distribution of the
-        underlying Student’s t-statistic.
+        underlying Student's t-statistic.
 
     Attributes:
         k_number_batches (int): number of nonspaced (adjacent) batches of size

@@ -32,10 +32,10 @@ from kim_convergence import (
 
 
 __all__ = [
-    "MSER_m_y",
-    "mser_m_y_ucl",
     "mser_m_y_ci",
     "mser_m_y_relative_half_width_estimate",
+    "mser_m_y_ucl",
+    "MSER_m_y",
 ]
 
 
@@ -54,7 +54,7 @@ class MSER_m_y(MSER_m):
     sizes until the test is finally passed and the batch means are finally
     determined to be approximately independent of each other. It starts by
     setting the initial batch size m as 1, and calculate the number of batches
-    k′ accordingly.
+    k' accordingly.
 
     Attributes:
         significance_level (float): Significance level. A probability threshold

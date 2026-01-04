@@ -9,17 +9,17 @@ from ._default import _DEFAULT_ABS_TOL
 
 
 __all__ = [
-    "MinMaxScale",
-    "minmax_scale",
-    "TranslateScale",
-    "translate_scale",
-    "StandardScale",
-    "standard_scale",
-    "RobustScale",
-    "robust_scale",
     "MaxAbsScale",
+    "MinMaxScale",
+    "RobustScale",
+    "StandardScale",
+    "TranslateScale",
     "maxabs_scale",
+    "minmax_scale",
+    "robust_scale",
     "scale_methods",
+    "standard_scale",
+    "translate_scale",
 ]
 
 

@@ -34,9 +34,9 @@ from kim_convergence import (
 
 __all__ = [
     "UncorrelatedSamples",
-    "uncorrelated_samples_ucl",
     "uncorrelated_samples_ci",
     "uncorrelated_samples_relative_half_width_estimate",
+    "uncorrelated_samples_ucl",
 ]
 
 SAMPLING_METHODS = ("uncorrelated", "random", "block_averaged")

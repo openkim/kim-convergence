@@ -15,10 +15,7 @@ from kim_convergence import cr_check
 from .t_dist import t_cdf
 
 
-__all__ = [
-    "t_test",
-    "chi_square_test",
-]
+__all__ = ["chi_square_test", "t_test"]
 
 
 def t_test(

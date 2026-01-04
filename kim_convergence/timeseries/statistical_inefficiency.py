@@ -24,12 +24,12 @@ from kim_convergence import (
 
 
 __all__ = [
-    "statistical_inefficiency",
     "geyer_r_statistical_inefficiency",
     "geyer_split_r_statistical_inefficiency",
     "geyer_split_statistical_inefficiency",
     "integrated_auto_correlation_time",
     "si_methods",
+    "statistical_inefficiency",
 ]
 
 
@@ -172,7 +172,7 @@ def geyer_r_statistical_inefficiency(
 ) -> float:
     r"""Compute the statistical inefficiency.
 
-    Compute the statistical inefficiency using the Geyer’s [geyer1992]_,
+    Compute the statistical inefficiency using the Geyer's [geyer1992]_,
     [geyer2011]_ initial monotone sequence criterion.
 
     Note:
@@ -323,7 +323,7 @@ def geyer_split_r_statistical_inefficiency(
     r"""Compute the statistical inefficiency.
 
     Compute the statistical inefficiency using the split-r method of
-    Geyer’s [geyer1992]_, [geyer2011]_ initial monotone sequence criterion.
+    Geyer's [geyer1992]_, [geyer2011]_ initial monotone sequence criterion.
 
     Note:
         The effective sample size is computed by:
