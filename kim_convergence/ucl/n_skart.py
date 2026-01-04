@@ -142,6 +142,9 @@ class N_SKART(UCLBase):
             truncated as False and the equilibration index equals to the last
             index in the time series data.
 
+        Note:
+            nskip, ignore_end, and number_of_cores are accepted for API
+            compatibility but are not used by this method.
         """
         time_series_data = np.asarray(time_series_data)
         if time_series_data.ndim != 1:
@@ -346,6 +349,11 @@ class N_SKART(UCLBase):
                 mean, based on the skewness-adjusted critical values of
                 Student's t-ratio.
 
+        Note:
+            heidel_welch_number_points, batch_size, test_size, train_size,
+            population_standard_deviation, si, minimum_correlation_time,
+            uncorrelated_sample_indices, and sample_method are accepted for API
+            compatibility but are not used by this method.
         """
         time_series_data = np.asarray(time_series_data)
 

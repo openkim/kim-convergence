@@ -220,6 +220,9 @@ def geyer_r_statistical_inefficiency(
             (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
             :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
 
+    Note:
+        minimum_correlation_time is accepted for API compatibility but is not
+        used by this method.
     """
     x = np.asarray(x)
 
@@ -360,11 +363,13 @@ def geyer_split_r_statistical_inefficiency(
             (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
             :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
 
+    Note:
+        minimum_correlation_time is accepted for API compatibility but is not
+        used by this method.
     """
     if y is not None:
         raise CRError(
-            "The split-r method, splits the x time-series data "
-            "and do not use y."
+            "The split-r method splits the x time-series data and does not use y."
         )
 
     x = np.asarray(x)
@@ -410,11 +415,13 @@ def geyer_split_statistical_inefficiency(
         float: estimated statistical inefficiency.
             :math:`si >= 1` is the estimated statistical inefficiency
 
+    Note:
+        minimum_correlation_time is accepted for API compatibility but is not
+        used by this method.
     """
     if y is not None:
         raise CRError(
-            "the split-r method, splits the x time-series data "
-            "and do not use y."
+            "The split-r method splits the x time-series data and does not use y."
         )
 
     x = np.asarray(x)

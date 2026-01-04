@@ -70,7 +70,7 @@ class MinMaxScale:
         if feature_range[0] >= feature_range[1]:
             raise CRError(
                 "Minimum of desired feature range must be smaller than "
-                f"maximum. Got {str(feature_range)}"
+                f"maximum. Got {feature_range!s}"
             )
         self.feature_range_ = feature_range
         self.data_min_ = None

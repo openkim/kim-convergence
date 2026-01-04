@@ -182,6 +182,9 @@ def estimate_equilibration_length(
             equilibration index, and statitical inefficiency estimates of a
             time series at the equilibration index estimate.
 
+    Note:
+        batch_size, scale, with_centering, and with_scaling
+        are accepted for API compatibility but are not used by this method.
     """
     time_series_data = np.asarray(time_series_data)
 

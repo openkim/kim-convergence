@@ -159,13 +159,13 @@ class ZERO_RC_BOUNDS:
                         f"highest search bound = {self.big}.\nIt means "
                         "that the stepping search terminated unsuccessfully "
                         "at the highest search bound."
-                    )  # noqa: TRY003
+                    )
                 raise CRError(
                     f"Answer x = {x}, appears to be lower than the lowest "
                     f"search bound = {self.small}.\nIt means that the "
                     "stepping search terminated unsuccessfully at the "
                     "lowest search bound."
-                )  # noqa: TRY003
+                )
 
             if self.fx_small >= 0.0:
                 if fx_big <= 0.0:
@@ -177,12 +177,12 @@ class ZERO_RC_BOUNDS:
                     f"search bound = {self.big}.\nIt means that the stepping "
                     "search terminated unsuccessfully at the highest search "
                     "bound."
-                )  # noqa: TRY003
+                )
             raise CRError(
                 f"Answer x = {x}, appears to be lower than the lowest search "
                 f"bound = {self.small}.\nIt means that the stepping search "
                 "terminated unsuccessfully at the lowest search bound."
-            )  # noqa: TRY003
+            )
         elif self.index == 3:
             self.yy = fx
 
@@ -224,7 +224,7 @@ class ZERO_RC_BOUNDS:
                     f"the highest search bound = {self.big}.\nIt means that "
                     "the stepping search terminated unsuccessfully at the "
                     "highest search bound."
-                )  # noqa: TRY003
+                )
 
             # Create an instance of ZERO_RC
             self.z = ZERO_RC(
@@ -259,10 +259,10 @@ class ZERO_RC_BOUNDS:
                 if qlim and not qbdd:
                     raise CRError(
                         f"Answer x = {self.small}, appears to be lower than "
-                        f"or equal to the lowest search bound = {self.small}."
+                        f"or equal to the lowest search bound = {self.small}. "
                         "\nIt means that the stepping search terminated "
                         "unsuccessfully at the lowest search bound."
-                    )  # noqa: TRY003
+                    )
 
                 # Create an instance of ZERO_RC
                 self.z = ZERO_RC(
@@ -310,4 +310,4 @@ class ZERO_RC_BOUNDS:
             raise CRError(
                 f"Wrong index number = {self.index}.\nThis function "
                 "should be called with zero status for the first time."
-            )  # noqa: TRY003
+            )

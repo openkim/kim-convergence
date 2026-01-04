@@ -476,6 +476,11 @@ class HeidelbergerWelch(UCLBase):
             - Constants :math:`C_1, C_2` are pre-computed based on
               ``heidel_welch_number_points`` and ``confidence_coefficient``.
 
+        Note:
+            equilibration_length_estimate, population_standard_deviation, si
+            minimum_correlation_time, uncorrelated_sample_indices, and
+            sample_method are accepted for API compatibility but are not used
+            by this method.
         """
 
         time_series_data = np.asarray(time_series_data)

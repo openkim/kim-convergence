@@ -120,10 +120,9 @@ def uncorrelated_time_series_data_sample_indices(
 ) -> np.ndarray:
     r"""Return indices of uncorrelated subsamples of the time series data.
 
-    Return indices of the uncorrelated uncorrelated_sample of the time series
-    data. Subsample a correlated timeseries to extract an effectively
-    uncorrelated dataset. If si (statistical inefficiency) is not provided it
-    will be computed.
+    Return indices of the uncorrelated sample of the time series data. Subsample
+    a correlated timeseries to extract an effectively uncorrelated dataset. If
+    si (statistical inefficiency) is not provided it will be computed.
 
     Args:
         time_series_data (array_like, 1d): time series data.
@@ -260,7 +259,6 @@ def time_series_data_uncorrelated_samples(
     Args:
         time_series_data (array_like, 1d): time series data.
         si (float, or str, optional): estimated statistical inefficiency.
-            c
         fft (bool, optional): if True, use FFT convolution. FFT should be
             preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): minimum amount of
@@ -293,7 +291,7 @@ def time_series_data_uncorrelated_samples(
             )
         except CRError as e:
             raise CRError(
-                "Failed to compute the indices of uncorrelated samples of"
+                "Failed to compute the indices of uncorrelated samples of "
                 "the time_series_data."
             ) from e
 

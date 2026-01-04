@@ -124,6 +124,11 @@ class UncorrelatedSamples(UCLBase):
                 The approximately unbiased estimate of variance of the sample
                 mean.
 
+        Note:
+            equilibration_length_estimate, heidel_welch_number_points,
+            batch_size, scale, with_centering, with_scaling, test_size, and
+            train_size are accepted for API compatibility but are not used by
+            this method.
         """
         time_series_data = np.asarray(time_series_data)
 

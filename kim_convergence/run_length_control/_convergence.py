@@ -248,7 +248,9 @@ def _compute_ucl_and_check_accuracy(
         # do not have enough data and need more
         return (None, 0.0, False)
     except CRError as e:
-        raise CRError(f"Failed to compute the ucl for variable number = {i + 1}.") from e
+        raise CRError(
+            f"Failed to compute the ucl for variable number = {i + 1}."
+        ) from e
 
     if final_pass:
         if ucl_obj.name != "uncorrelated_sample":
@@ -270,9 +272,9 @@ def _compute_ucl_and_check_accuracy(
             ucl_obj.mean, 0, abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL
         ):
             raise CRError(
-                "It is not possible to estimate the relative half width for the close "
-                f"to zero mean = {ucl_obj.mean}, for the variable number = {i + 1}. "
-                "Consider using absolute_accuracy instead."
+                "It is not possible to estimate the relative half width for "
+                f"the close to zero mean = {ucl_obj.mean}, for the variable "
+                f"number = {i + 1}. Consider using absolute_accuracy instead."
             )
 
         relative_half_width_estimate = upper_confidence_limit / fabs(ucl_obj.mean)
@@ -382,7 +384,7 @@ def _convergence_stage(
     converged = False
     while not converged:
         for i in range(number_of_variables):
-            done[i] = False
+            done[i] = False  # reset even if already converged
 
             # slice a numpy array, the memory is shared between the slice and the original
             time_series_data = _equilibrated_series(tsd, ndim, equilibration_step[i], i)
@@ -465,7 +467,8 @@ def _convergence_stage(
     failed = [str(i + 1) for i, u in enumerate(upper_confidence_limit) if u is None]
     if failed:
         raise CRError(
-            f'For variable number(s) {", ".join(failed)}. Failed to ' "compute the UCL."
+            f'For variable number(s) {", ".join(failed)}. Failed to '
+            "compute the UCL."
         )
 
     if dump_trajectory:
@@ -553,7 +556,9 @@ def _output_convergence_report(
         fp = sys.stdout
     elif isinstance(fp, str):
         if fp != "return":
-            raise CRError('Keyword argument `fp` is a `str` and not equal to "return".')
+            raise CRError(
+                'Keyword argument `fp` is a `str` and not equal to "return".'
+            )
         fp = None
     elif not hasattr(fp, "write"):
         raise CRError(

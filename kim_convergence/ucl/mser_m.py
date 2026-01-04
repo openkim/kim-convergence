@@ -363,6 +363,12 @@ class MSER_m(UCLBase):
         Returns:
             float: upper_confidence_limit
 
+        Note:
+            equilibration_length_estimate, heidel_welch_number_points, fft,
+            test_size, train_size, population_standard_deviation, si,
+            minimum_correlation_time, uncorrelated_sample_indices, and
+            sample_method are accepted for API compatibility but are not used
+            by this method.
         """
         time_series_data = np.asarray(time_series_data)
 
