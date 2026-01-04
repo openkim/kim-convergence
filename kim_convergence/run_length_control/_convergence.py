@@ -70,8 +70,7 @@ def _convergence_message(
             statistics, confidence intervals, and accuracy details.
 
     Raises:
-        AssertionError: If input types or shapes are inconsistent (defensive
-            checks only).
+        CRError: If any input list is not a list or has wrong length.
     """
     eq_step = equilibration_step
     rel_acc = relative_accuracy
@@ -83,15 +82,20 @@ def _convergence_message(
     ess = effective_sample_size
     rau = relative_accuracy_undefined
 
-    assert isinstance(eq_step, list) and len(eq_step) == number_of_variables
-    assert isinstance(rel_acc, list) and len(rel_acc) == number_of_variables
-    assert isinstance(abs_acc, list) and len(abs_acc) == number_of_variables
-    assert isinstance(rel_hw, list) and len(rel_hw) == number_of_variables
-    assert isinstance(mean, list) and len(mean) == number_of_variables
-    assert isinstance(ucl, list) and len(ucl) == number_of_variables
-    assert isinstance(std, list) and len(std) == number_of_variables
-    assert isinstance(ess, list) and len(ess) == number_of_variables
-    assert isinstance(rau, list) and len(rau) == number_of_variables
+    # Validate input arrays
+    for name, arr in [
+        ("equilibration_step", eq_step),
+        ("relative_accuracy", rel_acc),
+        ("absolute_accuracy", abs_acc),
+        ("relative_half_width_estimate", rel_hw),
+        ("upper_confidence_limit", ucl),
+        ("time_series_data_mean", mean),
+        ("time_series_data_std", std),
+        ("effective_sample_size", ess),
+        ("relative_accuracy_undefined", rau),
+    ]:
+        if not isinstance(arr, list) or len(arr) != number_of_variables:
+            raise CRError(f"{name} must be a list of length {number_of_variables}")
 
     confidence = f"{round(confidence_coefficient * 100, 3)}%"
 
@@ -224,7 +228,8 @@ def _compute_ucl_and_check_accuracy(
                 final-pass mode).
 
     Raises:
-        CRError: If UCL computation fails for reasons other than insufficient
+        CRError
+            If UCL computation fails for reasons other than insufficient
             sample size, or if relative accuracy is requested but the estimated
             mean is too close to zero to allow a meaningful relative estimate.
     """
@@ -267,8 +272,11 @@ def _compute_ucl_and_check_accuracy(
         accurate = upper_confidence_limit < cast(float, absolute_accuracy)
         relative_half_width_estimate = 0.0
     else:
-        assert isinstance(ucl_obj.mean, float)  # keeps mypy happy
         # Estimate the relative half width
+        if ucl_obj.mean is None:
+            raise CRError(f"Mean was not computed for variable {i + 1}.")
+
+        # mypy now knows ucl_obj.mean is float here
         if isclose(
             ucl_obj.mean, 0, abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL
         ):
@@ -485,8 +493,7 @@ def _convergence_stage(
     failed = [str(i + 1) for i, u in enumerate(upper_confidence_limit) if u is None]
     if failed:
         raise CRError(
-            f'For variable number(s) {", ".join(failed)}. Failed to '
-            "compute the UCL."
+            f'For variable number(s) {", ".join(failed)}. Failed to ' "compute the UCL."
         )
 
     if dump_trajectory:
@@ -580,9 +587,7 @@ def _output_convergence_report(
         fp = sys.stdout
     elif isinstance(fp, str):
         if fp != "return":
-            raise CRError(
-                'Keyword argument `fp` is a `str` and not equal to "return".'
-            )
+            raise CRError('Keyword argument `fp` is a `str` and not equal to "return".')
         fp = None
     elif not hasattr(fp, "write"):
         raise CRError(

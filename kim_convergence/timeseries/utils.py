@@ -273,6 +273,11 @@ def _resolve_and_validate_indices(
             "(sorted in time order)."
         )
 
+    if (indices < 0).any():
+        raise CRError(
+            "uncorrelated_sample_indices must contain non-negative indices."
+        )
+
     time_series_data_size = time_series_data.size
 
     wrong_indices = np.where(indices >= time_series_data_size)
