@@ -23,24 +23,16 @@ def geweke(
     in the stationary distribution and produces z-statistics for each
     estimated parameter [geweke1992]_, [plummer2006]_.
 
-    Parameters
-    ----------
-    x : 1D array-like
-      The trace of some stochastic parameter.
-    first : float
-      The fraction of series at the beginning of the trace.
-    last : float
-      The fraction of series at the end to be compared with the section
-      at the beginning.
-    intervals : int
-      The number of segments.
+    Args:
+        x (array_like, 1d): Trace of a stochastic parameter.
+        first (float): Fraction of series at the beginning.
+        last (float): Fraction at the end to compare with the first section.
+        intervals (int): Number of segments.
 
-    Returns
-    -------
-    scores : np.ndarray
-      Return a 2D numpy array of shape (intervals, 2) containing [i, score]
-      pairs, where i is the starting index for each interval and score the
-      Geweke score on the interval.
+    Returns:
+        ndarray
+            2-D array of shape (intervals, 2) with [i, score] pairs, where i is
+            the starting index of each interval and score the Geweke score.
 
     Note:
         The Geweke score on some series x is computed by:
@@ -52,7 +44,6 @@ def geweke(
         where :math:`E` stands for the mean, :math:`V` the variance,
         :math:`x_s` a section at the start of the series and
         :math:`x_e` a section at the end of the series.
-
     """
     if first + last >= 1:
         raise CRError(

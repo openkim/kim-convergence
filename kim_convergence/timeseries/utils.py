@@ -68,9 +68,9 @@ def time_series_data_si(
             (default: None)
 
     Returns:
-        float: estimated statistical inefficiency value.
-            :math:`si >= 1` is the estimated statistical inefficiency.
-
+        float
+            estimated statistical inefficiency value. :math:`si >= 1` is the
+            estimated statistical inefficiency.
     """
     if si is None:
         si = "statistical_inefficiency"
@@ -136,9 +136,9 @@ def uncorrelated_time_series_data_sample_indices(
             (default: None)
 
     Returns:
-        1darray: indices array.
-            Indices of uncorrelated subsamples of the time series data.
-
+        1darray
+            indices array. Indices of uncorrelated subsamples of the time series
+            data.
     """
     si_value = time_series_data_si(
         time_series_data,
@@ -196,9 +196,9 @@ def uncorrelated_time_series_data_samples(
             (default: None)
 
     Returns:
-        1darray: uncorrelated_sample of the time series data.
-            time series data at uncorrelated sample indices.
-
+        1darray
+            uncorrelated_sample of the time series data. time series data at
+            uncorrelated sample indices.
     """
     if sample_method is None:
         sample_method = "uncorrelated"
@@ -311,9 +311,9 @@ def time_series_data_uncorrelated_samples(
             (default: None)
 
     Returns:
-        1darray: uncorrelated_sample of the time series data.
-            time series data at uncorrelated sample indices.
-
+        1darray
+            uncorrelated_sample of the time series data. time series data at
+            uncorrelated sample indices.
     """
     time_series_data = np.asarray(time_series_data)
 
@@ -367,9 +367,9 @@ def time_series_data_uncorrelated_random_samples(
             (default: None)
 
     Returns:
-        1darray: uncorrelated_sample of the time series data.
-            random data for each block after blocking the time series data.
-
+        1darray
+            uncorrelated_sample of the time series data. random data for each
+            block after blocking the time series data.
     """
     time_series_data = np.asarray(time_series_data)
 
@@ -436,10 +436,9 @@ def time_series_data_uncorrelated_block_averaged_samples(
             (default: None)
 
     Returns:
-        1darray: uncorrelated_sample of the time series data.
-            average value for each block after blocking the time series
-            data.
-
+        1darray
+            uncorrelated_sample of the time series data. average value for each
+            block after blocking the time series data.
     """
     time_series_data = np.asarray(time_series_data)
 

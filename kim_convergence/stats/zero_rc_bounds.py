@@ -78,7 +78,6 @@ class ZERO_RC_BOUNDS:
                 (default: 1.0e-50)
             rel_tol (float, optional): Relative error tolerance.
                 (default: 1.0e-8)
-
         """
         self.fx_small = 0.0
         self.step = 0.0
@@ -113,19 +112,14 @@ class ZERO_RC_BOUNDS:
         Where ``tolerance(x) = Maximum(abs_tol, rel_tol * |x|)``.
 
         Args:
-            status (int): Status.
-                If status set to 0, the value of other parameters will be
-                ignored on the call.
-            x (float): The input value at which function f is to be
-                evaluated.
-            fx (float): Function f evaluated at x.
+            status (int): Status. If 0, other parameters are ignored.
+            x (float): Input value at which function f is evaluated.
+            fx (float): Function value f(x).
 
         Returns:
-            int, float: status, x.
-                Where, the status = 0 on return means it has finished without
-                error. The status = 1 on return, means the function needs to
-                be evaluated.
-
+            tuple[int, float]
+                status: 0 = finished without error, 1 = needs another evaluation.
+                x: updated input value.
         """
         if status == 0:
             monotone = (self.small <= x) and (x <= self.big)

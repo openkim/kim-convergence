@@ -118,8 +118,8 @@ def get_fft_optimal_size(input_size: int) -> int:
             positive integer.
 
     Returns:
-        int: The first 5-smooth number greater than or equal to `input_size`.
-
+        int
+            The first 5-smooth number greater than or equal to ``input_size``.
     """
     # Check inputs
     if not isinstance(input_size, int):
@@ -366,11 +366,12 @@ def auto_covariance(
 
     Args:
         x (array_like, 1d): Time series data.
-        fft (bool, optional): If True, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+        fft (bool, optional): Use FFT convolution for long series.
+            (default: False)
 
     Returns:
-        1darray: The estimated autocovariances.
+        1darray
+            Estimated autocovariances.
 
     Raises:
         CRError: If input validation fails.
@@ -402,15 +403,15 @@ def cross_covariance(
     Args:
         x (array_like, 1d): Time series data.
         y (array_like, 1d): Time series data.
-        fft (bool, optional): If True, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+        fft (bool, optional): Use FFT convolution for long series.
+            (default: False)
 
     Returns:
-        1darray: The calculated cross covariances.
+        1darray
+            Calculated cross covariances.
 
     Raises:
         CRError: If input validation fails.
-
     """
     if y is None:
         return auto_covariance(x, fft=fft)
@@ -447,12 +448,12 @@ def auto_correlate(
         x (array_like, 1d): Time series data.
         nlags (int > 0 or None, optional): Number of lags to return
             auto-correlation for it. (default: None)
-        fft (bool, optional): If True, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+        fft (bool, optional): Use FFT convolution for long series.
+            (default: False)
 
     Returns:
-        ndarray: The calculated auto correlation function.
-
+        ndarray
+            Calculated auto correlation function.
     """
     x = np.asarray(x, dtype=np.float64)
 
@@ -501,12 +502,12 @@ def cross_correlate(
         y (array_like, 1d): Time series data.
         nlags (int > 0 or None, optional): Number of lags to return
             auto-correlation for. (default: None)
-        fft (bool, optional): If True, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+        fft (bool, optional): Use FFT convolution for long series.
+            (default: False)
 
     Returns:
-        ndarray: The calculated cross correlation.
-
+        ndarray
+            Calculated cross correlation.
     """
     if y is None:
         return auto_correlate(x, nlags=nlags, fft=fft)
@@ -565,13 +566,14 @@ def modified_periodogram(
 
     Args:
         x (array_like, 1d): Time series data.
-        fft (bool, optional): If True, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+        fft (bool, optional):  Use FFT convolution for long series.
+            (default: False)
         with_mean (bool, optional): If True, use x minus its mean.
             (default: False)
 
     Returns:
-        1darray: Computed modified periodogram array.
+        1darray
+            Computed modified periodogram array.
 
     Note:
         This function does not return the array of sample frequencies. In
@@ -636,13 +638,14 @@ def periodogram(
 
     Args:
         x (array_like, 1d): Time series data.
-        fft (bool, optional): If True, use FFT convolution. FFT should be
-            preferred for long time series. (default: False)
+        fft (bool, optional): Use FFT convolution for long series.
+            (default: False)
         with_mean (bool, optional): If True, use x minus its mean.
             (default: False)
 
     Returns:
-        1darray: Computed power spectrum array.
+        1darray
+            Computed power spectrum array.
 
     Note:
         This function does not return the array of sample frequencies. In
@@ -655,7 +658,6 @@ def periodogram(
         or
 
         >>> f = np.arange(1., x.size//2 + 1) / x.size
-
     """
     try:
         result = modified_periodogram(x, fft=fft, with_mean=with_mean)
@@ -686,9 +688,14 @@ def summary(x: Union[np.ndarray, list[float]]):
         x(array_like, 1d): Time series data.
 
     Returns:
-        float, float, float, float, float, float, float:
-            min, max, mean, std, median, 1stQU, 3rdQU
-
+        tuple[float, float, float, float, float, float, float]
+            min:  minimum value
+            max:  maximum value
+            mean: sample mean
+            std:  sample standard deviation
+            median: sample median
+            1stQU:  first quartile (25 %)
+            3rdQU:  third quartile (75 %)
     """
     x = np.asarray(x)
 
@@ -712,8 +719,8 @@ def int_power(x: Union[np.ndarray, list[float]], exponent: int) -> np.ndarray:
         exponent (int): The exponent
 
     Returns:
-        1darray: Computed power array.
-
+        1darray
+            Computed power array.
     """
     x = np.asarray(x)
 
@@ -759,7 +766,8 @@ def moment(x: Union[np.ndarray, list[float]], *, moment: int = 1) -> float:
             (default: 1)
 
     Returns:
-        float: n-th central moment.
+        float
+            n-th central moment.
 
     Note:
         The k-th central moment of a time series data,
@@ -770,7 +778,6 @@ def moment(x: Union[np.ndarray, list[float]], *, moment: int = 1) -> float:
 
         where :math:`n` is the number of samples and :math:`\bar{x}` is the
         mean.
-
     """
     x, _ = _validate_and_prepare_input(x)
 
@@ -798,7 +805,8 @@ def skew(x: Union[np.ndarray, list[float]], *, bias: bool = False) -> float:
             for statistical bias. (default: False)
 
     Returns:
-        float: The skewness
+        float
+            The skewness
 
     Note:
         For normally distributed data, the skewness should be about zero.
@@ -815,7 +823,6 @@ def skew(x: Union[np.ndarray, list[float]], *, bias: bool = False) -> float:
         .. math::
 
             G_1 = \frac{k_3}{k_2^{3/2}} = \frac{\sqrt{N(N-1)}}{N-2} \frac{m_3}{m_2^{3/2}}.
-
     """
     x_size = np.size(x)
     if x_size in (1, 2):

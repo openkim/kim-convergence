@@ -13,10 +13,12 @@ def _get_caller_name(offset: int = 1) -> str:
     Return the name of the calling function, offset steps up the stack.
 
     Args:
-        offset: How many frames to go back. Default 1 = immediate caller of this function.
+        offset(int, optional): How many frames to go back. 1 = immediate caller.
+            (default: 1)
 
     Returns:
-        Function name, or "<unknown>" if cannot be determined.
+        str
+            Function name, or "<unknown>" if cannot be determined.
     """
     frame = inspect.currentframe()
     if frame is None:
@@ -40,8 +42,8 @@ class CRError(Exception):
 
     It raises an exception when receives an error message.
 
-    msg (str): The error message.
-
+    Args:
+        msg (str): Human-readable error message.
     """
 
     def __init__(self, msg):
@@ -105,14 +107,16 @@ def cr_check(
     r"""Check the variable type and lower bound.
 
     Args:
-        var (var_type): variable
-        var_name (str): variable name
-        var_type (type, optional): variable type. (default: None)
-        var_lower_bound (var_type, optional): variable lower bound.
+        var (var_type): Value to validate.
+        var_name (str): Variable name
+        var_type (Optional[type], optional): Variable type. (default: None)
+        var_lower_bound (var_type, optional): Minimum allowed value.
             (default: 0)
-        var_upper_bound (var_type, optional): variable upper bound.
+        var_upper_bound (var_type, optional): Maximum allowed value.
             (default: None)
 
+    Raises:
+        CRError: If type or bounds are violated.
     """
     if var_upper_bound is None:
         if var_type is None:

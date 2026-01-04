@@ -40,10 +40,10 @@ def t_test(
             below which the null hypothesis will be rejected. (default: 0.05)
 
     Returns:
-        bool: True for the expected value (mean) of a sample of independent
-            observations `x` is equal to the given population mean,
-            `population_mean`.
-
+        bool
+            ``True`` if the expected value (mean) of a sample of independent
+            observations ``x`` equals the given population mean
+            ``population_mean``.
     """
     cr_check(
         significance_level,
@@ -86,18 +86,18 @@ def chi_square_test(
             below which the null hypothesis will be rejected. (default: 0.05)
 
     Returns:
-        bool: True for the variance of a sample of independent observations `x`
-            is equal to the given population variance, `population_var`.
-
+        bool
+            ``True`` if the variance of a sample of independent observations
+            ``x`` equals the given population variance ``population_var``.
     """
     cr_check(
         significance_level,
         var_name="significance_level",
-        var_lower_bound=np.finfo(np.float64).resolution,
+        var_lower_bound=np.finfo(np.float64).resolution,  # type: ignore[arg-type]
     )
 
     df = sample_size - 1
     t = df * sample_var / population_var
     q1 = chi2.ppf(significance_level / 2, df)
     q2 = chi2.ppf(1 - (significance_level / 2), df)
-    return q1 < t < q2
+    return bool(q1 < t < q2)

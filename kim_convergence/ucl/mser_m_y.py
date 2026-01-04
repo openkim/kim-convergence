@@ -111,7 +111,8 @@ class MSER_m_y(MSER_m):
                 metod scaling approach. (default: False)
 
         Returns:
-            float: upper_confidence_limit
+            float
+                upper_confidence_limit
 
         Note:
             equilibration_length_estimate, heidel_welch_number_points, fft,
@@ -264,8 +265,8 @@ def mser_m_y_ci(
         obj (MSER_m_y, optional): instance of ``MSER_m_y`` (default: None)
 
     Returns:
-        float, float: confidence interval
-
+        tuple[float, float]
+            Lower and upper confidence limits for the mean.
     """
     mser = MSER_m_y() if obj is None else obj
     confidence_limits = mser.ci(
@@ -314,8 +315,8 @@ def mser_m_y_relative_half_width_estimate(
         obj (MSER_m_y, optional): instance of ``MSER_m_y`` (default: None)
 
     Returns:
-        float: the relative half width estimate.
-
+        float
+            Relative half width estimate.
     """
     mser = MSER_m_y() if obj is None else obj
     try:

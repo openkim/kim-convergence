@@ -30,8 +30,8 @@ def beta(a: float, b: float) -> float:
         b (float): Second parameter of the beta distribution.
 
     Returns:
-        float: Beta function value.
-
+        float
+            Beta function value.
     """
     _beta = exp(lgamma(a) + lgamma(b) - lgamma(a + b))
     return _beta
@@ -63,8 +63,8 @@ def betacf(
             (default: 1.0e-30)
 
     Returns:
-        float: Continued fraction for incomplete beta function.
-
+        float
+            Continued fraction for incomplete beta function.
     """
     _fpmax = 1.0 / _fpmin
 
@@ -159,7 +159,8 @@ def betai(a: float, b: float, x: float) -> float:
         x (float): Real-valued such that it must be between 0.0 and 1.0.
 
     Returns:
-        float: Incomplete beta function value.
+        float
+            Incomplete beta function value.
 
     """
     if x < 0.0 or x > 1.0:
@@ -201,8 +202,9 @@ def betai_cdf_ccdf(a: float, b: float, x: float) -> tuple[float, float]:
         x (float): Upper limit of integration
 
     Returns:
-        float, float: Cumulative incomplete beta distribution, compliment of the cumulative incomplete beta distribution.
-
+        tuple[float, float]
+            Cumulative incomplete beta distribution, compliment of the
+            cumulative incomplete beta distribution.
     """
     if x <= 0.0:
         return 0.0, 1.0
@@ -218,8 +220,8 @@ def betai_cdf_ccdf(a: float, b: float, x: float) -> tuple[float, float]:
 def betai_cdf(a: float, b: float, x: float) -> float:
     r"""Calculate the cumulative distribution of the incomplete beta distribution.
 
-    Calculate the cumulative distribution of the incomplete beta
-    distribution with parameters a and b as,
+    Calculate the cumulative distribution of the incomplete beta distribution
+    with parameters a and b as,
 
     .. math::
 
@@ -233,8 +235,8 @@ def betai_cdf(a: float, b: float, x: float) -> float:
         x (float): Upper limit of integration
 
     Returns:
-        float: Cumulative incomplete beta distribution.
-
+        float
+            Cumulative incomplete beta distribution.
     """
     cdf, _ = betai_cdf_ccdf(a, b, x)
     return cdf

@@ -73,12 +73,12 @@ def outlier_test(
 
     Args:
         x (array_like, 1d): Time series data.
-        outlier_method (str, optional): Method to detect what are outliers in
-            the data. (default: 'iqr')
+        outlier_method (str, optional): Method for outlier detection.
+            (default: 'iqr')
 
     Returns:
-        1darray, or None: outliers indices, or `None` if there is no outlier
-
+        Optional[ndarray]
+            Indices of outliers; None if no outliers found.
     """
     x = np.asarray(x)
 

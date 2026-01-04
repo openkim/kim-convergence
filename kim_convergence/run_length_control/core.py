@@ -447,15 +447,13 @@ def run_length_control(
             (default: 'txt')
 
     Returns:
-        bool or str:
+        Union[str, bool]
             ``True`` if the length of the time series is long enough to
             estimate the mean with sufficient accuracy or with enough requested
-            sample size and ``False`` otherwise.
-            If fp is a ``str`` equals to ``'return'`` the function will return
-            a string of the analysis results on the length of the time series.
-
+            sample size; ``False`` otherwise.
+            If ``fp == 'return'``, a string containing the analysis results is
+            returned instead.
     """
-
     # 1. Setup: validate inputs and initialize UCL object
     maximum_equilibration_step, ucl_obj = _setup_algorithm(
         get_trajectory=get_trajectory,

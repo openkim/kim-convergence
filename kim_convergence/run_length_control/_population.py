@@ -45,15 +45,13 @@ def _validate_population_params(
     Enforce mutual exclusivity and validity rules for population parameters.
 
     Validates that:
-      - Either a custom distribution (via population_cdf) is specified with loc/scale/args,
-        and mean/std are None
-      - Or no cdf is given → normal distribution assumed, requiring finite mean and std > 0,
-        with args/loc/scale forbidden
+      - Either a custom distribution (via population_cdf) is specified with
+        loc/scale/args, and mean/std are None
+      - Or no cdf is given → normal distribution assumed, requiring finite mean
+        and std > 0, with args/loc/scale forbidden
 
-    Raises
-    ------
-    CRError
-        If lengths mismatch or any semantic rule is violated.
+    Raises:
+        CRError: If lengths mismatch or any semantic rule is violated.
     """
     if not (
         len(population_mean)
@@ -165,11 +163,11 @@ def _population_tests(
     Executes t-test, chi-square test, and Levene test if the corresponding
     population parameters are provided. Short-circuits on the first failure.
 
-    Returns
-    -------
-    bool
-        True if all enabled tests pass (sample consistent with population).
-        False if any test fails (more data needed).
+    Returns:
+        bool
+            - True if all enabled tests pass (sample consistent with
+              population).
+            - False if any test fails (more data needed).
     """
     sig = 1.0 - confidence_coefficient
     ok = True

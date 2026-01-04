@@ -30,8 +30,12 @@ def validate_split(
             (default: None)
 
     Returns:
-        int, int: number of train points, number of test points
+        tuple[int, int]
+            n_train: number of train points
+            n_test: number of test points
 
+    Raises:
+        CRError: If any size is invalid or inconsistent.
     """
     if not isinstance(n_samples, int) or n_samples <= 0:
         raise CRError(f"n_samples={n_samples} is not a positive `int`.")
@@ -138,8 +142,14 @@ def train_test_split(
         default_test_size (float, optional): Default test size. (default: 0.1)
 
     Returns:
-        1darray, 1darray: training indices, testing indices.
+        tuple[np.ndarray, np.ndarray]
+            ind_train: training indices.
+            ind_test: testing indices.
 
+    Raises:
+        CRError
+            If any size is invalid or inconsistent, or if ``seed`` has an
+            illegal type.
     """
     time_series_data = np.asarray(time_series_data)
     n_samples = np.shape(time_series_data)[0]
@@ -155,7 +165,9 @@ def train_test_split(
     elif isinstance(seed, np.random.RandomState):
         rng = seed
     else:
-        raise CRError("seed should be one of `None`, `int` or `np.random.RandomState`.")
+        raise CRError(
+            "seed should be one of `None`, `int` or `np.random.RandomState`."
+        )
 
     # random partition
     permutation = rng.permutation(n_samples)

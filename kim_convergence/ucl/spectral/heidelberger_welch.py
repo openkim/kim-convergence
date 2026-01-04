@@ -448,8 +448,8 @@ class HeidelbergerWelch(UCLBase):
                 that are used to obtain the polynomial fit. The parameter
                 ``heidel_welch_number_points`` determines the frequency range
                 over which the fit is made. (default: 50)
-            fft (bool, optional): if ``True``, use FFT convolution. FFT should
-                be preferred for long time series. (default: True)
+            fft (bool, optional): Use FFT convolution for long series.
+                (default: True)
             test_size (int, float, optional): if ``float``, should be between
                 0.0 and 1.0 and represent the proportion of the periodogram
                 dataset to include in the test split. If ``int``, represents
@@ -460,13 +460,16 @@ class HeidelbergerWelch(UCLBase):
                 the absolute number of train samples. (default: None)
 
         Returns:
-            float: upper_confidence_limit
-                The approximately unbiased estimate of variance of the sample
-                mean, based on the degree of the fitted polynomial.
+            float
+                Upper-confidence limit (approximately unbiased estimate of
+                variance of the sample mean) based on the fitted polynomial
+                degree.
 
         Raises:
-            CRError: If inputs are invalid or computation fails
-            CRSampleSizeError: If insufficient data points
+            CRError
+                If inputs are invalid or computation fails
+            CRSampleSizeError
+                If insufficient data points
 
         Note:
             - If both ``test_size`` and ``train_size`` are None, no train-test
@@ -482,7 +485,6 @@ class HeidelbergerWelch(UCLBase):
             sample_method are accepted for API compatibility but are not used
             by this method.
         """
-
         time_series_data = np.asarray(time_series_data)
 
         if time_series_data.ndim != 1:
@@ -690,8 +692,8 @@ def heidelberger_welch_ci(
             that are used to obtain the polynomial fit. The parameter
             ``heidel_welch_number_points`` determines the frequency range
             over which the fit is made. (default: 50)
-        fft (bool, optional): if ``True``, use FFT convolution. FFT should
-            be preferred for long time series. (default: True)
+        fft (bool, optional): Use FFT convolution for long series.
+            (default: True)
         test_size (int, float, optional): if ``float``, should be between
             0.0 and 1.0 and represent the proportion of the periodogram
             dataset to include in the test split. If ``int``, represents
@@ -704,9 +706,8 @@ def heidelberger_welch_ci(
             (default: None)
 
     Returns:
-        float, float: confidence interval.
-            The estimate of confidence Limits for the mean.
-
+        tuple[float, float]
+            Lower and upper confidence limits for the mean.
     """
     heidelberger_welch = HeidelbergerWelch() if obj is None else obj
     confidence_limits = heidelberger_welch.ci(
@@ -763,8 +764,8 @@ def heidelberger_welch_relative_half_width_estimate(
             (default: None)
 
     Returns:
-        float: relative half width estimate
-
+        float
+            Relative half width estimate
     """
     heidelberger_welch = HeidelbergerWelch() if obj is None else obj
     try:

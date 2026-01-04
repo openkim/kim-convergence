@@ -60,7 +60,7 @@ class ZERO_RC:
         abs_tol: float = 1.0e-50,
         rel_tol: float = 1.0e-8,
     ):
-        """Initialize parameters.
+        r"""Initialize parameters.
 
         Args:
             xlo (float): Lower inverval bounds.
@@ -69,7 +69,6 @@ class ZERO_RC:
                 (default: 1.0e-50)
             rel_tol (float, optional): Relative error tolerance.
                 (default: 1.0e-8)
-
         """
         self.a = 0.0
         self.b = 0.0
@@ -95,25 +94,20 @@ class ZERO_RC:
         self.rel_tol = rel_tol
 
     def zero(self, status: int, x: float, fx: float, xlo: float, xhi: float):
-        """Perform the zero finding.
+        r"""Perform the zero finding.
 
         Args:
-            status {int}: Status.
-                If status set to 0, the value of other parameters will be
-                ignored on the call.
-            x (float): The input value at which function f is to be evaluated.
-            fx (float): Function f evaluated at x.
-            xlo (float): Interval bounds.
-            xhi (float): Interval bounds.
+            status (int): Status. If 0, other parameters are ignored.
+            x (float): Input value at which function f is evaluated.
+            fx (float): Function value f(x).
+            xlo (float): Lower interval bound.
+            xhi (float): Upper interval bound.
 
         Returns:
-            int, float, float, float: status, x, xlo, xhi.
-                The status = 0 on return means it has finished without error,
-                and ``[xlo, xhi]`` bounds the answer.
-                The status = 1 on return, means the function needs to be
-                evaluated.
-                The status = -1 on return, means an error happened.
-
+            tuple[int, float, float, float]
+                status:  0 = finished, 1 = needs eval, -1 = error.
+                x:       updated candidate.
+                xlo/xhi: refined bracketing interval.
         """
         if status <= 0:
             self.b = deepcopy(self.xxlo)

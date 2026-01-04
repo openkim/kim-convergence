@@ -86,7 +86,6 @@ class UCLBase:
 
         Args:
             value (1darray): indices array.
-
         """
         self.indices_ = value
 
@@ -116,7 +115,6 @@ class UCLBase:
                 computing the correlation time out to minimum_correlation_time
                 when the correlation function first goes negative.
                 (default: None)
-
         """
         self.set_si(
             time_series_data=time_series_data,
@@ -145,7 +143,6 @@ class UCLBase:
 
         Args:
             value (float): estimated statistical inefficiency value.
-
         """
         self.si_ = value
 
@@ -175,7 +172,6 @@ class UCLBase:
                 computing the correlation time out to minimum_correlation_time
                 when the correlation function first goes negative.
                 (default: None)
-
         """
         self.si = time_series_data_si(
             time_series_data=time_series_data,
@@ -195,7 +191,6 @@ class UCLBase:
 
         Args:
             value (float): mean value.
-
         """
         self.mean_ = value
 
@@ -215,7 +210,6 @@ class UCLBase:
 
         Args:
             value (float): std value.
-
         """
         self.std_ = value
 
@@ -235,7 +229,6 @@ class UCLBase:
 
         Args:
             value (int): sample_size value.
-
         """
         self.sample_size_ = value
 
@@ -255,11 +248,11 @@ class UCLBase:
         - Effective sample size = 1
         - Mean is known exactly -> upper confidence limit = 0
 
-        Returns
-        -------
-        bool
-            True if the series is constant and attributes were set (early exit recommended),
-            False otherwise (proceed with normal UCL computation).
+        Returns:
+            bool
+                True if the series is constant and attributes were set (early
+                exit recommended), False otherwise (proceed with normal UCL
+                computation).
         """
         samples = np.asarray(time_series_data)
 

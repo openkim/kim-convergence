@@ -50,19 +50,16 @@ def _normalize_ignore_end(
     A *float* in ``(0, 1)`` is interpreted as a fraction of the total batches.
     An *int* must be ≥ 1.
 
-    Returns
-    -------
-    int
-        Positive number of batches to ignore from the end.
+    Returns:
+        int
+            Positive number of batches to ignore from the end.
 
-    Raises
-    ------
-    CRError
-        If *ignore_end* has wrong type, wrong range, or is < 1.
-    CRSampleSizeError
-        If *ignore_end* >= *number_batches*.
+    Raises:
+        CRError
+            If *ignore_end* has wrong type, wrong range, or is < 1.
+        CRSampleSizeError
+            If *ignore_end* >= *number_batches*.
     """
-
     if not isinstance(ignore_end, int):
         if ignore_end is None:
             ignore_end = max(1, batch_size)
@@ -145,8 +142,9 @@ def mser_m(
             :math:`Min(batch_size, number_batches / 4)`. (default: None)
 
     Returns:
-        bool, int: truncated, truncation point.
-            Truncation point is the index to truncate.
+        tuple[bool, int]
+            truncated: True if truncation was applied.
+            truncation_point: Index at which to truncate.
 
     Note:
         MSER-m sometimes erroneously reports a truncation point at the end of
@@ -166,7 +164,6 @@ def mser_m(
         data, the MSER-m returns the time series data's last index as the
         truncation point. This index can be used as a measure that the
         algorithm did not find any truncation point.
-
     """
     time_series_data = np.asarray(time_series_data)
 
@@ -272,7 +269,6 @@ class MSER_m(UCLBase):
     MSER-m applies the equation to a series of batch averages instead of the
     raw series. The CI estimators can be computed from the truncated sequence
     of batch means.
-
     """
 
     def __init__(self):
@@ -361,7 +357,8 @@ class MSER_m(UCLBase):
                 metod scaling approach. (default: False)
 
         Returns:
-            float: upper_confidence_limit
+            float
+                upper_confidence_limit
 
         Note:
             equilibration_length_estimate, heidel_welch_number_points, fft,
@@ -468,8 +465,8 @@ def mser_m_ci(
         obj (MSER_m, optional): instance of ``MSER_m`` (default: None)
 
     Returns:
-        float, float: confidence interval
-
+        tuple[float, float]
+            Lower and upper confidence limits for the mean.
     """
     mser = MSER_m() if obj is None else obj
     confidence_limits = mser.ci(
@@ -518,8 +515,8 @@ def mser_m_relative_half_width_estimate(
         obj (MSER_m, optional): instance of ``MSER_m`` (default: None)
 
     Returns:
-        float: the relative half width estimate.
-
+        float
+            Relative half width estimate.
     """
     mser = MSER_m() if obj is None else obj
     try:

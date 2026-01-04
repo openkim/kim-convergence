@@ -38,11 +38,10 @@ def _check_accuracy(
       - Values are non-negative
       - Absolute accuracy meets the minimum threshold when relative accuracy is absent
 
-    Raises
-    ------
-    CRError
-        If any per-variable accuracy rule is violated (both None, negative values,
-        or absolute_accuracy below minimum when relative_accuracy is None).
+    Raises:
+        CRError: If any per-variable accuracy rule is violated (both None,
+            negative values, or absolute_accuracy below minimum when
+            relative_accuracy is None).
     """
     if len(relative_accuracy) != number_of_variables:
         raise CRError("Internal error: relative_accuracy list length mismatch.")

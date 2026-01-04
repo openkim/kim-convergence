@@ -76,11 +76,10 @@ def statistical_inefficiency(
             correlation function first goes negative. (default: None)
 
     Returns:
-        float: estimated statistical inefficiency.
-            :math:`si >= 1` is the estimated statistical inefficiency
-            (equal to :math:`1 + 2\tau`, where :math:`\tau` denotes the
-            integrated auto-correlation time).
-
+        float
+            estimated statistical inefficiency. :math:`si >= 1` is the estimated
+            statistical inefficiency (equal to :math:`1 + 2\tau`, where
+            :math:`\tau` denotes the integrated auto-correlation time).
     """
     x = np.asarray(x)
 
@@ -210,9 +209,10 @@ def geyer_r_statistical_inefficiency(
             preferred for long time series. (default: True)
 
     Returns:
-        float: estimated statistical inefficiency.
-            :math:`si >= 1` is the estimated statistical inefficiency
-            (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
+        float
+            estimated statistical inefficiency. :math:`si >= 1` is the estimated
+            statistical inefficiency (equal to
+            :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
             :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
 
     Note:
@@ -353,9 +353,10 @@ def geyer_split_r_statistical_inefficiency(
             preferred for long time series. (default: True)
 
     Returns:
-        float: estimated statistical inefficiency.
-            :math:`si >= 1` is the estimated statistical inefficiency
-            (equal to :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
+        float
+            estimated statistical inefficiency. :math:`si >= 1` is the estimated
+            statistical inefficiency (equal to
+            :math:`si = -1 + 2 \sum_{t'=0}^m \hat{P}_{t'}`, where
             :math:`\hat{P}_{t'} = \hat{\rho}_{2t'} + \hat{\rho}_{2t'+1}`)
 
     Note:
@@ -407,8 +408,9 @@ def geyer_split_statistical_inefficiency(
             preferred for long time series. (default: True)
 
     Returns:
-        float: estimated statistical inefficiency.
-            :math:`si >= 1` is the estimated statistical inefficiency
+        float
+            estimated statistical inefficiency. :math:`si >= 1` is the estimated
+            statistical inefficiency
 
     Note:
         minimum_correlation_time is accepted for API compatibility but is not
@@ -571,9 +573,9 @@ def integrated_auto_correlation_time(
             correlation function first goes negative. (default: None)
 
     Returns:
-        float: integrated auto-correlation time.
-            estimated :math:`\tau` (the integrated auto-correlation time)
-
+        float
+            integrated auto-correlation time. estimated :math:`\tau` (the
+            integrated auto-correlation time)
     """
     if si is None:
         # Compute the statistical inefficiency

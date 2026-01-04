@@ -63,17 +63,15 @@ def _convergence_message(
 
     Producing a consistent report suitable for JSON/EDN serialization or printing.
 
-    Returns
-    -------
-    dict
-        Convergence report with keys such as 'converged', 'total_run_length',
-        'equilibration_detected', per-variable statistics, confidence intervals,
-        and accuracy details.
+    Returns:
+        dict
+            Convergence report with keys such as ``'converged'``,
+            ``'total_run_length'``, ``'equilibration_detected'``, per-variable
+            statistics, confidence intervals, and accuracy details.
 
-    Raises
-    ------
-    AssertionError
-        If input types or shapes are inconsistent (defensive checks only).
+    Raises:
+        AssertionError: If input types or shapes are inconsistent (defensive
+            checks only).
     """
     eq_step = equilibration_step
     rel_acc = relative_accuracy
@@ -208,24 +206,27 @@ def _compute_ucl_and_check_accuracy(
     value for reporting the best available estimates when full convergence is not
     reached.
 
-    Returns
-    -------
-    upper_confidence_limit : Optional[float]
-        The computed half-width of the confidence interval.
-        ``None`` if the sample size was insufficient (CRSampleSizeError).
-    relative_half_width_estimate : float
-        Estimated relative half-width when relative accuracy is requested;
-        0.0 when absolute accuracy is used or in final_pass mode.
-    accurate : bool
-        ``True`` if the accuracy criterion is met (ignored in final_pass mode,
-        where it is always ``True``).
+    Returns:
+        tuple[
+            upper_confidence_limit : Optional[float],
+            relative_half_width_estimate : float,
+            accurate : bool
+        ]
+            - upper_confidence_limit:
+                The computed half-width of the confidence interval, or ``None``
+                if the sample size was insufficient (``CRSampleSizeError``).
+            - relative_half_width_estimate:
+                Estimated relative half-width when relative accuracy is
+                requested; 0.0 when absolute accuracy is used or in final-pass
+                mode.
+            - accurate:
+                ``True`` if the accuracy criterion is met (always ``True`` in
+                final-pass mode).
 
-    Raises
-    ------
-    CRError
-        If UCL computation fails for reasons other than insufficient sample size,
-        or if relative accuracy is requested but the estimated mean is too close
-        to zero to allow a meaningful relative estimate.
+    Raises:
+        CRError: If UCL computation fails for reasons other than insufficient
+            sample size, or if relative accuracy is requested but the estimated
+            mean is too close to zero to allow a meaningful relative estimate.
     """
     try:
         upper_confidence_limit = ucl_obj.ucl(
@@ -351,26 +352,35 @@ def _convergence_stage(
     When convergence is not achieved (e.g., maximum_run_length reached),
     final statistics are computed for reporting the best available estimates.
 
-    Returns
-    -------
-    converged : bool
-        True if all variables fully converged.
-    total_run_length: int
-        Total number of steps in the trajectory.
-    mean : list[Optional[float]]
-        Estimated means (None only if UCL computation failed entirely).
-    std : list[Optional[float]]
-        Estimated standard deviations.
-    effective_sample_size : list[float]
-        Effective sample sizes (N / statistical inefficiency).
-    upper_confidence_limit : list[Optional[float]]
-        Final upper confidence limits (half-widths).
-    relative_half_width_estimate : list[float]
-        Relative half-width estimates (0.0 when absolute accuracy was used).
-    relative_accuracy_undefined : list[bool]
-        True for variables whose CI covers zero.
+    Returns:
+        tuple[
+            converged : bool,
+            total_run_length : int,
+            mean : list[Optional[float]],
+            std : list[Optional[float]],
+            effective_sample_size : list[float],
+            upper_confidence_limit : list[Optional[float]],
+            relative_half_width_estimate : list[float],
+            relative_accuracy_undefined : list[bool]
+        ]
+            - converged:
+                True if all variables fully converged.
+            - total_run_length:
+                Total number of steps in the trajectory.
+            - mean:
+                Estimated means (None only if UCL computation failed entirely).
+            - std:
+                Estimated standard deviations.
+            - effective_sample_size:
+                Effective sample sizes (N / statistical inefficiency).
+            - upper_confidence_limit:
+                Final upper confidence limits (half-widths).
+            - relative_half_width_estimate:
+                Relative half-width estimates (0.0 when absolute accuracy was
+                used).
+            - relative_accuracy_undefined:
+                True for variables whose CI covers zero.
     """
-
     ndim: int = tsd.ndim
 
     done: list[bool] = [False] * number_of_variables
@@ -553,17 +563,14 @@ def _output_convergence_report(
     Handles writing the convergence message to a file-like object or returning
     it as a string, according to ``fp`` and ``fp_format``.
 
-    Returns
-    -------
-    str
-        Serialized report if ``fp == "return"``.
-    bool
-        ``converged`` if output was written to ``fp`` or stdout.
+    Returns:
+        Union[str, bool]
+            - If ``fp == "return"``: serialized report string.
+            - Otherwise: ``converged`` boolean that was written to ``fp`` or
+              stdout.
 
-    Raises
-    ------
-    CRError
-        If ``fp`` or ``fp_format`` is invalid.
+    Raises:
+        CRError: If ``fp`` or ``fp_format`` is invalid.
     """
     if fp is None:
         fp = sys.stdout

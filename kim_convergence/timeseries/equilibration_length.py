@@ -67,20 +67,17 @@ def _normalize_ignore_end(
     A *float* in ``(0, 1)`` is interpreted as a fraction of the series length.
     An *int* must be ≥ 1.  Geyer methods impose additional lower bounds.
 
-    Returns
-    -------
-    int
-        Positive number of **data points** to ignore from the end.
+    Returns:
+        int
+            Positive number of data points to ignore from the end.
 
-    Raises
-    ------
-    CRError
-        If *ignore_end* has wrong type, wrong range, or is < 1.
-    CRSampleSizeError
-        If *ignore_end* >= *time_series_data_size* or if the series is too
-        short for the chosen Geyer estimator.
+    Raises:
+        CRError
+            If *ignore_end* has wrong type, wrong range, or is < 1.
+        CRSampleSizeError
+            If *ignore_end* >= *time_series_data_size* or if the series is too
+            short for the chosen Geyer estimator.
     """
-
     if not isinstance(ignore_end, int):
         if ignore_end is None:
             ignore_end = max(1, data_size // 4)
@@ -155,21 +152,19 @@ def estimate_equilibration_length(
     statistical inefficiencies [chodera2016]_, [geyer1992]_, [geyer2011]_.
 
     Args:
-        time_series_data (array_like, 1d): time series data.
-        si (str, optional): statistical inefficiency method. (default: None)
-        nskip (int, optional): the number of data points to skip.
+        time_series_data (array_like, 1d): Time-series data.
+        si (Optional[str], optional): Statistical-inefficiency method.
+            (default: None)
+        nskip (Optional[int], optional): Number of data points to skip.
             (default: 1)
-        fft (bool, optional): if ``True``, use FFT convolution. FFT should be
-            preferred for long time series. (default: True)
-        minimum_correlation_time (int, optional): the minimum amount of
-            correlation function to compute. The algorithm terminates after
-            computing the correlation time out to minimum_correlation_time when
-            the correlation function first goes negative. (default: None)
-        ignore_end (int, or float, or None, optional): if ``int``, it is the
-            last few points that should be ignored. if ``float``, should be in
-            ``(0, 1)`` and it is the percent of number of points that should be
-            ignored. If ``None`` it would be set to the one fourth of the total
-            number of points. (default: None)
+        fft (bool, optional): Use FFT convolution for long series.
+            (default: True)
+        minimum_correlation_time (Optional[int], optional): Minimum
+            correlation-time window; algorithm stops when correlation first goes
+            negative. (default: None)
+        ignore_end (Optional[Union[int, float]], optional): If int, last points
+            to ignore; if float in (0, 1), fraction to ignore; if None, uses one
+            fourth of data. (default: None)
         number_of_cores (int, optional): The maximum number of concurrently
             running jobs, such as the number of Python worker processes or the
             size of the thread-pool. If -1 all CPUs are used. If 1 is given, no
@@ -178,8 +173,9 @@ def estimate_equilibration_length(
             one are used. (default: 1)
 
     Returns:
-        int, float: equilibration index, statistical inefficiency estimates
-            equilibration index, and statitical inefficiency estimates of a
+        tuple[int, float]
+            equilibration_index: index where equilibrated region starts.
+            statistical_inefficiency: statitical inefficiency estimates of a
             time series at the equilibration index estimate.
 
     Note:

@@ -46,10 +46,9 @@ def t_cdf_ccdf(t: float, df: float) -> tuple[float, float]:
         df (float): Degrees of freedom, must be a positive number.
 
     Returns:
-        float, float: cdf, ccdf
-            Cumulative t-distribution, compliment of the cumulative
-            t-distribution.
-
+        tuple[float, float]
+            cdf: cumulative t-distribution value.
+            ccdf: complement of the cumulative t-distribution (1 - cdf).
     """
     if df < 1:
         _raise_bounds_error("df", df, 1, "infinity")
@@ -93,8 +92,8 @@ def t_cdf(t: float, df: float) -> float:
         df (float): Degrees of freedom, must be a positive number.
 
     Returns:
-        float: Cumulative t-distribution.
-
+        float
+            Cumulative t-distribution.
     """
     cdf, _ = t_cdf_ccdf(t, df)
     return cdf
@@ -110,7 +109,7 @@ def t_inv_cdf(
     _atol: float = 1.0e-50,
     _rtinf: float = 1.0e100,
 ) -> float:
-    """Compute the t_distribution inverse cumulative distribution function.
+    r"""Compute the t_distribution inverse cumulative distribution function.
 
     Compute the inverse cumulative distribution function (percent point
     function or quantile function) for t-distributions with df degrees of
@@ -125,12 +124,9 @@ def t_inv_cdf(
         scale (float, optional): scale parameter (default: 1.0)
 
     Returns:
-        float: The inverse cumulative distribution function.
-            The inverse cumulative distribution function.
-            The value x of the random variable X such that the
-            probability of the variable being less than or equal to that
-            value equals the given probability p. :math:`x : P(X <= x) = p`.
-
+        float
+            Inverse cumulative distribution function: value :math:`x` such that
+            :math:`P(X \le x) = p`.
     """
     if p <= 0.0 or p >= 1.0:
         _raise_bounds_error("p", p, 0.0, 1.0)
@@ -211,10 +207,9 @@ def t_interval(
         scale (float, optional): scale parameter (default: 1.0)
 
     Returns:
-        float, float : lower bound, upper bound of the confidence interval
-            end-points of range that contain
-            :math:`100 \text{confidence_level} \%` of the t_distribution
-            possible values.
+        tuple[float, float]
+            Lower and upper bounds of the confidence interval that contains
+            :math:`100 \cdot \text{confidence_level}\%` of the t-distribution.
 
     Note:
         - Confidence interval is a range of values that is likely to contain an
@@ -227,7 +222,6 @@ def t_interval(
           null hypothesis when it is true. To find alpha, just subtract the
           confidence interval from 100%. E.g., the significance level for a 90%
           confidence level is 100% – 90% = 10%.
-
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
         _raise_bounds_error("confidence_level", confidence_level, 0.0, 1.0)

@@ -120,9 +120,9 @@ class UncorrelatedSamples(UCLBase):
                 (default: None)
 
         Returns:
-            float: upper_confidence_limit
-                The approximately unbiased estimate of variance of the sample
-                mean.
+            float
+                upper_confidence_limit. The approximately unbiased estimate of
+                variance of the sample mean.
 
         Note:
             equilibration_length_estimate, heidel_welch_number_points,
@@ -322,10 +322,9 @@ def uncorrelated_samples_ci(
             ``UncorrelatedSamples`` (default: None)
 
     Returns:
-        float, float: confidence interval
-            The approximately unbiased estimate of confidence Limits
-            for the mean.
-
+        tuple[float, float]
+            Lower and upper confidence limits for the mean. The approximately
+            unbiased estimate of confidence Limits for the mean.
     """
     uncorrelated_samples = UncorrelatedSamples() if obj is None else obj
     confidence_limits = uncorrelated_samples.ci(
@@ -393,8 +392,8 @@ def uncorrelated_samples_relative_half_width_estimate(
             ``UncorrelatedSamples`` (default: None)
 
     Returns:
-        float: the relative half width estimate
-
+        float
+            Relative half width estimate
     """
     uncorrelated_samples = UncorrelatedSamples() if obj is None else obj
     try:

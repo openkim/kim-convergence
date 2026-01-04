@@ -28,14 +28,12 @@ def s_normal_inv_cdf(p: float) -> float:
     [pythonstats]_, [wichura1988]_.
 
     Args:
-        p {float} -- Probability (must be between 0.0 and 1.0)
+        p (float): Probability (must be between 0.0 and 1.0).
 
     Returns:
-        float -- the inverse cumulative distribution function.
-            the value x of the random variable X such that the probability of
-            the variable being less than or equal to that value equals the
-            given probability p. :math:`x : P(X <= x) = p`.
-
+        float
+            Inverse cumulative distribution function: value :math:`x` such that
+            :math:`P(X \le x) = p`.
     """
     if p == 0.0:
         return -inf
@@ -119,16 +117,14 @@ def normal_inv_cdf(p: float, *, loc=0.0, scale: float = 1.0) -> float:
     r"""Compute the normal distribution inverse cumulative distribution function.
 
     Args:
-        p {float} -- Probability (must be between 0.0 and 1.0)
-        loc (float, optional): location parameter (default: 0.0)
-        scale (float, optional): scale parameter (default: 1.0)
+        p (float): Probability (must be between 0.0 and 1.0).
+        loc (float, optional): Location parameter. (default: 0.0)
+        scale (float, optional): Scale parameter. (default: 1.0)
 
     Returns:
-        float -- the inverse cumulative distribution function.
-            the value x of the random variable X such that the probability of
-            the variable being less than or equal to that value equals the
-            given probability p. :math:`x : P(X <= x) = p`.
-
+        float
+            Inverse cumulative distribution function: value :math:`x` such that
+            :math:`P(X \le x) = p`.
     """
     return s_normal_inv_cdf(p) * scale + loc
 
@@ -142,16 +138,15 @@ def normal_interval(
     the median.
 
     Args:
-        confidence_level (float): (or confidence coefficient) must be between
-            0.0 and 1.0
-        loc (float, optional): location parameter (default: 0.0)
-        scale (float, optional): scale parameter (default: 1.0)
+        confidence_level (float): Confidence coefficient (must be between 0.0
+            and 1.0).
+        loc (float, optional): Location parameter. (default: 0.0)
+        scale (float, optional): Scale parameter. (default: 1.0)
 
     Returns:
-        float, float : lower bound, upper bound of the confidence interval
-            end-points of range that contain
-            :math:`100 \text{confidence_level} \%` of the normal distribution
-            possible values.
+        tuple[float, float]
+            Lower and upper bounds of the confidence interval that contains
+            :math:`100~\text{confidence_level}\%` of the distribution.
 
     Note:
         - Confidence interval is a range of values that is likely to contain an
@@ -164,7 +159,6 @@ def normal_interval(
           null hypothesis when it is true. To find alpha, just subtract the
           confidence interval from 100%. E.g., the significance level for a 90%
           confidence level is 100% – 90% = 10%.
-
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
         raise CRError(

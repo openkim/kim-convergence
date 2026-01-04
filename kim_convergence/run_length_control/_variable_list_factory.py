@@ -52,24 +52,22 @@ def _make_variable_list(
     r"""
     Convert arbitrary input into a list of length exactly ``number_of_variables``.
 
-    Behavior
-    --------
-    - ``None`` -> ``[None] * number_of_variables``
-    - Scalar (int, float, str, list, etc.) -> repeated: ``[scalar] * number_of_variables``
-      - Only *numeric* scalars have inf/nan -> None applied
-    - Sequence (list, tuple, ndarray) -> must have length == number_of_variables
-      - Each element passed through cleaning (only numeric scalars affected)
-      - Nested lists, dicts, custom objects preserved exactly
+    Behavior:
+        - ``None`` -> ``[None] * number_of_variables``
+        - Scalar (int, float, str, list, etc.) ->
+          repeated: ``[scalar] * number_of_variables``
+            - Only *numeric* scalars have inf/nan -> None applied
+        - Sequence (list, tuple, ndarray) -> must have length ==
+          number_of_variables
+            - Each element cleaned (only numeric scalars affected)
+            - Nested lists, dicts, custom objects preserved exactly
 
-    Returns
-    -------
-    list
-        Length-exact list with non-finite numerics replaced by ``None``.
+    Returns:
+        list[Any]
+            Length-exact list with non-finite numerics replaced by ``None``.
 
-    Raises
-    ------
-    CRError
-        On unsupported type or length mismatch.
+    Raises:
+        CRError: On unsupported type or length mismatch.
     """
     if value is None:
         return [None] * number_of_variables

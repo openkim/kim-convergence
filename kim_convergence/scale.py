@@ -44,28 +44,27 @@ class MinMaxScale:
 
     Examples:
 
-        >>> from kim_convergence import MinMaxScale, minmax_scale
-        >>> data = [-1., 3.]
-        >>> mms = MinMaxScale()
-        >>> scaled_x = mms.scale(data)
-        >>> print(scaled_x)
-            [0. 1.]
+    >>> from kim_convergence import MinMaxScale, minmax_scale
+    >>> data = [-1., 3.]
+    >>> mms = MinMaxScale()
+    >>> scaled_x = mms.scale(data)
+    >>> print(scaled_x)
+    [0. 1.]
 
-        >>> x = mms.inverse(scaled_x)
-        >>> print(x)
-            [-1.  3.]
+    >>> x = mms.inverse(scaled_x)
+    >>> print(x)
+    [-1.  3.]
 
-        >>> data = [-1., 3., 100.]
-        >>> scaled_x = minmax_scale(data)
-        >>> print(scaled_x)
-            [0. 0.03960396 1.]
+    >>> data = [-1., 3., 100.]
+    >>> scaled_x = minmax_scale(data)
+    >>> print(scaled_x)
+    [0. 0.03960396 1.]
 
-        >>> mms = MinMaxScale()
-        >>> scaled_x = mms.scale(data)
-        >>> x = mms.inverse(scaled_x)
-        >>> print(x)
-            [ -1. 3. 100.]
-
+    >>> mms = MinMaxScale()
+    >>> scaled_x = mms.scale(data)
+    >>> x = mms.inverse(scaled_x)
+    >>> print(x)
+    [ -1. 3. 100.]
     """
 
     def __init__(self, *, feature_range: tuple[float, float] = (0, 1)):
@@ -88,8 +87,8 @@ class MinMaxScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Scaled dataset to a given range.
-
+            1darray
+                Scaled dataset to a given range.
         """
         x = np.asarray(x)
 
@@ -129,8 +128,8 @@ class MinMaxScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Transformed data.
-
+            1darray
+                Transformed data.
         """
         if self.min_ is None:
             raise CRError(
@@ -170,7 +169,8 @@ def minmax_scale(
             Desired range of transformed data.
 
     Returns:
-        1darray: Scaled dataset to a given range.
+        1darray
+            Scaled dataset to a given range.
 
     Note:
         with_centering, and with_scaling are accepted for API compatibility but
@@ -205,17 +205,16 @@ class TranslateScale:
 
     Examples:
 
-        >>> from kim_convergence import TranslateScale
-        >>> data = [1., 2., 2., 2., 3.]
-        >>> tsc = TranslateScale()
-        >>> scaled_x = tsc.scale(data)
-        >>> print(scaled_x)
-            [0. 1. 1. 1. 2.]
+    >>> from kim_convergence import TranslateScale
+    >>> data = [1., 2., 2., 2., 3.]
+    >>> tsc = TranslateScale()
+    >>> scaled_x = tsc.scale(data)
+    >>> print(scaled_x)
+    [0. 1. 1. 1. 2.]
 
-        >>> x = tsc.inverse(scaled_x)
-        >>> print(x)
-            [1. 2. 2. 2. 3.]
-
+    >>> x = tsc.inverse(scaled_x)
+    >>> print(x)
+    [1. 2. 2. 2. 3.]
     """
 
     def __init__(self, *, with_centering: bool = True, with_scaling: bool = True):
@@ -231,8 +230,8 @@ class TranslateScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Scaled dataset to a given range.
-
+            1darray
+                Scaled dataset to a given range.
         """
         x = np.asarray(x)
 
@@ -267,8 +266,8 @@ class TranslateScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Transformed data.
-
+            1darray
+                Transformed data.
         """
         if self.scale_ is None and self.center_ is None:
             raise CRError(
@@ -317,8 +316,8 @@ def translate_scale(
             (default: True)
 
     Returns:
-        1darray: Scaled dataset.
-
+        1darray
+            Scaled dataset.
     """
     tsc = TranslateScale(with_centering=with_centering, with_scaling=with_scaling)
     return tsc.scale(x)
@@ -354,17 +353,16 @@ class StandardScale:
 
     Examples:
 
-        >>> from kim_convergence import StandardScale
-        >>> data = [-0.5, 6]
-        >>> ssc = StandardScale()
-        >>> scaled_x = ssc.scale(data)
-        >>> print(scaled_x)
-            [-1.  1.]
+    >>> from kim_convergence import StandardScale
+    >>> data = [-0.5, 6]
+    >>> ssc = StandardScale()
+    >>> scaled_x = ssc.scale(data)
+    >>> print(scaled_x)
+    [-1.  1.]
 
-        >>> x = ssc.inverse(scaled_x)
-        >>> print(x)
-            [-0.5  6. ]
-
+    >>> x = ssc.inverse(scaled_x)
+    >>> print(x)
+    [-0.5  6. ]
     """
 
     def __init__(self, *, with_centering: bool = True, with_scaling: bool = True):
@@ -382,8 +380,8 @@ class StandardScale:
             x (array_like, 1d): The data to center and scale.
 
         Returns:
-            1darray: Scaled and/or Centered dataset.
-
+            1darray
+                Scaled and/or Centered dataset.
         """
         x = np.asarray(x)
 
@@ -453,8 +451,8 @@ class StandardScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Transformed data.
-
+            1darray
+                Transformed data.
         """
         if self.mean_ is None and self.std_ is None:
             raise CRError(
@@ -512,13 +510,13 @@ def standard_scale(
             (default: True)
 
     Returns:
-        1darray: scaled dataset
+        1darray
+            Scaled dataset
 
     Note:
         If set explicitly `with_centering=False` (only variance scaling will
         be performed on x). We use a biased estimator for the standard
         deviation.
-
     """
     ssc = StandardScale(with_centering=with_centering, with_scaling=with_scaling)
     return ssc.scale(x)
@@ -548,17 +546,16 @@ class RobustScale:
 
     Examples:
 
-        >>> from kim_convergence import RobustScale
-        >>> data = [ 4.,  1., -2.]
-        >>> rsc = RobustScale()
-        >>> scaled_x = rsc.scale(data)
-        >>> print(scaled_x)
-            [ 1.22474487  0.         -1.22474487]
+    >>> from kim_convergence import RobustScale
+    >>> data = [ 4.,  1., -2.]
+    >>> rsc = RobustScale()
+    >>> scaled_x = rsc.scale(data)
+    >>> print(scaled_x)
+    [ 1.22474487  0.         -1.22474487]
 
-        >>> x = rsc.inverse(scaled_x)
-        >>> print(x)
-            [ 4.  1. -2.]
-
+    >>> x = rsc.inverse(scaled_x)
+    >>> print(x)
+    [ 4.  1. -2.]
     """
 
     def __init__(
@@ -592,8 +589,8 @@ class RobustScale:
             x (array_like, 1d): The data to center and scale.
 
         Returns:
-            1darray: Scaled dataset.
-
+            1darray
+                Scaled dataset.
         """
         x = np.asarray(x)
 
@@ -629,8 +626,8 @@ class RobustScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Transformed data.
-
+            1darray
+                Transformed data.
         """
         if self.center_ is None and self.scale_ is None:
             raise CRError(
@@ -675,8 +672,8 @@ def robust_scale(
             (default: (25.0, 75.0) = (1st quantile, 3rd quantile))
 
     Returns:
-        1darray: Scaled dataset.
-
+        1darray
+            Scaled dataset.
     """
     rsc = RobustScale(
         with_centering=with_centering,
@@ -694,17 +691,16 @@ class MaxAbsScale:
 
     Examples:
 
-        >>> from kim_convergence import MaxAbsScale
-        >>> data = [ 4.,  1., -9.]
-        >>> mas = MaxAbsScale()
-        >>> scaled_x = mas.scale(data)
-        >>> print(scaled_x)
-            [ 0.44444444  0.11111111 -1.        ]
+    >>> from kim_convergence import MaxAbsScale
+    >>> data = [ 4.,  1., -9.]
+    >>> mas = MaxAbsScale()
+    >>> scaled_x = mas.scale(data)
+    >>> print(scaled_x)
+    [ 0.44444444  0.11111111 -1.        ]
 
-        >>> x = mas.inverse(scaled_x)
-        >>> print(x)
-            [ 4.  1. -9.]
-
+    >>> x = mas.inverse(scaled_x)
+    >>> print(x)
+    [ 4.  1. -9.]
     """
 
     def __init__(self):
@@ -722,8 +718,8 @@ class MaxAbsScale:
             x (array_like, 1d): The data to scale.
 
         Returns:
-            1darray: Scaled dataset.
-
+            1darray
+                Scaled dataset.
         """
         x = np.asarray(x)
 
@@ -752,8 +748,8 @@ class MaxAbsScale:
             x (array_like, 1d): Time series data.
 
         Returns:
-            1darray: Transformed data.
-
+            1darray
+                Transformed data.
         """
         if self.scale_ is None:
             raise CRError(
@@ -785,7 +781,8 @@ def maxabs_scale(
         x (array_like, 1d): The data to center and scale.
 
     Returns:
-        1darray: Scaled dataset.
+        1darray
+            Scaled dataset.
 
     Note:
         with_centering, and with_scaling are accepted for API compatibility but

@@ -25,11 +25,12 @@ def randomness_test(
 
     Args:
         x (array_like, 1d): Time series data.
-        significance_level (float): Significance level. A probability threshold
-            below which the null hypothesis will be rejected.
+        significance_level (float): Probability threshold below which the null
+            hypothesis is rejected.
 
     Returns:
-        bool: True for the independence of observations
+        bool
+            ``True`` if the observations are independent.
 
     Note:
         Given a series :math:`x` of :math:`n` data points, the Von-Neumann test
@@ -42,7 +43,6 @@ def randomness_test(
         Under the null hypothesis of independence, the mean :math:`\bar{v} = 2`
         and the variance :math:`\sigma^2_v = \frac{4 (n - 2)}{(n^2-1)}` (see
         [williams1941]_, and [madansky1988]_ for a simple derivation).
-
     """
     x = np.asarray(x)
 

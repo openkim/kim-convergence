@@ -72,14 +72,12 @@ class N_SKART(UCLBase):
             below which the null hypothesis will be rejected.
         randomness_test_counter (int): counter for applying the randomness test
             of von Neumann [vonneumann1941]_ [vonneumann1941b]_.
-
     """
 
     def __init__(self):
         r"""Initialize the N_SKART class.
 
         Initialize a N_SKART object and set the constants.
-
         """
         UCLBase.__init__(self)
 
@@ -134,8 +132,9 @@ class N_SKART(UCLBase):
             time_series_data (array_like, 1d): time series data.
 
         Returns:
-            bool, int: truncated, equilibration index.
-                Truncation point is the index to truncate.
+            tuple[bool, int]
+                truncated: True if truncation was applied.
+                truncation_point: Index at which to truncate.
 
         Note:
             if N-Skart does not detect the equilibration it will return
@@ -344,10 +343,10 @@ class N_SKART(UCLBase):
                 be preferred for long time series. (default: True)
 
         Returns:
-            float: upper_confidence_limit
-                The correlation-adjusted estimate of variance of the sample
-                mean, based on the skewness-adjusted critical values of
-                Student's t-ratio.
+            float
+                upper_confidence_limit. The correlation-adjusted estimate of
+                variance of the sample mean, based on the skewness-adjusted
+                critical values of Student's t-ratio.
 
         Note:
             heidel_welch_number_points, batch_size, test_size, train_size,
@@ -545,10 +544,9 @@ def n_skart_ci(
             be preferred for long time series. (default: True)
         obj (N_SKART, optional): instance of ``N_SKART`` (default: None)
 
-
     Returns:
-        float, float: confidence interval
-
+        tuple[float, float]
+            Lower and upper confidence limits for the mean.
     """
     n_skart = N_SKART() if obj is None else obj
     confidence_limits = n_skart.ci(
@@ -590,8 +588,8 @@ def n_skart_relative_half_width_estimate(
         obj (N_SKART, optional): instance of ``N_SKART`` (default: None)
 
     Returns:
-        float: the relative half width estimate.
-
+        float
+            Relative half width estimate.
     """
     n_skart = N_SKART() if obj is None else obj
     try:

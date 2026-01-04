@@ -40,8 +40,9 @@ def batch(
         with_scaling (bool, optional): If True, scale the data to scale
             metod scaling approach. (default: False)
 
-    Returns:
-        1darray: Batched (, and rescaled) data.
+    Returns
+        1darray
+            Batched (, and rescaled) data.
 
     Note:
         This function will terminate the end of the data points which are
@@ -62,7 +63,6 @@ def batch(
     >>> print(x.mean(), x_batch.mean())
     10.054804081191616 10.054804081191616
 
-
     >>> x_batch_scaled = batch(x, batch_size=5,
                                scale='translate_scale',
                                with_scaling=True)
@@ -70,7 +70,6 @@ def batch(
     20
     >>> print(x.mean(), x_batch_scaled.mean())
     10.054804081191616 1.0
-
     """
     time_series_data = np.asarray(time_series_data)
 

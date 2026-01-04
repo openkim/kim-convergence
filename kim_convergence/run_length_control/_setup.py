@@ -51,19 +51,15 @@ def _setup_algorithm(
     and initializes the UCL object that will be used throughout the convergence
     stage. It is executed once at the beginning of ``run_length_control``.
 
-    Returns
-    -------
-    maximum_equilibration_step : int
-        The (possibly defaulted) hard limit for equilibration detection.
-    ucl_obj : UCLBase
-        Instantiated and configured UCL estimator object.
+    Returns:
+        tuple[int, UCLBase]
+            - maximum_equilibration_step: The (possibly defaulted) hard limit
+              for equilibration detection.
+            - ucl_obj: Instantiated and configured UCL estimator object.
 
-    Raises
-    ------
-    CRError
-        If any input validation or UCL instantiation fails.
+    Raises:
+        CRError: If any input validation or UCL instantiation fails.
     """
-
     _check_get_trajectory(get_trajectory)
 
     cr_check(number_of_variables, "number_of_variables", int, 1)

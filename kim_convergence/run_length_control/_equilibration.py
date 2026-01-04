@@ -185,25 +185,21 @@ def _equilibration_stage(
       - Equilibration is detected for all variables, or
       - The maximum_run_length is reached.
 
-    Returns
-    -------
-    tsd : np.ndarray
-        Full trajectory acquired during the process.
-        Shape: (number_of_variables, total_steps) or (total_steps,) for single variable.
-    run_length: int
-        Length of the last trajectory segment acquired.
-    total_run_length : int
-        Total number of steps in the trajectory.
-    equilibration_step : list[int]
-        Per-variable index where the equilibrated region begins.
-    equilibration_detected : bool
-        True if equilibration was successfully detected for all variables.
+    Returns:
+        tuple[np.ndarray, int, int, list[int], bool]
+            - tsd: Full trajectory acquired during the process.
+              Shape: (number_of_variables, total_steps) or (total_steps,) for
+              single variable.
+            - run_length: Length of the last trajectory segment acquired.
+            - total_run_length: Total number of steps in the trajectory.
+            - equilibration_step: Per-variable index where the equilibrated
+              region begins.
+            - equilibration_detected: True if equilibration was successfully
+              detected for all variables.
 
-    Raises
-    ------
-    CRError
-        If any equilibration step exceeds maximum_equilibration_step or MSER returns
-        an invalid truncation point.
+    Raises:
+        CRError: If any equilibration step exceeds maximum_equilibration_step
+            or MSER returns an invalid truncation point.
     """
     # 1. Initialization and first trajectory acquisition
 

@@ -397,7 +397,6 @@ def check_population_cdf_args(population_cdf: Optional[str], population_args: tu
     Args:
         population_cdf (str): The name of a distribution.
         population_args (tuple): Distribution parameter.
-
     """
     if population_cdf in ("default", None):
         return
@@ -455,12 +454,12 @@ def get_distribution_stats(
     Args:
         population_cdf (str): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
 
     Returns:
-        tuple: median, mean, var, std
-
+        tuple
+            median, mean, var, std
     """
     check_population_cdf_args(population_cdf, population_args)
 
@@ -511,20 +510,18 @@ def ks_test(
 
     Args:
         time_series_data (np.ndarray): time series data.
-        population_cdf (str, or None): The name of a distribution.
+        population_cdf (Optional[str]): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
-        significance_level (float, optional): Significance level. A
-            probability threshold below which the null hypothesis will be
-            rejected. (default: 0.05)
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
+        significance_level (float, optional): Probability threshold below which
+            the null hypothesis is rejected. (default: 0.05)
 
     Returns:
-        bool: True
-            Returns True if observed samples are drawn from the same
-            continuous distribution as the given distribution (If the
-            two-tailed p-value is greater than the significance_level).
-
+        bool
+            ``True`` if the observed samples are drawn from the same continuous
+            distribution as the given one (two-tailed p-value >
+            significance_level).
     """
     if population_cdf in ("default", None):
         return True
@@ -587,19 +584,17 @@ def levene_test(
 
     Args:
         time_series_data (np.ndarray): time series data.
-        population_cdf (str, or None): The name of a distribution.
+        population_cdf (Optional[str]): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
-        significance_level (float, optional): Significance level. A
-            probability threshold below which the null hypothesis will be
-            rejected. (default: 0.05)
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
+        significance_level (float, optional): Probability threshold below which
+            the null hypothesis is rejected. (default: 0.05)
 
     Returns:
-        bool: True
-            Returns True if the input variance is the same as population
-            variance. (If the two-tailed p-value is greater than the
-            significance_level).
+        bool
+            ``True`` if the sample variance equals the population variance
+            (two-tailed p-value > significance_level).
 
     Examples:
 
@@ -639,6 +634,8 @@ def levene_test(
     there is a difference in variance of the `time_series_data` and `gamma`
     distribution with shape parameter `a`.
 
+    Example:
+
     >>> levene_test(x,
                     population_cdf='alpha',
                     population_args=(a,),
@@ -646,7 +643,6 @@ def levene_test(
                     population_scale=1,
                     significance_level=0.05)
     True
-
     """
     if population_cdf in ("default", None):
         return False
@@ -707,17 +703,16 @@ def wilcoxon_test(
 
     Args:
         time_series_data (np.ndarray): time series data.
-        population_cdf (str, or None): The name of a distribution.
+        population_cdf (Optional[str]): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
-        significance_level (float, optional): Significance level. A
-            probability threshold below which the null hypothesis will be
-            rejected. (default: 0.05)
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
+        significance_level (float, optional): Probability threshold below which
+            the null hypothesis is rejected. (default: 0.05)
 
     Returns:
-        bool: True
-            Returns True if the input sample is the same as population
+        bool
+            ``True`` if the sample is drawn from the specified population
             distribution.
 
     Examples:
@@ -734,6 +729,7 @@ def wilcoxon_test(
                       population_scale=scale,
                       significance_level=0.05)
     True
+
     >>> wilcoxon_test(x,
                       population_cdf='gamma',
                       population_args=(shape,),
@@ -741,7 +737,6 @@ def wilcoxon_test(
                       population_scale=1,
                       significance_level=0.05)
     False
-
     """
     if population_cdf in ("default", None):
         return False
@@ -798,18 +793,17 @@ def kruskal_test(
 
     Args:
         time_series_data (np.ndarray): time series data.
-        population_cdf (str, or None): The name of a distribution.
+        population_cdf (Optional[str]): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
-        significance_level (float, optional): Significance level. A
-            probability threshold below which the null hypothesis will be
-            rejected. (default: 0.05)
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
+        significance_level (float, optional): Probability threshold below which
+            the null hypothesis is rejected. (default: 0.05)
 
     Returns:
-        bool: True
-            if the median of the time series data is the same as the one
-            from population_cdf.
+        bool
+            ``True`` if the median of the time-series data equals the median
+            of the specified population distribution.
 
     Examples:
 
@@ -825,7 +819,6 @@ def kruskal_test(
                      population_scale=1,
                      significance_level=0.05)
     True
-
     """
     if population_cdf in ("default", None):
         return False
