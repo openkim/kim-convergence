@@ -467,7 +467,9 @@ class StandardScale:
             if not isinstance(self.std_, float):
                 raise CRError("std_ must be a float")
             x = np.asarray(x)
-            if self.mean_2 is not None:
+            if self.mean_2 is not None and not isclose(
+                self.mean_2, 0, abs_tol=_DEFAULT_ABS_TOL
+            ):
                 inverse_scaled_x = (x + self.mean_2) * self.std_
             else:
                 inverse_scaled_x = x * self.std_

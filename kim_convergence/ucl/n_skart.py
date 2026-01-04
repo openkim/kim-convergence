@@ -471,6 +471,7 @@ class N_SKART(UCLBase):
         spaced_x_batch = x_batch[batches_per_spacer::batches_per_spacer + 1]
 
         # number of spaced batches, k'' = 1 + floor((k' - 1) / (d' + 1))
+        # paper formula (may differ by 1 from actual slice size)
         spaced_x_batch_size = 1 + (self.kp_number_batches - 1) // (
             batches_per_spacer + 1
         )

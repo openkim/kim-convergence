@@ -485,7 +485,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
 
     block_averaged_samples = np.empty(indices.size - 1, dtype=time_series_data.dtype)
 
-    index_s = 0
+    index_s = indices[0]
     for index, index_e in enumerate(indices[1:]):
         block_averaged_samples[index] = np.mean(time_series_data[index_s:index_e])
         index_s = index_e

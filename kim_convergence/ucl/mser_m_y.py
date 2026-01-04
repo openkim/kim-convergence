@@ -32,10 +32,10 @@ from kim_convergence import (
 
 
 __all__ = [
+    "MSER_m_y",
     "mser_m_y_ci",
     "mser_m_y_relative_half_width_estimate",
     "mser_m_y_ucl",
-    "MSER_m_y",
 ]
 
 

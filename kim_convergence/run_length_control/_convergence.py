@@ -383,8 +383,9 @@ def _convergence_stage(
 
     converged = False
     while not converged:
+        # Reset convergence flags for all variables at the start of each iteration
         for i in range(number_of_variables):
-            done[i] = False  # reset even if already converged
+            done[i] = False
 
             # slice a numpy array, the memory is shared between the slice and the original
             time_series_data = _equilibrated_series(tsd, ndim, equilibration_step[i], i)
@@ -440,6 +441,8 @@ def _convergence_stage(
                         std[i] = ucl_obj.std
                         done[i] = True
 
+        # Python for-else: the else clause executes only if the loop completes
+        # without breaking. Here it means all variables computed UCL successfully.
         else:
             converged = all(done)
             if converged:

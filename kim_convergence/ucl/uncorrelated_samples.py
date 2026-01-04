@@ -39,7 +39,7 @@ __all__ = [
     "uncorrelated_samples_ucl",
 ]
 
-SAMPLING_METHODS = ("uncorrelated", "random", "block_averaged")
+# SAMPLING_METHODS = ("uncorrelated", "random", "block_averaged")
 
 
 class UncorrelatedSamples(UCLBase):

@@ -26,7 +26,3 @@ References
 .. [williams1941] Williams, J. D., (1941). "Moments of the Ratio of the Mean Square Successive Difference to the Mean Square Difference in Samples From a Normal Universe," 12(2) 239--241. http://www.jstor.org/stable/2235775
 .. [yousefi2011] Yousefi, S., (2011) "MSER-5Y: An Improved Version of MSER-5 with Automatic Confidence Interval Estimation," MSc thesis, http://www.lib.ncsu.edu/resolver/1840.16/6923
 .. [zwillinger2000] Zwillinger, D. and Kokoska, S., (2000). "CRC Standard Probability and Statistics Tables and Formulae," Chapman & Hall:New York. 2000. Section 2.2.24.1
-
-.. .. [vehtari2019] Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-.. .. [mcstaness] https://mc-stan.org/docs/2_22/reference-manual/effective-sample-size-section.html
-.. .. [gelman2014] Gelman et al. BDA (2014) Formula 11.8
