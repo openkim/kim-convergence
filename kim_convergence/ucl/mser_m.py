@@ -67,7 +67,7 @@ def _normalize_ignore_end(
     if not isinstance(ignore_end, int):
         if ignore_end is None:
             ignore_end = max(1, batch_size)
-            ignore_end = min(ignore_end, number_batches // 4)
+            ignore_end = max(1, min(ignore_end, number_batches // 4))  # guaranteed >= 1
         elif isinstance(ignore_end, float):
             if not 0.0 < ignore_end < 1.0:
                 raise CRError(
@@ -299,11 +299,9 @@ class MSER_m(UCLBase):
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
         ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
-        # unused input parameters in MSER-m module
-        # estimate_equilibration_length interface
-        number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
+        number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,  # unused (API compatibility)
         si: Union[str, float, int, None] = _DEFAULT_SI,
-        nskip: Optional[int] = _DEFAULT_NSKIP,
+        nskip: Optional[int] = _DEFAULT_NSKIP,  # unused (API compatibility)
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
     ) -> tuple[bool, int]:
@@ -341,22 +339,20 @@ class MSER_m(UCLBase):
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        # unused input parameters in MSER_m module
-        # _ucl_impl interface
-        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-        fft: bool = _DEFAULT_FFT,
-        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
-        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,  # unused (API compatibility)
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,  # unused (API compatibility)
+        fft: bool = _DEFAULT_FFT,  # unused (API compatibility)
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,  # unused (API compatibility)
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,  # unused (API compatibility)
         population_standard_deviation: Optional[
             float
-        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,  # unused (API compatibility)
+        si: Union[str, float, int, None] = _DEFAULT_SI,  # unused (API compatibility)
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,  # unused (API compatibility)
         uncorrelated_sample_indices: Union[
             np.ndarray, list[int], None
-        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
+        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,  # unused (API compatibility)
+        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,  # unused (API compatibility)
     ) -> float:
         r"""Approximate the upper confidence limit of the mean [mokashi2010]_.
 
@@ -421,8 +417,8 @@ class MSER_m(UCLBase):
         upper = t_inv_cdf(p_up, number_batches - 1)
 
         self.upper_confidence_limit = upper * standard_error_of_mean
-        assert isinstance(self.upper_confidence_limit, float)
-        return float(self.upper_confidence_limit)
+        assert isinstance(self.upper_confidence_limit, float)  # keeps mypy happy
+        return float(self.upper_confidence_limit)  # ensures built-in float, not numpy scalar
 
 
 def mser_m_ucl(

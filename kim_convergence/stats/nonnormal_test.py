@@ -555,7 +555,7 @@ def ks_test(
         _, pvalue = kstest(
             time_series_data, cdf=population_cdf, args=args, alternative="two-sided"
         )
-    except Exception as e:  # noqa: BLE001  # intentional catch-all
+    except Exception as e:  # intentional catch-all
         raise CRError("Kolmogorov-Smirnov test failed.") from e
 
     return significance_level < pvalue
@@ -686,12 +686,12 @@ def levene_test(
             _, pvalue = kstest(
                 y, cdf=population_cdf, args=args, alternative="two-sided"
             )
-        except Exception as e:  # noqa: BLE001  # intentional catch-all
+        except Exception as e:  # intentional catch-all
             raise CRError("Kolmogorov-Smirnov test failed.") from e
 
     try:
         _, pvalue = levene(x, y)
-    except Exception as e:  # noqa: BLE001  # intentional catch-all
+    except Exception as e:  # intentional catch-all
         raise CRError("Levene test failed.") from e
 
     return significance_level < pvalue
@@ -778,7 +778,7 @@ def wilcoxon_test(
             _, pvalue = kstest(
                 y, cdf=population_cdf, args=args, alternative="two-sided"
             )
-        except Exception as e:  # noqa: BLE001  # intentional catch-all
+        except Exception as e:  # intentional catch-all
             raise CRError("Kolmogorov-Smirnov test failed.") from e
 
     _, pvalue = wilcoxon(x, y, zero_method="wilcox", alternative="two-sided")
@@ -868,12 +868,12 @@ def kruskal_test(
             _, pvalue = kstest(
                 y, cdf=population_cdf, args=args, alternative="two-sided"
             )
-        except Exception as e:  # noqa: BLE001  # intentional catch-all
+        except Exception as e:  # intentional catch-all
             raise CRError("Kolmogorov-Smirnov test failed.") from e
 
     try:
         _, pvalue = kruskal(x, y)
-    except Exception as e:  # noqa: BLE001  # intentional catch-all
+    except Exception as e:  # intentional catch-all
         raise CRError("Kruskal test failed.") from e
 
     return significance_level < pvalue

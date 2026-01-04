@@ -31,8 +31,8 @@ MSER-m for equilibration and adaptive confidence intervals for precision.
 <table>
   <tr>
     <td> <img src="./doc/files/vid2_T.gif?raw=true" width="200" height="200"> </td>
-    <td> <img src="./doc/files/vid2_P.gif?raw=true" width="200" height="200 "> </td>
-    <td> <img src="./doc/files/vid2_V.gif?raw=true" width="200" height="200 "> </td>
+    <td> <img src="./doc/files/vid2_P.gif?raw=true" width="200" height="200"> </td>
+    <td> <img src="./doc/files/vid2_V.gif?raw=true" width="200" height="200"> </td>
   </tr>
 </table>
 
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         fp="return",
     )
 
-    print(result) # txt with converged length, UCL, effective sample size …
+    print(result)
 ```
 
 That’s it—head to the [docs](https://kim-convergence.readthedocs.io/) for

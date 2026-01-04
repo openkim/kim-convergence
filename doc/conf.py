@@ -5,7 +5,6 @@ from datetime import datetime
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 project = "kim-convergence"
-version = "0.0.2"
 author = "Yaser Afshar"
 copyright = f"2021-{datetime.now().year}, Regents of the University of Minnesota"
 rst_epilog = f".. |copyright| replace:: {copyright}"
@@ -16,7 +15,9 @@ try:
     release = kim_convergence.__version__
     version = ".".join(release.split(".")[:2])
 except ImportError:
-    pass
+    import warnings
+    warnings.warn("Could not import kim_convergence; using fallback version")
+    version = "0.0.3"
 
 
 extensions = [

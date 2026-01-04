@@ -1,4 +1,4 @@
-"""Zero finding class.
+r"""Zero finding class.
 
 This code is adapted from SciPy.
 It is completely revised and rewritten by Yaser Afshar.
@@ -158,13 +158,13 @@ class ZERO_RC_BOUNDS:
                         f"highest search bound = {self.big}.\nIt means "
                         "that the stepping search terminated unsuccessfully "
                         "at the highest search bound."
-                    )
+                    )  # noqa: TRY003
                 raise CRError(
                     f"Answer x = {x}, appears to be lower than the lowest "
                     f"search bound = {self.small}.\nIt means that the "
                     "stepping search terminated unsuccessfully at the "
                     "lowest search bound."
-                )
+                )  # noqa: TRY003
 
             if self.fx_small >= 0.0:
                 if fx_big <= 0.0:
@@ -176,12 +176,12 @@ class ZERO_RC_BOUNDS:
                     f"search bound = {self.big}.\nIt means that the stepping "
                     "search terminated unsuccessfully at the highest search "
                     "bound."
-                )
+                )  # noqa: TRY003
             raise CRError(
                 f"Answer x = {x}, appears to be lower than the lowest search "
                 f"bound = {self.small}.\nIt means that the stepping search "
                 "terminated unsuccessfully at the lowest search bound."
-            )
+            )  # noqa: TRY003
         elif self.index == 3:
             self.yy = fx
 
@@ -223,7 +223,7 @@ class ZERO_RC_BOUNDS:
                     f"the highest search bound = {self.big}.\nIt means that "
                     "the stepping search terminated unsuccessfully at the "
                     "highest search bound."
-                )
+                )  # noqa: TRY003
 
             # Create an instance of ZERO_RC
             self.z = ZERO_RC(
@@ -261,7 +261,7 @@ class ZERO_RC_BOUNDS:
                         f"or equal to the lowest search bound = {self.small}."
                         "\nIt means that the stepping search terminated "
                         "unsuccessfully at the lowest search bound."
-                    )
+                    )  # noqa: TRY003
 
                 # Create an instance of ZERO_RC
                 self.z = ZERO_RC(
@@ -294,9 +294,10 @@ class ZERO_RC_BOUNDS:
             self.index = 5
             return 1, self.xlb
         elif self.index == 6:
+            assert self.z is not None, "ZERO_RC instance must be initialized"
             while True:
                 if status == 1:
-                    status, x, self.xlo, self.xhi = self.z.zero(  # type: ignore[arg-type]
+                    status, x, self.xlo, self.xhi = self.z.zero(
                         status, x, fx, self.xlo, self.xhi
                     )
                     if status == 1:
@@ -308,4 +309,4 @@ class ZERO_RC_BOUNDS:
             raise CRError(
                 f"Wrong index number = {self.index}.\nThis function "
                 "should be called with zero status for the first time."
-            )
+            )  # noqa: TRY003

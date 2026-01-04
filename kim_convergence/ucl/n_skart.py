@@ -112,14 +112,12 @@ class N_SKART(UCLBase):
         self,
         time_series_data: Union[np.ndarray, list[float]],
         *,
-        # unused input parameters in N-SKART module
-        # estimate_equilibration_length interface
         si: Union[str, float, int, None] = _DEFAULT_SI,
-        nskip: Optional[int] = _DEFAULT_NSKIP,
+        nskip: Optional[int] = _DEFAULT_NSKIP,  # unused (API compatibility)
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
-        number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
+        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,  # unused (API compatibility)
+        number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,  # unused (API compatibility)
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
@@ -302,24 +300,22 @@ class N_SKART(UCLBase):
         confidence_coefficient=_DEFAULT_CONFIDENCE_COEFFICIENT,
         equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
         fft: bool = _DEFAULT_FFT,
-        # unused input parameters in N_SKART module
-        # _ucl_impl interface
-        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-        batch_size: int = _DEFAULT_BATCH_SIZE,
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,  # unused (API compatibility)
+        batch_size: int = _DEFAULT_BATCH_SIZE,  # unused (API compatibility)
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
-        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,  # unused (API compatibility)
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,  # unused (API compatibility)
         population_standard_deviation: Optional[
             float
-        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,  # unused (API compatibility)
+        si: Union[str, float, int, None] = _DEFAULT_SI,  # unused (API compatibility)
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,  # unused (API compatibility)
         uncorrelated_sample_indices: Union[
             np.ndarray, list[int], None
-        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
+        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,  # unused (API compatibility)
+        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,  # unused (API compatibility)
     ) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
@@ -473,8 +469,8 @@ class N_SKART(UCLBase):
         self.upper_confidence_limit = skewness_adjustment * sqrt(
             correlation_adjustment * x_batch_var / self.kp_number_batches
         )
-        assert isinstance(self.upper_confidence_limit, float)
-        return float(self.upper_confidence_limit)
+        assert isinstance(self.upper_confidence_limit, float)  # keeps mypy happy
+        return float(self.upper_confidence_limit)  # ensures built-in float, not numpy scalar
 
 
 def n_skart_ucl(

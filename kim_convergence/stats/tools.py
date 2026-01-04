@@ -228,7 +228,7 @@ def _subproc_corr(
             corr = _direct_corr(dx, dy)
 
         q.put(corr)
-    except Exception as e:  # noqa: BLE001  # intentional catch-all
+    except Exception as e:  # intentional catch-all
         q.put(CRError(str(e)))
 
 
@@ -248,15 +248,15 @@ def _isolate(
     )
 
     p.start()
-    p.join()  # wait until subprocess terminates
+    p.join()  # NO-TIMEOUT: must finish, hard limit would break legitimate long operations.
 
     if p.exitcode != 0:  # crash, kill -9, segfault, etc.
         raise CRError(f"Correlation worker died (exitcode {p.exitcode}).")
 
     try:
         result = q.get_nowait()
-    except Empty:  # child exited without putting anything
-        raise CRError("Correlation worker produced no result.")
+    except Empty as e:  # child exited without putting anything
+        raise CRError("Correlation worker produced no result.") from e
 
     if isinstance(result, CRError):  # remote Python exception
         raise result
@@ -273,7 +273,7 @@ def _subproc_perio(dx_bytes: bytes, dx_size: int, q: mp.Queue) -> None:
         result = dft * np.conjugate(dft)
 
         q.put(result)
-    except Exception as e:  # noqa: BLE001  # intentional catch-all
+    except Exception as e:  # intentional catch-all
         q.put(CRError(str(e)))
 
 
@@ -290,15 +290,15 @@ def _isolate_perio(dx: np.ndarray) -> np.ndarray:
     )
 
     p.start()
-    p.join()  # wait until subprocess terminates
+    p.join()  # NO-TIMEOUT: must finish, hard limit would break legitimate long operations.
 
     if p.exitcode != 0:  # crash, kill -9, segfault, etc.
         raise CRError(f"Periodogram worker died (exitcode {p.exitcode}).")
 
     try:
         result = q.get_nowait()
-    except Empty:  # child exited without putting anything
-        raise CRError("Periodogram worker produced no result.")
+    except Empty as e:  # child exited without putting anything
+        raise CRError("Periodogram worker produced no result.") from e
 
     if isinstance(result, CRError):  # remote Python exception
         raise result

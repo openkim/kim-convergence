@@ -289,12 +289,10 @@ class UCLBase:
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
         ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
         number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
-        # unused input parameters in UCLBase module
-        # estimate_equilibration_length interface
-        batch_size: int = _DEFAULT_BATCH_SIZE,
-        scale: str = _DEFAULT_SCALE_METHOD,
-        with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING,
+        batch_size: int = _DEFAULT_BATCH_SIZE,  # unused (API compatibility)
+        scale: str = _DEFAULT_SCALE_METHOD,  # unused (API compatibility)
+        with_centering: bool = _DEFAULT_WITH_CENTERING,  # unused (API compatibility)
+        with_scaling: bool = _DEFAULT_WITH_SCALING,  # unused (API compatibility)
     ) -> tuple[bool, int]:
         r"""Estimate the equilibration point in a time series data."""
         equilibration_index_estimate, si_value = estimate_equilibration_length(

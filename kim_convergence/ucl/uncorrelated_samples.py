@@ -65,16 +65,14 @@ class UncorrelatedSamples(UCLBase):
             np.ndarray, list[int], None
         ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
         sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
-        # unused input parameters in UncorrelatedSamples module
-        # _ucl_impl interface
-        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
-        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-        batch_size: int = _DEFAULT_BATCH_SIZE,
-        scale: str = _DEFAULT_SCALE_METHOD,
-        with_centering: bool = _DEFAULT_WITH_CENTERING,
-        with_scaling: bool = _DEFAULT_WITH_SCALING,
-        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
-        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,  # unused (API compatibility)
+        heidel_welch_number_points: int = _DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,  # unused (API compatibility)
+        batch_size: int = _DEFAULT_BATCH_SIZE,  # unused (API compatibility)
+        scale: str = _DEFAULT_SCALE_METHOD,  # unused (API compatibility)
+        with_centering: bool = _DEFAULT_WITH_CENTERING,  # unused (API compatibility)
+        with_scaling: bool = _DEFAULT_WITH_SCALING,  # unused (API compatibility)
+        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,  # unused (API compatibility)
+        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,  # unused (API compatibility)
     ) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
@@ -210,8 +208,8 @@ class UncorrelatedSamples(UCLBase):
         upper = t_inv_cdf(p_up, uncorrelated_samples_size - 1)
 
         self.upper_confidence_limit = upper * standard_error_of_mean
-        assert isinstance(self.upper_confidence_limit, float)
-        return float(self.upper_confidence_limit)
+        assert isinstance(self.upper_confidence_limit, float)  # keeps mypy happy
+        return float(self.upper_confidence_limit)  # ensures built-in float, not numpy scalar
 
 
 def uncorrelated_samples_ucl(

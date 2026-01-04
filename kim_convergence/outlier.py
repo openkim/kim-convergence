@@ -115,6 +115,9 @@ def outlier_test(
     elif outlier_method in ("z_score", "standard_score"):
         x_mean = np.mean(x)
         x_std = np.std(x)
+        if np.isclose(x_std, 0.0):
+            # All values identical -> no outlier can be declared
+            return None
         z_score = (x - x_mean) / x_std
         outliers_indices = np.where(np.abs(z_score) > 3)
     elif outlier_method == "modified_z_score":

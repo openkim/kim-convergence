@@ -53,7 +53,7 @@ def _get_trajectory(
     ):
         try:
             tsd = get_trajectory(run_length, get_trajectory_args)
-        except Exception as e:  # noqa: BLE001  # intentional catch-all
+        except Exception as e:  # intentional catch-all
             raise CRError(
                 "failed to get the time-series data or do the simulation "
                 f"for {run_length} number of steps."
@@ -61,7 +61,7 @@ def _get_trajectory(
     else:
         try:
             tsd = get_trajectory(run_length)
-        except Exception as e:  # noqa: BLE001  # intentional catch-all
+        except Exception as e:  # intentional catch-all
             raise CRError(
                 "failed to get the time-series data or do the simulation "
                 f"for {run_length} number of steps."

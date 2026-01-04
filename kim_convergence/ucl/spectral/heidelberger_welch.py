@@ -318,22 +318,20 @@ class HeidelbergerWelch(UCLBase):
         fft: bool = _DEFAULT_FFT,
         test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,
         train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,
-        # unused input parameters in HeidelbergerWelch module
-        # _ucl_impl interface
         batch_size: int = _DEFAULT_BATCH_SIZE,
-        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,
+        equilibration_length_estimate: int = _DEFAULT_EQUILIBRATION_LENGTH_ESTIMATE,  # unused (API compatibility)
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
         population_standard_deviation: Optional[
             float
-        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+        ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,  # unused (API compatibility)
+        si: Union[str, float, int, None] = _DEFAULT_SI,  # unused (API compatibility)
+        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,  # unused (API compatibility)
         uncorrelated_sample_indices: Union[
             np.ndarray, list[int], None
-        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
+        ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,  # unused (API compatibility)
+        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,  # unused (API compatibility)
     ) -> float:
         r"""Approximate the upper confidence limit of the mean using spectral methods.
 

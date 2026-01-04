@@ -46,10 +46,10 @@ def betacf(
     max_iteration: int = 200,
     _fpmin: float = 1.0e-30,
 ) -> float:
-    r"""Continued fraction for incomplete beta function by modified Lentz’s method.
+    r"""Continued fraction for incomplete beta function by modified Lentz's method.
 
     Evaluates continued fraction for incomplete beta function by modified
-    Lentz’s method [numrec2007]_.
+    Lentz's method [numrec2007]_.
 
     Args:
         a (float): First parameter of the beta distribution.

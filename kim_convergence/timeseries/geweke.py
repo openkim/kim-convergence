@@ -11,7 +11,7 @@ __all__ = [
 
 def geweke(
     x: np.ndarray, *, first: float = 0.1, last: float = 0.5, intervals: int = 20
-):
+) -> np.ndarray:
     r"""Compute z-scores for convergence diagnostics.
 
     Compare the mean of the first % of series with the mean of the last % of
@@ -37,8 +37,9 @@ def geweke(
 
     Returns
     -------
-    scores : list [[]]
-      Return a list of [i, score], where i is the starting index for each interval and score the
+    scores : np.ndarray
+      Return a 2D numpy array of shape (intervals, 2) containing [i, score]
+      pairs, where i is the starting index for each interval and score the
       Geweke score on the interval.
 
     Notes

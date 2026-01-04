@@ -53,7 +53,7 @@ class CRError(Exception):
 
     def __reduce__(self):
         r"""Efficient pickling."""
-        return self.__class__, (self.msg)
+        return self.__class__, (self.msg,)
 
     def __str__(self):
         r"""Message string representation."""

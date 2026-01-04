@@ -1,11 +1,12 @@
 """T distribution module.
 
-This module is specilized for the ``kim-convergence`` code and is not a general
-function to be used for other purposes.
+This module is specialized for the ``kim-convergence`` code and is not a
+general function to be used for other purposes.
 """
 
 from math import fabs
 import numpy as np
+from typing import Union
 
 from .beta_dist import betai_cdf_ccdf
 from .normal_dist import s_normal_inv_cdf
@@ -13,6 +14,13 @@ from .zero_rc_bounds import ZERO_RC_BOUNDS
 from kim_convergence import CRError
 
 __all__ = ["t_cdf", "t_cdf_ccdf", "t_interval", "t_inv_cdf"]
+
+
+def _raise_bounds_error(
+    name: str, value: float, low: float, high: Union[float, str]
+) -> None:
+    """Centralize bounds-checking error messages."""
+    raise CRError(f"{name} = {value} must be in the range ({low}, {high}).")
 
 
 def t_cdf_ccdf(t: float, df: float) -> tuple[float, float]:
@@ -44,10 +52,7 @@ def t_cdf_ccdf(t: float, df: float) -> tuple[float, float]:
 
     """
     if df < 1:
-        raise CRError(
-            f"df = {df} is wrong. Degrees of freedom, must be positive and "
-            "greater than 1."
-        )
+        _raise_bounds_error("df", df, 1, "infinity")
 
     tt = t * t
     denom = df + tt
@@ -128,13 +133,10 @@ def t_inv_cdf(
 
     """
     if p <= 0.0 or p >= 1.0:
-        raise CRError(f"p = {p} is not in the range (0.0 1.0).")
+        _raise_bounds_error("p", p, 0.0, 1.0)
 
     if df < 1:
-        raise CRError(
-            f"df = {df} is wrong. Degrees of freedom, must be positive and "
-            "greater than 1."
-        )
+        _raise_bounds_error("df", df, 1, "infinity")
 
     x = fabs(s_normal_inv_cdf(p))
     x_sq = x * x
@@ -228,9 +230,7 @@ def t_interval(
 
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
-        raise CRError(
-            f"confidence level = {confidence_level} is not in the range " "(0.0 1.0)."
-        )
+        _raise_bounds_error("confidence_level", confidence_level, 0.0, 1.0)
 
     lower = (1.0 - confidence_level) / 2
     upper = (1.0 + confidence_level) / 2

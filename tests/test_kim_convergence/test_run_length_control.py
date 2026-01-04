@@ -10,7 +10,7 @@ import unittest
 
 try:
     import kim_convergence as cr
-except Exception as e:  # noqa: BLE001  # intentional catch-all
+except Exception as e:  # intentional catch-all
     raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 from kim_convergence import CRError
@@ -646,7 +646,7 @@ class TestRunLengthControl(unittest.TestCase):
 
     def test_equilibration_failure_raises_error(self):
         """Test CRError raise when equilibration is not detected within limits."""
-        self.setUp()
+        self.setUp()  # reset state once more, deliberate, not redundant
         trajectory_state = {"current": 0}
 
         # a two-phase trajectory with args
@@ -910,7 +910,7 @@ class TestRunLengthControl(unittest.TestCase):
         emsg = str(ctx.exception)
         self.assertIn("failed to get the time-series data", emsg)
         self.assertIn("simulation", emsg)  # From the message text
-        self.assertIn("10", emsg)  # The requested step countF
+        self.assertIn("10", emsg)  # The requested step count
 
     def test_non_finite_values_after_extension(self):
         """Test CRError when get_trajectory returns non-finite values in an extended segment."""
