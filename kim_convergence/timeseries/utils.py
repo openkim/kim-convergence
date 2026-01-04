@@ -99,7 +99,8 @@ def time_series_data_si(
     elif isinstance(si, (float, int)):
         if si < 1.0:
             raise CRError(
-                f"statistical inefficiency = {si} must be greater than or " "equal one."
+                f"statistical inefficiency = {si} must be greater than or "
+                "equal to one."
             )
 
         si_value = si

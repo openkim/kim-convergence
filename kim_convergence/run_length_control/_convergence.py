@@ -493,7 +493,8 @@ def _convergence_stage(
     failed = [str(i + 1) for i, u in enumerate(upper_confidence_limit) if u is None]
     if failed:
         raise CRError(
-            f'For variable number(s) {", ".join(failed)}. Failed to ' "compute the UCL."
+            f'For variable number(s) {", ".join(failed)}. Failed to '
+            "compute the UCL."
         )
 
     if dump_trajectory:
