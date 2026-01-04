@@ -431,7 +431,7 @@ class UCLBase:
             uncorrelated_sample_indices=uncorrelated_sample_indices,
             sample_method=sample_method,
         )
-        assert isinstance(self.mean, float)
+        assert isinstance(self.mean, float)  # keeps mypy happy
         lower_interval = self.mean - self.upper_confidence_limit
         upper_interval = self.mean + self.upper_confidence_limit
         return lower_interval, upper_interval
@@ -480,7 +480,7 @@ class UCLBase:
             sample_method=sample_method,
         )
 
-        assert isinstance(self.mean, float)
+        assert isinstance(self.mean, float)  # keeps mypy happy
         # Estimate the relative half width
         if isclose(self.mean, 0, abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL):
             raise CRError(

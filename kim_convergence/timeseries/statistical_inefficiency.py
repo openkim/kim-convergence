@@ -363,7 +363,8 @@ def geyer_split_r_statistical_inefficiency(
     """
     if y is not None:
         raise CRError(
-            "The split-r method, splits the x time-series data " "and do not use y."
+            "The split-r method, splits the x time-series data "
+            "and do not use y."
         )
 
     x = np.asarray(x)
@@ -412,7 +413,8 @@ def geyer_split_statistical_inefficiency(
     """
     if y is not None:
         raise CRError(
-            "the split-r method, splits the x time-series data " "and do not use y."
+            "the split-r method, splits the x time-series data "
+            "and do not use y."
         )
 
     x = np.asarray(x)

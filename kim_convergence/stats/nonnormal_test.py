@@ -413,7 +413,7 @@ def check_population_cdf_args(population_cdf: Optional[str], population_args: tu
             "be the name of a distribution in:\n    "
             "https://docs.scipy.org/doc/scipy/reference/stats.html#"
             "continuous-distributions"
-        )
+        )  # noqa: TRY003
 
     number_of_required_arguments = ContinuousDistributionsNumberOfRequiredArguments[
         population_cdf

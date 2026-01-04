@@ -42,7 +42,6 @@ def _normalize_ignore_end(
     ignore_end: Union[int, float, None],
     batch_size: int,
     number_batches: int,
-    data_size: int,
 ) -> int:
     r"""
     Validate *ignore_end* and return the positive number of batches to ignore.
@@ -210,9 +209,7 @@ def mser_m(
     # Number of batches
     number_batches = x_batch.size
 
-    ignore_end = _normalize_ignore_end(
-        ignore_end, batch_size, number_batches, time_series_data.size
-    )
+    ignore_end = _normalize_ignore_end(ignore_end, batch_size, number_batches)
 
     # To find the optimal truncation point in MSER-m
 

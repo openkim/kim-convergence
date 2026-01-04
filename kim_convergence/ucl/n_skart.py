@@ -116,7 +116,9 @@ class N_SKART(UCLBase):
         nskip: Optional[int] = _DEFAULT_NSKIP,  # unused (API compatibility)
         fft: bool = _DEFAULT_FFT,
         minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,  # unused (API compatibility)
+        ignore_end: Union[
+            int, float, None
+        ] = _DEFAULT_IGNORE_END,  # unused (API compatibility)
         number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,  # unused (API compatibility)
         batch_size: int = _DEFAULT_BATCH_SIZE,
         scale: str = _DEFAULT_SCALE_METHOD,
@@ -305,17 +307,25 @@ class N_SKART(UCLBase):
         scale: str = _DEFAULT_SCALE_METHOD,
         with_centering: bool = _DEFAULT_WITH_CENTERING,
         with_scaling: bool = _DEFAULT_WITH_SCALING,
-        test_size: Union[int, float, None] = _DEFAULT_TEST_SIZE,  # unused (API compatibility)
-        train_size: Union[int, float, None] = _DEFAULT_TRAIN_SIZE,  # unused (API compatibility)
+        test_size: Union[
+            int, float, None
+        ] = _DEFAULT_TEST_SIZE,  # unused (API compatibility)
+        train_size: Union[
+            int, float, None
+        ] = _DEFAULT_TRAIN_SIZE,  # unused (API compatibility)
         population_standard_deviation: Optional[
             float
         ] = _DEFAULT_POPULATION_STANDARD_DEVIATION,  # unused (API compatibility)
         si: Union[str, float, int, None] = _DEFAULT_SI,  # unused (API compatibility)
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,  # unused (API compatibility)
+        minimum_correlation_time: Optional[
+            int
+        ] = _DEFAULT_MINIMUM_CORRELATION_TIME,  # unused (API compatibility)
         uncorrelated_sample_indices: Union[
             np.ndarray, list[int], None
         ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,  # unused (API compatibility)
-        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,  # unused (API compatibility)
+        sample_method: Optional[
+            str
+        ] = _DEFAULT_SAMPLE_METHOD,  # unused (API compatibility)
     ) -> float:
         r"""Approximate the upper confidence limit of the mean.
 
@@ -434,6 +444,13 @@ class N_SKART(UCLBase):
             x_batch, nlags=1, fft=(fft and x_batch.size > 30)
         )[1]
 
+        if abs(1 - lag1_correlation) < 1e-10:
+            raise CRError(
+                "Batches are perfectly correlated (lag-one correlation ~ 1.0). "
+                "Correlation adjustment cannot be computed. Your sampling "
+                "interval may be too small or the system has not moved."
+            )
+
         # compute the correlation adjustment A <- (1 + \phi) / (1 - \phi)
         correlation_adjustment = (1 + lag1_correlation) / (1 - lag1_correlation)
 
@@ -462,15 +479,20 @@ class N_SKART(UCLBase):
         upper_p = (1.0 + confidence_coefficient) / 2
         upper = t_inv_cdf(upper_p, spaced_x_batch_size - 1)
 
-        skewness_adjustment = ((1 + 6 * beta * (upper - beta)) ** (1 / 3) - 1) / (
-            2 * beta
-        )
+        if abs(beta) < 1e-15:  # limiting case beta -> 0
+            skewness_adjustment = upper - beta
+        else:
+            skewness_adjustment = ((1 + 6 * beta * (upper - beta)) ** (1 / 3) - 1) / (
+                2 * beta
+            )
 
         self.upper_confidence_limit = skewness_adjustment * sqrt(
             correlation_adjustment * x_batch_var / self.kp_number_batches
         )
         assert isinstance(self.upper_confidence_limit, float)  # keeps mypy happy
-        return float(self.upper_confidence_limit)  # ensures built-in float, not numpy scalar
+        return float(
+            self.upper_confidence_limit
+        )  # ensures built-in float, not numpy scalar
 
 
 def n_skart_ucl(

@@ -20,7 +20,8 @@ except ImportError:
     warnings.warn(
         "Could not import kim_convergence; using fallback version", stacklevel=2
     )
-    version = "0.0.3"
+    release = "0.0.3"
+    version = release
 
 
 extensions = [

@@ -264,7 +264,7 @@ def _compute_ucl_and_check_accuracy(
         accurate = upper_confidence_limit < cast(float, absolute_accuracy)
         relative_half_width_estimate = 0.0
     else:
-        assert isinstance(ucl_obj.mean, float)
+        assert isinstance(ucl_obj.mean, float)  # keeps mypy happy
         # Estimate the relative half width
         if isclose(
             ucl_obj.mean, 0, abs_tol=_DEFAULT_RELATIVE_HALF_WIDTH_ESTIMATE_ABS_TOL
@@ -416,7 +416,7 @@ def _convergence_stage(
                 break
 
             if enough_accuracy:
-                assert isinstance(ucl_obj.si, float)
+                assert isinstance(ucl_obj.si, float)  # keeps mypy happy
                 effective_sample_size[i] = time_series_data_size / ucl_obj.si
 
                 if (
@@ -504,7 +504,7 @@ def _convergence_stage(
 
                 mean[i] = ucl_obj.mean
                 std[i] = ucl_obj.std
-                assert isinstance(ucl_obj.si, float)
+                assert isinstance(ucl_obj.si, float)  # keeps mypy happy
                 effective_sample_size[i] = time_series_data_size / ucl_obj.si
 
                 if relative_accuracy_list[i] is not None and abs(

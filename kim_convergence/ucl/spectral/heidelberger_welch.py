@@ -143,9 +143,9 @@ class HeidelbergerWelch(UCLBase):
 
         if self.heidel_welch_set and heidel_welch_number_points == self.heidel_welch_k:
             if confidence_coefficient != self.heidel_welch_p:
-                assert isinstance(self.heidel_welch_c2_1, float)
-                assert isinstance(self.heidel_welch_c2_2, float)
-                assert isinstance(self.heidel_welch_c2_3, float)
+                assert isinstance(self.heidel_welch_c2_1, float)  # keeps mypy happy
+                assert isinstance(self.heidel_welch_c2_2, float)  # keeps mypy happy
+                assert isinstance(self.heidel_welch_c2_3, float)  # keeps mypy happy
                 p_up = (1 + confidence_coefficient) / 2
                 self.tm_1 = t_inv_cdf(p_up, self.heidel_welch_c2_1)
                 self.tm_2 = t_inv_cdf(p_up, self.heidel_welch_c2_2)
@@ -496,7 +496,7 @@ class HeidelbergerWelch(UCLBase):
 
         time_series_data_size = time_series_data.size
 
-        assert isinstance(self.heidel_welch_n, int)
+        assert isinstance(self.heidel_welch_n, int)  # keeps mypy happy
         if time_series_data_size < self.heidel_welch_n:
             msg = (
                 f"{time_series_data_size} input data points are not "
@@ -540,10 +540,10 @@ class HeidelbergerWelch(UCLBase):
         avg_period_lg = np.log(avg_period_lg)
         avg_period_lg += 0.27
 
-        assert isinstance(self.a_matrix_1_inv, np.ndarray)
-        assert isinstance(self.a_matrix_2_inv, np.ndarray)
-        assert isinstance(self.a_matrix_3_inv, np.ndarray)
-        assert isinstance(self.a_matrix, np.ndarray)
+        assert isinstance(self.a_matrix_1_inv, np.ndarray)  # keeps mypy happy
+        assert isinstance(self.a_matrix_2_inv, np.ndarray)  # keeps mypy happy
+        assert isinstance(self.a_matrix_3_inv, np.ndarray)  # keeps mypy happy
+        assert isinstance(self.a_matrix, np.ndarray)  # keeps mypy happy
 
         # Using ordinary least squares, and fit a polynomial to the data
         if test_size is None and train_size is None:
@@ -635,7 +635,7 @@ class HeidelbergerWelch(UCLBase):
         # the spread the more accurate.
         standard_error_of_mean = sqrt(sigma_sq)
 
-        assert isinstance(hwl_tm, float)
+        assert isinstance(hwl_tm, float)  # keeps mypy happy
         self.upper_confidence_limit = hwl_tm * standard_error_of_mean
         return float(self.upper_confidence_limit)
 

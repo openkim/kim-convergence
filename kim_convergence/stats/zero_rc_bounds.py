@@ -131,7 +131,8 @@ class ZERO_RC_BOUNDS:
             monotone = (self.small <= x) and (x <= self.big)
             if not monotone:
                 raise CRError(
-                    f"small={self.small}, x={x}, big={self.big} are not " "monotone."
+                    f"small={self.small}, x={x}, big={self.big} are not "
+                    "monotone."
                 )
 
             self.xsave = x

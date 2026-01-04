@@ -464,7 +464,8 @@ class StandardScale:
             )
 
         if self.with_scaling_:
-            assert isinstance(self.std_, float)
+            if not isinstance(self.std_, float):
+                raise CRError("std_ must be a float")
             x = np.asarray(x)
             if self.mean_2 is not None:
                 inverse_scaled_x = (x + self.mean_2) * self.std_
@@ -474,13 +475,15 @@ class StandardScale:
             inverse_scaled_x = np.array(x, copy=True)
 
         if self.with_centering_:
-            assert isinstance(self.mean_1, float)
-            assert isinstance(self.mean_, float)
+            if not isinstance(self.mean_1, float):
+                raise CRError("mean_1 must be a float")
+            if not isinstance(self.mean_, float):
+                raise CRError("mean_ must be a float")
             if not isclose(self.mean_1, 0, abs_tol=_DEFAULT_ABS_TOL):
                 inverse_scaled_x += self.mean_1
             inverse_scaled_x += self.mean_
 
-        return inverse_scaled_x  # type: ignore[arg-type]
+        return inverse_scaled_x
 
 
 def standard_scale(

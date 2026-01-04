@@ -421,7 +421,7 @@ def cross_covariance(
 
     x, y = _validate_and_prepare_input(x, y)
 
-    assert isinstance(y, np.ndarray)
+    assert isinstance(y, np.ndarray)  # keeps mypy happy
 
     # Fluctuations
     dx = x - x.mean()

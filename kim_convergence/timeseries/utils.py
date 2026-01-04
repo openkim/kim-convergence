@@ -97,13 +97,16 @@ def time_series_data_si(
     elif isinstance(si, (float, int)):
         if si < 1.0:
             raise CRError(
-                f"statistical inefficiency = {si} must be greater than or " "equal one."
+                f"statistical inefficiency = {si} must be greater than or "
+                "equal one."
             )
 
         si_value = si
 
     else:
-        raise CRError("statistical inefficiency (si) must be a `float` or a `str`.")
+        raise CRError(
+            "statistical inefficiency (si) must be a `float` or a `str`."
+        )
 
     return si_value
 
@@ -117,10 +120,10 @@ def uncorrelated_time_series_data_sample_indices(
 ) -> np.ndarray:
     r"""Return indices of uncorrelated subsamples of the time series data.
 
-    Return indices of the uncorrelated uncorrelated_sample of the time series data.
-    Subsample a correlated timeseries to extract an effectively
-    uncorrelated dataset. If si (statistical inefficiency) is not provided
-    it will be computed.
+    Return indices of the uncorrelated uncorrelated_sample of the time series
+    data. Subsample a correlated timeseries to extract an effectively
+    uncorrelated dataset. If si (statistical inefficiency) is not provided it
+    will be computed.
 
     Args:
         time_series_data (array_like, 1d): time series data.

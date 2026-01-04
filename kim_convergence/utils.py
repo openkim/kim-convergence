@@ -83,18 +83,18 @@ def validate_split(
         n_train = None
 
     if train_size is None:  # test_size is authoritative
-        assert isinstance(n_test, int)
+        assert isinstance(n_test, int)  # keeps mypy happy
         n_train = n_samples - n_test
         if n_train <= 0:
             raise CRError("Derived train set is empty.")
     elif test_size is None:  # train_size is authoritative
-        assert isinstance(n_train, int)
+        assert isinstance(n_train, int)  # keeps mypy happy
         n_test = n_samples - n_train
         if n_test <= 0:
             raise CRError("Derived test set is empty.")
 
-    assert isinstance(n_test, int)
-    assert isinstance(n_train, int)
+    assert isinstance(n_test, int)  # keeps mypy happy
+    assert isinstance(n_train, int)  # keeps mypy happy
     if n_train + n_test > n_samples:
         raise CRError(
             f"train_size ({n_train}) + test_size ({n_test}) > "

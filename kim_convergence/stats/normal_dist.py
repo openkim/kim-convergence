@@ -168,7 +168,8 @@ def normal_interval(
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
         raise CRError(
-            f"confidence level = {confidence_level} is not in the " "range (0.0 1.0)."
+            f"confidence level = {confidence_level} is not in the range "
+            "(0.0, 1.0)."
         )
 
     lower = (1.0 - confidence_level) / 2
