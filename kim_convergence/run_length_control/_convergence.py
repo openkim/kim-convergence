@@ -253,7 +253,7 @@ def _compute_ucl_and_check_accuracy(
         ) from e
 
     if final_pass:
-        if ucl_obj.name != "uncorrelated_sample":
+        if ucl_obj.requires_si_computation():
             ucl_obj.set_si(
                 time_series_data,
                 si=si,
@@ -281,7 +281,7 @@ def _compute_ucl_and_check_accuracy(
 
         accurate = relative_half_width_estimate < cast(float, relative_accuracy)
 
-    if accurate and ucl_obj.name != "uncorrelated_sample":
+    if accurate and ucl_obj.requires_si_computation():
         ucl_obj.set_indices(
             time_series_data,
             si=si,
@@ -419,7 +419,12 @@ def _convergence_stage(
                 break
 
             if enough_accuracy:
-                assert isinstance(ucl_obj.si, float)  # keeps mypy happy
+                if ucl_obj.si is None:
+                    raise CRError(
+                        "Statistical inefficiency was not computed for "
+                        f"variable {i + 1}."
+                    )
+                # mypy now knows ucl_obj.si is float here
                 effective_sample_size[i] = time_series_data_size / ucl_obj.si
 
                 if (
@@ -510,7 +515,12 @@ def _convergence_stage(
 
                 mean[i] = ucl_obj.mean
                 std[i] = ucl_obj.std
-                assert isinstance(ucl_obj.si, float)  # keeps mypy happy
+                if ucl_obj.si is None:
+                    raise CRError(
+                        "Statistical inefficiency was not computed for "
+                        f"variable {i + 1}."
+                    )
+                # mypy now knows ucl_obj.si is float here
                 effective_sample_size[i] = time_series_data_size / ucl_obj.si
 
                 if relative_accuracy_list[i] is not None and abs(

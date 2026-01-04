@@ -171,11 +171,10 @@ def minmax_scale(
         1darray: Scaled dataset to a given range
 
 
-    Notes
-    -----
-    `with_centering` and `with_scaling` exist only to provide the same
-    signature as the other scaling helpers; they are **ignored** because
-    MinMaxScale always centres and scales by construction.
+    Note:
+        `with_centering` and `with_scaling` exist only to provide the same
+        signature as the other scaling helpers; they are **ignored** because
+        MinMaxScale always centres and scales by construction.
     """
     mms = MinMaxScale(feature_range=feature_range)
     return mms.scale(x)
@@ -348,7 +347,7 @@ class StandardScale:
             variance (or equivalently, unit standard deviation).
             (default: True)
 
-    Notes:
+    Note:
         If set explicitly `with_centering=False` (only variance scaling will
         be performed on x). We use a biased estimator for the standard
         deviation.
@@ -515,7 +514,7 @@ def standard_scale(
     Returns:
         1darray: scaled dataset
 
-    Notes:
+    Note:
         If set explicitly `with_centering=False` (only variance scaling will
         be performed on x). We use a biased estimator for the standard
         deviation.
@@ -795,12 +794,11 @@ def maxabs_scale(
     Returns:
         1darray: scaled dataset
 
-    Notes
-    -----
-    `with_centering` and `with_scaling` exist only to provide the same
-    signature as the other scaling helpers; they are **ignored** because
-    MaxAbsScale only performs absolute-max scaling and has no separate
-    centre/scale flags.
+    Note:
+        `with_centering` and `with_scaling` exist only to provide the same
+        signature as the other scaling helpers; they are **ignored** because
+        MaxAbsScale only performs absolute-max scaling and has no separate
+        centre/scale flags.
     """
     mas = MaxAbsScale()
     return mas.scale(x)

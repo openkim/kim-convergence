@@ -42,15 +42,16 @@ def geweke(
       pairs, where i is the starting index for each interval and score the
       Geweke score on the interval.
 
-    Notes
-    -----
-    The Geweke score on some series x is computed by:
-      .. math::
-          \frac{E[x_s] - E[x_e]}{\sqrt{V[x_s] + V[x_e]}}
+    Note:
+        The Geweke score on some series x is computed by:
 
-    where :math:`E` stands for the mean, :math:`V` the variance,
-    :math:`x_s` a section at the start of the series and
-    :math:`x_e` a section at the end of the series.
+        .. math::
+
+              \frac{E[x_s] - E[x_e]}{\sqrt{V[x_s] + V[x_e]}}
+
+        where :math:`E` stands for the mean, :math:`V` the variance,
+        :math:`x_s` a section at the start of the series and
+        :math:`x_e` a section at the end of the series.
 
     """
     if first + last >= 1:

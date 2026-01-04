@@ -158,12 +158,6 @@ def statistical_inefficiency(
     return max(1.0, si)
 
 
-# Must be corrected in future
-# .. [vehtari2019] Vehtari et al. (2019) see https://arxiv.org/abs/1903.08008
-# .. [mcstaness] https://mc-stan.org/docs/2_22/reference-manual/effective-sample-size-section.html
-# .. [gelman2014] Gelman et al. BDA (2014) Formula 11.8
-
-
 def geyer_r_statistical_inefficiency(
     x: Union[np.ndarray, list[float]],
     y: Union[np.ndarray, list[float], None] = None,

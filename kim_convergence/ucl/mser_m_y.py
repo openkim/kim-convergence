@@ -43,7 +43,7 @@ class MSER_m_y(MSER_m):
     r"""MSER_m_y algorithm.
 
     MSER_m_y [yousefi2011]_ computes k batch means of size m to evaluate the
-    MSER-m statistic as described in [spratt1998]_ and detect the trucation
+    MSER-m statistic as described in [spratt1998]_ and detect the truncation
     point. If the truncation is detected, the point estimator of the mean is
     the sample mean of all observations in the truncated data set.
 

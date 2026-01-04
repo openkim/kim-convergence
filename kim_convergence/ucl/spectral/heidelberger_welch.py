@@ -390,7 +390,7 @@ class HeidelbergerWelch(UCLBase):
         the true population mean. As :math:`N \to \infty`, the UCL converges to 0
         and the sample mean converges to the population mean.
 
-        .. note::
+        Note:
             A 95% confidence interval means that if the experiment were repeated
             many times, approximately 95% of the computed intervals would contain
             the true population mean. It does **not** mean there is a 95% probability

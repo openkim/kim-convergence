@@ -279,6 +279,10 @@ class UCLBase:
 
         return False
 
+    def requires_si_computation(self) -> bool:
+        """Return True if this UCL method requires statistical inefficiency computation."""
+        return self.name != "uncorrelated_sample"
+
     def estimate_equilibration_length(
         self,
         time_series_data: Union[np.ndarray, list[float]],

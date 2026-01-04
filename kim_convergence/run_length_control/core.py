@@ -277,10 +277,12 @@ def run_length_control(
             if we only have one variable or
             ``get_trajectory(nstep: int) -> 2darray`` with the shape of
             (number_of_variables, nstep)
+
             Note:
                 all the values returned from this function should be finite
                 values, otherwise the code will stop wih error message
                 explaining the issue.
+
         get_trajectory_args (dict, optional): Extra arguments passed to the
             get_trajectory function. (default: {})
             To use this option, the dictionary may contain `start` and `stop`

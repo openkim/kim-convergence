@@ -27,7 +27,9 @@ __all__ = [
 SAMPLING_METHODS = ("uncorrelated", "random", "block_averaged")
 
 
-def _out_of_bounds_error_str(bad_indices: list[int], size: int) -> str:
+def _out_of_bounds_error_str(
+    bad_indices: Union[np.ndarray, list[int]], size: int
+) -> str:
     r"""
     Return a uniform, ready-to-raise error message for out-of-bounds indices.
     Caller must `raise CRError(...)` explicitly.
@@ -97,16 +99,13 @@ def time_series_data_si(
     elif isinstance(si, (float, int)):
         if si < 1.0:
             raise CRError(
-                f"statistical inefficiency = {si} must be greater than or "
-                "equal one."
+                f"statistical inefficiency = {si} must be greater than or " "equal one."
             )
 
         si_value = si
 
     else:
-        raise CRError(
-            "statistical inefficiency (si) must be a `float` or a `str`."
-        )
+        raise CRError("statistical inefficiency (si) must be a `float` or a `str`.")
 
     return si_value
 
@@ -198,7 +197,7 @@ def uncorrelated_time_series_data_samples(
 
     Returns:
         1darray: uncorrelated_sample of the time series data.
-            time series data at uncorrelated uncorrelated_sample indices.
+            time series data at uncorrelated sample indices.
 
     """
     if sample_method is None:
@@ -250,7 +249,7 @@ def time_series_data_uncorrelated_samples(
         np.ndarray, list[int], None
     ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
 ) -> np.ndarray:
-    r"""Return time series data at uncorrelated uncorrelated_sample indices.
+    r"""Return time series data at uncorrelated sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
     dataset. If si (statistical inefficiency) is not provided it will be
@@ -272,7 +271,7 @@ def time_series_data_uncorrelated_samples(
 
     Returns:
         1darray: uncorrelated_sample of the time series data.
-            time series data at uncorrelated uncorrelated_sample indices.
+            time series data at uncorrelated sample indices.
 
     """
     time_series_data = np.asarray(time_series_data)
@@ -311,7 +310,7 @@ def time_series_data_uncorrelated_samples(
         wrong_indices = np.where(mask)
         raise CRError(
             _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size  # type: ignore[arg-type]
+                bad_indices=indices[wrong_indices], size=time_series_data_size
             )
         ) from e
 
@@ -390,7 +389,7 @@ def time_series_data_uncorrelated_random_samples(
     if len(wrong_indices[0]) > 0:
         raise CRError(
             _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size  # type: ignore[arg-type]
+                bad_indices=indices[wrong_indices], size=time_series_data_size
             )
         )
 
@@ -479,7 +478,7 @@ def time_series_data_uncorrelated_block_averaged_samples(
     if len(wrong_indices[0]) > 0:
         raise CRError(
             _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size  # type: ignore[arg-type]
+                bad_indices=indices[wrong_indices], size=time_series_data_size
             )
         )
 

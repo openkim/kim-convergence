@@ -43,10 +43,11 @@ def batch(
     Returns:
         1darray: Batched (, and rescaled) data.
 
-    Notes:
+    Note:
         This function will terminate the end of the data points which are
         remainder of the division of data points by the batch_size.
 
+    Note:
         By default, this method is using ``np.mean`` and compute the arithmetic
         mean.
 
