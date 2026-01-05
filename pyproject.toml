@@ -18,6 +18,11 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dynamic = [ "version" ]
 keywords = [ "convergence", "automated equilibration detection", "run length control",
@@ -25,7 +30,12 @@ keywords = [ "convergence", "automated equilibration detection", "run length con
 
 [project.urls]
 Homepage = "https://github.com/openkim/kim-convergence"
+Documentation = "https://kim-convergence.readthedocs.io/"
 Issues = "https://github.com/openkim/kim-convergence/issues"
+Source = "https://github.com/openkim/kim-convergence"
+
+[tool.setuptools]
+include-package-data = true
 
 [tool.setuptools.packages.find]
 include = [ "kim_convergence*" ]
@@ -45,3 +55,13 @@ versionfile_source = "kim_convergence/_version.py"
 versionfile_build = "kim_convergence/_version.py"
 tag_prefix = "v"
 parentdir_prefix = "kim_convergence-"
+
+[project.optional-dependencies]
+doc = [
+    "sphinx>=8.0,<9.0",
+    "sphinx-rtd-theme",
+    "numpydoc",
+    "myst-parser",
+    "sphinxcontrib-mermaid",
+    "sphinx-design",
+]

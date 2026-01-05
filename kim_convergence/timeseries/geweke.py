@@ -5,67 +5,57 @@ import numpy as np
 from kim_convergence import CRError
 
 __all__ = [
-    'geweke',
+    "geweke",
 ]
 
 
-def geweke(x: np.ndarray,
-           *,
-           first: float = 0.1,
-           last: float = 0.5,
-           intervals: int = 20):
+def geweke(
+    x: np.ndarray, *, first: float = 0.1, last: float = 0.5, intervals: int = 20
+) -> np.ndarray:
     r"""Compute z-scores for convergence diagnostics.
 
-    # Compare the mean of the first % of series with the mean of the last % of
-    # series. x is divided into a number of segments for which this difference
-    # is computed. If the series is converged, this score should oscillate
-    # between -1 and 1.
+    Compare the mean of the first % of series with the mean of the last % of
+    series. x is divided into a number of segments for which this difference
+    is computed. If the series is converged, this score should oscillate
+    between -1 and 1.
 
-    # The Geweke diagnostic tests the null hypothesis that the Markov chain is
-    # in the stationary distribution and produces z-statistics for each
-    # estimated parameter.
+    The Geweke diagnostic tests the null hypothesis that the Markov chain is
+    in the stationary distribution and produces z-statistics for each
+    estimated parameter [geweke1992]_, [plummer2006]_.
 
-    # Parameters
-    # ----------
-    # x : 1D array-like
-    #   The trace of some stochastic parameter.
-    # first : float
-    #   The fraction of series at the beginning of the trace.
-    # last : float
-    #   The fraction of series at the end to be compared with the section
-    #   at the beginning.
-    # intervals : int
-    #   The number of segments.
-    # Returns
-    # -------
-    # scores : list [[]]
-    #   Return a list of [i, score], where i is the starting index for each interval and score the
-    #   Geweke score on the interval.
-    # Notes
-    # -----
-    # The Geweke score on some series x is computed by:
-    #   .. math::
-    #       \frac{E[x_s] - E[x_e]}{\sqrt{V[x_s] + V[x_e]}}
+    Args:
+        x (array_like, 1d): Trace of a stochastic parameter.
+        first (float): Fraction of series at the beginning.
+        last (float): Fraction at the end to compare with the first section.
+        intervals (int): Number of segments.
 
-    # where :math:`E` stands for the mean, :math:`V` the variance,
-    # :math:`x_s` a section at the start of the series and
-    # :math:`x_e` a section at the end of the series.
-    # References
-    # ----------
-    # * Geweke (1992)
+    Returns:
+        ndarray
+            2-D array of shape (intervals, 2) with [i, score] pairs, where i is
+            the starting index of each interval and score the Geweke score.
 
+    Note:
+        The Geweke score on some series x is computed by:
+
+        .. math::
+
+              \frac{E[x_s] - E[x_e]}{\sqrt{V[x_s] + V[x_e]}}
+
+        where :math:`E` stands for the mean, :math:`V` the variance,
+        :math:`x_s` a section at the start of the series and
+        :math:`x_e` a section at the end of the series.
     """
     if first + last >= 1:
         raise CRError(
-            'Invalid intervals for Geweke convergence analysis:'
-            f'({first}, {last}), where {first} + {last} >= 1'
+            "Invalid intervals for Geweke convergence analysis:"
+            f"({first}, {last}), where {first} + {last} >= 1"
         )
 
     for interval in (first, last):
         if interval <= 0 or interval >= 1:
             raise CRError(
-                'Invalid intervals for Geweke convergence analysis:'
-                f'({first}, {last})'
+                "Invalid intervals for Geweke convergence analysis:"
+                f"({first}, {last})"
             )
 
     x = np.asarray(x)
@@ -84,12 +74,13 @@ def geweke(x: np.ndarray,
 
     # Calculate starting indices
     start_indices = np.linspace(
-        0, last_start_idx, num=intervals, endpoint=True, dtype=int)
+        0, last_start_idx, num=intervals, endpoint=True, dtype=int
+    )
 
     # Loop over start indices
     for start in start_indices:
         # Calculate slices
-        first_slice = x[start: start + int(first * (end - start))]
+        first_slice = x[start:start + int(first * (end - start))]
         last_slice = x[int(end - last * (end - start)):]
         z_score = first_slice.mean() - last_slice.mean()
         scale_ = first_slice.var() + last_slice.var()

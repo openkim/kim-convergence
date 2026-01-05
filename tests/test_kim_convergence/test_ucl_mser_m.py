@@ -1,11 +1,12 @@
 """Test UCL mser_m module."""
+
 import unittest
 import numpy as np
 
 try:
     import kim_convergence as cr
-except Exception:  # noqa: BLE001  # intentional catch-all
-    raise RuntimeError('Failed to import `kim-convergence` utility module')
+except Exception as e:  # intentional catch-all
+    raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 from kim_convergence import CRError
 
@@ -19,8 +20,7 @@ class TestUCLMSERModule(unittest.TestCase):
         x = np.ones(n)
 
         # x is not one dimensional
-        self.assertRaises(CRError, cr.mser_m,
-                          x.reshape(5, 20))
+        self.assertRaises(CRError, cr.mser_m, x.reshape(5, 20))
 
         # constant data sets
         x = np.ones(n)
@@ -65,38 +65,28 @@ class TestUCLMSERModule(unittest.TestCase):
         x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
         # invalid int ignore_end
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end=0)
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end=-1)
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end=0)
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end=-1)
 
         # invalid float ignore_end
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end=0.0)
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end=1.0)
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end=-0.1)
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end=1.1)
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end=0.0)
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end=1.0)
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end=-0.1)
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end=1.1)
 
         # invalid ignore_end
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end="None")
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end="1")
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end="None")
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end="1")
 
         # invalid ignore_end
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end=120)
-        self.assertRaises(CRError, cr.mser_m,
-                          x, ignore_end=100)
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end=120)
+        self.assertRaises(CRError, cr.mser_m, x, ignore_end=100)
 
         # Create synthetic data
         rng = np.random.RandomState(12345)
 
         n = 1000
-        x = np.arange(10.)
+        x = np.arange(10.0)
         y = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
         x = np.concatenate((x, y))
 
@@ -137,7 +127,7 @@ class TestUCLMSERModule(unittest.TestCase):
         rng = np.random.RandomState(12345)
 
         n = 1000
-        x = np.arange(10.)
+        x = np.arange(10.0)
         y = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
         x = np.concatenate((x, y))
 

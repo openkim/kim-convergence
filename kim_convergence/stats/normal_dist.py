@@ -1,18 +1,15 @@
-"""normal distribution module.
+r"""normal distribution module.
 
-`s_normal_inv_cdf` code is adapted from python statistics module [1]_ by
-Yaser Afshar.
+`s_normal_inv_cdf` code is adapted from python statistics module
+[pythonstats]_ by Yaser Afshar.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
-    2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 Python
-    Software Foundation;
-    All Rights Reserved
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-References:
-    .. [1] Python statistics module.
-           https://www.python.org/
+..
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+        2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 Python
+        Software Foundation;
+        All Rights Reserved
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 """
 
@@ -20,36 +17,23 @@ from math import log, fabs, sqrt, inf, nan
 
 from kim_convergence import CRError
 
-__all__ = [
-    's_normal_inv_cdf',
-    'normal_inv_cdf',
-    'normal_interval'
-]
+__all__ = ["normal_interval", "normal_inv_cdf", "s_normal_inv_cdf"]
 
 
 def s_normal_inv_cdf(p: float) -> float:
     r"""Compute the standard normal distribution inverse cumulative distribution function.
 
     Compute the inverse cumulative distribution function (percent point
-    function or quantile function) for standard normal distribution [5]_,
-    [6]_.
+    function or quantile function) for standard normal distribution
+    [pythonstats]_, [wichura1988]_.
 
-    Ars:
-        p {float} -- Probability (must be between 0.0 and 1.0)
+    Args:
+        p (float): Probability (must be between 0.0 and 1.0).
 
     Returns:
-        float -- the inverse cumulative distribution function.
-            the value x of the random variable X such that the probability of
-            the variable being less than or equal to that value equals the
-            given probability p. :math:`x : P(X <= x) = p`.
-
-    References:
-        .. [5] Python statistics module. https://www.python.org/
-
-        .. [6] Wichura, M.J. (1988). "Algorithm AS241: The Percentage Points
-            of the Normal Distribution" Applied Statistics. Blackwell
-            Publishing. 37(3), 477–484.
-
+        float
+            Inverse cumulative distribution function: value :math:`x` such that
+            :math:`P(X \le x) = p`.
     """
     if p == 0.0:
         return -inf
@@ -132,41 +116,37 @@ def s_normal_inv_cdf(p: float) -> float:
 def normal_inv_cdf(p: float, *, loc=0.0, scale: float = 1.0) -> float:
     r"""Compute the normal distribution inverse cumulative distribution function.
 
-    Ars:
-        p {float} -- Probability (must be between 0.0 and 1.0)
-        loc (float, optional): location parameter (default: 0.0)
-        scale (float, optional): scale parameter (default: 1.0)
+    Args:
+        p (float): Probability (must be between 0.0 and 1.0).
+        loc (float, optional): Location parameter. (default: 0.0)
+        scale (float, optional): Scale parameter. (default: 1.0)
 
     Returns:
-        float -- the inverse cumulative distribution function.
-            the value x of the random variable X such that the probability of
-            the variable being less than or equal to that value equals the
-            given probability p. :math:`x : P(X <= x) = p`.
-
+        float
+            Inverse cumulative distribution function: value :math:`x` such that
+            :math:`P(X \le x) = p`.
     """
     return s_normal_inv_cdf(p) * scale + loc
 
 
-def normal_interval(confidence_level: float,
-                    *,
-                    loc: float = 0.0,
-                    scale: float = 1.0) -> tuple[float, float]:
+def normal_interval(
+    confidence_level: float, *, loc: float = 0.0, scale: float = 1.0
+) -> tuple[float, float]:
     r"""Compute the normal distribution confidence interval.
 
     Compute the normal-distribution confidence interval with equal areas around
     the median.
 
     Args:
-        confidence_level (float): (or confidence coefficient) must be between
-            0.0 and 1.0
-        loc (float, optional): location parameter (default: 0.0)
-        scale (float, optional): scale parameter (default: 1.0)
+        confidence_level (float): Confidence coefficient (must be between 0.0
+            and 1.0).
+        loc (float, optional): Location parameter. (default: 0.0)
+        scale (float, optional): Scale parameter. (default: 1.0)
 
     Returns:
-        float, float : lower bound, upper bound of the confidence interval
-            end-points of range that contain
-            :math:`100 \text{confidence_level} \%` of the normal distribution
-            possible values.
+        tuple[float, float]
+            Lower and upper bounds of the confidence interval that contains
+            :math:`100~\text{confidence_level}\%` of the distribution.
 
     Note:
         - Confidence interval is a range of values that is likely to contain an
@@ -179,12 +159,11 @@ def normal_interval(confidence_level: float,
           null hypothesis when it is true. To find alpha, just subtract the
           confidence interval from 100%. E.g., the significance level for a 90%
           confidence level is 100% – 90% = 10%.
-
     """
     if confidence_level <= 0.0 or confidence_level >= 1.0:
         raise CRError(
-            f'confidence level = {confidence_level} is not in the '
-            'range (0.0 1.0).'
+            f"confidence level = {confidence_level} is not in the range "
+            "(0.0, 1.0)."
         )
 
     lower = (1.0 - confidence_level) / 2

@@ -1,24 +1,23 @@
-"""Outlier module."""
+r"""Outlier module."""
 
 import numpy as np
-from typing import Union, List
+from typing import Optional, Union
 
 from .err import CRError
 
 
-__all__ = [
-    'outlier_methods',
-    'outlier_test'
-]
+__all__ = ["outlier_methods", "outlier_test"]
 
 
-outlier_methods = ('iqr',
-                   'boxplot',
-                   'extreme_iqr',
-                   'extreme_boxplot',
-                   'z_score',
-                   'standard_score',
-                   'modified_z_score')
+outlier_methods = (
+    "iqr",
+    "boxplot",
+    "extreme_iqr",
+    "extreme_boxplot",
+    "z_score",
+    "standard_score",
+    "modified_z_score",
+)
 r"""Methods to decide what are outliers in the data.
 
 - iqr or boxplot:
@@ -54,8 +53,9 @@ r"""Methods to decide what are outliers in the data.
 """
 
 
-def outlier_test(x: Union[np.ndarray, List[float]],
-                 outlier_method: str = 'iqr') -> np.ndarray:
+def outlier_test(
+    x: Union[np.ndarray, list[float]], outlier_method: str = "iqr"
+) -> Optional[np.ndarray]:
     r"""Test to detect what are outliers in the data.
 
     The intuitive definition for the concept of an outlier in the data is a
@@ -73,57 +73,60 @@ def outlier_test(x: Union[np.ndarray, List[float]],
 
     Args:
         x (array_like, 1d): Time series data.
-        method (str, optional): Method to detect what are outliers in the data.
+        outlier_method (str, optional): Method for outlier detection.
             (default: 'iqr')
 
     Returns:
-        1darray, or None: outliers indices, or `None` if there is no outlier
-
+        Optional[ndarray]
+            Indices of outliers; None if no outliers found.
     """
     x = np.asarray(x)
 
     if x.ndim != 1:
-        raise CRError('x is not an array of one-dimension.')
+        raise CRError("x is not an array of one-dimension.")
 
     if not np.all(np.isfinite(x)):
         raise CRError(
-            'there is at least one value in the input array which is '
-            'non-finite or not-number.'
+            "there is at least one value in the input array which is "
+            "non-finite or not-number."
         )
 
     if isinstance(outlier_method, str):
         if outlier_method not in outlier_methods:
             raise CRError(
-                f'method {outlier_method} not found. Valid methods to '
-                'detect outliers are:\n\t- ' + "\n\t- ".join(outlier_methods)
+                f"method {outlier_method} not found. Valid methods to "
+                "detect outliers are:\n\t- " + "\n\t- ".join(outlier_methods)
             )
     else:
-        raise CRError('Input outlier_method is not a `str`.')
+        raise CRError("Input outlier_method is not a `str`.")
 
-    if outlier_method in ('iqr', 'boxplot'):
+    if outlier_method in ("iqr", "boxplot"):
         lower_quartile, upper_quartile = np.quantile(x, [0.25, 0.75])
         difference = upper_quartile - lower_quartile
         lower_inner_fence = lower_quartile - (difference * 1.5)
         upper_inner_fence = upper_quartile + (difference * 1.5)
-        outliers_indices = np.where(
-            (x < lower_inner_fence) | (x > upper_inner_fence))
-    elif outlier_method in ('extreme_iqr', 'extreme_boxplot'):
+        outliers_indices = np.where((x < lower_inner_fence) | (x > upper_inner_fence))
+    elif outlier_method in ("extreme_iqr", "extreme_boxplot"):
         lower_quartile, upper_quartile = np.quantile(x, [0.25, 0.75])
         difference = upper_quartile - lower_quartile
         lower_outer_fence = lower_quartile - (difference * 3.0)
         upper_outer_fence = upper_quartile + (difference * 3.0)
-        outliers_indices = np.where(
-            (x < lower_outer_fence) | (x > upper_outer_fence))
-    elif outlier_method in ('z_score', 'standard_score'):
+        outliers_indices = np.where((x < lower_outer_fence) | (x > upper_outer_fence))
+    elif outlier_method in ("z_score", "standard_score"):
         x_mean = np.mean(x)
         x_std = np.std(x)
+        if np.isclose(x_std, 0.0):
+            # All values identical -> no outlier can be declared
+            return None
         z_score = (x - x_mean) / x_std
         outliers_indices = np.where(np.abs(z_score) > 3)
-    elif outlier_method == 'modified_z_score':
+    elif outlier_method == "modified_z_score":
         x_median = np.median(x)
         x_median_absolute_deviation = np.median(np.abs(x - x_median))
-        modified_z_score = 0.6745 * \
-            (x - x_median) / x_median_absolute_deviation
+        if np.isclose(x_median_absolute_deviation, 0.0):
+            # All values identical -> no outlier can be declared
+            return None
+        modified_z_score = 0.6745 * (x - x_median) / x_median_absolute_deviation
         outliers_indices = np.where(np.abs(modified_z_score) > 3.5)
 
     if np.size(outliers_indices):

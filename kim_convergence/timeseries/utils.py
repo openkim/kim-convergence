@@ -1,35 +1,36 @@
-"""Time series utility module."""
+r"""Time series utility module."""
 
 import numpy as np
 from random import randint
-from typing import Optional, Union, List
+from typing import Optional, Union
 
 from .statistical_inefficiency import si_methods
 
 from kim_convergence import CRError
-from kim_convergence._default import \
-    _DEFAULT_SI, \
-    _DEFAULT_FFT, \
-    _DEFAULT_MINIMUM_CORRELATION_TIME, \
-    _DEFAULT_UNCORRELATED_SAMPLE_INDICES, \
-    _DEFAULT_SAMPLE_METHOD
+from kim_convergence._default import (
+    _DEFAULT_SI,
+    _DEFAULT_FFT,
+    _DEFAULT_MINIMUM_CORRELATION_TIME,
+    _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+    _DEFAULT_SAMPLE_METHOD,
+)
 
 __all__ = [
-    'time_series_data_si',
-    'uncorrelated_time_series_data_sample_indices',
-    'uncorrelated_time_series_data_samples',
-    'time_series_data_uncorrelated_samples',
-    'time_series_data_uncorrelated_random_samples',
-    'time_series_data_uncorrelated_block_averaged_samples',
+    "time_series_data_si",
+    "time_series_data_uncorrelated_block_averaged_samples",
+    "time_series_data_uncorrelated_random_samples",
+    "time_series_data_uncorrelated_samples",
+    "uncorrelated_time_series_data_sample_indices",
+    "uncorrelated_time_series_data_samples",
 ]
 
-SAMPLING_METHODS = ('uncorrelated', 'random', 'block_averaged')
+SAMPLING_METHODS = ("uncorrelated", "random", "block_averaged")
 
 
 def _out_of_bounds_error_str(
-        bad_indices: List[int],
-        size: int) -> str:
-    """
+    bad_indices: Union[np.ndarray, list[int]], size: int
+) -> str:
+    r"""
     Return a uniform, ready-to-raise error message for out-of-bounds indices.
     Caller must `raise CRError(...)` explicitly.
     """
@@ -46,12 +47,13 @@ def _out_of_bounds_error_str(
 
 
 def time_series_data_si(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> float:
-    """Helper method to compute or return the statistical inefficiency value.
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    si: Union[str, float, int, None] = _DEFAULT_SI,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+) -> float:
+    r"""Helper method to compute or return the statistical inefficiency value.
 
     Args:
         time_series_data (array_like, 1d): time series data.
@@ -66,18 +68,18 @@ def time_series_data_si(
             (default: None)
 
     Returns:
-        float: estimated statistical inefficiency value.
-            :math:`si >= 1` is the estimated statistical inefficiency.
-
+        float
+            estimated statistical inefficiency value. :math:`si >= 1` is the
+            estimated statistical inefficiency.
     """
     if si is None:
-        si = 'statistical_inefficiency'
+        si = "statistical_inefficiency"
 
     if isinstance(si, str):
         if si not in si_methods:
             raise CRError(
-                f'method {si} not found. Valid statistical inefficiency (si) '
-                'methods are:\n\t- ' + "\n\t- ".join(si_methods)
+                f"method {si} not found. Valid statistical inefficiency (si) "
+                "methods are:\n\t- " + "\n\t- ".join(si_methods)
             )
 
         si_func = si_methods[si]
@@ -86,42 +88,41 @@ def time_series_data_si(
             si_value = si_func(
                 time_series_data,
                 fft=fft,
-                minimum_correlation_time=minimum_correlation_time)
-        except CRError:
-            raise CRError(
-                'Failed to compute the statistical inefficiency for the '
-                'time_series_data.'
+                minimum_correlation_time=minimum_correlation_time,
             )
+        except CRError as e:
+            raise CRError(
+                "Failed to compute the statistical inefficiency for the "
+                "time_series_data."
+            ) from e
 
     elif isinstance(si, (float, int)):
         if si < 1.0:
             raise CRError(
-                f'statistical inefficiency = {si} must be greater than or '
-                'equal one.'
+                f"statistical inefficiency = {si} must be greater than or "
+                "equal to one."
             )
 
         si_value = si
 
     else:
-        raise CRError(
-            'statistical inefficiency (si) must be a `float` or a `str`.'
-        )
+        raise CRError("statistical inefficiency (si) must be a `float` or a `str`.")
 
     return si_value
 
 
 def uncorrelated_time_series_data_sample_indices(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME) -> np.ndarray:
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    si: Union[str, float, int, None] = _DEFAULT_SI,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+) -> np.ndarray:
     r"""Return indices of uncorrelated subsamples of the time series data.
 
-    Return indices of the uncorrelated uncorrelated_sample of the time series data.
-    Subsample a correlated timeseries to extract an effectively
-    uncorrelated dataset. If si (statistical inefficiency) is not provided
-    it will be computed.
+    Return indices of the uncorrelated sample of the time series data. Subsample
+    a correlated timeseries to extract an effectively uncorrelated dataset. If
+    si (statistical inefficiency) is not provided it will be computed.
 
     Args:
         time_series_data (array_like, 1d): time series data.
@@ -136,15 +137,16 @@ def uncorrelated_time_series_data_sample_indices(
             (default: None)
 
     Returns:
-        1darray: indices array.
-            Indices of uncorrelated subsamples of the time series data.
-
+        1darray
+            indices array. Indices of uncorrelated subsamples of the time series
+            data.
     """
     si_value = time_series_data_si(
         time_series_data,
         si=si,
         fft=fft,
-        minimum_correlation_time=minimum_correlation_time)
+        minimum_correlation_time=minimum_correlation_time,
+    )
 
     # Get the length of the time_series_data
     time_series_data_size = len(time_series_data)
@@ -152,8 +154,7 @@ def uncorrelated_time_series_data_sample_indices(
     uncorrelated_sample_indices = si_value * np.arange(time_series_data_size)
 
     # Each block should contain more steps than si
-    uncorrelated_sample_indices = \
-        np.ceil(uncorrelated_sample_indices).astype(int)
+    uncorrelated_sample_indices = np.ceil(uncorrelated_sample_indices).astype(int)
 
     indices = np.where(uncorrelated_sample_indices < time_series_data_size)
 
@@ -162,14 +163,16 @@ def uncorrelated_time_series_data_sample_indices(
 
 
 def uncorrelated_time_series_data_samples(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Union[np.ndarray, List[int],
-                                           None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
-        sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD) -> np.ndarray:
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    si: Union[str, float, int, None] = _DEFAULT_SI,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    uncorrelated_sample_indices: Union[
+        np.ndarray, list[int], None
+    ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+    sample_method: Optional[str] = _DEFAULT_SAMPLE_METHOD,
+) -> np.ndarray:
     r"""Get time series data at the sample_method uncorrelated_sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
@@ -194,55 +197,112 @@ def uncorrelated_time_series_data_samples(
             (default: None)
 
     Returns:
-        1darray: uncorrelated_sample of the time series data.
-            time series data at uncorrelated uncorrelated_sample indices.
-
+        1darray
+            uncorrelated_sample of the time series data. time series data at
+            uncorrelated sample indices.
     """
     if sample_method is None:
-        sample_method = 'uncorrelated'
+        sample_method = "uncorrelated"
 
     if not isinstance(sample_method, str):
-        raise CRError(f'sample_method {sample_method} is not a `str`.')
+        raise CRError(f"sample_method {sample_method} is not a `str`.")
 
     if sample_method not in SAMPLING_METHODS:
         raise CRError(
-            f'method {sample_method} not found. Valid sampling methods '
-            'are:\n\t- ' + "\n\t- ".join(SAMPLING_METHODS)
+            f"method {sample_method} not found. Valid sampling methods "
+            "are:\n\t- " + "\n\t- ".join(SAMPLING_METHODS)
         )
 
-    if sample_method == 'uncorrelated':
+    if sample_method == "uncorrelated":
         return time_series_data_uncorrelated_samples(
             time_series_data=time_series_data,
             si=si,
             fft=fft,
             minimum_correlation_time=minimum_correlation_time,
-            uncorrelated_sample_indices=uncorrelated_sample_indices)
+            uncorrelated_sample_indices=uncorrelated_sample_indices,
+        )
 
-    if sample_method == 'random':
+    if sample_method == "random":
         return time_series_data_uncorrelated_random_samples(
             time_series_data=time_series_data,
             si=si,
             fft=fft,
             minimum_correlation_time=minimum_correlation_time,
-            uncorrelated_sample_indices=uncorrelated_sample_indices)
+            uncorrelated_sample_indices=uncorrelated_sample_indices,
+        )
 
     return time_series_data_uncorrelated_block_averaged_samples(
         time_series_data=time_series_data,
         si=si,
         fft=fft,
         minimum_correlation_time=minimum_correlation_time,
-        uncorrelated_sample_indices=uncorrelated_sample_indices)
+        uncorrelated_sample_indices=uncorrelated_sample_indices,
+    )
+
+
+def _resolve_and_validate_indices(
+    time_series_data: np.ndarray,
+    uncorrelated_sample_indices: Union[np.ndarray, list[int], None],
+    si: Union[str, float, int, None],
+    fft: bool,
+    minimum_correlation_time: Optional[int],
+) -> np.ndarray:
+    """Resolve and validate uncorrelated sample indices."""
+    if uncorrelated_sample_indices is None:
+        try:
+            indices = uncorrelated_time_series_data_sample_indices(
+                time_series_data=time_series_data,
+                si=si,
+                fft=fft,
+                minimum_correlation_time=minimum_correlation_time,
+            )
+        except CRError as e:
+            raise CRError(
+                "Failed to compute the indices of uncorrelated samples of "
+                "the time_series_data."
+            ) from e
+    else:
+        indices = np.asarray(uncorrelated_sample_indices)
+        if indices.ndim != 1:
+            raise CRError(
+                "uncorrelated_sample_indices is not an array of one-dimension."
+            )
+
+    if indices.size > 1 and (indices[:-1] >= indices[1:]).any():
+        raise CRError(
+            "uncorrelated_sample_indices must be monotonically increasing "
+            "(sorted in time order)."
+        )
+
+    if (indices < 0).any():
+        raise CRError(
+            "uncorrelated_sample_indices must contain non-negative indices."
+        )
+
+    time_series_data_size = time_series_data.size
+
+    wrong_indices = np.where(indices >= time_series_data_size)
+
+    if len(wrong_indices[0]) > 0:
+        raise CRError(
+            _out_of_bounds_error_str(
+                bad_indices=indices[wrong_indices], size=time_series_data_size
+            )
+        )
+    return indices
 
 
 def time_series_data_uncorrelated_samples(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Union[np.ndarray, List[int],
-                                           None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
-    r"""Return time series data at uncorrelated uncorrelated_sample indices.
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    si: Union[str, float, int, None] = _DEFAULT_SI,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    uncorrelated_sample_indices: Union[
+        np.ndarray, list[int], None
+    ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+) -> np.ndarray:
+    r"""Return time series data at uncorrelated sample indices.
 
     Subsample a correlated timeseries to extract an effectively uncorrelated
     dataset. If si (statistical inefficiency) is not provided it will be
@@ -251,7 +311,6 @@ def time_series_data_uncorrelated_samples(
     Args:
         time_series_data (array_like, 1d): time series data.
         si (float, or str, optional): estimated statistical inefficiency.
-            c
         fft (bool, optional): if True, use FFT convolution. FFT should be
             preferred for long time series. (default: True)
         minimum_correlation_time (int, optional): minimum amount of
@@ -261,66 +320,44 @@ def time_series_data_uncorrelated_samples(
             (default: None)
         uncorrelated_sample_indices (array_like, 1d, optional): indices
             of uncorrelated subsamples of the time series data.
-            (default: None)
-        uncorrelated_sample_indices (array_like, 1d, optional): indices
-            of uncorrelated subsamples of the time series data.
-            (default: None)
+            **must be monotonically increasing**. If None they are computed
+            automatically. (default: None)
 
     Returns:
-        1darray: uncorrelated_sample of the time series data.
-            time series data at uncorrelated uncorrelated_sample indices.
-
+        1darray
+            uncorrelated_sample of the time series data. time series data at
+            uncorrelated sample indices.
     """
     time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
-    if uncorrelated_sample_indices is None:
-        try:
-            indices = uncorrelated_time_series_data_sample_indices(
-                time_series_data=time_series_data,
-                si=si,
-                fft=fft,
-                minimum_correlation_time=minimum_correlation_time)
-        except CRError:
-            raise CRError(
-                'Failed to compute the indices of uncorrelated samples of'
-                'the time_series_data.'
-            )
+    indices = _resolve_and_validate_indices(
+        time_series_data,
+        uncorrelated_sample_indices,
+        si,
+        fft,
+        minimum_correlation_time,
+    )
 
-    else:
-        indices = np.asarray(uncorrelated_sample_indices)
-
-        if indices.ndim != 1:
-            raise CRError(
-                'uncorrelated_sample_indices is not an array of one-dimension.'
-            )
-
-    try:
-        uncorrelated_samples = time_series_data[indices]
-    except IndexError:
-        time_series_data_size = time_series_data.size
-        mask = indices >= time_series_data_size
-        wrong_indices = np.where(mask)
-        raise CRError(
-            _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size)
-        )
+    uncorrelated_samples = time_series_data[indices]
 
     return uncorrelated_samples
 
 
 def time_series_data_uncorrelated_random_samples(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Union[np.ndarray, List[int],
-                                           None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
-    r"""Retuen random data for each block after blocking the data.
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    si: Union[str, float, int, None] = _DEFAULT_SI,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    uncorrelated_sample_indices: Union[
+        np.ndarray, list[int], None
+    ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+) -> np.ndarray:
+    r"""Return random data for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
     where each block contains ``si`` successive data points. If si
@@ -340,73 +377,56 @@ def time_series_data_uncorrelated_random_samples(
             (default: None)
         uncorrelated_sample_indices (array_like, 1d, optional): indices
             of uncorrelated subsamples of the time series data.
-            (default: None)
+            **must be monotonically increasing**. If None they are computed
+            automatically. (default: None)
 
     Returns:
-        1darray: uncorrelated_sample of the time series data.
-            random data for each block after blocking the time series data.
-
+        1darray
+            uncorrelated_sample of the time series data. random data for each
+            block after blocking the time series data.
     """
     time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
-    if uncorrelated_sample_indices is None:
-        try:
-            indices = uncorrelated_time_series_data_sample_indices(
-                time_series_data=time_series_data,
-                si=si,
-                fft=fft,
-                minimum_correlation_time=minimum_correlation_time)
-        except CRError:
-            raise CRError(
-                'Failed to compute the indices of uncorrelated samples of '
-                'the time_series_data.'
-            )
+    indices = _resolve_and_validate_indices(
+        time_series_data,
+        uncorrelated_sample_indices,
+        si,
+        fft,
+        minimum_correlation_time,
+    )
 
-    else:
-        indices = np.asarray(uncorrelated_sample_indices)
-
-        if indices.ndim != 1:
-            raise CRError(
-                'uncorrelated_sample_indices is not an array of one-dimension.'
-            )
-
-    time_series_data_size = time_series_data.size
-
-    wrong_indices = np.where(indices >= time_series_data_size)
-
-    if len(wrong_indices[0]) > 0:
+    if indices.size < 2:
         raise CRError(
-            _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size)
+            "uncorrelated_sample_indices must contain at least 2 elements "
+            "to define block boundaries."
         )
 
-    random_samples = np.empty(indices.size, dtype=time_series_data.dtype)
+    random_samples = np.empty(indices.size - 1, dtype=time_series_data.dtype)
 
-    index_s = 0
-    for index, index_e in enumerate(indices[1:-1]):
+    index_s = indices[0]
+    for index, index_e in enumerate(indices[1:]):
         rand_index = randint(index_s, index_e - 1)
         random_samples[index] = time_series_data[rand_index]
         index_s = index_e
-
-    rand_index = randint(index_s, indices[-1])
-    random_samples[-1] = time_series_data[rand_index]
 
     return random_samples
 
 
 def time_series_data_uncorrelated_block_averaged_samples(
-        time_series_data: Union[np.ndarray, List[float]],
-        *,
-        si: Union[str, float, int, None] = _DEFAULT_SI,
-        fft: bool = _DEFAULT_FFT,
-        minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
-        uncorrelated_sample_indices: Union[np.ndarray, List[int],
-                                           None] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES) -> np.ndarray:
-    """Retuen average value for each block after blocking the data.
+    time_series_data: Union[np.ndarray, list[float]],
+    *,
+    si: Union[str, float, int, None] = _DEFAULT_SI,
+    fft: bool = _DEFAULT_FFT,
+    minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    uncorrelated_sample_indices: Union[
+        np.ndarray, list[int], None
+    ] = _DEFAULT_UNCORRELATED_SAMPLE_INDICES,
+) -> np.ndarray:
+    """Return average value for each block after blocking the data.
 
     At first, break down the time series data into the series of blocks,
     where each block contains ``si`` successive data points. If si
@@ -427,58 +447,39 @@ def time_series_data_uncorrelated_block_averaged_samples(
             (default: None)
         uncorrelated_sample_indices (array_like, 1d, optional): indices
             of uncorrelated subsamples of the time series data.
-            (default: None)
+            **must be monotonically increasing**. If None they are computed
+            automatically. (default: None)
 
     Returns:
-        1darray: uncorrelated_sample of the time series data.
-            average value for each block after blocking the time series
-            data.
-
+        1darray
+            uncorrelated_sample of the time series data. average value for each
+            block after blocking the time series data.
     """
     time_series_data = np.asarray(time_series_data)
 
     # Check inputs
     if time_series_data.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
-    if uncorrelated_sample_indices is None:
-        try:
-            indices = uncorrelated_time_series_data_sample_indices(
-                time_series_data=time_series_data,
-                si=si,
-                fft=fft,
-                minimum_correlation_time=minimum_correlation_time)
-        except CRError:
-            raise CRError(
-                'Failed to compute the indices of uncorrelated samples of '
-                'the time_series_data.'
-            )
+    indices = _resolve_and_validate_indices(
+        time_series_data,
+        uncorrelated_sample_indices,
+        si,
+        fft,
+        minimum_correlation_time,
+    )
 
-    else:
-        indices = np.asarray(uncorrelated_sample_indices)
-
-        if indices.ndim != 1:
-            raise CRError(
-                'uncorrelated_sample_indices is not an array of one-dimension.'
-            )
-
-    time_series_data_size = time_series_data.size
-
-    wrong_indices = np.where(indices >= time_series_data_size)
-
-    if len(wrong_indices[0]) > 0:
+    if indices.size < 2:
         raise CRError(
-            _out_of_bounds_error_str(
-                bad_indices=indices[wrong_indices], size=time_series_data_size)
+            "uncorrelated_sample_indices must contain at least 2 elements "
+            "to define block boundaries."
         )
 
-    block_averaged_samples = \
-        np.empty(indices.size - 1, dtype=time_series_data.dtype)
+    block_averaged_samples = np.empty(indices.size - 1, dtype=time_series_data.dtype)
 
-    index_s = 0
+    index_s = indices[0]
     for index, index_e in enumerate(indices[1:]):
-        block_averaged_samples[index] = np.mean(
-            time_series_data[index_s:index_e])
+        block_averaged_samples[index] = np.mean(time_series_data[index_s:index_e])
         index_s = index_e
 
     return block_averaged_samples

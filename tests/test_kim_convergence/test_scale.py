@@ -1,12 +1,13 @@
 """Test scale module."""
+
 from math import isclose
 import unittest
 import numpy as np
 
 try:
     import kim_convergence as cr
-except Exception:  # noqa: BLE001  # intentional catch-all
-    raise RuntimeError('Failed to import `kim-convergence` utility module')
+except Exception as e:  # intentional catch-all
+    raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 from kim_convergence import CRError
 
@@ -25,11 +26,11 @@ class TestScaleModule(unittest.TestCase):
         """Test minmax_scale function."""
         x = np.array([0, 1, 2, 3, 4, 5, 10], dtype=np.float64)
         scaled_x = cr.minmax_scale(x)
-        self.assertTrue(np.allclose(scaled_x, x / 10.))
+        self.assertTrue(np.allclose(scaled_x, x / 10.0))
 
         mms = cr.MinMaxScale()
         scaled_x = mms.scale(x)
-        self.assertTrue(np.allclose(scaled_x, x / 10.))
+        self.assertTrue(np.allclose(scaled_x, x / 10.0))
         inverse_scaled_x = mms.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, x))
 
@@ -37,29 +38,29 @@ class TestScaleModule(unittest.TestCase):
         inverse_scaled_x = mms.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, self.x))
 
-        x = [-1., 3.]
+        x = [-1.0, 3.0]
         scaled_x = mms.scale(x)
         inverse_scaled_x = mms.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, x))
 
-        x = [-1., 3., 100.]
+        x = [-1.0, 3.0, 100.0]
         scaled_x = mms.scale(x)
         inverse_scaled_x = mms.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, x))
 
-        x = [-1., 3., 100., np.nan]
+        x = [-1.0, 3.0, 100.0, np.nan]
         self.assertRaises(CRError, mms.scale, x)
 
-        x = [-1., np.inf, 3., 100.]
+        x = [-1.0, np.inf, 3.0, 100.0]
         self.assertRaises(CRError, mms.scale, x)
 
         self.assertRaises(CRError, mms.scale, self.x.reshape((2, -1)))
 
     def test_translate_scale(self):
         """Test translate_scale function."""
-        x = [1., 2., 2., 2., 3.]
+        x = [1.0, 2.0, 2.0, 2.0, 3.0]
         scaled_x = cr.translate_scale(x)
-        scaled_x_ = [0., 1.0, 1.0, 1.0, 2.0]
+        scaled_x_ = [0.0, 1.0, 1.0, 1.0, 2.0]
         self.assertTrue(np.allclose(scaled_x, scaled_x_))
 
         tsc = cr.TranslateScale()
@@ -89,7 +90,7 @@ class TestScaleModule(unittest.TestCase):
         inverse_scaled_x = ssc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, self.x))
 
-        x = [4.,  1., -2.]
+        x = [4.0, 1.0, -2.0]
         scaled_x = ssc.scale(x)
         inverse_scaled_x = ssc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, x))
@@ -104,7 +105,7 @@ class TestScaleModule(unittest.TestCase):
         inverse_scaled_x = msc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, self.x))
 
-        x = [4.0,  1.0, -9.0]
+        x = [4.0, 1.0, -9.0]
         scaled_x = msc.scale(x)
         inverse_scaled_x = msc.inverse(scaled_x)
         self.assertTrue(np.allclose(inverse_scaled_x, x))

@@ -1,11 +1,12 @@
 """Test Time series equilibration_length module."""
+
 import unittest
 import numpy as np
 
 try:
     import kim_convergence as cr
-except Exception:  # noqa: BLE001  # intentional catch-all
-    raise RuntimeError('Failed to import `kim-convergence` utility module')
+except Exception as e:  # intentional catch-all
+    raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
 from kim_convergence import CRError
 
@@ -15,26 +16,22 @@ class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
 
     def test_estimate_equilibration_length(self):
         """Test estimate_equilibration_length function."""
-        x = np.arange(100.)
+        x = np.arange(100.0)
         # si is not an str nor a valid si methods
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si=cr.statistical_inefficiency)
+        self.assertRaises(
+            CRError, cr.estimate_equilibration_length, x, si=cr.statistical_inefficiency
+        )
 
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si=1.0)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, si=1.0)
 
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si=1)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, si=1)
 
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si=True)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, si=True)
 
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si='si')
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, si="si")
 
         # x is not one dimensional
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x.reshape(5, 20))
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x.reshape(5, 20))
 
         # constant data sets
         x = np.ones(100)
@@ -47,80 +44,91 @@ class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
         x = np.ones(100) * 10 + (rng.random_sample(100) - 0.5)
 
         # invalid int ignore_end
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end=0)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end=-1)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end=0)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end=-1)
 
         # invalid float ignore_end
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end=0.0)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end=1.0)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end=-0.1)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end=1.1)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end=0.0)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end=1.0)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end=-0.1)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end=1.1)
 
         # invalid ignore_end
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end="None")
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end="1")
+        self.assertRaises(
+            CRError, cr.estimate_equilibration_length, x, ignore_end="None"
+        )
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end="1")
 
         # invalid ignore_end
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end=120)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, ignore_end=100)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end=120)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, ignore_end=100)
 
         # insufficient data points
         n = 1
         x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
         self.assertRaises(CRError, cr.estimate_equilibration_length, x)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si='geyer_r_statistical_inefficiency')
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si='geyer_split_r_statistical_inefficiency')
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si='geyer_split_statistical_inefficiency')
+        self.assertRaises(
+            CRError,
+            cr.estimate_equilibration_length,
+            x,
+            si="geyer_r_statistical_inefficiency",
+        )
+        self.assertRaises(
+            CRError,
+            cr.estimate_equilibration_length,
+            x,
+            si="geyer_split_r_statistical_inefficiency",
+        )
+        self.assertRaises(
+            CRError,
+            cr.estimate_equilibration_length,
+            x,
+            si="geyer_split_statistical_inefficiency",
+        )
 
         n = 3
         x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si='geyer_r_statistical_inefficiency')
+        self.assertRaises(
+            CRError,
+            cr.estimate_equilibration_length,
+            x,
+            si="geyer_r_statistical_inefficiency",
+        )
 
         n = 7
         x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
 
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si='geyer_split_r_statistical_inefficiency')
+        self.assertRaises(
+            CRError,
+            cr.estimate_equilibration_length,
+            x,
+            si="geyer_split_r_statistical_inefficiency",
+        )
 
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, si='geyer_split_statistical_inefficiency')
+        self.assertRaises(
+            CRError,
+            cr.estimate_equilibration_length,
+            x,
+            si="geyer_split_statistical_inefficiency",
+        )
 
         # invalid nskip
         n = 100
         x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, nskip=1.0)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, nskip=10.)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, nskip=-10.)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, nskip=0)
-        self.assertRaises(CRError, cr.estimate_equilibration_length,
-                          x, nskip=-1)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, nskip=1.0)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, nskip=10.0)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, nskip=-10.0)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, nskip=0)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, nskip=-1)
 
         rng = np.random.RandomState(12345)
         n = 1000
         x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
         y = np.concatenate(
-            (np.arange(n // 10)[::-1] / float(n // 10),
-             np.zeros(n - n // 10)))
+            (np.arange(n // 10)[::-1] / float(n // 10), np.zeros(n - n // 10))
+        )
 
         x += y
 
@@ -137,40 +145,47 @@ class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
         self.assertAlmostEqual(si1, si2, places=12)
 
         n1, si1 = cr.estimate_equilibration_length(
-            x, fft=True, minimum_correlation_time=2)
+            x, fft=True, minimum_correlation_time=2
+        )
         n2, si2 = cr.estimate_equilibration_length(
-            x, fft=False, minimum_correlation_time=2)
+            x, fft=False, minimum_correlation_time=2
+        )
 
         self.assertTrue(n1 == n2)
         self.assertAlmostEqual(si1, si2, places=12)
 
         n1, si1 = cr.estimate_equilibration_length(x, fft=True, ignore_end=25)
-        n2, si2 = cr.estimate_equilibration_length(
-            x, fft=False, ignore_end=25)
+        n2, si2 = cr.estimate_equilibration_length(x, fft=False, ignore_end=25)
 
         self.assertTrue(n1 == n2)
         self.assertAlmostEqual(si1, si2, places=12)
 
         n1, si1 = cr.estimate_equilibration_length(
-            x, si='geyer_r_statistical_inefficiency', fft=True)
+            x, si="geyer_r_statistical_inefficiency", fft=True
+        )
         n2, si2 = cr.estimate_equilibration_length(
-            x, si='geyer_r_statistical_inefficiency', fft=False)
+            x, si="geyer_r_statistical_inefficiency", fft=False
+        )
 
         self.assertTrue(n1 == n2)
         self.assertAlmostEqual(si1, si2, places=12)
 
         n1, si1 = cr.estimate_equilibration_length(
-            x, si='geyer_split_r_statistical_inefficiency', fft=True)
+            x, si="geyer_split_r_statistical_inefficiency", fft=True
+        )
         n2, si2 = cr.estimate_equilibration_length(
-            x, si='geyer_split_r_statistical_inefficiency', fft=False)
+            x, si="geyer_split_r_statistical_inefficiency", fft=False
+        )
 
         self.assertTrue(n1 == n2)
         self.assertAlmostEqual(si1, si2, places=12)
 
         n1, si1 = cr.estimate_equilibration_length(
-            x, si='geyer_split_statistical_inefficiency', fft=True)
+            x, si="geyer_split_statistical_inefficiency", fft=True
+        )
         n2, si2 = cr.estimate_equilibration_length(
-            x, si='geyer_split_statistical_inefficiency', fft=False)
+            x, si="geyer_split_statistical_inefficiency", fft=False
+        )
 
         self.assertTrue(n1 == n2)
         self.assertAlmostEqual(si1, si2, places=12)
@@ -182,18 +197,12 @@ class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
 
         x[2] = np.inf
 
-        self.assertRaises(CRError,
-                          cr.estimate_equilibration_length, x)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x)
 
         x[2] = np.nan
 
-        self.assertRaises(CRError,
-                          cr.estimate_equilibration_length, x)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x)
 
-        if np.__version__.startswith('1.'):
-            x[2] = np.NINF
-        else:
-            x[2] = -np.inf
+        x[2] = -np.inf
 
-        self.assertRaises(CRError,
-                          cr.estimate_equilibration_length, x)
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x)

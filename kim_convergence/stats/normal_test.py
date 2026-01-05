@@ -5,6 +5,7 @@ Note:
     package use.
 
 """
+
 from math import sqrt, fabs
 import numpy as np
 from scipy.stats import chi2
@@ -14,18 +15,16 @@ from kim_convergence import cr_check
 from .t_dist import t_cdf
 
 
-__all__ = [
-    't_test',
-    'chi_square_test',
-]
+__all__ = ["chi_square_test", "t_test"]
 
 
 def t_test(
-        sample_mean: float,
-        sample_std: float,
-        sample_size: int,
-        population_mean: float,
-        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+    sample_mean: float,
+    sample_std: float,
+    sample_size: int,
+    population_mean: float,
+    significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT,
+) -> bool:
     """T-test for the mean.
 
     Calculate the T-test for the mean. This is a two-sided test for the null
@@ -41,15 +40,15 @@ def t_test(
             below which the null hypothesis will be rejected. (default: 0.05)
 
     Returns:
-        bool: True for the expected value (mean) of a sample of independent
-            observations `x` is equal to the given population mean,
-            `population_mean`.
-
+        bool
+            ``True`` if the expected value (mean) of a sample of independent
+            observations ``x`` equals the given population mean
+            ``population_mean``.
     """
     cr_check(
         significance_level,
-        var_name='significance_level',
-        var_lower_bound=np.finfo(np.float64).resolution
+        var_name="significance_level",
+        var_lower_bound=np.finfo(np.float64).resolution,  # type: ignore[assignment]
     )
 
     nomin = sample_mean - population_mean
@@ -61,10 +60,11 @@ def t_test(
 
 
 def chi_square_test(
-        sample_var: float,
-        sample_size: int,
-        population_var: float,
-        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
+    sample_var: float,
+    sample_size: int,
+    population_var: float,
+    significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT,
+) -> bool:
     r"""Chi-square test for the variance.
 
     Calculate the chi-square test for the variance. This is a two-sided test.
@@ -86,18 +86,18 @@ def chi_square_test(
             below which the null hypothesis will be rejected. (default: 0.05)
 
     Returns:
-        bool: True for the variance of a sample of independent observations `x`
-            is equal to the given population variance, `population_var`.
-
+        bool
+            ``True`` if the variance of a sample of independent observations
+            ``x`` equals the given population variance ``population_var``.
     """
     cr_check(
         significance_level,
-        var_name='significance_level',
-        var_lower_bound=np.finfo(np.float64).resolution
+        var_name="significance_level",
+        var_lower_bound=np.finfo(np.float64).resolution,  # type: ignore[arg-type]
     )
 
     df = sample_size - 1
     t = df * sample_var / population_var
     q1 = chi2.ppf(significance_level / 2, df)
     q2 = chi2.ppf(1 - (significance_level / 2), df)
-    return q1 < t < q2
+    return bool(q1 < t < q2)

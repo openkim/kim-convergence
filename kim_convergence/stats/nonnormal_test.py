@@ -1,404 +1,452 @@
-"""Test module for non-normally distributed data.
+r"""Test module for non-normally distributed data.
 
 Note:
-    The tests in this module are modified and fixed for the convergence
+    The tests in this module are modified and fixed for the kim-convergence
     package use.
 
 """
+
 import numpy as np
 from scipy.stats import distributions, kruskal, kstest, levene, wilcoxon
-from typing import Optional, Union, List
+from typing import cast, Optional, Union
 
 from kim_convergence._default import _DEFAULT_CONFIDENCE_COEFFICIENT
 from kim_convergence import CRError, CRSampleSizeError, cr_check
 
 
 __all__ = [
-    'ContinuousDistributions',
-    'ContinuousDistributionsNumberOfRequiredArguments',
-    'ContinuousDistributionsArgumentRequirement',
-    'check_population_cdf_args',
-    'get_distribution_stats',
-    'ks_test',
-    'levene_test',
-    'wilcoxon_test',
-    'kruskal_test',
+    "ContinuousDistributions",
+    "ContinuousDistributionsArgumentRequirement",
+    "ContinuousDistributionsNumberOfRequiredArguments",
+    "check_population_cdf_args",
+    "get_distribution_stats",
+    "kruskal_test",
+    "ks_test",
+    "levene_test",
+    "wilcoxon_test",
 ]
 
-"""Continuous distributions.
-
-References:
-    .. [22] https://docs.scipy.org/doc/scipy/reference/stats.html#continuous-distributions
-
-"""
+r"""Continuous distributions [scipystats]_."""
 ContinuousDistributions = {
-    'alpha': 'Alpha distribution',
-    'anglit': 'Anglit distribution',
-    'arcsine': 'Arcsine distribution',
-    'argus': 'Argus distribution',
-    'beta': 'Beta distribution',
-    'betaprime': 'Beta prime distribution',
-    'bradford': 'Bradford distribution',
-    'burr': 'Burr (Type III) distribution',
-    'burr12': 'Burr (Type XII) distribution',
-    'cauchy': 'Cauchy distribution',
-    'chi': 'Chi distribution',
-    'chi-squared': 'Chi-squared distribution',
-    'cosine': 'Cosine distribution',
-    'crystalball': 'Crystalball distribution',
-    'dgamma': 'Double gamma distribution',
-    'dweibull': 'Double Weibull distribution',
-    'erlang': 'Erlang distribution',
-    'expon': 'Exponential distribution',
-    'exponnorm': 'Exponentially modified Normal distribution',
-    'exponweib': 'Exponentiated Weibull distribution',
-    'exponpow': 'Exponential power distribution',
-    'f': 'F distribution',
-    'fatiguelife': 'Fatigue-life (Birnbaum-Saunders) distribution',
-    'fisk': 'Fisk distribution',
-    'foldcauchy': 'Folded Cauchy distribution',
-    'foldnorm': 'Folded normal distribution',
-    'genlogistic': 'Generalized logistic distribution',
-    'gennorm': 'Generalized normal distribution',
-    'genpareto': 'Generalized Pareto distribution',
-    'genexpon': 'Generalized exponential distribution',
-    'genextreme': 'Generalized extreme value distribution',
-    'gausshyper': 'Gauss hypergeometric distribution',
-    'gamma': 'Gamma distribution',
-    'gengamma': 'Generalized gamma distribution',
-    'genhalflogistic': 'Generalized half-logistic distribution',
-    'geninvgauss': 'Generalized Inverse Gaussian distribution',
-    'gilbrat': 'Gilbrat distribution',
-    'gompertz': 'Gompertz (or truncated Gumbel) distribution',
-    'gumbel_r': 'Right-skewed Gumbel distribution',
-    'gumbel_l': 'Left-skewed Gumbel distribution',
-    'halfcauchy': 'Half-Cauchy distribution',
-    'halflogistic': 'Half-logistic distribution',
-    'halfnorm': 'Half-normal distribution',
-    'halfgennorm': 'Upper half of a generalized normal distribution',
-    'hypsecant': 'Hyperbolic secant distribution',
-    'invgamma': 'Inverted gamma distribution',
-    'invgauss': 'Inverse Gaussian distribution',
-    'invweibull': 'Inverted Weibull distribution',
-    'johnsonsb': 'Johnson SB distribution',
-    'johnsonsu': 'Johnson SU distribution',
-    'kappa4': 'Kappa 4 parameter distribution',
-    'kappa3': 'Kappa 3 parameter distribution',
-    'ksone': 'Kolmogorov-Smirnov one-sided test statistic distribution',
-    'kstwo': 'Kolmogorov-Smirnov two-sided test statistic distribution',
-    'kstwobign': 'Limiting distribution of scaled Kolmogorov-Smirnov two-sided test statistic',
-    'laplace': 'Laplace distribution',
-    'laplace_asymmetric': 'Asymmetric Laplace distribution',
-    'levy': 'Levy distribution',
-    'levy_l': 'Left-skewed Levy distribution',
-    'levy_stable': 'Levy-stable distribution',
-    'logistic': 'Logistic (or Sech-squared) distribution',
-    'loggamma': 'Log gamma distribution',
-    'loglaplace': 'Log-Laplace distribution',
-    'lognorm': 'Lognormal distribution',
-    'loguniform': 'Loguniform or reciprocal distribution',
-    'lomax': 'Lomax (Pareto of the second kind) distribution',
-    'maxwell': 'Maxwell distribution',
-    'mielke': 'Mielke Beta-Kappa / Dagum distribution',
-    'moyal': 'Moyal distribution',
-    'nakagami': 'Nakagami distribution',
-    'ncx2': 'Non-central chi-squared distribution',
-    'ncf': 'Non-central F distribution distribution',
-    'nct': 'Non-central Student’s t distribution',
-    'norm': 'Normal distribution',
-    'norminvgauss': 'Normal Inverse Gaussian distribution',
-    'pareto': 'Pareto distribution',
-    'pearson3': 'Pearson type III distribution',
-    'powerlaw': 'Power-function distribution',
-    'powerlognorm': 'Power log-normal distribution',
-    'powernorm': 'Power normal distribution',
-    'rdist': 'R-distributed (symmetric beta) distribution',
-    'rayleigh': 'Rayleigh distribution',
-    'rice': 'Rice distribution',
-    'recipinvgauss': 'Reciprocal inverse Gaussian distribution',
-    'semicircular': 'Semicircular distribution',
-    'skewnorm': 'Skew-normal distribution',
-    't': 'Student’s t distribution',
-    'trapezoid': 'Trapezoidal distribution',
-    'triang': 'Triangular distribution',
-    'truncexpon': 'Truncated exponential distribution',
-    'truncnorm': 'Truncated normal distribution',
-    'tukeylambda': 'Tukey-Lamdba distribution',
-    'uniform': 'Uniform distribution',
-    'vonmises': 'Von Mises distribution',
-    'vonmises_line': 'Von Mises distribution',
-    'wald': 'Wald distribution',
-    'weibull_min': 'Weibull minimum distribution',
-    'weibull_max': 'Weibull maximum distribution',
-    'wrapcauchy': 'Wrapped Cauchy distribution',
+    "alpha": "Alpha distribution",
+    "anglit": "Anglit distribution",
+    "arcsine": "Arcsine distribution",
+    "argus": "Argus distribution",
+    "beta": "Beta distribution",
+    "betaprime": "Beta prime distribution",
+    "bradford": "Bradford distribution",
+    "burr": "Burr (Type III) distribution",
+    "burr12": "Burr (Type XII) distribution",
+    "cauchy": "Cauchy distribution",
+    "chi": "Chi distribution",
+    "chi-squared": "Chi-squared distribution",
+    "cosine": "Cosine distribution",
+    "crystalball": "Crystalball distribution",
+    "dgamma": "Double gamma distribution",
+    "dweibull": "Double Weibull distribution",
+    "erlang": "Erlang distribution",
+    "expon": "Exponential distribution",
+    "exponnorm": "Exponentially modified Normal distribution",
+    "exponweib": "Exponentiated Weibull distribution",
+    "exponpow": "Exponential power distribution",
+    "f": "F distribution",
+    "fatiguelife": "Fatigue-life (Birnbaum-Saunders) distribution",
+    "fisk": "Fisk distribution",
+    "foldcauchy": "Folded Cauchy distribution",
+    "foldnorm": "Folded normal distribution",
+    "genlogistic": "Generalized logistic distribution",
+    "gennorm": "Generalized normal distribution",
+    "genpareto": "Generalized Pareto distribution",
+    "genexpon": "Generalized exponential distribution",
+    "genextreme": "Generalized extreme value distribution",
+    "gausshyper": "Gauss hypergeometric distribution",
+    "gamma": "Gamma distribution",
+    "gengamma": "Generalized gamma distribution",
+    "genhalflogistic": "Generalized half-logistic distribution",
+    "geninvgauss": "Generalized Inverse Gaussian distribution",
+    "gilbrat": "Gilbrat distribution",
+    "gompertz": "Gompertz (or truncated Gumbel) distribution",
+    "gumbel_r": "Right-skewed Gumbel distribution",
+    "gumbel_l": "Left-skewed Gumbel distribution",
+    "halfcauchy": "Half-Cauchy distribution",
+    "halflogistic": "Half-logistic distribution",
+    "halfnorm": "Half-normal distribution",
+    "halfgennorm": "Upper half of a generalized normal distribution",
+    "hypsecant": "Hyperbolic secant distribution",
+    "invgamma": "Inverted gamma distribution",
+    "invgauss": "Inverse Gaussian distribution",
+    "invweibull": "Inverted Weibull distribution",
+    "johnsonsb": "Johnson SB distribution",
+    "johnsonsu": "Johnson SU distribution",
+    "kappa4": "Kappa 4 parameter distribution",
+    "kappa3": "Kappa 3 parameter distribution",
+    "ksone": "Kolmogorov-Smirnov one-sided test statistic distribution",
+    "kstwo": "Kolmogorov-Smirnov two-sided test statistic distribution",
+    "kstwobign": "Limiting distribution of scaled Kolmogorov-Smirnov two-sided test statistic",
+    "laplace": "Laplace distribution",
+    "laplace_asymmetric": "Asymmetric Laplace distribution",
+    "levy": "Levy distribution",
+    "levy_l": "Left-skewed Levy distribution",
+    "levy_stable": "Levy-stable distribution",
+    "logistic": "Logistic (or Sech-squared) distribution",
+    "loggamma": "Log gamma distribution",
+    "loglaplace": "Log-Laplace distribution",
+    "lognorm": "Lognormal distribution",
+    "loguniform": "Loguniform or reciprocal distribution",
+    "lomax": "Lomax (Pareto of the second kind) distribution",
+    "maxwell": "Maxwell distribution",
+    "mielke": "Mielke Beta-Kappa / Dagum distribution",
+    "moyal": "Moyal distribution",
+    "nakagami": "Nakagami distribution",
+    "ncx2": "Non-central chi-squared distribution",
+    "ncf": "Non-central F distribution distribution",
+    "nct": "Non-central Student's t distribution",
+    "norm": "Normal distribution",
+    "norminvgauss": "Normal Inverse Gaussian distribution",
+    "pareto": "Pareto distribution",
+    "pearson3": "Pearson type III distribution",
+    "powerlaw": "Power-function distribution",
+    "powerlognorm": "Power log-normal distribution",
+    "powernorm": "Power normal distribution",
+    "rdist": "R-distributed (symmetric beta) distribution",
+    "rayleigh": "Rayleigh distribution",
+    "rice": "Rice distribution",
+    "recipinvgauss": "Reciprocal inverse Gaussian distribution",
+    "semicircular": "Semicircular distribution",
+    "skewnorm": "Skew-normal distribution",
+    "t": "Student's t distribution",
+    "trapezoid": "Trapezoidal distribution",
+    "triang": "Triangular distribution",
+    "truncexpon": "Truncated exponential distribution",
+    "truncnorm": "Truncated normal distribution",
+    "tukeylambda": "Tukey-Lamdba distribution",
+    "uniform": "Uniform distribution",
+    "vonmises": "Von Mises distribution",
+    "vonmises_line": "Von Mises distribution",
+    "wald": "Wald distribution",
+    "weibull_min": "Weibull minimum distribution",
+    "weibull_max": "Weibull maximum distribution",
+    "wrapcauchy": "Wrapped Cauchy distribution",
 }
 
 
-"""Continuous distributions number of required arguments."""
+r"""Continuous distributions number of required arguments."""
 ContinuousDistributionsNumberOfRequiredArguments = {
-    'alpha': 1,
-    'anglit': 0,
-    'arcsine': 0,
-    'argus': 1,
-    'beta': 2,
-    'betaprime': 2,
-    'bradford': 1,
-    'burr': 2,
-    'burr12': 2,
-    'cauchy': 0,
-    'chi': 1,
-    'chi-squared': 1,
-    'cosine': 0,
-    'crystalball': 2,
-    'dgamma': 1,
-    'dweibull': 1,
-    'erlang': 1,
-    'expon': 0,
-    'exponnorm': 1,
-    'exponweib': 2,
-    'exponpow': 1,
-    'f': 2,
-    'fatiguelife': 1,
-    'fisk': 1,
-    'foldcauchy': 1,
-    'foldnorm': 1,
-    'genlogistic': 1,
-    'gennorm': 1,
-    'genpareto': 1,
-    'genexpon': 3,
-    'genextreme': 1,
-    'gausshyper': 4,
-    'gamma': 1,
-    'gengamma': 2,
-    'genhalflogistic': 1,
-    'geninvgauss': 2,
-    'gilbrat': 0,
-    'gompertz': 1,
-    'gumbel_r': 0,
-    'gumbel_l': 0,
-    'halfcauchy': 0,
-    'halflogistic': 0,
-    'halfnorm': 0,
-    'halfgennorm': 1,
-    'hypsecant': 0,
-    'invgamma': 1,
-    'invgauss': 1,
-    'invweibull': 1,
-    'johnsonsb': 2,
-    'johnsonsu': 2,
-    'kappa4': 2,
-    'kappa3': 1,
-    'ksone': 1,
-    'kstwo': 1,
-    'kstwobign': 0,
-    'laplace': 0,
-    'laplace_asymmetric': 1,
-    'levy': 0,
-    'levy_l': 0,
-    'levy_stable': 2,
-    'logistic': 0,
-    'loggamma': 1,
-    'loglaplace': 1,
-    'lognorm': 1,
-    'loguniform': 2,
-    'lomax': 1,
-    'maxwell': 0,
-    'mielke': 2,
-    'moyal': 0,
-    'nakagami': 1,
-    'ncx2': 2,
-    'ncf': 3,
-    'nct': 2,
-    'norm': 0,
-    'norminvgauss': 2,
-    'pareto': 1,
-    'pearson3': 3,
-    'powerlaw': 1,
-    'powerlognorm': 2,
-    'powernorm': 1,
-    'rdist': 1,
-    'rayleigh': 0,
-    'rice': 1,
-    'recipinvgauss': 1,
-    'semicircular': 0,
-    'skewnorm': 1,
-    't': 1,
-    'trapezoid': 2,
-    'triang': 1,
-    'truncexpon': 1,
-    'truncnorm': 2,
-    'tukeylambda': 1,
-    'uniform': 0,
-    'vonmises': 1,
-    'vonmises_line': 1,
-    'wald': 0,
-    'weibull_min': 1,
-    'weibull_max': 1,
-    'wrapcauchy': 1,
+    "alpha": 1,
+    "anglit": 0,
+    "arcsine": 0,
+    "argus": 1,
+    "beta": 2,
+    "betaprime": 2,
+    "bradford": 1,
+    "burr": 2,
+    "burr12": 2,
+    "cauchy": 0,
+    "chi": 1,
+    "chi-squared": 1,
+    "cosine": 0,
+    "crystalball": 2,
+    "dgamma": 1,
+    "dweibull": 1,
+    "erlang": 1,
+    "expon": 0,
+    "exponnorm": 1,
+    "exponweib": 2,
+    "exponpow": 1,
+    "f": 2,
+    "fatiguelife": 1,
+    "fisk": 1,
+    "foldcauchy": 1,
+    "foldnorm": 1,
+    "genlogistic": 1,
+    "gennorm": 1,
+    "genpareto": 1,
+    "genexpon": 3,
+    "genextreme": 1,
+    "gausshyper": 4,
+    "gamma": 1,
+    "gengamma": 2,
+    "genhalflogistic": 1,
+    "geninvgauss": 2,
+    "gilbrat": 0,
+    "gompertz": 1,
+    "gumbel_r": 0,
+    "gumbel_l": 0,
+    "halfcauchy": 0,
+    "halflogistic": 0,
+    "halfnorm": 0,
+    "halfgennorm": 1,
+    "hypsecant": 0,
+    "invgamma": 1,
+    "invgauss": 1,
+    "invweibull": 1,
+    "johnsonsb": 2,
+    "johnsonsu": 2,
+    "kappa4": 2,
+    "kappa3": 1,
+    "ksone": 1,
+    "kstwo": 1,
+    "kstwobign": 0,
+    "laplace": 0,
+    "laplace_asymmetric": 1,
+    "levy": 0,
+    "levy_l": 0,
+    "levy_stable": 2,
+    "logistic": 0,
+    "loggamma": 1,
+    "loglaplace": 1,
+    "lognorm": 1,
+    "loguniform": 2,
+    "lomax": 1,
+    "maxwell": 0,
+    "mielke": 2,
+    "moyal": 0,
+    "nakagami": 1,
+    "ncx2": 2,
+    "ncf": 3,
+    "nct": 2,
+    "norm": 0,
+    "norminvgauss": 2,
+    "pareto": 1,
+    "pearson3": 1,
+    "powerlaw": 1,
+    "powerlognorm": 2,
+    "powernorm": 1,
+    "rdist": 1,
+    "rayleigh": 0,
+    "rice": 1,
+    "recipinvgauss": 1,
+    "semicircular": 0,
+    "skewnorm": 1,
+    "t": 1,
+    "trapezoid": 2,
+    "triang": 1,
+    "truncexpon": 1,
+    "truncnorm": 2,
+    "tukeylambda": 1,
+    "uniform": 0,
+    "vonmises": 1,
+    "vonmises_line": 1,
+    "wald": 0,
+    "weibull_min": 1,
+    "weibull_max": 1,
+    "wrapcauchy": 1,
 }
 
 
-"""Continuous distributions argument requirement."""
+r"""Continuous distributions argument requirement."""
 ContinuousDistributionsArgumentRequirement = {
-    'alpha': ContinuousDistributions['alpha'] + ' takes `a` as a shape parameter.',
-    'anglit': ContinuousDistributions['anglit'] + ' takes no arguments.',
-    'arcsine': ContinuousDistributions['arcsine'] + ' takes no arguments.',
-    'argus': ContinuousDistributions['argus'] + ' takes `chi` as a shape parameter.',
-    'beta': ContinuousDistributions['beta'] + ' takes `a` and `b` as shape parameters.',
-    'betaprime': ContinuousDistributions['betaprime'] + ' takes `a` and `b` as shape parameters.',
-    'bradford': ContinuousDistributions['bradford'] + ' takes `c` as a shape parameter.',
-    'burr': ContinuousDistributions['burr'] + ' takes takes `c` and `d` as shape parameters.',
-    'burr12': ContinuousDistributions['burr12'] + ' takes takes `c` and `d` as shape parameters.',
-    'cauchy': ContinuousDistributions['cauchy'] + ' takes no arguments.',
-    'chi': ContinuousDistributions['chi'] + ' takes `df` as a shape parameter.',
-    'chi-squared': ContinuousDistributions['chi-squared'] + ' takes `df` as a shape parameter.',
-    'cosine': ContinuousDistributions['cosine'] + ' takes no arguments.',
-    'crystalball': ContinuousDistributions['crystalball'] + ' takes `beta > 0` and `m > 1` as shape parameters.',
-    'dgamma': ContinuousDistributions['dgamma'] + ' takes `a` as a shape parameter.',
-    'dweibull': ContinuousDistributions['dweibull'] + ' takes `c` as a shape parameter.',
-    'erlang': ContinuousDistributions['erlang'] + ' takes `a` as a shape parameter.',
-    'expon': ContinuousDistributions['expon'] + ' takes no arguments.',
-    'exponnorm': ContinuousDistributions['exponnorm'] + ' takes :math:`K > 0` as a rate equals to :math:`1/K`.',
-    'exponweib': ContinuousDistributions['exponweib'] + ' takes `a` and `c` as shape parameters.',
-    'exponpow': ContinuousDistributions['exponpow'] + ' takes `b` as a shape parameter.',
-    'f': ContinuousDistributions['f'] + ' takes `dfn` and `dfd` as shape parameters.',
-    'fatiguelife': ContinuousDistributions['fatiguelife'] + ' takes `c` as a shape parameter.',
-    'fisk': ContinuousDistributions['fisk'] + ' takes `c` as a shape parameter.',
-    'foldcauchy': ContinuousDistributions['foldcauchy'] + ' takes `c` as a shape parameter.',
-    'foldnorm': ContinuousDistributions['foldnorm'] + ' takes `c` as a shape parameter.',
-    'genlogistic': ContinuousDistributions['genlogistic'] + ' takes `c` as a shape parameter.',
-    'gennorm': ContinuousDistributions['gennorm'] + ' takes `beta` as a shape parameter.',
-    'genpareto': ContinuousDistributions['genpareto'] + ' takes `c` as a shape parameter.',
-    'genexpon': ContinuousDistributions['genexpon'] + ' takes `a` and `b` and `c` as shape parameters.',
-    'genextreme': ContinuousDistributions['genextreme'] + ' takes `c` as a shape parameter.',
-    'gausshyper': ContinuousDistributions['gausshyper'] + ' takes`a` and `b` and `c` and `z` as shape parameters.',
-    'gamma': ContinuousDistributions['gamma'] + ' takes `a` as a shape parameter.',
-    'gengamma': ContinuousDistributions['gengamma'] + ' takes`a` and `c` as shape parameters.',
-    'genhalflogistic': ContinuousDistributions['genhalflogistic'] + ' takes`c` as a shape parameter.',
-    'geninvgauss': ContinuousDistributions['geninvgauss'] + ' takes`p` and `b > 0` parameters.',
-    'gilbrat': ContinuousDistributions['gilbrat'] + ' takesno arguments.',
-    'gompertz': ContinuousDistributions['gompertz'] + ' takes`c` as a shape parameter.',
-    'gumbel_r': ContinuousDistributions['gumbel_r'] + ' takes no arguments.',
-    'gumbel_l': ContinuousDistributions['gumbel_l'] + ' takes no arguments.',
-    'halfcauchy': ContinuousDistributions['halfcauchy'] + ' takes no arguments.',
-    'halflogistic': ContinuousDistributions['halflogistic'] + ' takes no arguments.',
-    'halfnorm': ContinuousDistributions['halfnorm'] + ' takes no arguments.',
-    'halfgennorm': ContinuousDistributions['halfgennorm'] + ' takes `beta` as a shape parameter.',
-    'hypsecant': ContinuousDistributions['hypsecant'] + ' takes no arguments.',
-    'invgamma': ContinuousDistributions['invgamma'] + ' takes `a` as a shape parameter.',
-    'invgauss': ContinuousDistributions['invgauss'] + r' takes `\mu` as a shape parameter.',
-    'invweibull': ContinuousDistributions['invweibull'] + ' takes `c` as a shape parameter.',
-    'johnsonsb': ContinuousDistributions['johnsonsb'] + ' takes `a` and `b` as shape parameters.',
-    'johnsonsu': ContinuousDistributions['johnsonsu'] + ' takes `a` and `b` as shape parameters.',
-    'kappa4': ContinuousDistributions['kappa4'] + ' takes `h` and `k` as shape parameters.',
-    'kappa3': ContinuousDistributions['kappa3'] + ' takes `a` as a shape parameter.',
-    'ksone': ContinuousDistributions['ksone'] + ' takes `n` as a shape parameter.',
-    'kstwo': ContinuousDistributions['kstwo'] + ' takes `n` as a shape parameter.',
-    'kstwobign': ContinuousDistributions['kstwobign'] + ' takes no arguments.',
-    'laplace': ContinuousDistributions['laplace'] + ' takes no arguments.',
-    'laplace_asymmetric': ContinuousDistributions['laplace_asymmetric'] + ' takes `kappa` as a shape parameter.',
-    'levy': ContinuousDistributions['levy'] + ' takes no arguments.',
-    'levy_l': ContinuousDistributions['levy_l'] + ' takes no arguments.',
-    'levy_stable': ContinuousDistributions['levy_stable'] + ' takes `alpha` and `beta` parameters.',
-    'logistic': ContinuousDistributions['logistic'] + ' takes no arguments.',
-    'loggamma': ContinuousDistributions['loggamma'] + ' takes `c` as a shape parameter.',
-    'loglaplace': ContinuousDistributions['loglaplace'] + ' takes `c` as a shape parameter.',
-    'lognorm': ContinuousDistributions['lognorm'] + ' takes `s` as a shape parameter.',
-    'loguniform': ContinuousDistributions['loguniform'] + ' takes `a` and `b` parameters.',
-    'lomax': ContinuousDistributions['lomax'] + ' takes `c` as a shape parameter.',
-    'maxwell': ContinuousDistributions['maxwell'] + ' takes no arguments.',
-    'mielke': ContinuousDistributions['mielke'] + ' takes `k` and `s` as shape parameters.',
-    'moyal': ContinuousDistributions['moyal'] + ' takes no arguments.',
-    'nakagami': ContinuousDistributions['nakagami'] + ' takes `n` as a shape parameter.',
-    'ncx2': ContinuousDistributions['ncx2'] + ' takes `df` and `nc` as shape parameters.',
-    'ncf': ContinuousDistributions['ncf'] + ' takes `dfn` and `dfd` and `nc` as shape parameters.',
-    'nct': ContinuousDistributions['nct'] + ' takes `df` and `nc` as shape parameters.',
-    'norm': ContinuousDistributions['norm'] + ' takes no arguments.',
-    'norminvgauss': ContinuousDistributions['norminvgauss'] + ' takes `a` and `b` as parameters.',
-    'pareto': ContinuousDistributions['pareto'] + ' takes `b` as a shape parameter.',
-    'pearson3': ContinuousDistributions['pearson3'] + ' takes `skew` as a shape parameter.',
-    'powerlaw': ContinuousDistributions['powerlaw'] + ' takes `a` as a shape parameter.',
-    'powerlognorm': ContinuousDistributions['powerlognorm'] + ' takes `c` and `s` as shape parameters.',
-    'powernorm': ContinuousDistributions['powernorm'] + ' takes `c` as a shape parameter.',
-    'rdist': ContinuousDistributions['rdist'] + ' takes `c` as a shape parameter.',
-    'rayleigh': ContinuousDistributions['rayleigh'] + ' takes no arguments.',
-    'rice': ContinuousDistributions['rice'] + ' takes `b` as a shape parameter.',
-    'recipinvgauss': ContinuousDistributions['recipinvgauss'] + ' takes `mu` as a shape parameter.',
-    'semicircular': ContinuousDistributions['semicircular'] + ' takes no arguments.',
-    'skewnorm': ContinuousDistributions['skewnorm'] + ' takes `a` as a parameter.',
-    't': ContinuousDistributions['t'] + ' takes `df` as a parameter.',
-    'trapezoid': ContinuousDistributions['trapezoid'] + ' takes `c` and `d` as shape parameters.',
-    'triang': ContinuousDistributions['triang'] + ' takes `c` as a shape parameter.',
-    'truncexpon': ContinuousDistributions['truncexpon'] + ' takes `b` as a shape parameter.',
-    'truncnorm': ContinuousDistributions['truncnorm'] + ' takes `a` and `b` as shape parameters.',
-    'tukeylambda': ContinuousDistributions['tukeylambda'] + ' takes `lambda` as a shape parameter.',
-    'uniform': ContinuousDistributions['uniform'] + ' takes no arguments.',
-    'vonmises': ContinuousDistributions['vonmises'] + ' takes `kappa` as a shape parameter.',
-    'vonmises_line': ContinuousDistributions['vonmises_line'] + ' takes `kappa` as a shape parameter.',
-    'wald': ContinuousDistributions['wald'] + ' takes no arguments.',
-    'weibull_min': ContinuousDistributions['weibull_min'] + ' takes `c` as a shape parameter.',
-    'weibull_max': ContinuousDistributions['weibull_max'] + ' takes `c` as a shape parameter.',
-    'wrapcauchy': ContinuousDistributions['wrapcauchy'] + ' takes `c` as a shape parameter.',
+    "alpha": ContinuousDistributions["alpha"] + " takes `a` as a shape parameter.",
+    "anglit": ContinuousDistributions["anglit"] + " takes no arguments.",
+    "arcsine": ContinuousDistributions["arcsine"] + " takes no arguments.",
+    "argus": ContinuousDistributions["argus"] + " takes `chi` as a shape parameter.",
+    "beta": ContinuousDistributions["beta"] + " takes `a` and `b` as shape parameters.",
+    "betaprime": ContinuousDistributions["betaprime"]
+    + " takes `a` and `b` as shape parameters.",
+    "bradford": ContinuousDistributions["bradford"]
+    + " takes `c` as a shape parameter.",
+    "burr": ContinuousDistributions["burr"]
+    + " takes takes `c` and `d` as shape parameters.",
+    "burr12": ContinuousDistributions["burr12"]
+    + " takes takes `c` and `d` as shape parameters.",
+    "cauchy": ContinuousDistributions["cauchy"] + " takes no arguments.",
+    "chi": ContinuousDistributions["chi"] + " takes `df` as a shape parameter.",
+    "chi-squared": ContinuousDistributions["chi-squared"]
+    + " takes `df` as a shape parameter.",
+    "cosine": ContinuousDistributions["cosine"] + " takes no arguments.",
+    "crystalball": ContinuousDistributions["crystalball"]
+    + " takes `beta > 0` and `m > 1` as shape parameters.",
+    "dgamma": ContinuousDistributions["dgamma"] + " takes `a` as a shape parameter.",
+    "dweibull": ContinuousDistributions["dweibull"]
+    + " takes `c` as a shape parameter.",
+    "erlang": ContinuousDistributions["erlang"] + " takes `a` as a shape parameter.",
+    "expon": ContinuousDistributions["expon"] + " takes no arguments.",
+    "exponnorm": ContinuousDistributions["exponnorm"]
+    + " takes :math:`K > 0` as a rate equals to :math:`1/K`.",
+    "exponweib": ContinuousDistributions["exponweib"]
+    + " takes `a` and `c` as shape parameters.",
+    "exponpow": ContinuousDistributions["exponpow"]
+    + " takes `b` as a shape parameter.",
+    "f": ContinuousDistributions["f"] + " takes `dfn` and `dfd` as shape parameters.",
+    "fatiguelife": ContinuousDistributions["fatiguelife"]
+    + " takes `c` as a shape parameter.",
+    "fisk": ContinuousDistributions["fisk"] + " takes `c` as a shape parameter.",
+    "foldcauchy": ContinuousDistributions["foldcauchy"]
+    + " takes `c` as a shape parameter.",
+    "foldnorm": ContinuousDistributions["foldnorm"]
+    + " takes `c` as a shape parameter.",
+    "genlogistic": ContinuousDistributions["genlogistic"]
+    + " takes `c` as a shape parameter.",
+    "gennorm": ContinuousDistributions["gennorm"]
+    + " takes `beta` as a shape parameter.",
+    "genpareto": ContinuousDistributions["genpareto"]
+    + " takes `c` as a shape parameter.",
+    "genexpon": ContinuousDistributions["genexpon"]
+    + " takes `a` and `b` and `c` as shape parameters.",
+    "genextreme": ContinuousDistributions["genextreme"]
+    + " takes `c` as a shape parameter.",
+    "gausshyper": ContinuousDistributions["gausshyper"]
+    + " takes`a` and `b` and `c` and `z` as shape parameters.",
+    "gamma": ContinuousDistributions["gamma"] + " takes `a` as a shape parameter.",
+    "gengamma": ContinuousDistributions["gengamma"]
+    + " takes`a` and `c` as shape parameters.",
+    "genhalflogistic": ContinuousDistributions["genhalflogistic"]
+    + " takes`c` as a shape parameter.",
+    "geninvgauss": ContinuousDistributions["geninvgauss"]
+    + " takes`p` and `b > 0` parameters.",
+    "gilbrat": ContinuousDistributions["gilbrat"] + " takes no arguments.",
+    "gompertz": ContinuousDistributions["gompertz"] + " takes`c` as a shape parameter.",
+    "gumbel_r": ContinuousDistributions["gumbel_r"] + " takes no arguments.",
+    "gumbel_l": ContinuousDistributions["gumbel_l"] + " takes no arguments.",
+    "halfcauchy": ContinuousDistributions["halfcauchy"] + " takes no arguments.",
+    "halflogistic": ContinuousDistributions["halflogistic"] + " takes no arguments.",
+    "halfnorm": ContinuousDistributions["halfnorm"] + " takes no arguments.",
+    "halfgennorm": ContinuousDistributions["halfgennorm"]
+    + " takes `beta` as a shape parameter.",
+    "hypsecant": ContinuousDistributions["hypsecant"] + " takes no arguments.",
+    "invgamma": ContinuousDistributions["invgamma"]
+    + " takes `a` as a shape parameter.",
+    "invgauss": ContinuousDistributions["invgauss"]
+    + r" takes `\mu` as a shape parameter.",
+    "invweibull": ContinuousDistributions["invweibull"]
+    + " takes `c` as a shape parameter.",
+    "johnsonsb": ContinuousDistributions["johnsonsb"]
+    + " takes `a` and `b` as shape parameters.",
+    "johnsonsu": ContinuousDistributions["johnsonsu"]
+    + " takes `a` and `b` as shape parameters.",
+    "kappa4": ContinuousDistributions["kappa4"]
+    + " takes `h` and `k` as shape parameters.",
+    "kappa3": ContinuousDistributions["kappa3"] + " takes `a` as a shape parameter.",
+    "ksone": ContinuousDistributions["ksone"] + " takes `n` as a shape parameter.",
+    "kstwo": ContinuousDistributions["kstwo"] + " takes `n` as a shape parameter.",
+    "kstwobign": ContinuousDistributions["kstwobign"] + " takes no arguments.",
+    "laplace": ContinuousDistributions["laplace"] + " takes no arguments.",
+    "laplace_asymmetric": ContinuousDistributions["laplace_asymmetric"]
+    + " takes `kappa` as a shape parameter.",
+    "levy": ContinuousDistributions["levy"] + " takes no arguments.",
+    "levy_l": ContinuousDistributions["levy_l"] + " takes no arguments.",
+    "levy_stable": ContinuousDistributions["levy_stable"]
+    + " takes `alpha` and `beta` parameters.",
+    "logistic": ContinuousDistributions["logistic"] + " takes no arguments.",
+    "loggamma": ContinuousDistributions["loggamma"]
+    + " takes `c` as a shape parameter.",
+    "loglaplace": ContinuousDistributions["loglaplace"]
+    + " takes `c` as a shape parameter.",
+    "lognorm": ContinuousDistributions["lognorm"] + " takes `s` as a shape parameter.",
+    "loguniform": ContinuousDistributions["loguniform"]
+    + " takes `a` and `b` parameters.",
+    "lomax": ContinuousDistributions["lomax"] + " takes `c` as a shape parameter.",
+    "maxwell": ContinuousDistributions["maxwell"] + " takes no arguments.",
+    "mielke": ContinuousDistributions["mielke"]
+    + " takes `k` and `s` as shape parameters.",
+    "moyal": ContinuousDistributions["moyal"] + " takes no arguments.",
+    "nakagami": ContinuousDistributions["nakagami"]
+    + " takes `n` as a shape parameter.",
+    "ncx2": ContinuousDistributions["ncx2"]
+    + " takes `df` and `nc` as shape parameters.",
+    "ncf": ContinuousDistributions["ncf"]
+    + " takes `dfn` and `dfd` and `nc` as shape parameters.",
+    "nct": ContinuousDistributions["nct"] + " takes `df` and `nc` as shape parameters.",
+    "norm": ContinuousDistributions["norm"] + " takes no arguments.",
+    "norminvgauss": ContinuousDistributions["norminvgauss"]
+    + " takes `a` and `b` as parameters.",
+    "pareto": ContinuousDistributions["pareto"] + " takes `b` as a shape parameter.",
+    "pearson3": ContinuousDistributions["pearson3"]
+    + " takes `skew` as a shape parameter.",
+    "powerlaw": ContinuousDistributions["powerlaw"]
+    + " takes `a` as a shape parameter.",
+    "powerlognorm": ContinuousDistributions["powerlognorm"]
+    + " takes `c` and `s` as shape parameters.",
+    "powernorm": ContinuousDistributions["powernorm"]
+    + " takes `c` as a shape parameter.",
+    "rdist": ContinuousDistributions["rdist"] + " takes `c` as a shape parameter.",
+    "rayleigh": ContinuousDistributions["rayleigh"] + " takes no arguments.",
+    "rice": ContinuousDistributions["rice"] + " takes `b` as a shape parameter.",
+    "recipinvgauss": ContinuousDistributions["recipinvgauss"]
+    + " takes `mu` as a shape parameter.",
+    "semicircular": ContinuousDistributions["semicircular"] + " takes no arguments.",
+    "skewnorm": ContinuousDistributions["skewnorm"] + " takes `a` as a parameter.",
+    "t": ContinuousDistributions["t"] + " takes `df` as a parameter.",
+    "trapezoid": ContinuousDistributions["trapezoid"]
+    + " takes `c` and `d` as shape parameters.",
+    "triang": ContinuousDistributions["triang"] + " takes `c` as a shape parameter.",
+    "truncexpon": ContinuousDistributions["truncexpon"]
+    + " takes `b` as a shape parameter.",
+    "truncnorm": ContinuousDistributions["truncnorm"]
+    + " takes `a` and `b` as shape parameters.",
+    "tukeylambda": ContinuousDistributions["tukeylambda"]
+    + " takes `lambda` as a shape parameter.",
+    "uniform": ContinuousDistributions["uniform"] + " takes no arguments.",
+    "vonmises": ContinuousDistributions["vonmises"]
+    + " takes `kappa` as a shape parameter.",
+    "vonmises_line": ContinuousDistributions["vonmises_line"]
+    + " takes `kappa` as a shape parameter.",
+    "wald": ContinuousDistributions["wald"] + " takes no arguments.",
+    "weibull_min": ContinuousDistributions["weibull_min"]
+    + " takes `c` as a shape parameter.",
+    "weibull_max": ContinuousDistributions["weibull_max"]
+    + " takes `c` as a shape parameter.",
+    "wrapcauchy": ContinuousDistributions["wrapcauchy"]
+    + " takes `c` as a shape parameter.",
 }
 
 
-def check_population_cdf_args(population_cdf: Optional[str],
-                              population_args: tuple):
-    """Check the input population_cdf and population_args for correctness.
+def check_population_cdf_args(population_cdf: Optional[str], population_args: tuple):
+    r"""Check the input population_cdf and population_args for correctness.
 
     Args:
         population_cdf (str): The name of a distribution.
         population_args (tuple): Distribution parameter.
-
     """
-    if population_cdf in ('default', None):
+    if population_cdf in ("default", None):
         return
 
     if population_cdf not in ContinuousDistributions:
         raise CRError(
-            f'The {population_cdf} distribution is not supported. It should '
-            'be the name of a distribution in:\n    '
-            'https://docs.scipy.org/doc/scipy/reference/stats.html#'
-            'continuous-distributions'
+            f"The {population_cdf} distribution is not supported. It should "
+            "be the name of a distribution in:\n    "
+            "https://docs.scipy.org/doc/scipy/reference/stats.html#"
+            "continuous-distributions"
         )
 
-    number_of_required_arguments = \
-        ContinuousDistributionsNumberOfRequiredArguments[population_cdf]
+    number_of_required_arguments = ContinuousDistributionsNumberOfRequiredArguments[
+        population_cdf
+    ]
     number_of_arguments = len(population_args)
 
     if number_of_required_arguments != number_of_arguments:
-        msg = [f'The {population_cdf} distribution requires ']
+        msg = [f"The {population_cdf} distribution requires "]
 
         if number_of_required_arguments == 0:
-            msg.append('no input argument, but ')
+            msg.append("no input argument, but ")
         elif number_of_required_arguments == 1:
-            msg.append('1 input argument, but ')
+            msg.append("1 input argument, but ")
         else:
-            msg.append(f'{number_of_required_arguments} input arguments, but ')
+            msg.append(f"{number_of_required_arguments} input arguments, but ")
 
         if number_of_arguments == 0:
-            msg.append('no input argument is provided.\n(')
+            msg.append("no input argument is provided.\n(")
         elif number_of_arguments == 1:
-            msg.append('1 input argument is provided.\n(')
+            msg.append("1 input argument is provided.\n(")
         else:
-            msg.append(
-                f'{number_of_arguments} input arguments are provided.\n('
-            )
+            msg.append(f"{number_of_arguments} input arguments are provided.\n(")
 
         msg.append(ContinuousDistributionsArgumentRequirement[population_cdf])
         msg.append(
-            ')\nReference: https://docs.scipy.org/doc/scipy/reference/generated'
-            f'/scipy.stats.{population_cdf}.html#scipy.stats.{population_cdf}'
+            ")\nReference: https://docs.scipy.org/doc/scipy/reference/generated"
+            f"/scipy.stats.{population_cdf}.html#scipy.stats.{population_cdf}"
         )
 
-        raise CRError(''.join(msg))
+        raise CRError("".join(msg))
 
 
-def get_distribution_stats(population_cdf: Optional[str],
-                           population_args: tuple,
-                           population_loc: Optional[float],
-                           population_scale: Optional[float]):
-    """Get the distribution stats from its name.
+def get_distribution_stats(
+    population_cdf: Optional[str],
+    population_args: tuple,
+    population_loc: Optional[float],
+    population_scale: Optional[float],
+):
+    r"""Get the distribution stats from its name.
 
     The stats include, Median, Mean, Variance, and Standard deviation of the
     distribution.
@@ -406,12 +454,12 @@ def get_distribution_stats(population_cdf: Optional[str],
     Args:
         population_cdf (str): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
 
     Returns:
-        tuple: median, mean, var, std
-
+        tuple
+            median, mean, var, std
     """
     check_population_cdf_args(population_cdf, population_args)
 
@@ -419,7 +467,7 @@ def get_distribution_stats(population_cdf: Optional[str],
     args.append(population_loc if population_loc else 0)
     args.append(population_scale if population_scale else 1)
 
-    distribution = getattr(distributions, population_cdf)
+    distribution = getattr(distributions, cast(str, population_cdf))
 
     median = distribution.median(*args)
     mean = distribution.mean(*args)
@@ -430,13 +478,14 @@ def get_distribution_stats(population_cdf: Optional[str],
 
 
 def ks_test(
-        time_series_data: Union[np.ndarray, List[float]],
-        population_cdf: Optional[str],
-        population_args: tuple,
-        population_loc: Optional[float],
-        population_scale: Optional[float],
-        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
-    """Kolmogorov-Smirnov test for goodness of fit.
+    time_series_data: Union[np.ndarray, list[float]],
+    population_cdf: Optional[str],
+    population_args: tuple,
+    population_loc: Optional[float],
+    population_scale: Optional[float],
+    significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT,
+) -> bool:
+    r"""Kolmogorov-Smirnov test for goodness of fit.
 
     Note:
         This test is only valid for continuous distributions.
@@ -451,7 +500,7 @@ def ks_test(
     Note:
         The alternative hypothesis is `two-sided`. Where the empirical
         cumulative distribution function of the observed variables is `less` or
-        `greater than the cumulative distribution function of the given
+        `greater` than the cumulative distribution function of the given
         distribution.
 
     The probability density of the given population distribution is in the
@@ -461,33 +510,31 @@ def ks_test(
 
     Args:
         time_series_data (np.ndarray): time series data.
-        population_cdf (str, or None): The name of a distribution.
+        population_cdf (Optional[str]): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
-        significance_level (float, optional): Significance level. A
-            probability threshold below which the null hypothesis will be
-            rejected. (default: 0.05)
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
+        significance_level (float, optional): Probability threshold below which
+            the null hypothesis is rejected. (default: 0.05)
 
     Returns:
-        bool: True
-            Returns True if observed samples are drawn from the same
-            continuous distribution as the given distribution (If the
-            two-tailed p-value is greater than the significance_level).
-
+        bool
+            ``True`` if the observed samples are drawn from the same continuous
+            distribution as the given one (two-tailed p-value >
+            significance_level).
     """
-    if population_cdf in ('default', None):
+    if population_cdf in ("default", None):
         return True
 
     time_series_data = np.asarray(time_series_data)
 
     if time_series_data.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
     cr_check(
         significance_level,
-        var_name='significance_level',
-        var_lower_bound=np.finfo(np.float64).resolution
+        var_name="significance_level",
+        var_lower_bound=np.finfo(np.float64).resolution,  # type: ignore[arg-type]
     )
 
     check_population_cdf_args(population_cdf, population_args)
@@ -498,29 +545,27 @@ def ks_test(
 
     try:
         _, pvalue = kstest(
-            time_series_data,
-            cdf=population_cdf,
-            args=args,
-            alternative='two-sided'
+            time_series_data, cdf=population_cdf, args=args, alternative="two-sided"
         )
-    except Exception:  # noqa: BLE001  # intentional catch-all
-        raise CRError('Kolmogorov-Smirnov test failed.')
+    except Exception as e:  # intentional catch-all
+        raise CRError("Kolmogorov-Smirnov test failed.") from e
 
     return significance_level < pvalue
 
 
 def levene_test(
-        time_series_data: Union[np.ndarray, List[float]],
-        population_cdf: Optional[str],
-        population_args: tuple,
-        population_loc: Optional[float],
-        population_scale: Optional[float],
-        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
-    """Perform modified Levene test for equal variances.
+    time_series_data: Union[np.ndarray, list[float]],
+    population_cdf: Optional[str],
+    population_args: tuple,
+    population_loc: Optional[float],
+    population_scale: Optional[float],
+    significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT,
+) -> bool:
+    r"""Perform modified Levene test for equal variances.
 
     The modified Levene test tests the null hypothesis that one sample input
     `time_series_data` is from population `population_cdf` with the same
-    variance.
+    variance [nistdiv898b]_.
 
     Note:
         This test is fixed to use 'median' variation of the Levene's test.
@@ -539,22 +584,17 @@ def levene_test(
 
     Args:
         time_series_data (np.ndarray): time series data.
-        population_cdf (str, or None): The name of a distribution.
+        population_cdf (Optional[str]): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
-        significance_level (float, optional): Significance level. A
-            probability threshold below which the null hypothesis will be
-            rejected. (default: 0.05)
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
+        significance_level (float, optional): Probability threshold below which
+            the null hypothesis is rejected. (default: 0.05)
 
     Returns:
-        bool: True
-            Returns True if the input variance is the same as population
-            variance. (If the two-tailed p-value is greater than the
-            significance_level).
-
-    References:
-        .. [23] https://www.itl.nist.gov/div898/handbook/eda/section3/eda35a.htm
+        bool
+            ``True`` if the sample variance equals the population variance
+            (two-tailed p-value > significance_level).
 
     Examples:
 
@@ -594,6 +634,8 @@ def levene_test(
     there is a difference in variance of the `time_series_data` and `gamma`
     distribution with shape parameter `a`.
 
+    Example:
+
     >>> levene_test(x,
                     population_cdf='alpha',
                     population_args=(a,),
@@ -601,22 +643,21 @@ def levene_test(
                     population_scale=1,
                     significance_level=0.05)
     True
-
     """
-    if population_cdf in ('default', None):
+    if population_cdf in ("default", None):
         return False
 
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
     x_size = x.size
 
     cr_check(
         significance_level,
-        var_name='significance_level',
-        var_lower_bound=np.finfo(np.float64).resolution
+        var_name="significance_level",
+        var_lower_bound=np.finfo(np.float64).resolution,  # type: ignore[arg-type]
     )
 
     # population
@@ -634,46 +675,44 @@ def levene_test(
 
         try:
             _, pvalue = kstest(
-                y,
-                cdf=population_cdf,
-                args=args,
-                alternative='two-sided')
-        except Exception:  # noqa: BLE001  # intentional catch-all
-            raise CRError('Kolmogorov-Smirnov test failed.')
+                y, cdf=population_cdf, args=args, alternative="two-sided"
+            )
+        except Exception as e:  # intentional catch-all
+            raise CRError("Kolmogorov-Smirnov test failed.") from e
 
     try:
         _, pvalue = levene(x, y)
-    except Exception:  # noqa: BLE001  # intentional catch-all
-        raise CRError('Levene test failed.')
+    except Exception as e:  # intentional catch-all
+        raise CRError("Levene test failed.") from e
 
     return significance_level < pvalue
 
 
 def wilcoxon_test(
-        time_series_data: Union[np.ndarray, List[float]],
-        population_cdf: Optional[str],
-        population_args: tuple,
-        population_loc: Optional[float],
-        population_scale: Optional[float],
-        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
-    """Calculate the Wilcoxon signed-rank test.
+    time_series_data: Union[np.ndarray, list[float]],
+    population_cdf: Optional[str],
+    population_args: tuple,
+    population_loc: Optional[float],
+    population_scale: Optional[float],
+    significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT,
+) -> bool:
+    r"""Calculate the Wilcoxon signed-rank test.
 
     Here it is used as a non-parametric test to determine whether an unknown
     population mean is different from a specific value.
 
     Args:
         time_series_data (np.ndarray): time series data.
-        population_cdf (str, or None): The name of a distribution.
+        population_cdf (Optional[str]): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
-        significance_level (float, optional): Significance level. A
-            probability threshold below which the null hypothesis will be
-            rejected. (default: 0.05)
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
+        significance_level (float, optional): Probability threshold below which
+            the null hypothesis is rejected. (default: 0.05)
 
     Returns:
-        bool: True
-            Returns True if the input sample is the same as population
+        bool
+            ``True`` if the sample is drawn from the specified population
             distribution.
 
     Examples:
@@ -690,6 +729,7 @@ def wilcoxon_test(
                       population_scale=scale,
                       significance_level=0.05)
     True
+
     >>> wilcoxon_test(x,
                       population_cdf='gamma',
                       population_args=(shape,),
@@ -697,22 +737,21 @@ def wilcoxon_test(
                       population_scale=1,
                       significance_level=0.05)
     False
-
     """
-    if population_cdf in ('default', None):
+    if population_cdf in ("default", None):
         return False
 
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
     x_size = x.size
 
     cr_check(
         significance_level,
-        var_name='significance_level',
-        var_lower_bound=np.finfo(np.float64).resolution
+        var_name="significance_level",
+        var_lower_bound=np.finfo(np.float64).resolution,  # type: ignore[arg-type]
     )
 
     args = [arg for arg in population_args]
@@ -726,28 +765,26 @@ def wilcoxon_test(
         y = rvs(*args, size=x_size)
 
         try:
-            _, pvalue = kstest(y,
-                               cdf=population_cdf,
-                               args=args,
-                               alternative='two-sided')
-        except Exception:  # noqa: BLE001  # intentional catch-all
-            raise CRError('Kolmogorov-Smirnov test failed.')
+            _, pvalue = kstest(
+                y, cdf=population_cdf, args=args, alternative="two-sided"
+            )
+        except Exception as e:  # intentional catch-all
+            raise CRError("Kolmogorov-Smirnov test failed.") from e
 
-    _, pvalue = wilcoxon(x, y,
-                         zero_method='wilcox',
-                         alternative='two-sided')
+    _, pvalue = wilcoxon(x, y, zero_method="wilcox", alternative="two-sided")
 
-    return significance_level < pvalue
+    return significance_level < cast(float, pvalue)
 
 
 def kruskal_test(
-        time_series_data: Union[np.ndarray, List[float]],
-        population_cdf: Optional[str],
-        population_args: tuple,
-        population_loc: Optional[float],
-        population_scale: Optional[float],
-        significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT) -> bool:
-    """Kruskal-Wallis H-test for independent samples.
+    time_series_data: Union[np.ndarray, list[float]],
+    population_cdf: Optional[str],
+    population_args: tuple,
+    population_loc: Optional[float],
+    population_scale: Optional[float],
+    significance_level: float = 1 - _DEFAULT_CONFIDENCE_COEFFICIENT,
+) -> bool:
+    r"""Kruskal-Wallis H-test for independent samples.
 
     The Kruskal-Wallis H-test tests the null hypothesis that the median of
     the time series data is the same as the one from population_cdf.
@@ -756,18 +793,17 @@ def kruskal_test(
 
     Args:
         time_series_data (np.ndarray): time series data.
-        population_cdf (str, or None): The name of a distribution.
+        population_cdf (Optional[str]): The name of a distribution.
         population_args (tuple): Distribution parameter.
-        population_loc (float, or None): location of the distribution.
-        population_scale (float, or None): scale of the distribution.
-        significance_level (float, optional): Significance level. A
-            probability threshold below which the null hypothesis will be
-            rejected. (default: 0.05)
+        population_loc (Optional[float]): location of the distribution.
+        population_scale (Optional[float]): scale of the distribution.
+        significance_level (float, optional): Probability threshold below which
+            the null hypothesis is rejected. (default: 0.05)
 
     Returns:
-        bool: True
-            if the median of the time series data is the same as the one
-            from population_cdf.
+        bool
+            ``True`` if the median of the time-series data equals the median
+            of the specified population distribution.
 
     Examples:
 
@@ -783,15 +819,14 @@ def kruskal_test(
                      population_scale=1,
                      significance_level=0.05)
     True
-
     """
-    if population_cdf in ('default', None):
+    if population_cdf in ("default", None):
         return False
 
     x = np.asarray(time_series_data)
 
     if x.ndim != 1:
-        raise CRError('time_series_data is not an array of one-dimension.')
+        raise CRError("time_series_data is not an array of one-dimension.")
 
     x_size = x.size
 
@@ -799,12 +834,12 @@ def kruskal_test(
     # of samples must not be too small. A typical rule is that time_series_data
     # must have at least 5 data.
     if x_size < 5:
-        raise CRSampleSizeError('time_series_data must have at least 5 data.')
+        raise CRSampleSizeError("time_series_data must have at least 5 data.")
 
     cr_check(
         significance_level,
-        var_name='significance_level',
-        var_lower_bound=np.finfo(np.float64).resolution
+        var_name="significance_level",
+        var_lower_bound=np.finfo(np.float64).resolution,  # type: ignore[arg-type]
     )
 
     args = [arg for arg in population_args]
@@ -818,16 +853,15 @@ def kruskal_test(
         y = rvs(*args, size=x_size)
 
         try:
-            _, pvalue = kstest(y,
-                               cdf=population_cdf,
-                               args=args,
-                               alternative='two-sided')
-        except Exception:  # noqa: BLE001  # intentional catch-all
-            raise CRError('Kolmogorov-Smirnov test failed.')
+            _, pvalue = kstest(
+                y, cdf=population_cdf, args=args, alternative="two-sided"
+            )
+        except Exception as e:  # intentional catch-all
+            raise CRError("Kolmogorov-Smirnov test failed.") from e
 
     try:
         _, pvalue = kruskal(x, y)
-    except Exception:  # noqa: BLE001  # intentional catch-all
-        raise CRError('Levene test failed.')
+    except Exception as e:  # intentional catch-all
+        raise CRError("Kruskal test failed.") from e
 
     return significance_level < pvalue
