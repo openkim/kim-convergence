@@ -66,7 +66,7 @@ class TestRunLengthControl(unittest.TestCase):
             ("number_of_variables", 1.5),
             ("initial_run_length", 0),
             ("initial_run_length", -10),
-            ("run_length_factor", 0),
+            ("run_length_factor", -0.01),
             ("run_length_factor", -1.0),
             ("run_length_factor", "invalid"),
             ("maximum_run_length", 0),
@@ -1017,3 +1017,42 @@ class TestRunLengthControl(unittest.TestCase):
         emsg = str(ctx.exception)
         self.assertIn("get_trajectory", emsg)
         self.assertIn("function has a wrong dimension of 2 != 1", emsg)
+
+    def test_get_run_length_various_scenarios(self):
+        """Comprehensive test of _get_run_length behavior across key cases."""
+        from kim_convergence.run_length_control._run_length import _get_run_length
+
+        test_cases = [
+            # (run_length, factor, total, max_total, expected, description)
+            (100, 1.5, 500, 2000, 150, "standard growth with room"),
+            (200, 1.8, 1700, 2000, 300, "growth capped by remaining budget"),
+            (100, 2.0, 2000, 2000, 0, "already at maximum -> stop"),
+            (100, 2.0, 2100, 2000, 0, "beyond maximum -> stop"),
+            (500, 0.0, 300, 10000, 0, "factor = 0 -> immediate stop"),
+            (200, 0.6, 400, 2000, 120, "shrinking (factor < 1)"),
+            (10, 0.05, 800, 1000, 1, "very small factor -> clamped to min 1"),
+            (120, 1.0, 800, 2000, 120, "factor = 1 -> no change"),
+            (300, 1.0, 1850, 2000, 150, "factor = 1 but capped by remaining"),
+            (100, 2, 300, 2000, 200, "integer factor (same as float)"),
+            (100, 2.0, 300, 2000, 200, "float factor — must match integer case"),
+        ]
+
+        for run_length, factor, total, max_total, expected, desc in test_cases:
+            with self.subTest(
+                description=desc,
+                run_length=run_length,
+                factor=factor,
+                total=total,
+                max_total=max_total,
+            ):
+                result = _get_run_length(
+                    run_length=run_length,
+                    run_length_factor=factor,
+                    total_run_length=total,
+                    maximum_run_length=max_total,
+                )
+                self.assertEqual(
+                    result,
+                    expected,
+                    f"Expected {expected} but got {result} for: {desc}",
+                )
