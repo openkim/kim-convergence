@@ -26,6 +26,10 @@ def _get_run_length(
     if total_run_length >= maximum_run_length:
         return 0
 
+    run_length_factor = float(run_length_factor)
+    if run_length_factor <= 0:
+        return 0
+
     # apply growth factor
     candidate = int(run_length * run_length_factor)
     candidate = max(candidate, 1)

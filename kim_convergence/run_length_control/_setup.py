@@ -64,7 +64,14 @@ def _setup_algorithm(
 
     cr_check(number_of_variables, "number_of_variables", int, 1)
     cr_check(initial_run_length, "initial_run_length", int, 1)
-    cr_check(run_length_factor, "run_length_factor", float, 0)
+    cr_check(run_length_factor, "run_length_factor", (int, float), 0)
+    if run_length_factor < 1:
+        cr_warning(
+            f"run_length_factor = {run_length_factor} < 1.0 -> next run length "
+            "will be **shorter** than current. This is allowed (e.g. for "
+            "back-off strategies), but unusual in standard progressive "
+            "convergence schemes. Double-check if this is intentional."
+        )
     cr_check(maximum_run_length, "maximum_run_length", int, 1)
     cr_check(confidence_coefficient, "confidence_coefficient", float, 0, 1)
     cr_check(heidel_welch_number_points, "heidel_welch_number_points", int, 25)
