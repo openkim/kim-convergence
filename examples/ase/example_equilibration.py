@@ -32,7 +32,7 @@ def main():
     )
 
     print("Starting convergence-controlled equilibration...")
-    print(f"Target temperature: 500 K")
+    print("Target temperature: 500 K")
     print(f"Number of atoms: {len(atoms)}")
     print()
 
