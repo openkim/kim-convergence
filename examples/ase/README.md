@@ -56,9 +56,10 @@ if result["converged"]:
     print(f"Mean value: {result['mean']}")
 ```
 
-### Using `sample_interval` for Expensive Calculators
+### Using `sample_interval` to Reduce Data Collection
 
-For expensive calculators (e.g., neural network potentials), sample less frequently:
+You can sample less frequently since convergence analysis doesn't require every
+MD step. This reduces memory usage and data storage:
 
 ```python
 # Sample every 10 MD steps

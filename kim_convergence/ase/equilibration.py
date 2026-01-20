@@ -173,7 +173,7 @@ def run_ase_equilibration(
         >>> if result["converged"]:
         ...     print(f"Equilibrated! Mean T = {result['mean']:.1f} K")
 
-        With sample_interval for expensive calculators:
+        With sample_interval to reduce data collection:
 
         >>> sampler = ASESampler(dyn, property_name="energy", sample_interval=10)
         >>> result = run_ase_equilibration(

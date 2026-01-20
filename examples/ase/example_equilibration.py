@@ -63,10 +63,16 @@ def main():
 
 
 def example_with_sample_interval():
-    """Example showing sample_interval for expensive calculators.
+    """Example showing sample_interval parameter.
 
-    When using expensive calculators (e.g., neural network potentials),
-    you may want to sample less frequently to reduce overhead.
+    The sample_interval parameter controls how often properties are collected
+    during MD. Sampling less frequently reduces memory usage and data storage.
+    
+    Note: Sampling frequency can affect convergence analysis. If you sample
+    too infrequently (fewer than ~100 samples), statistical analysis may be
+    less reliable. However, if consecutive MD steps are highly correlated,
+    sampling every N steps (where N exceeds the correlation time) can actually
+    improve effective sample size by reducing redundant information.
     """
     atoms = bulk("Cu", cubic=True) * (3, 3, 3)
     atoms.calc = EMT()
