@@ -86,7 +86,7 @@ class ASESampler:
                 run will be nstep * sample_interval.
 
         Returns:
-            1D array of property values collected at each sample_interval.
+            1D array of nstep + 1 property values collected at each sample_interval.
         """
         md_steps = nstep * self.sample_interval
         property_values: List[float] = []
