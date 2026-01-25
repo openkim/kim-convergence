@@ -195,6 +195,13 @@ def run_ase_equilibration(
         >>> result = run_ase_equilibration(sampler, relative_accuracy=0.1)
     """
     # Build kwargs for run_length_control
+    # Prevent override of get_trajectory (sampler) as it's critical to function operation
+    if "get_trajectory" in kwargs:
+        raise ValueError(
+            "Cannot override 'get_trajectory' parameter. "
+            "The sampler is automatically set from the provided sampler argument."
+        )
+    
     rlc_kwargs: Dict[str, Any] = {
         "get_trajectory": sampler,
         "number_of_variables": 1,
@@ -202,6 +209,8 @@ def run_ase_equilibration(
         "fp_format": "json",
     }
     rlc_kwargs.update(kwargs)
+    # Reassert get_trajectory after merging to ensure it cannot be overridden
+    rlc_kwargs["get_trajectory"] = sampler
 
     # Run convergence control
     result_json = run_length_control(**rlc_kwargs)
