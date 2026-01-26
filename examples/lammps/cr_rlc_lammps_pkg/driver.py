@@ -148,7 +148,10 @@ class Driver:
 
             # 5.  hand result back to LAMMPS
             self.lmp.command("variable run_var string ''")
-            self.lmp.set_string_variable("run_var", report)
+            if hasattr(self.lmp, "set_string_variable"):
+                self.lmp.set_string_variable("run_var", report)
+            else:
+                self.lmp.set_variable("run_var", report)
             self.lmp.command('print "${run_var}"')
             self.lmp.command("variable run_var delete")
         elif nprocs > 1:
