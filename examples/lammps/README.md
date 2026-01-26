@@ -10,7 +10,7 @@ in this folder and call it directly from your LAMMPS input script.
 For the latter, the LAMMPS uses the
 [`python`](https://docs.lammps.org/python.html) command to define and execute a
 Python function. The Python code for the run length control is included in an
-auxiliary file `cr_rlc_lammps.py.`
+auxiliary file `cr_rlc_lammps.py`.
 
 The function has arguments that mapped to LAMMPS variables (also defined in the
 input script), and it can return a value to a LAMMPS variable. This is a
