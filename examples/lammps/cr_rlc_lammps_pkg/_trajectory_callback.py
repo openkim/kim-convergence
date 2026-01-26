@@ -61,7 +61,7 @@ def build_get_trajectory(
                 var_name = var_names[j]
                 if var_name in ctrl_map:
                     lb, ub = ctrl_map[var_name]
-                    if lb and ub:
+                    if lb is not None and ub is not None:
                         for _nstep in range(args["nstep"], args["nstep"] + ncountmax):
                             val = lmp.extract_fix(fix_id, 0, 2, _nstep, j)
                             if val <= lb or val >= ub:
@@ -71,7 +71,7 @@ def build_get_trajectory(
                                     "is unstable."
                                 )
                         continue
-                    elif lb:
+                    elif lb is not None:
                         for _nstep in range(args["nstep"], args["nstep"] + ncountmax):
                             val = lmp.extract_fix(fix_id, 0, 2, _nstep, j)
                             if val <= lb:
@@ -81,7 +81,7 @@ def build_get_trajectory(
                                     "is unstable."
                                 )
                         continue
-                    elif ub:
+                    elif ub is not None:
                         for _nstep in range(args["nstep"], args["nstep"] + ncountmax):
                             val = lmp.extract_fix(fix_id, 0, 2, _nstep, j)
                             if val >= ub:
