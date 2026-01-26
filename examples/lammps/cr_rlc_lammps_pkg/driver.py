@@ -103,48 +103,50 @@ class Driver:
 
         if me == 0:
             # 4.  run kim-convergence with
-            report = cr.run_length_control(
-                get_trajectory=get_trajectory,
-                get_trajectory_args=traj_args,
-                number_of_variables=self.config["number_of_variables"],
-                initial_run_length=INITIAL_RUN_LENGTH,
-                run_length_factor=RUN_LENGTH_FACTOR,
-                maximum_run_length=MAX_RUN_LENGTH,
-                maximum_equilibration_step=MAX_EQUILIBRATION_STEP,
-                minimum_number_of_independent_samples=MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES,
-                relative_accuracy=RELATIVE_ACCURACY,
-                absolute_accuracy=ABSOLUTE_ACCURACY,
-                population_mean=p_mean,
-                population_standard_deviation=p_std,
-                population_cdf=p_cdf,
-                population_args=p_args,
-                population_loc=p_loc,
-                population_scale=p_scale,
-                confidence_coefficient=CONFIDENCE,
-                confidence_interval_approximation_method=UCL_METHOD,
-                heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
-                fft=_DEFAULT_FFT,
-                test_size=_DEFAULT_TEST_SIZE,
-                train_size=_DEFAULT_TRAIN_SIZE,
-                batch_size=_DEFAULT_BATCH_SIZE,
-                scale=_DEFAULT_SCALE_METHOD,
-                with_centering=_DEFAULT_WITH_CENTERING,
-                with_scaling=_DEFAULT_WITH_SCALING,
-                ignore_end=_DEFAULT_IGNORE_END,
-                number_of_cores=_DEFAULT_NUMBER_OF_CORES,
-                si=_DEFAULT_SI,  # type: ignore[arg-type]
-                nskip=_DEFAULT_NSKIP,
-                minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
-                dump_trajectory=DUMP_TRAJECTORY,
-                dump_trajectory_fp="kim_convergence_trajectory.edn",
-                fp="return",
-                fp_format="txt",
-            )
+            try:
+                report = cr.run_length_control(
+                    get_trajectory=get_trajectory,
+                    get_trajectory_args=traj_args,
+                    number_of_variables=self.config["number_of_variables"],
+                    initial_run_length=INITIAL_RUN_LENGTH,
+                    run_length_factor=RUN_LENGTH_FACTOR,
+                    maximum_run_length=MAX_RUN_LENGTH,
+                    maximum_equilibration_step=MAX_EQUILIBRATION_STEP,
+                    minimum_number_of_independent_samples=MINIMUM_NUMBER_OF_INDEPENDENT_SAMPLES,
+                    relative_accuracy=RELATIVE_ACCURACY,
+                    absolute_accuracy=ABSOLUTE_ACCURACY,
+                    population_mean=p_mean,
+                    population_standard_deviation=p_std,
+                    population_cdf=p_cdf,
+                    population_args=p_args,
+                    population_loc=p_loc,
+                    population_scale=p_scale,
+                    confidence_coefficient=CONFIDENCE,
+                    confidence_interval_approximation_method=UCL_METHOD,
+                    heidel_welch_number_points=_DEFAULT_HEIDEL_WELCH_NUMBER_POINTS,
+                    fft=_DEFAULT_FFT,
+                    test_size=_DEFAULT_TEST_SIZE,
+                    train_size=_DEFAULT_TRAIN_SIZE,
+                    batch_size=_DEFAULT_BATCH_SIZE,
+                    scale=_DEFAULT_SCALE_METHOD,
+                    with_centering=_DEFAULT_WITH_CENTERING,
+                    with_scaling=_DEFAULT_WITH_SCALING,
+                    ignore_end=_DEFAULT_IGNORE_END,
+                    number_of_cores=_DEFAULT_NUMBER_OF_CORES,
+                    si=_DEFAULT_SI,  # type: ignore[arg-type]
+                    nskip=_DEFAULT_NSKIP,
+                    minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
+                    dump_trajectory=DUMP_TRAJECTORY,
+                    dump_trajectory_fp="kim_convergence_trajectory.edn",
+                    fp="return",
+                    fp_format="txt",
+                )
 
-            if nprocs > 1:
-                # Send exit signal
-                for r in range(1, nprocs):
-                    comm.send(-1, dest=r, tag=56789)
+            finally:
+                if nprocs > 1:
+                    # Send exit signal
+                    for r in range(1, nprocs):
+                        comm.send(-1, dest=r, tag=56789)
 
             # 5.  hand result back to LAMMPS
             self.lmp.command("variable run_var string ''")
