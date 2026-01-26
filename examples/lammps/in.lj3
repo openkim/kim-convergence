@@ -27,5 +27,5 @@ thermo 100
 
 variable t_ub equal 0.71
 
-python run_length_control input 8 SELF 1 variable pea compute thermo_temp ub t_ub format pissssss file run_length_control.py
+python run_length_control input 8 SELF 1 variable pea compute thermo_temp ub t_ub format pissssss file cr_rlc_lammps.py
 python run_length_control invoke
