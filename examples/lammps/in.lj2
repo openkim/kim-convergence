@@ -25,5 +25,5 @@ variable pea    equal "c_thermo_pe/v_natoms"
 thermo_style custom step pe temp
 thermo 100
 
-python run_length_control input 6 SELF 1 variable pea compute thermo_temp format pissss file run_length_control.py
+python run_length_control input 6 SELF 1 variable pea compute thermo_temp format pissss file cr_rlc_lammps.py
 python run_length_control invoke
