@@ -122,7 +122,7 @@ where `4` is the number of inputs to the Python function.
 - `1` specifies to use the variable `pea` every steps
 - `variable` is a string indicating to the Python function that the next input
   is a LAMMPS variable
-- `pea` is a string name of the LAMMPS varable
+- `pea` is a string name of the LAMMPS variable
 
 The format for `SELF 1 variable pea` would be `piss`.
 
@@ -142,7 +142,7 @@ where `6` is the number of inputs to the Python function.
 - `1` specifies to use the variable `pea` and compute `thermo_temp` every steps
 - `variable` is a string indicating to the Python function that the next input
   is a LAMMPS variable
-- `pea` is a string name of the LAMMPS varable
+- `pea` is a string name of the LAMMPS variable
 - `compute` is a string indicating to the Python function that the next input
   is a LAMMPS compute
 - `thermo_temp` is a LAMMPS compute with the ID of `thermo_temp` and is created
@@ -171,7 +171,7 @@ where `8` is the number of inputs to the Python function.
 - `1` specifies to use the variable `pea` and compute `thermo_temp` every steps
 - `variable` is a string indicating to the Python function that the next input
   is a LAMMPS variable
-- `pea` is a string name of the LAMMPS varable
+- `pea` is a string name of the LAMMPS variable
 - `compute` is a string indicating to the Python function that the next input
   is a LAMMPS compute
 - `thermo_temp` is a LAMMPS compute with the ID of `thermo_temp` and is created
