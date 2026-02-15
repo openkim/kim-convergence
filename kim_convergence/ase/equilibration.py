@@ -81,12 +81,22 @@ class ASESampler:
 
         Uses ASE's observer mechanism for efficient batch execution.
 
+        Note:
+            ASE observers fire at step 0 (capturing the initial state) plus
+            every ``sample_interval`` steps thereafter. This means requesting
+            ``nstep`` samples will return an array of length ``nstep + 1``
+            (values at steps 0, sample_interval, 2*sample_interval, ...,
+            nstep*sample_interval). If the dynamics object has already been
+            advanced before this call, step 0 reflects the state at the start
+            of *this* call, not the very beginning of the simulation.
+
         Args:
             nstep: Number of samples to collect. The actual number of MD steps
                 run will be nstep * sample_interval.
 
         Returns:
-            1D array of nstep + 1 property values collected at each sample_interval.
+            1D array of nstep + 1 property values collected at each
+            sample_interval, including the initial state at step 0.
         """
         md_steps = nstep * self.sample_interval
         property_values: List[float] = []
@@ -139,6 +149,9 @@ def run_ase_equilibration(
             - absolute_accuracy (float): Target absolute accuracy. Default: 0.1.
             - confidence_coefficient (float): Confidence level. Default: 0.95.
             See kim_convergence.run_length_control for all available options.
+
+            Note: The ``get_trajectory``, ``fp``, and ``fp_format`` parameters
+            are reserved and cannot be overridden.
 
     Returns:
         Dictionary containing the kim-convergence run_length_control result.
@@ -195,22 +208,23 @@ def run_ase_equilibration(
         >>> result = run_ase_equilibration(sampler, relative_accuracy=0.1)
     """
     # Build kwargs for run_length_control
-    # Prevent override of get_trajectory (sampler) as it's critical to function operation
-    if "get_trajectory" in kwargs:
+    # Prevent override of reserved parameters that are critical to function operation
+    reserved_keys = {"get_trajectory", "fp", "fp_format"}
+    conflicts = reserved_keys.intersection(kwargs)
+    if conflicts:
         raise ValueError(
-            "Cannot override 'get_trajectory' parameter. "
-            "The sampler is automatically set from the provided sampler argument."
+            f"Cannot override reserved parameter(s): {', '.join(sorted(conflicts))}. "
+            "'get_trajectory' is automatically set from the provided sampler, "
+            "and 'fp'/'fp_format' are required for result parsing."
         )
-    
+
     rlc_kwargs: Dict[str, Any] = {
         "get_trajectory": sampler,
         "number_of_variables": 1,
         "fp": "return",
         "fp_format": "json",
+        **kwargs,
     }
-    rlc_kwargs.update(kwargs)
-    # Reassert get_trajectory after merging to ensure it cannot be overridden
-    rlc_kwargs["get_trajectory"] = sampler
 
     # Run convergence control
     result_json = run_length_control(**rlc_kwargs)
