@@ -32,7 +32,7 @@ class ASESampler:
         >>> from kim_convergence.ase import ASESampler, run_ase_equilibration
         >>>
         >>> dyn = Langevin(atoms, timestep=1.0, temperature_K=300, friction=0.01)
-        >>> sampler = ASESampler(dyn, property_name="temperature")
+        >>> sampler = ASESampler(dyn, property_names="temperature")
         >>> result = run_ase_equilibration(sampler, maximum_run_length=10000)
     """
 
@@ -190,7 +190,7 @@ def run_ase_equilibration(
         >>> atoms.calc = EMT()
         >>> dyn = Langevin(atoms, 5 * units.fs, temperature_K=500, friction=0.01)
         >>>
-        >>> sampler = ASESampler(dyn, property_name="temperature")
+        >>> sampler = ASESampler(dyn, property_names="temperature")
         >>> result = run_ase_equilibration(
         ...     sampler,
         ...     initial_run_length=1000,
@@ -202,12 +202,16 @@ def run_ase_equilibration(
 
         With sample_interval to reduce data collection:
 
-        >>> sampler = ASESampler(dyn, property_name="energy", sample_interval=10)
+        >>> sampler = ASESampler(dyn, property_names="energy", sample_interval=10)
         >>> result = run_ase_equilibration(
         ...     sampler,
         ...     maximum_run_length=5000,  # 5000 samples = 50000 MD steps
         ...     relative_accuracy=0.05,
         ... )
+
+        With multiple properties:
+
+        >>> sampler = ASESampler(dyn, property_names=["energy", "temperature"])
 
         With custom property extractor:
 
@@ -216,7 +220,7 @@ def run_ase_equilibration(
         >>>
         >>> sampler = ASESampler(
         ...     dyn,
-        ...     property_name="max_force",
+        ...     property_names="max_force",
         ...     extractors={"max_force": get_max_force},
         ... )
         >>> result = run_ase_equilibration(sampler, relative_accuracy=0.1)

@@ -144,9 +144,11 @@ class TestASESampler(unittest.TestCase):
         from kim_convergence.ase import ASESampler
 
         sampler = ASESampler(self.dyn, property_names="temperature")
-        self.assertEqual(sampler.property_name, "temperature")
+        self.assertEqual(sampler.property_names, ["temperature"])
         self.assertEqual(sampler.sample_interval, 1)
         self.assertEqual(sampler.total_steps, 0)
+        sampler = ASESampler(self.dyn, property_names=["temperature", "energy"])
+        self.assertEqual(sampler.property_names, ["temperature", "energy"])
 
     def test_sampler_returns_correct_shape(self):
         """Test that sampler returns array of correct shape."""
@@ -241,6 +243,27 @@ class TestASEEquilibration(unittest.TestCase):
 
         dyn = self._create_dynamics(temperature_K=350)
         sampler = ASESampler(dyn, property_names="temperature")
+
+        result = run_ase_equilibration(
+            sampler,
+            initial_run_length=50,
+            maximum_run_length=500,
+            relative_accuracy=0.5,  # Very loose for fast test
+            confidence_coefficient=0.95,
+        )
+
+        # Check result structure (kim-convergence output)
+        self.assertIn("converged", result)
+        self.assertIn("total_run_length", result)
+        self.assertIsInstance(result["converged"], bool)
+        self.assertGreater(result["total_run_length"], 0)
+
+    def test_run_ase_equilibration_multiprop(self):
+        """Test equilibration run with multiple properties."""
+        from kim_convergence.ase import ASESampler, run_ase_equilibration
+
+        dyn = self._create_dynamics(temperature_K=350)
+        sampler = ASESampler(dyn, property_names=["temperature", "energy"])
 
         result = run_ase_equilibration(
             sampler,
