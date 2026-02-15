@@ -143,7 +143,7 @@ class TestASESampler(unittest.TestCase):
         """Test sampler can be created."""
         from kim_convergence.ase import ASESampler
 
-        sampler = ASESampler(self.dyn, property_name="temperature")
+        sampler = ASESampler(self.dyn, property_names="temperature")
         self.assertEqual(sampler.property_name, "temperature")
         self.assertEqual(sampler.sample_interval, 1)
         self.assertEqual(sampler.total_steps, 0)
@@ -154,7 +154,7 @@ class TestASESampler(unittest.TestCase):
 
         sampler = ASESampler(
             dynamics=self.dyn,
-            property_name="temperature",
+            property_names="temperature",
             sample_interval=1,
         )
 
@@ -174,7 +174,7 @@ class TestASESampler(unittest.TestCase):
 
         sampler = ASESampler(
             dynamics=self.dyn,
-            property_name="temperature",
+            property_names="temperature",
             sample_interval=5,
         )
 
@@ -193,7 +193,7 @@ class TestASESampler(unittest.TestCase):
 
         sampler = ASESampler(
             dynamics=self.dyn,
-            property_name="constant",
+            property_names="constant",
             sample_interval=1,
             extractors={"constant": constant_extractor},
         )
@@ -208,7 +208,7 @@ class TestASESampler(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             ASESampler(
                 dynamics=self.dyn,
-                property_name="invalid_property",
+                property_names="invalid_property",
             )
 
         self.assertIn("No extractor available", str(ctx.exception))
@@ -240,7 +240,7 @@ class TestASEEquilibration(unittest.TestCase):
         from kim_convergence.ase import ASESampler, run_ase_equilibration
 
         dyn = self._create_dynamics(temperature_K=350)
-        sampler = ASESampler(dyn, property_name="temperature")
+        sampler = ASESampler(dyn, property_names="temperature")
 
         result = run_ase_equilibration(
             sampler,
@@ -261,7 +261,7 @@ class TestASEEquilibration(unittest.TestCase):
         from kim_convergence.ase import ASESampler, run_ase_equilibration
 
         dyn = self._create_dynamics(temperature_K=300)
-        sampler = ASESampler(dyn, property_name="kinetic_energy")
+        sampler = ASESampler(dyn, property_names="kinetic_energy")
 
         result = run_ase_equilibration(
             sampler,
@@ -280,7 +280,7 @@ class TestASEEquilibration(unittest.TestCase):
         from kim_convergence.ase import ASESampler, run_ase_equilibration
 
         dyn = self._create_dynamics(temperature_K=300)
-        sampler = ASESampler(dyn, property_name="temperature", sample_interval=10)
+        sampler = ASESampler(dyn, property_names="temperature", sample_interval=10)
 
         result = run_ase_equilibration(
             sampler,
@@ -306,7 +306,7 @@ class TestASEEquilibration(unittest.TestCase):
 
         sampler = ASESampler(
             dyn,
-            property_name="max_velocity",
+            property_names="max_velocity",
             extractors={"max_velocity": get_max_velocity},
         )
 
@@ -325,7 +325,7 @@ class TestASEEquilibration(unittest.TestCase):
         from kim_convergence.ase import ASESampler, run_ase_equilibration
 
         dyn = self._create_dynamics(temperature_K=300)
-        sampler = ASESampler(dyn, property_name="temperature")
+        sampler = ASESampler(dyn, property_names="temperature")
 
         result = run_ase_equilibration(
             sampler,
@@ -342,7 +342,7 @@ class TestASEEquilibration(unittest.TestCase):
         from kim_convergence.ase import ASESampler, run_ase_equilibration
 
         dyn = self._create_dynamics(temperature_K=300)
-        sampler = ASESampler(dyn, property_name="energy")
+        sampler = ASESampler(dyn, property_names="energy")
 
         result = run_ase_equilibration(
             sampler,

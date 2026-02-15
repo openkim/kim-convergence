@@ -27,6 +27,8 @@ A comprehensive example showing:
 
 4. **Energy-based equilibration**: Monitor potential energy for convergence.
 
+5. **Temperature- and energy-based equilibration**: Monitor multiple properties for convergence.
+
 Run:
 
 ```bash
@@ -41,7 +43,7 @@ python example_equilibration.py
 from kim_convergence.ase import ASESampler, run_ase_equilibration
 
 # Create sampler
-sampler = ASESampler(dyn, property_name="temperature")
+sampler = ASESampler(dyn, property_names=["energy", "temperature"])
 
 # Run equilibration
 result = run_ase_equilibration(
@@ -63,7 +65,7 @@ MD step. This reduces memory usage and data storage:
 
 ```python
 # Sample every 10 MD steps
-sampler = ASESampler(dyn, property_name="energy", sample_interval=10)
+sampler = ASESampler(dyn, property_names="energy", sample_interval=10)
 
 result = run_ase_equilibration(
     sampler,
@@ -96,7 +98,7 @@ def get_max_displacement(atoms):
 
 sampler = ASESampler(
     dyn,
-    property_name="max_displacement",
+    property_names="max_displacement",
     extractors={"max_displacement": get_max_displacement},
 )
 

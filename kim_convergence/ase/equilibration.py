@@ -5,7 +5,7 @@ automatic convergence detection using kim-convergence.
 """
 
 import json
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
 
@@ -39,7 +39,7 @@ class ASESampler:
     def __init__(
         self,
         dynamics: "MolecularDynamics",
-        property_name: str = "energy",
+        property_names: Union[str, List[str]] = "energy",
         sample_interval: int = 1,
         extractors: Optional[Dict[str, Callable[["Atoms"], float]]] = None,
     ):
@@ -47,7 +47,7 @@ class ASESampler:
 
         Args:
             dynamics: ASE MolecularDynamics object.
-            property_name: Name of the property to monitor. Available options:
+            property_names: Names of the properties to monitor. Available options:
                 "energy" (or "potential_energy"), "kinetic_energy", "total_energy",
                 "volume", "pressure", "temperature", "density".
                 Default: "energy".
@@ -57,7 +57,9 @@ class ASESampler:
                 Atoms object and return a float.
         """
         self.dynamics = dynamics
-        self.property_name = property_name
+        self.property_names = (
+            [property_names] if isinstance(property_names, str) else property_names
+            )
         self.sample_interval = max(1, sample_interval)
         self._total_steps = 0
 
@@ -66,15 +68,16 @@ class ASESampler:
         if extractors:
             self.extractors.update(extractors)
 
-        # Validate that the requested property has an extractor
-        if self.property_name not in self.extractors:
-            available = ", ".join(sorted(self.extractors.keys()))
-            raise ValueError(
-                f"No extractor available for property: {self.property_name}. "
-                f"Available properties: {available}"
-            )
-
-        self._extractor = self.extractors[self.property_name]
+        self._extractors = []
+        for property_name in self.property_names:
+            # Validate that the requested property has an extractor
+            if property_name not in self.extractors:
+                available = ", ".join(sorted(self.extractors.keys()))
+                raise ValueError(
+                    f"No extractor available for property: {property_name}. "
+                    f"Available properties: {available}"
+                )
+            self._extractors.append(self.extractors[property_name])
 
     def __call__(self, nstep: int) -> np.ndarray:
         """Advance the dynamics nstep steps and return property values.
@@ -84,30 +87,33 @@ class ASESampler:
         Note:
             ASE observers fire at step 0 (capturing the initial state) plus
             every ``sample_interval`` steps thereafter. This means requesting
-            ``nstep`` samples will return an array of length ``nstep + 1``
+            ``nstep`` samples will return ``nstep + 1`` samples
             (values at steps 0, sample_interval, 2*sample_interval, ...,
-            nstep*sample_interval). If the dynamics object has already been
-            advanced before this call, step 0 reflects the state at the start
-            of *this* call, not the very beginning of the simulation.
+            nstep*sample_interval), if the dynamics object has not been
+            advanced before this call. Otherwise, ``nstep`` samples
+            will be returned.
 
         Args:
             nstep: Number of samples to collect. The actual number of MD steps
                 run will be nstep * sample_interval.
 
         Returns:
-            1D array of nstep + 1 property values collected at each
-            sample_interval, including the initial state at step 0.
+            If self.num_properties == 1, it will return a 1D array of collected
+            property values. Otherwise it will return a 2D array of values, with the
+            first index being the property. See the note regarding the length
+            of the other dimension, which is the number of samples.
         """
         md_steps = nstep * self.sample_interval
-        property_values: List[float] = []
+        property_values: List[List[float]] = [[] for _ in range(self.num_properties)]
 
-        def collect_property() -> None:
-            """Observer callback to collect property value."""
-            value = self._extractor(self.dynamics.atoms)
-            property_values.append(value)
+        def collect_properties() -> None:
+            """Observer callback to collect property values."""
+            for i in range(self.num_properties):
+                value = self._extractors[i](self.dynamics.atoms)
+                property_values[i].append(value)
 
         # Attach observer for data collection
-        self.dynamics.attach(collect_property, interval=self.sample_interval)
+        self.dynamics.attach(collect_properties, interval=self.sample_interval)
 
         try:
             # Run all steps at once (much faster than run(1) in a loop)
@@ -116,16 +122,24 @@ class ASESampler:
         finally:
             # Clean up: remove our observer
             for i, (func, *_) in enumerate(self.dynamics.observers):
-                if func is collect_property:
+                if func is collect_properties:
                     self.dynamics.observers.pop(i)
                     break
 
-        return np.asarray(property_values, dtype=np.float64)
+        return_array = np.asarray(property_values, dtype=np.float64)
+        if self.num_properties == 1:
+            return_array = np.reshape(return_array, (-1, ))
+        return return_array
 
     @property
     def total_steps(self) -> int:
         """Return the total number of MD steps run so far."""
         return self._total_steps
+
+    @property
+    def num_properties(self) -> int:
+        """Return the number of properties being sampled"""
+        return len(self._extractors)
 
 
 def run_ase_equilibration(
@@ -209,18 +223,18 @@ def run_ase_equilibration(
     """
     # Build kwargs for run_length_control
     # Prevent override of reserved parameters that are critical to function operation
-    reserved_keys = {"get_trajectory", "fp", "fp_format"}
+    reserved_keys = {"get_trajectory", "fp", "fp_format", "number_of_variables"}
     conflicts = reserved_keys.intersection(kwargs)
     if conflicts:
         raise ValueError(
             f"Cannot override reserved parameter(s): {', '.join(sorted(conflicts))}. "
-            "'get_trajectory' is automatically set from the provided sampler, "
-            "and 'fp'/'fp_format' are required for result parsing."
+            "'get_trajectory' and 'number_of_variables' are automatically set from the "
+            "provided sampler, and 'fp'/'fp_format' are required for result parsing."
         )
 
     rlc_kwargs: Dict[str, Any] = {
         "get_trajectory": sampler,
-        "number_of_variables": 1,
+        "number_of_variables": sampler.num_properties,
         "fp": "return",
         "fp_format": "json",
         **kwargs,

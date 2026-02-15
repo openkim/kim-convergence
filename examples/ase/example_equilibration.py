@@ -37,7 +37,7 @@ def main():
     print()
 
     # Create sampler and run equilibration
-    sampler = ASESampler(dyn, property_name="temperature")
+    sampler = ASESampler(dyn, property_names="temperature")
     result = run_ase_equilibration(
         sampler,
         initial_run_length=500,
@@ -67,7 +67,7 @@ def example_with_sample_interval():
 
     The sample_interval parameter controls how often properties are collected
     during MD. Sampling less frequently reduces memory usage and data storage.
-    
+
     Note: Sampling frequency can affect convergence analysis. If you sample
     too infrequently (fewer than ~100 samples), statistical analysis may be
     less reliable. However, if consecutive MD steps are highly correlated,
@@ -89,7 +89,7 @@ def example_with_sample_interval():
     print("\nEquilibrating with sample_interval=10 (sample every 10 MD steps)...")
 
     # Sample every 10 MD steps
-    sampler = ASESampler(dyn, property_name="temperature", sample_interval=10)
+    sampler = ASESampler(dyn, property_names="temperature", sample_interval=10)
     result = run_ase_equilibration(
         sampler,
         initial_run_length=100,  # 100 samples = 1000 MD steps
@@ -127,7 +127,7 @@ def example_with_custom_extractor():
 
     sampler = ASESampler(
         dyn,
-        property_name="max_force",
+        property_names="max_force",
         extractors={"max_force": get_max_force},
     )
     result = run_ase_equilibration(
@@ -158,7 +158,36 @@ def example_energy_equilibration():
 
     print("\nEquilibrating based on potential energy...")
 
-    sampler = ASESampler(dyn, property_name="energy")
+    sampler = ASESampler(dyn, property_names="energy")
+    result = run_ase_equilibration(
+        sampler,
+        initial_run_length=500,
+        maximum_run_length=15000,
+        relative_accuracy=0.01,  # 1% relative accuracy (stricter)
+    )
+
+    print(f"Converged: {result['converged']}")
+
+    return result
+
+
+def example_energy_temperature_equilibration():
+    """Example monitoring potential energy and temperature."""
+    atoms = bulk("Cu", cubic=True) * (3, 3, 3)
+    atoms.calc = EMT()
+
+    MaxwellBoltzmannDistribution(atoms, temperature_K=800)
+
+    dyn = Langevin(
+        atoms,
+        timestep=5 * units.fs,
+        temperature_K=500,
+        friction=0.02 / units.fs,
+    )
+
+    print("\nEquilibrating based on potential energy and temperature...")
+
+    sampler = ASESampler(dyn, property_names=["energy", "temperature"])
     result = run_ase_equilibration(
         sampler,
         initial_run_length=500,
@@ -179,3 +208,5 @@ if __name__ == "__main__":
     example_energy_equilibration()
     print("\n" + "-" * 50 + "\n")
     example_with_custom_extractor()
+    print("\n" + "-" * 50 + "\n")
+    example_energy_temperature_equilibration()
