@@ -57,7 +57,7 @@ class ASESampler:
                 Atoms object and return a float.
 
         Raises:
-            CRerror: If an invalid property is provided
+            CRError: If an invalid property is provided
         """
         self.dynamics = dynamics
         self.property_names = (

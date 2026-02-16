@@ -179,7 +179,7 @@ class TestASESampler(unittest.TestCase):
         # Request 4 samples -> runs 20 MD steps
         # ASE observer fires at step 0, 5, 10, 15, 20 = 5 values
         result = sampler(4)
-        self.assertGreater(len(result), 0)
+        self.assertEqual(len(result), 5)
         self.assertEqual(sampler.total_steps, 20)
 
     def test_sampler_custom_extractor(self):
