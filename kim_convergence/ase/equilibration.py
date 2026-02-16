@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
 
-from kim_convergence import run_length_control
+from kim_convergence import run_length_control, CRError, cr_check
 
 from .extractors import DEFAULT_EXTRACTORS
 
@@ -55,12 +55,16 @@ class ASESampler:
             extractors: Optional dictionary of custom property extractors.
                 Keys are property names, values are functions that take an
                 Atoms object and return a float.
+
+        Raises:
+            CRerror: If an invalid property is provided
         """
         self.dynamics = dynamics
         self.property_names = (
             [property_names] if isinstance(property_names, str) else property_names
             )
-        self.sample_interval = max(1, sample_interval)
+        cr_check(sample_interval, "sample_interval", int, var_lower_bound=1)
+        self.sample_interval = sample_interval
         self._total_steps = 0
 
         # Set up property extractors
@@ -73,7 +77,7 @@ class ASESampler:
             # Validate that the requested property has an extractor
             if property_name not in self.extractors:
                 available = ", ".join(sorted(self.extractors.keys()))
-                raise ValueError(
+                raise CRError(
                     f"No extractor available for property: {property_name}. "
                     f"Available properties: {available}"
                 )
@@ -177,6 +181,10 @@ def run_ase_equilibration(
         - standard_deviation (float): Standard deviation.
         See kim_convergence.run_length_control documentation for full details.
 
+    Raises:
+        CRerror:
+            If a reserved parameter is provided in ``**kwargs``
+
     Examples:
         Basic usage:
 
@@ -230,7 +238,7 @@ def run_ase_equilibration(
     reserved_keys = {"get_trajectory", "fp", "fp_format", "number_of_variables"}
     conflicts = reserved_keys.intersection(kwargs)
     if conflicts:
-        raise ValueError(
+        raise CRError(
             f"Cannot override reserved parameter(s): {', '.join(sorted(conflicts))}. "
             "'get_trajectory' and 'number_of_variables' are automatically set from the "
             "provided sampler, and 'fp'/'fp_format' are required for result parsing."

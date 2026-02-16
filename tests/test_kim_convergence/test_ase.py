@@ -1,7 +1,7 @@
 """Test ASE integration module."""
 
 import unittest
-
+from kim_convergence import CRError
 import numpy as np
 
 # Check if ASE is available
@@ -94,12 +94,8 @@ class TestASEExtractors(unittest.TestCase):
         from kim_convergence.ase import get_pressure
 
         # EMT calculator supports stress, so this should work
-        try:
-            pressure = get_pressure(self.atoms)
-            self.assertIsInstance(pressure, float)
-        except Exception:
-            # Some calculators may not support stress
-            pass
+        pressure = get_pressure(self.atoms)
+        self.assertIsInstance(pressure, float)
 
     def test_default_extractors_dict(self):
         """Test DEFAULT_EXTRACTORS dictionary contains expected keys."""
@@ -163,11 +159,11 @@ class TestASESampler(unittest.TestCase):
         # Note: ASE observer fires at step 0 (initial) + every interval steps
         # So for 10 samples requested (10 MD steps), we get 11 values (0,1,2,...,10)
         result = sampler(10)  # Request 10 samples -> 10 MD steps
-        self.assertGreater(len(result), 0)
+        self.assertEqual(len(result), 11)
         self.assertEqual(sampler.total_steps, 10)
 
         result2 = sampler(5)  # Request 5 more samples -> 5 more MD steps
-        self.assertGreater(len(result2), 0)
+        self.assertEqual(len(result2), 5)
         self.assertEqual(sampler.total_steps, 15)
 
     def test_sampler_with_sample_interval(self):
@@ -203,17 +199,26 @@ class TestASESampler(unittest.TestCase):
         result = sampler(5)
         self.assertTrue(np.allclose(result, 42.0))
 
-    def test_sampler_invalid_property(self):
-        """Test sampler raises ValueError for invalid property."""
+    def test_sampler_errors(self):
+        """Test sampler raises CRErrors for invalid inputs."""
         from kim_convergence.ase import ASESampler
 
-        with self.assertRaises(ValueError) as ctx:
+        with self.assertRaises(CRError) as ctx:
             ASESampler(
                 dynamics=self.dyn,
                 property_names="invalid_property",
             )
 
         self.assertIn("No extractor available", str(ctx.exception))
+
+        with self.assertRaises(CRError) as ctx:
+            ASESampler(
+                dynamics=self.dyn,
+                property_names="energy",
+                sample_interval=0
+            )
+
+        self.assertIn("greater than or equal", str(ctx.exception))
 
 
 @unittest.skipUnless(HAS_ASE, "ASE not installed")
