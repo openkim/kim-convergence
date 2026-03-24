@@ -99,6 +99,12 @@ from .ucl import (
 )
 from .run_length_control import run_length_control
 
+# ASE integration (optional - only available if ASE is installed)
+try:
+    from . import ase
+except ImportError:
+    ase = None  # type: ignore[assignment, misc]
+
 
 __all__ = [
     # batch module
@@ -203,6 +209,8 @@ __all__ = [
     "ucl_methods",
     # run_length_control module
     "run_length_control",
+    # ASE integration
+    "ase",
 ]
 
 
