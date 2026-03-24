@@ -35,6 +35,29 @@ Environment Variables
         mpirun -np 8 lmp -in in.my_simulation   # or similar
 
     This flag is optional and should remain unset in nearly all cases.
+
+``KIM_CONV_MAX_TSD_LENGTH``
+    Maximum allowed length for time series data arrays processed by
+    statistical functions (autocovariance, cross-covariance, periodogram).
+    If a time series exceeds this length, it is automatically batched
+    (block-averaged) to reduce the size while preserving the mean and
+    low-frequency statistical properties.
+
+    Default: ``5000000`` (5 million samples). Set to ``0`` to disable
+    auto-batching and allow unlimited length (original behavior).
+
+    This prevents MPI/BLAS deadlocks and memory issues that occur with
+    very long time series (>5M points) in multi-process LAMMPS runs.
+
+    Example usage:
+
+    .. code-block:: bash
+
+        export KIM_CONV_MAX_TSD_LENGTH=3000000   # stricter 3M limit
+        mpirun -np 20 lmp -in in.simulation
+
+        # Or disable entirely:
+        export KIM_CONV_MAX_TSD_LENGTH=0
 """
 
 from bisect import bisect_left
@@ -46,7 +69,8 @@ from queue import Empty
 from typing import Optional, Union
 
 from kim_convergence._default import _DEFAULT_ABS_TOL
-from kim_convergence import CRError
+from kim_convergence import CRError, cr_warning
+from kim_convergence.batch import batch
 
 __all__ = [
     "auto_correlate",
@@ -102,6 +126,10 @@ FFTURN = (8, 9, 10, 12, 15, 16, 18, 20,
           87480, 90000, 91125, 92160, 93312, 93750, 96000, 97200,
           98304, 98415, 100000)
 r"""tuple: FFT unique regular numbers."""
+
+
+# Auto-batching configuration
+_MAX_TSD_LENGTH = int(os.environ.get("KIM_CONV_MAX_TSD_LENGTH", "5000000"))
 
 
 def get_fft_optimal_size(input_size: int) -> int:
@@ -172,6 +200,36 @@ def get_fft_optimal_size(input_size: int) -> int:
         optimal_size = power_5
 
     return optimal_size  # type: ignore[arg-type]
+
+
+def _auto_batch(x: np.ndarray) -> np.ndarray:
+    r"""Auto-batch time series data if it exceeds safe length limit.
+
+    Uses non-overlapping block averaging to reduce array length while
+    preserving mean and low-frequency statistics needed for convergence
+    analysis. Remainder points at the end are discarded (standard batch
+    behavior).
+
+    Args:
+        x (1darray): Input time series data.
+
+    Returns:
+        1darray: Original array if length <= limit, otherwise batched
+        (down-sampled) array with length <= _MAX_TSD_LENGTH.
+    """
+    if _MAX_TSD_LENGTH <= 0 or x.size <= _MAX_TSD_LENGTH:
+        return x
+
+    # Calculate batch size to ensure result fits within limit
+    # Ceiling division: (n + limit - 1) // limit
+    batch_size = (x.size + _MAX_TSD_LENGTH - 1) // _MAX_TSD_LENGTH
+
+    cr_warning(
+        f"Time series length ({x.size}) exceeds safe limit "
+        f"({_MAX_TSD_LENGTH}). Auto-batching with batch_size={batch_size}."
+    )
+
+    return batch(x, batch_size=batch_size, func=np.mean)
 
 
 def _fft_corr(dx: np.ndarray, dy: Optional[np.ndarray] = None) -> np.ndarray:
@@ -378,6 +436,9 @@ def auto_covariance(
     """
     x, _ = _validate_and_prepare_input(x)
 
+    # Auto-batch if series exceeds safe length to prevent MPI/BLAS deadlock
+    x = _auto_batch(x)
+
     # Fluctuations (Center the data)
     dx = x - np.mean(x)
 
@@ -423,6 +484,10 @@ def cross_covariance(
     x, y = _validate_and_prepare_input(x, y)
 
     assert isinstance(y, np.ndarray)  # keeps mypy happy
+
+    # Auto-batch if series exceeds safe length
+    x = _auto_batch(x)
+    y = _auto_batch(y)
 
     # Fluctuations
     dx = x - x.mean()
@@ -591,6 +656,9 @@ def modified_periodogram(
         CRError: If input validation fails.
     """
     x, _ = _validate_and_prepare_input(x)
+
+    # Auto-batch if series exceeds safe length to prevent MPI/BLAS deadlock
+    x = _auto_batch(x)
 
     if with_mean:
         dx = x - np.mean(x)
