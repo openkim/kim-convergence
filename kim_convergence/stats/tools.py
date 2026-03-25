@@ -458,9 +458,6 @@ def auto_covariance(
     """
     x, _ = _validate_and_prepare_input(x)
 
-    # Auto-batch if series exceeds safe length
-    x = _auto_batch(x)
-
     # Fluctuations (Center the data)
     dx = x - np.mean(x)
 
@@ -507,10 +504,6 @@ def cross_covariance(
 
     assert isinstance(y, np.ndarray)  # keeps mypy happy
 
-    # Auto-batch if series exceeds safe length
-    x = _auto_batch(x)
-    y = _auto_batch(y)
-
     # Fluctuations
     dx = x - x.mean()
     dy = y - y.mean()
@@ -543,6 +536,8 @@ def auto_correlate(
             Calculated auto correlation function.
     """
     x = np.asarray(x, dtype=np.float64)
+
+    x = _auto_batch(x)
 
     # Calculate (estimate) the auto covariances
     autocor = auto_covariance(x, fft=fft)
@@ -605,6 +600,9 @@ def cross_correlate(
 
     x = np.asarray(x, dtype=np.float64)
     y = np.asarray(y, dtype=np.float64)
+
+    x = _auto_batch(x)
+    y = _auto_batch(y)
 
     # Calculate the cross covariances
     crosscorr = cross_covariance(x, y, fft=fft)
@@ -749,13 +747,18 @@ def periodogram(
 
         >>> f = np.arange(1., x.size//2 + 1) / x.size
     """
+    x, _ = _validate_and_prepare_input(x)
+
+    # Auto-batch if series exceeds safe length
+    x = _auto_batch(x)
+
     try:
         result = modified_periodogram(x, fft=fft, with_mean=with_mean)
     except CRError as e:
         raise CRError("Failed to compute a modified periodogram.") from e
 
     # Data size
-    x_size = np.size(x)
+    x_size = x.size
 
     scale = 1.0 / float(x_size)
 
