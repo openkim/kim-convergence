@@ -129,7 +129,24 @@ r"""tuple: FFT unique regular numbers."""
 
 
 # Auto-batching configuration
-_MAX_TSD_LENGTH = int(os.environ.get("KIM_CONV_MAX_TSD_LENGTH", "5000000"))
+_MAX_TSD_LENGTH_STR = os.getenv("KIM_CONV_MAX_TSD_LENGTH", "5000000")
+try:
+    _MAX_TSD_LENGTH = int(_MAX_TSD_LENGTH_STR)
+    if _MAX_TSD_LENGTH < 0:
+        cr_warning(
+            f"KIM_CONV_MAX_TSD_LENGTH={_MAX_TSD_LENGTH_STR} is negative, "
+            f"using default 5000000"
+        )
+        _MAX_TSD_LENGTH = 5_000_000
+except (ValueError, TypeError):
+    cr_warning(
+        f"Invalid KIM_CONV_MAX_TSD_LENGTH='{_MAX_TSD_LENGTH_STR}', "
+        f"using default 5000000"
+    )
+    _MAX_TSD_LENGTH = 5_000_000
+
+# Module-level tracking
+_AUTO_BATCH_LAST_WARNED_SIZE: int = 0
 
 
 def get_fft_optimal_size(input_size: int) -> int:
@@ -217,6 +234,8 @@ def _auto_batch(x: np.ndarray) -> np.ndarray:
         1darray: Original array if length <= limit, otherwise batched
         (down-sampled) array with length <= _MAX_TSD_LENGTH.
     """
+    global _AUTO_BATCH_LAST_WARNED_SIZE
+
     if _MAX_TSD_LENGTH <= 0 or x.size <= _MAX_TSD_LENGTH:
         return x
 
@@ -224,10 +243,13 @@ def _auto_batch(x: np.ndarray) -> np.ndarray:
     # Ceiling division: (n + limit - 1) // limit
     batch_size = (x.size + _MAX_TSD_LENGTH - 1) // _MAX_TSD_LENGTH
 
-    cr_warning(
-        f"Time series length ({x.size}) exceeds safe limit "
-        f"({_MAX_TSD_LENGTH}). Auto-batching with batch_size={batch_size}."
-    )
+    # Warn only when batch_size changes to avoid log flooding
+    if batch_size != _AUTO_BATCH_LAST_WARNED_SIZE:
+        cr_warning(
+            f"Time series length ({x.size}) exceeds safe limit "
+            f"({_MAX_TSD_LENGTH}). Auto-batching with batch_size={batch_size}."
+        )
+        _AUTO_BATCH_LAST_WARNED_SIZE = batch_size
 
     return batch(x, batch_size=batch_size, func=np.mean)
 
@@ -436,7 +458,7 @@ def auto_covariance(
     """
     x, _ = _validate_and_prepare_input(x)
 
-    # Auto-batch if series exceeds safe length to prevent MPI/BLAS deadlock
+    # Auto-batch if series exceeds safe length
     x = _auto_batch(x)
 
     # Fluctuations (Center the data)
@@ -657,7 +679,7 @@ def modified_periodogram(
     """
     x, _ = _validate_and_prepare_input(x)
 
-    # Auto-batch if series exceeds safe length to prevent MPI/BLAS deadlock
+    # Auto-batch if series exceeds safe length
     x = _auto_batch(x)
 
     if with_mean:

@@ -151,16 +151,30 @@ If convergence seems too fast or too slow:
 Deadlock or hang inside simulations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If your simulation (e.g., LAMMPS with OpenMP) deadlocks or severely slows down
-when using kim-convergence, set the following environment variable **before**
-launching the simulation:
+If your simulation (e.g., LAMMPS with MPI) hangs at high step counts
+(>5 million), kim-convergence automatically batches long time series to prevent
+BLAS/MPI threading conflicts. The limit is controlled by:
+
+.. code-block:: bash
+
+   export KIM_CONV_MAX_TSD_LENGTH=5000000  # default, 5 million samples
+   # or stricter:
+   export KIM_CONV_MAX_TSD_LENGTH=3000000
+
+Set to ``0`` to disable auto-batching (may deadlock on very long runs).
+
+If auto-batching does not resolve the hang, force isolated subprocesses and
+set the following environment variable **before** launching the simulation:
 
 .. code-block:: bash
 
    export KIM_CONV_FORCE_SUBPROC=1
 
-This forces correlation and FFT computations into isolated subprocesses,
-preventing threading conflicts with the host simulator's parallelism.
+This isolates FFT/correlation computations via multiprocessing spawn,
+avoiding all threading conflicts with the host simulator.
+
+**Recommendation:** Use ``KIM_CONV_MAX_TSD_LENGTH`` first; escalate to
+``KIM_CONV_FORCE_SUBPROC`` only if hangs persist.
 
 **Important performance note**:
 
