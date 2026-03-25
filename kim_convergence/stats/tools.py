@@ -38,7 +38,8 @@ Environment Variables
 
 ``KIM_CONV_MAX_TSD_LENGTH``
     Maximum allowed length for time series data arrays processed by
-    statistical functions (autocovariance, cross-covariance, periodogram).
+    statistical functions (autocovariance, cross-covariance, auto_correlate,
+    cross_correlate, modified_periodogram, periodogram).
     If a time series exceeds this length, it is automatically batched
     (block-averaged) to reduce the size while preserving the mean and
     low-frequency statistical properties.
@@ -458,6 +459,9 @@ def auto_covariance(
     """
     x, _ = _validate_and_prepare_input(x)
 
+    # Auto-batch if series exceeds safe length
+    x = _auto_batch(x)
+
     # Fluctuations (Center the data)
     dx = x - np.mean(x)
 
@@ -504,6 +508,10 @@ def cross_covariance(
 
     assert isinstance(y, np.ndarray)  # keeps mypy happy
 
+    # Auto-batch if series exceeds safe length
+    x = _auto_batch(x)
+    y = _auto_batch(y)
+
     # Fluctuations
     dx = x - x.mean()
     dy = y - y.mean()
@@ -537,6 +545,7 @@ def auto_correlate(
     """
     x = np.asarray(x, dtype=np.float64)
 
+    # Auto-batch if series exceeds safe length
     x = _auto_batch(x)
 
     # Calculate (estimate) the auto covariances
@@ -601,6 +610,7 @@ def cross_correlate(
     x = np.asarray(x, dtype=np.float64)
     y = np.asarray(y, dtype=np.float64)
 
+    # Auto-batch if series exceeds safe length
     x = _auto_batch(x)
     y = _auto_batch(y)
 
