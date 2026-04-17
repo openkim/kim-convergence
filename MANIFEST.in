@@ -1,2 +1,7 @@
 include kim_convergence/_version.py
 recursive-include doc/files/ *
+
+# Include single-threaded FFT extension sources
+recursive-include kim_convergence/stats/_stfft *.h *.cpp *.py
+
+include LICENSE
