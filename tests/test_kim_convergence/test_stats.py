@@ -10,6 +10,21 @@ except Exception as e:  # intentional catch-all
 
 from kim_convergence import CRError
 
+try:
+    from kim_convergence.stats import _stfft as stfft_mod
+
+    STFFT_AVAILABLE = stfft_mod.STFFT_AVAILABLE
+    stfft_rfft = stfft_mod.rfft
+    stfft_irfft = stfft_mod.irfft
+except ImportError:
+    STFFT_AVAILABLE = False
+
+    def stfft_rfft(*args, **kwargs):
+        raise ImportError("STFFT extension not built")
+
+    def stfft_irfft(*args, **kwargs):
+        raise ImportError("STFFT extension not built")
+
 
 class TestStatsModule(unittest.TestCase):
     """Test stats module components."""
@@ -761,3 +776,31 @@ class TestStatsModule(unittest.TestCase):
 
         x = np.array([2, 2])
         self.assertEqual(cr.skew(x, bias=True), 0.0)
+
+
+@unittest.skipUnless(STFFT_AVAILABLE, "STFFT extension not built")
+class TestStfftWrapper(unittest.TestCase):
+    """Test STFFT wrapper edge cases and basic behavior."""
+
+    def test_stfft_rfft_invalid_n_raises(self):
+        """Test rfft rejects non-positive n."""
+        x = np.array([1.0, 2.0], dtype=np.float64)
+        self.assertRaises(ValueError, stfft_rfft, x, 0)
+        self.assertRaises(ValueError, stfft_rfft, x, -3)
+
+    def test_stfft_irfft_invalid_n_raises(self):
+        """Test irfft rejects non-positive explicit n."""
+        x = np.array([1.0 + 0.0j], dtype=np.complex128)
+        self.assertRaises(ValueError, stfft_irfft, x, 0)
+        self.assertRaises(ValueError, stfft_irfft, x, -1)
+
+    def test_stfft_irfft_default_n_len1_raises(self):
+        """Test current default-n behavior for length-1 spectrum."""
+        x = np.array([1.0 + 0.0j], dtype=np.complex128)
+        self.assertRaises(ValueError, stfft_irfft, x)
+
+    def test_stfft_round_trip(self):
+        """Test rfft/irfft round trip with explicit n."""
+        x = np.linspace(0.0, 1.0, 32, dtype=np.float64)
+        y = stfft_irfft(stfft_rfft(x, 32), 32)
+        np.testing.assert_allclose(y, x, rtol=1e-12, atol=1e-12)
