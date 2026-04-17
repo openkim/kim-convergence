@@ -35,6 +35,19 @@ Environment Variables
         mpirun -np 8 lmp -in in.my_simulation   # or similar
 
     This flag is optional and should remain unset in nearly all cases.
+
+``KIM_CONV_STFFT``
+    If set (to any value), uses the single-threaded pocketfft extension
+    instead of NumPy's FFT. This avoids threading deadlocks in MPI
+    environments (e.g., LAMMPS with 20+ ranks) but requires the C++
+    extension to be built at install time.
+
+    Example usage:
+
+    .. code-block:: bash
+
+        export KIM_CONV_STFFT=1
+        mpirun -np 20 lmp -in in.my_simulation   # or similar
 """
 
 from bisect import bisect_left
@@ -60,6 +73,25 @@ __all__ = [
     "periodogram",
     "skew",
 ]
+
+
+# FFT backend selection (static at import time)
+if os.getenv("KIM_CONV_STFFT"):
+    try:
+        from kim_convergence.stats._stfft import rfft as _rfft, irfft as _irfft
+        _USE_STFFT = True
+    except ImportError:
+        from kim_convergence import cr_warning
+        cr_warning(
+            "KIM_CONV_STFFT is set but the single-threaded FFT extension "
+            "is not built. Using numpy.fft instead. To build the extension, "
+            "install kim-convergence with a C++ compiler available."
+        )
+        from numpy.fft import rfft as _rfft, irfft as _irfft
+        _USE_STFFT = False
+else:
+    from numpy.fft import rfft as _rfft, irfft as _irfft
+    _USE_STFFT = False
 
 
 FFTURN = (8, 9, 10, 12, 15, 16, 18, 20,
@@ -181,18 +213,18 @@ def _fft_corr(dx: np.ndarray, dy: Optional[np.ndarray] = None) -> np.ndarray:
     # Find the optimal size for the FFT solver
     optimal_size = get_fft_optimal_size(2 * dx_size)
 
-    dftx = np.fft.rfft(dx, n=optimal_size)
+    dftx = _rfft(dx, n=optimal_size)
 
     if dy is None:
         # Auto-covariance
         dft = dftx * np.conjugate(dftx)
     else:
         # Cross-covariance
-        dfty = np.fft.rfft(dy, n=optimal_size)
+        dfty = _rfft(dy, n=optimal_size)
         dft = dftx * np.conjugate(dfty)
 
     # Compute the one-dimensional inverse discrete Fourier Transform
-    result = np.fft.irfft(dft, n=optimal_size)[:dx_size]
+    result = _irfft(dft, n=optimal_size)[:dx_size]
     return result.real
 
 
@@ -268,8 +300,17 @@ def _subproc_perio(dx_bytes: bytes, dx_size: int, q: mp.Queue) -> None:
     try:
         dx = np.frombuffer(dx_bytes, dtype=np.float64, count=dx_size)
 
+        # In subprocess, re-evaluate backend choice from env var
+        if os.getenv("KIM_CONV_STFFT"):
+            try:
+                from kim_convergence.stats._stfft import rfft as _sp_rfft
+            except ImportError:
+                from numpy.fft import rfft as _sp_rfft
+        else:
+            from numpy.fft import rfft as _sp_rfft
+
         # Compute the one-dimensional discrete Fourier Transform
-        dft = np.fft.rfft(dx)[1:]
+        dft = _sp_rfft(dx)[1:]
         result = dft * np.conjugate(dft)
 
         q.put(result)
@@ -608,7 +649,7 @@ def modified_periodogram(
             result = _isolate_perio(dx)
         else:
             # Compute the one-dimensional discrete Fourier Transform
-            dft = np.fft.rfft(dx)[1:]
+            dft = _rfft(dx)[1:]
             result = dft * np.conjugate(dft)
     else:
         # The periodogram is defined in [heidelberger1981]_ as,
