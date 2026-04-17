@@ -138,3 +138,6 @@ Guidelines: [Contributing Guide](https://kim-convergence.readthedocs.io/en/lates
 ## License
 
 LGPL-2.1-or-later — see [LICENSE](LICENSE).
+
+This package includes [pocketfft](https://gitlab.mpcdf.mpg.de/mtr/pocketfft)
+(BSD-3-Clause, Copyright Max-Planck-Society 2010–2024).

@@ -30,3 +30,16 @@ jobs:
     - name: Test with unittest
       run: |
         python -m tests
+    - name: Verify STFFT backend is active
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        KIM_CONV_STFFT: "1"
+      run: |
+        python -c "from kim_convergence.stats._stfft import STFFT_AVAILABLE; assert STFFT_AVAILABLE, 'STFFT extension not built'"
+        python -c "import kim_convergence.stats.tools as t; assert t._USE_STFFT, 'STFFT backend not selected'; print(t._rfft.__module__, t._irfft.__module__)"
+    - name: Test STFFT wrapper cases
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        KIM_CONV_STFFT: "1"
+      run: |
+        python -m unittest tests.test_kim_convergence.test_stats.TestStfftWrapper
