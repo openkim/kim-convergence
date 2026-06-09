@@ -206,3 +206,96 @@ class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
         x[2] = -np.inf
 
         self.assertRaises(CRError, cr.estimate_equilibration_length, x)
+
+    def test_invalid_solver(self):
+        """An unknown solver must raise CRError."""
+        rng = np.random.RandomState(12345)
+        x = np.ones(100) * 10 + (rng.random_sample(100) - 0.5)
+
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, solver="bogus")
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, solver="")
+        self.assertRaises(CRError, cr.estimate_equilibration_length, x, solver=None)
+
+    def _effective_sample_size(self, x, t, si_value):
+        """N_eff = (N - t) / si, the quantity the solvers maximize."""
+        return (x.size - t) / si_value
+
+    def test_solver_equivalence(self):
+        """The unimodal (ternary) solver is an *approximate* maximizer: on a
+        series with a decaying transient it must return a statistically
+        equivalent result to the exhaustive scan -- a nearly identical
+        statistical inefficiency and an effective sample size within a small
+        fraction of the exhaustive optimum -- but not necessarily the identical
+        integer index, because N_eff(t) is locally jagged near its (flat) peak.
+        """
+        rng = np.random.RandomState(12345)
+        n = 1000
+
+        # Stationary noise with a decaying transient added to the front: this
+        # makes N_eff(t) rise (as the transient is removed) then plateau.
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
+        transient = np.concatenate(
+            (np.arange(n // 10)[::-1] / float(n // 10), np.zeros(n - n // 10))
+        )
+        x += transient
+
+        for fft in (True, False):
+            n_exhaustive, si_exhaustive = cr.estimate_equilibration_length(
+                x, fft=fft, solver="exhaustive"
+            )
+            n_unimodal, si_unimodal = cr.estimate_equilibration_length(
+                x, fft=fft, solver="unimodal"
+            )
+
+            # Statistical inefficiency must agree closely (relative tolerance).
+            self.assertAlmostEqual(
+                si_unimodal, si_exhaustive, delta=0.01 * si_exhaustive + 1e-9
+            )
+
+            # The unimodal solver must not lose more than a small fraction of
+            # the optimal effective sample size found by the exhaustive scan.
+            neff_exhaustive = self._effective_sample_size(
+                x, n_exhaustive, si_exhaustive
+            )
+            neff_unimodal = self._effective_sample_size(x, n_unimodal, si_unimodal)
+            self.assertGreaterEqual(neff_unimodal, 0.98 * neff_exhaustive)
+
+    def test_solver_auto_matches_exhaustive_for_small_series(self):
+        """For small series, ``auto`` must behave exactly like ``exhaustive``
+        (the candidate-offset count is below the fallback threshold), so the
+        result is bit-for-bit identical."""
+        rng = np.random.RandomState(54321)
+        n = 1000
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
+        x += np.concatenate(
+            (np.arange(n // 10)[::-1] / float(n // 10), np.zeros(n - n // 10))
+        )
+
+        n_auto, si_auto = cr.estimate_equilibration_length(x, solver="auto")
+        n_exhaustive, si_exhaustive = cr.estimate_equilibration_length(
+            x, solver="exhaustive"
+        )
+
+        self.assertEqual(n_auto, n_exhaustive)
+        self.assertAlmostEqual(si_auto, si_exhaustive, places=12)
+
+    def test_unimodal_near_constant_series(self):
+        """On a near-constant (already-equilibrated) series the unimodal solver
+        must return a statistically equivalent result: si ~= 1 and an effective
+        sample size within a small fraction of the exhaustive optimum."""
+        rng = np.random.RandomState(7)
+        x = np.ones(200) * 5.0 + (rng.random_sample(200) - 0.5) * 1e-3
+
+        n_exhaustive, si_exhaustive = cr.estimate_equilibration_length(
+            x, solver="exhaustive"
+        )
+        n_unimodal, si_unimodal = cr.estimate_equilibration_length(
+            x, solver="unimodal"
+        )
+
+        self.assertAlmostEqual(
+            si_unimodal, si_exhaustive, delta=0.01 * si_exhaustive + 1e-9
+        )
+        neff_exhaustive = self._effective_sample_size(x, n_exhaustive, si_exhaustive)
+        neff_unimodal = self._effective_sample_size(x, n_unimodal, si_unimodal)
+        self.assertGreaterEqual(neff_unimodal, 0.98 * neff_exhaustive)

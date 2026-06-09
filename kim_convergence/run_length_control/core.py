@@ -37,6 +37,7 @@ from kim_convergence._default import (
     _DEFAULT_SI,
     _DEFAULT_NSKIP,
     _DEFAULT_MINIMUM_CORRELATION_TIME,
+    _DEFAULT_EQUILIBRATION_SOLVER,
 )
 
 
@@ -90,6 +91,7 @@ def run_length_control(
     si: str = _DEFAULT_SI,  # type: ignore[assignment]
     nskip: Optional[int] = _DEFAULT_NSKIP,
     minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
+    equilibration_solver: str = _DEFAULT_EQUILIBRATION_SOLVER,
     dump_trajectory: bool = False,
     dump_trajectory_fp: str = "kim_convergence_trajectory.edn",
     fp: Any = None,
@@ -432,6 +434,13 @@ def run_length_control(
             terminates after computing the correlation time out to
             minimum_correlation_time when the correlation function first
             goes negative. (default: None)
+        equilibration_solver (str, optional): offset-search strategy used when
+            refining the equilibration length, one of ``"auto"``,
+            ``"exhaustive"``, or ``"unimodal"``. ``"auto"`` uses the exact
+            exhaustive scan for short series and switches to the fast unimodal
+            (ternary) search for long series, where the exhaustive scan's
+            :math:`O(N^2)` cost is prohibitive. See
+            ``estimate_equilibration_length`` for details. (default: "auto")
         dump_trajectory (bool, optional): if ``True``, dump the final trajectory
             data to a file ``dump_trajectory_fp``. (default: False)
         dump_trajectory_fp (str, object with a write(string) method, optional):
@@ -543,6 +552,7 @@ def run_length_control(
             fft=fft,
             minimum_correlation_time=minimum_correlation_time,
             number_of_cores=number_of_cores,
+            solver=equilibration_solver,
             dump_trajectory=dump_trajectory,
             dump_trajectory_fp=dump_trajectory_fp,
         )
