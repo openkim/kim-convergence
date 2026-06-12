@@ -19,6 +19,7 @@ from kim_convergence._default import (
     _DEFAULT_SI,
     _DEFAULT_NSKIP,
     _DEFAULT_MINIMUM_CORRELATION_TIME,
+    _DEFAULT_EQUILIBRATION_SOLVER,
 )
 
 from ._argument_parser import ArgumentParser
@@ -52,6 +53,11 @@ ABSOLUTE_ACCURACY: Optional[float] = None
 CONFIDENCE: float = 0.95
 # Method to use for approximating the upper confidence limit of the mean.
 UCL_METHOD: str = "uncorrelated_sample"
+# Offset-search strategy used when refining the equilibration length, one of
+# "auto", "exhaustive", or "unimodal". "auto" uses the exact exhaustive scan
+# for short series and switches to the fast unimodal (ternary) search for long
+# series, where the exhaustive scan's O(N^2) cost is prohibitive.
+EQUILIBRATION_SOLVER: str = _DEFAULT_EQUILIBRATION_SOLVER
 # if ``True``, dump the final trajectory data to a file.
 DUMP_TRAJECTORY: bool = False
 
@@ -136,6 +142,7 @@ class Driver:
                     si=_DEFAULT_SI,  # type: ignore[arg-type]
                     nskip=_DEFAULT_NSKIP,
                     minimum_correlation_time=_DEFAULT_MINIMUM_CORRELATION_TIME,
+                    equilibration_solver=EQUILIBRATION_SOLVER,
                     dump_trajectory=DUMP_TRAJECTORY,
                     dump_trajectory_fp="kim_convergence_trajectory.edn",
                     fp="return",
