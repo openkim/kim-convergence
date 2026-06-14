@@ -477,6 +477,7 @@ def run_length_control(
         heidel_welch_number_points=heidel_welch_number_points,
         number_of_cores=number_of_cores,
         minimum_correlation_time=minimum_correlation_time,
+        equilibration_solver=equilibration_solver,
     )
 
     # 2.0 Normalize per-variable parameters to lists

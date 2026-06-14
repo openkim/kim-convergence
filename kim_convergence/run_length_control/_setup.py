@@ -43,6 +43,7 @@ def _setup_algorithm(
     heidel_welch_number_points: int,
     number_of_cores: int,
     minimum_correlation_time: Optional[int],
+    equilibration_solver: str,
 ) -> tuple[int, UCLBase]:
     r"""
     Perform initial validation and setup of parameters and UCL estimator.
@@ -78,6 +79,17 @@ def _setup_algorithm(
     cr_check(number_of_cores, "number_of_cores", int, 1)
     if minimum_correlation_time is not None:
         cr_check(minimum_correlation_time, "minimum_correlation_time", int, 1)
+
+    # Validate the equilibration solver here so an invalid value fails fast:
+    # estimate_equilibration_length (which also validates it) is only reached
+    # in the refinement branch after equilibration is detected, so a late
+    # check could be skipped entirely.
+    if equilibration_solver not in ("auto", "exhaustive", "unimodal"):
+        raise CRError(
+            f'invalid equilibration_solver = "{equilibration_solver}". '
+            'equilibration_solver must be one of "auto", "exhaustive", or '
+            '"unimodal".'
+        )
 
     if maximum_equilibration_step is None:
         maximum_equilibration_step = maximum_run_length // 2

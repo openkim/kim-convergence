@@ -12,6 +12,8 @@ try:
 except Exception as e:  # intentional catch-all
     raise RuntimeError("Failed to import `kim-convergence` utility module") from e
 
+from kim_convergence import CRError
+
 
 start = 0
 stop = 0
@@ -42,6 +44,26 @@ class TimeseriesModule(unittest.TestCase):
             if step > len(lst):
                 lst.append(words)
     data = np.array(lst, dtype=np.float64).reshape((len(lst), len(lst[0])))
+
+    def test_invalid_equilibration_solver(self):
+        """An invalid equilibration_solver must fail fast (before acquiring any
+        trajectory data) with a CRError."""
+
+        def never_called_get_trajectory(step):
+            raise AssertionError(
+                "get_trajectory must not be called when equilibration_solver "
+                "is invalid; validation should fail first."
+            )
+
+        self.assertRaises(
+            CRError,
+            cr.run_length_control,
+            get_trajectory=never_called_get_trajectory,
+            number_of_variables=1,
+            relative_accuracy=0.01,
+            equilibration_solver="bogus",
+            fp="return",
+        )
 
     def test_timeseries_default(self):
         """Test run_length_control function."""
