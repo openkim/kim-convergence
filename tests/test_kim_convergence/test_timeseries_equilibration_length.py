@@ -279,6 +279,28 @@ class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
         self.assertEqual(n_auto, n_exhaustive)
         self.assertAlmostEqual(si_auto, si_exhaustive, places=12)
 
+    def test_solver_auto_matches_unimodal_for_large_series(self):
+        """For large series, ``auto`` must dispatch to the unimodal solver and
+        return a bit-for-bit identical result. The candidate-offset count
+        (~0.75 * n with the default ignore_end) must exceed the fallback
+        threshold so that ``auto`` does not use the exhaustive scan."""
+        rng = np.random.RandomState(98765)
+        # n chosen so that ~0.75 * n candidate offsets exceeds the 10000
+        # exhaustive-scan threshold, forcing auto -> unimodal.
+        n = 20000
+        x = np.ones(n) * 10 + (rng.random_sample(n) - 0.5)
+        x += np.concatenate(
+            (np.arange(n // 10)[::-1] / float(n // 10), np.zeros(n - n // 10))
+        )
+
+        n_auto, si_auto = cr.estimate_equilibration_length(x, solver="auto")
+        n_unimodal, si_unimodal = cr.estimate_equilibration_length(
+            x, solver="unimodal"
+        )
+
+        self.assertEqual(n_auto, n_unimodal)
+        self.assertAlmostEqual(si_auto, si_unimodal, places=12)
+
     def test_unimodal_near_constant_series(self):
         """On a near-constant (already-equilibrated) series the unimodal solver
         must return a statistically equivalent result: si ~= 1 and an effective
