@@ -23,6 +23,7 @@ All symbols are private implementation details of the
 from typing import Callable, Optional
 
 from kim_convergence import CRError, cr_check, cr_warning, ucl_methods
+from kim_convergence._default import _EQUILIBRATION_SOLVERS
 from kim_convergence.ucl import UCLBase
 
 from ._trajectory import _check_get_trajectory
@@ -84,11 +85,11 @@ def _setup_algorithm(
     # estimate_equilibration_length (which also validates it) is only reached
     # in the refinement branch after equilibration is detected, so a late
     # check could be skipped entirely.
-    if equilibration_solver not in ("auto", "exhaustive", "unimodal"):
+    if equilibration_solver not in _EQUILIBRATION_SOLVERS:
         raise CRError(
             f'invalid equilibration_solver = "{equilibration_solver}". '
-            'equilibration_solver must be one of "auto", "exhaustive", or '
-            '"unimodal".'
+            "equilibration_solver must be one of:\n\t- "
+            + "\n\t- ".join(_EQUILIBRATION_SOLVERS)
         )
 
     if maximum_equilibration_step is None:

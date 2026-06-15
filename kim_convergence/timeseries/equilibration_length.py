@@ -27,6 +27,7 @@ from kim_convergence._default import (
     _DEFAULT_NUMBER_OF_CORES,
     _DEFAULT_EQUILIBRATION_SOLVER,
     _DEFAULT_EQUILIBRATION_EXHAUSTIVE_MAX_EVALS,
+    _EQUILIBRATION_SOLVERS,
 )
 from kim_convergence.err import CRError, CRSampleSizeError
 
@@ -327,10 +328,10 @@ def estimate_equilibration_length(
     elif nskip < 1:
         raise CRError("nskip must be a positive `int`.")
 
-    if solver not in ("auto", "exhaustive", "unimodal"):
+    if solver not in _EQUILIBRATION_SOLVERS:
         raise CRError(
-            f'invalid solver = "{solver}". solver must be one of "auto", '
-            '"exhaustive", or "unimodal".'
+            f'invalid solver = "{solver}". solver must be one of:\n\t- '
+            + "\n\t- ".join(_EQUILIBRATION_SOLVERS)
         )
 
     ignore_end = _normalize_ignore_end(ignore_end, time_series_data_size, si)
