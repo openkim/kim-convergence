@@ -439,7 +439,7 @@ def run_length_control(
             ``"exhaustive"``, or ``"unimodal"``. ``"auto"`` uses the exact
             exhaustive scan for short series and switches to the fast unimodal
             (ternary) search for long series, where the exhaustive scan's
-            :math:`O(N^2)` cost is prohibitive. See
+            :math:`O(N^2 \log N)` cost is prohibitive. See
             ``estimate_equilibration_length`` for details. (default: "auto")
         dump_trajectory (bool, optional): if ``True``, dump the final trajectory
             data to a file ``dump_trajectory_fp``. (default: False)

@@ -56,7 +56,7 @@ UCL_METHOD: str = "uncorrelated_sample"
 # Offset-search strategy used when refining the equilibration length, one of
 # "auto", "exhaustive", or "unimodal". "auto" uses the exact exhaustive scan
 # for short series and switches to the fast unimodal (ternary) search for long
-# series, where the exhaustive scan's O(N^2) cost is prohibitive.
+# series, where the exhaustive scan's O(N^2 log N) cost is prohibitive.
 EQUILIBRATION_SOLVER: str = _DEFAULT_EQUILIBRATION_SOLVER
 # if ``True``, dump the final trajectory data to a file.
 DUMP_TRAJECTORY: bool = False

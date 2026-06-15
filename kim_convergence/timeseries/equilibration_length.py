@@ -240,11 +240,13 @@ def estimate_equilibration_length(
     * ``"exhaustive"`` evaluates every candidate offset
       ``t in range(0, upper_bound, nskip)``. This is exact but costs one
       statistical-inefficiency computation per offset; because each computation
-      is itself an :math:`O(N \log N)` FFT, the total cost is :math:`O(N^2)` and
-      becomes intractable for long series (millions of points).
+      is itself an :math:`O(N \log N)` FFT, the total cost is
+      :math:`O(N^2 \log N)` and becomes intractable for long series (millions
+      of points).
     * ``"unimodal"`` performs a ternary search, exploiting that
       :math:`N_{eff}(t)` is (to a good approximation) unimodal in ``t``. It
-      evaluates only :math:`O(\log N)` offsets.
+      evaluates only :math:`O(\log N)` offsets, for a total cost of
+      :math:`O(N \log^2 N)`.
 
     .. note::
         The ``"unimodal"`` solver is an *approximate* maximizer. Because
@@ -256,7 +258,7 @@ def estimate_equilibration_length(
         exhaustive optimum, and the difference in discarded samples is
         statistically negligible. Use ``solver="exhaustive"`` if the exact
         argmax is required and the series is short enough to afford the
-        :math:`O(N^2)` cost.
+        :math:`O(N^2 \log N)` cost.
 
     Args:
         time_series_data (array_like, 1d): Time-series data.
@@ -282,7 +284,7 @@ def estimate_equilibration_length(
             ``"exhaustive"``, or ``"unimodal"``. ``"auto"`` uses the exhaustive
             scan when the number of candidate offsets is small (cheap and exact)
             and switches to the unimodal ternary search for large series, where
-            the exhaustive scan's :math:`O(N^2)` cost is prohibitive.
+            the exhaustive scan's :math:`O(N^2 \log N)` cost is prohibitive.
             (default: "auto")
 
     Returns:
@@ -358,7 +360,7 @@ def estimate_equilibration_length(
 
     # Resolve the "auto" solver: the exhaustive scan is exact and cheap when the
     # number of candidate offsets is small, but its total cost grows as
-    # O(N^2). For long series we fall back to the unimodal ternary search.
+    # O(N^2 log N). For long series we fall back to the unimodal ternary search.
     resolved_solver = solver
     if resolved_solver == "auto":
         if number_of_candidate_offsets > _DEFAULT_EQUILIBRATION_EXHAUSTIVE_MAX_EVALS:
