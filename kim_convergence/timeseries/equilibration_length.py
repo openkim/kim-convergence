@@ -25,6 +25,9 @@ from kim_convergence._default import (
     _DEFAULT_WITH_CENTERING,
     _DEFAULT_WITH_SCALING,
     _DEFAULT_NUMBER_OF_CORES,
+    _DEFAULT_EQUILIBRATION_SOLVER,
+    _DEFAULT_EQUILIBRATION_EXHAUSTIVE_MAX_EVALS,
+    _EQUILIBRATION_SOLVERS,
 )
 from kim_convergence.err import CRError, CRSampleSizeError
 
@@ -53,6 +56,85 @@ def _estimate_equilibration_length(
         si_value = x_size
     effective_samples_size = x_size / si_value
     return effective_samples_size, si_value, t
+
+
+def _unimodal_search_equilibration(
+    time_series_data: np.ndarray,
+    upper_bound: int,
+    nskip: int,
+    si_func: Callable,
+    fft: bool,
+    minimum_correlation_time: Optional[int],
+) -> tuple[int, float]:
+    r"""Locate the offset that maximizes the effective sample size.
+
+    The effective sample size :math:`N_{eff}(t) = (N - t) / g(x[t:])` (where
+    :math:`g` is the statistical inefficiency) is, to a good approximation,
+    unimodal in the offset :math:`t`: it rises as the initial transient is
+    removed, reaches a maximum, then falls as the remaining series ``(N - t)``
+    shrinks. This is the same objective the exhaustive scan maximizes; here we
+    find its peak with a ternary search over the candidate grid
+    ``t in range(0, upper_bound, nskip)`` so that only ~O(log N) statistical
+    inefficiency evaluations are required instead of one per offset.
+
+    The result is the *same* peak the exhaustive scan would find whenever the
+    objective is unimodal, but obtained in logarithmically many evaluations.
+
+    Args:
+        time_series_data (1darray): Time-series data.
+        upper_bound (int): Exclusive upper bound on the offset (already adjusted
+            for ``ignore_end``).
+        nskip (int): Spacing between candidate offsets.
+        si_func (callable): Statistical-inefficiency estimator.
+        fft (bool): Use FFT convolution.
+        minimum_correlation_time (Optional[int]): Passed through to ``si_func``.
+
+    Returns:
+        tuple[int, float]
+            equilibration_index_estimate, statistical_inefficiency_estimate.
+    """
+    # Candidate offsets are t = i * nskip for i in [0, n_grid).
+    n_grid = (upper_bound + nskip - 1) // nskip
+
+    # Memoize evaluations: a ternary search revisits the same indices, and each
+    # evaluation is an expensive FFT.
+    cache: dict[int, tuple[float, float]] = {}
+
+    def evaluate(i: int) -> float:
+        r"""Return effective sample size at grid index ``i`` (memoized)."""
+        if i not in cache:
+            effective_samples_size, si_value, _ = _estimate_equilibration_length(
+                time_series_data, i * nskip, si_func, fft, minimum_correlation_time
+            )
+            cache[i] = (effective_samples_size, si_value)
+        return cache[i][0]
+
+    # Ternary search for the maximum over integer grid indices [lo, hi].
+    lo = 0
+    hi = n_grid - 1
+    while hi - lo > 2:
+        third = (hi - lo) // 3
+        m1 = lo + third
+        m2 = hi - third
+        if evaluate(m1) < evaluate(m2):
+            lo = m1 + 1
+        else:
+            hi = m2 - 1
+
+    # Resolve the small remaining bracket exactly. Iterate in ascending index
+    # order and keep the first strict maximum, matching the exhaustive scan's
+    # tie-breaking (which keeps the earliest offset achieving the maximum).
+    best_effective_samples_size = -1.0
+    best_index = 0
+    best_si = 1.0
+    for i in range(lo, hi + 1):
+        effective_samples_size = evaluate(i)
+        if effective_samples_size > best_effective_samples_size:
+            best_effective_samples_size = effective_samples_size
+            best_si = cache[i][1]
+            best_index = i * nskip
+
+    return best_index, best_si
 
 
 def _normalize_ignore_end(
@@ -141,6 +223,7 @@ def estimate_equilibration_length(
     minimum_correlation_time: Optional[int] = _DEFAULT_MINIMUM_CORRELATION_TIME,
     ignore_end: Union[int, float, None] = _DEFAULT_IGNORE_END,
     number_of_cores: int = _DEFAULT_NUMBER_OF_CORES,
+    solver: str = _DEFAULT_EQUILIBRATION_SOLVER,
     batch_size: int = _DEFAULT_BATCH_SIZE,  # unused (API compatibility)
     scale: str = _DEFAULT_SCALE_METHOD,  # unused (API compatibility)
     with_centering: bool = _DEFAULT_WITH_CENTERING,  # unused (API compatibility)
@@ -150,6 +233,33 @@ def estimate_equilibration_length(
 
     Estimate the equilibration point in a time series data using the
     statistical inefficiencies [chodera2016]_, [geyer1992]_, [geyer2011]_.
+
+    The equilibration point is the offset ``t`` that maximizes the effective
+    sample size :math:`N_{eff}(t) = (N - t) / g(x[t:])`, where :math:`g` is the
+    statistical inefficiency. Two solvers find this maximum:
+
+    * ``"exhaustive"`` evaluates every candidate offset
+      ``t in range(0, upper_bound, nskip)``. This is exact but costs one
+      statistical-inefficiency computation per offset; because each computation
+      is itself an :math:`O(N \log N)` FFT, the total cost is
+      :math:`O(N^2 \log N)` and becomes intractable for long series (millions
+      of points).
+    * ``"unimodal"`` performs a ternary search, exploiting that
+      :math:`N_{eff}(t)` is (to a good approximation) unimodal in ``t``. It
+      evaluates only :math:`O(\log N)` offsets, for a total cost of
+      :math:`O(N \log^2 N)`.
+
+    .. note::
+        The ``"unimodal"`` solver is an *approximate* maximizer. Because
+        :math:`N_{eff}(t)` is locally jagged near its (typically flat) peak --
+        the statistical inefficiency fluctuates from offset to offset -- the
+        ternary search may return an equilibration index a few offsets away from
+        the exhaustive argmax. In practice the returned statistical inefficiency
+        and effective sample size are within a fraction of a percent of the
+        exhaustive optimum, and the difference in discarded samples is
+        statistically negligible. Use ``solver="exhaustive"`` if the exact
+        argmax is required and the series is short enough to afford the
+        :math:`O(N^2 \log N)` cost.
 
     Args:
         time_series_data (array_like, 1d): Time-series data.
@@ -171,6 +281,12 @@ def estimate_equilibration_length(
             parallel computing code is used at all. For n_jobs below -1,
             (n_cpus + 1 + n_jobs) are used. Thus for n_jobs = -2, all CPUs but
             one are used. (default: 1)
+        solver (str, optional): Offset-search strategy, one of ``"auto"``,
+            ``"exhaustive"``, or ``"unimodal"``. ``"auto"`` uses the exhaustive
+            scan when the number of candidate offsets is small (cheap and exact)
+            and switches to the unimodal ternary search for large series, where
+            the exhaustive scan's :math:`O(N^2 \log N)` cost is prohibitive.
+            (default: "auto")
 
     Returns:
         tuple[int, float]
@@ -212,6 +328,12 @@ def estimate_equilibration_length(
     elif nskip < 1:
         raise CRError("nskip must be a positive `int`.")
 
+    if solver not in _EQUILIBRATION_SOLVERS:
+        raise CRError(
+            f'invalid solver = "{solver}". solver must be one of:\n\t- '
+            + "\n\t- ".join(_EQUILIBRATION_SOLVERS)
+        )
+
     ignore_end = _normalize_ignore_end(ignore_end, time_series_data_size, si)
 
     # Special case if timeseries is constant.
@@ -233,6 +355,31 @@ def estimate_equilibration_length(
     upper_bound = time_series_data_size - ignore_end
 
     nskip = min(nskip, upper_bound)
+
+    # Number of candidate offsets t = 0, nskip, 2*nskip, ... < upper_bound.
+    number_of_candidate_offsets = (upper_bound + nskip - 1) // nskip
+
+    # Resolve the "auto" solver: the exhaustive scan is exact and cheap when the
+    # number of candidate offsets is small, but its total cost grows as
+    # O(N^2 log N). For long series we fall back to the unimodal ternary search.
+    resolved_solver = solver
+    if resolved_solver == "auto":
+        if number_of_candidate_offsets > _DEFAULT_EQUILIBRATION_EXHAUSTIVE_MAX_EVALS:
+            resolved_solver = "unimodal"
+        else:
+            resolved_solver = "exhaustive"
+
+    if resolved_solver == "unimodal":
+        # The ternary search is inherently serial (each step depends on the
+        # previous evaluations), so it ignores number_of_cores.
+        return _unimodal_search_equilibration(
+            time_series_data,
+            upper_bound,
+            nskip,
+            si_func,
+            fft,
+            minimum_correlation_time,
+        )
 
     if number_of_cores != 1:
         with parallel_backend("loky", n_jobs=number_of_cores):

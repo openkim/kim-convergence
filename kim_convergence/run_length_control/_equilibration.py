@@ -168,6 +168,7 @@ def _equilibration_stage(
     fft: bool,
     minimum_correlation_time: Optional[int],
     number_of_cores: int,
+    solver: str,
     dump_trajectory: bool,
     dump_trajectory_fp,
 ) -> tuple[np.ndarray, int, int, list[int], bool]:
@@ -323,6 +324,7 @@ def _equilibration_stage(
                 minimum_correlation_time=minimum_correlation_time,
                 ignore_end=ignore_end,
                 number_of_cores=number_of_cores,
+                solver=solver,
             )
 
             # Correct the equilibration step

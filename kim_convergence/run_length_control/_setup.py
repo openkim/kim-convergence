@@ -23,6 +23,7 @@ All symbols are private implementation details of the
 from typing import Callable, Optional
 
 from kim_convergence import CRError, cr_check, cr_warning, ucl_methods
+from kim_convergence._default import _EQUILIBRATION_SOLVERS
 from kim_convergence.ucl import UCLBase
 
 from ._trajectory import _check_get_trajectory
@@ -43,6 +44,7 @@ def _setup_algorithm(
     heidel_welch_number_points: int,
     number_of_cores: int,
     minimum_correlation_time: Optional[int],
+    equilibration_solver: str,
 ) -> tuple[int, UCLBase]:
     r"""
     Perform initial validation and setup of parameters and UCL estimator.
@@ -78,6 +80,17 @@ def _setup_algorithm(
     cr_check(number_of_cores, "number_of_cores", int, 1)
     if minimum_correlation_time is not None:
         cr_check(minimum_correlation_time, "minimum_correlation_time", int, 1)
+
+    # Validate the equilibration solver here so an invalid value fails fast:
+    # estimate_equilibration_length (which also validates it) is only reached
+    # in the refinement branch after equilibration is detected, so a late
+    # check could be skipped entirely.
+    if equilibration_solver not in _EQUILIBRATION_SOLVERS:
+        raise CRError(
+            f'invalid equilibration_solver = "{equilibration_solver}". '
+            "equilibration_solver must be one of:\n\t- "
+            + "\n\t- ".join(_EQUILIBRATION_SOLVERS)
+        )
 
     if maximum_equilibration_step is None:
         maximum_equilibration_step = maximum_run_length // 2
