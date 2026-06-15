@@ -55,8 +55,9 @@ class TimeseriesModule(unittest.TestCase):
                 "is invalid; validation should fail first."
             )
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             CRError,
+            r'invalid equilibration_solver = "bogus"',
             cr.run_length_control,
             get_trajectory=never_called_get_trajectory,
             number_of_variables=1,

@@ -212,7 +212,13 @@ class TestTimeseriesEquilibrationLengthModule(unittest.TestCase):
         rng = np.random.RandomState(12345)
         x = np.ones(100) * 10 + (rng.random_sample(100) - 0.5)
 
-        self.assertRaises(CRError, cr.estimate_equilibration_length, x, solver="bogus")
+        self.assertRaisesRegex(
+            CRError,
+            r'invalid solver = "bogus"',
+            cr.estimate_equilibration_length,
+            x,
+            solver="bogus",
+        )
         self.assertRaises(CRError, cr.estimate_equilibration_length, x, solver="")
         self.assertRaises(CRError, cr.estimate_equilibration_length, x, solver=None)
 
