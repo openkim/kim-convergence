@@ -42,7 +42,7 @@ Installation
 Requirements
 ~~~~~~~~~~~~~~~~~~~~~~
 
-``kim-convergence`` requires **Python 3.9 or later**. Download installers for
+``kim-convergence`` requires **Python 3.10 or later**. Download installers for
 all platforms from the `official Python website <https://www.python.org/getit/>`_.
 
 Using uv (Recommended)
