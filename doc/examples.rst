@@ -139,7 +139,7 @@ The LAMMPS integration works through LAMMPS's built-in Python interface.
    variable pea    equal "c_thermo_pe/v_natoms"
 
    # Call the Python function
-   python run_length_control input 4 SELF 1 variable pea format piss file run_length_control.py
+   python run_length_control input 4 SELF 1 variable pea format piss file cr_rlc_lammps.py
    python run_length_control invoke
 
 **Python function signature in LAMMPS context:**
@@ -164,13 +164,13 @@ Single variable:
 
 .. code-block:: bash
 
-   python run_length_control input 4 SELF 100 variable my_var format piss file run_length_control.py
+   python run_length_control input 4 SELF 100 variable my_var format piss file cr_rlc_lammps.py
 
 Multiple observables:
 
 .. code-block:: bash
 
-   python run_length_control input 6 SELF 10 variable energy compute temperature format pissss file run_length_control.py
+   python run_length_control input 6 SELF 10 variable energy compute temperature format pissss file cr_rlc_lammps.py
 
 6b. LAMMPS command (input-script fragment)
 ------------------------------------------
@@ -179,7 +179,7 @@ Add these two lines **after** your computes/variables are defined.
 
 .. code-block:: bash
 
-   python run_length_control input 4 SELF 100 v_pe format piss file run_length_control.py
+   python run_length_control input 4 SELF 100 variable pe format piss file cr_rlc_lammps.py
    python run_length_control invoke
 
 See :ref:`lammps-integration` above for Python implementation details.
