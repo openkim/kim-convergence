@@ -167,8 +167,8 @@ Key fields include ``converged``, ``total_run_length``, ``equilibration_step``,
 Integration with Simulation Packages
 ------------------------------------
 
-- **LAMMPS** and **OpenMM** are supported via dedicated callbacks (see
-  :doc:`examples` for full code).
+- **LAMMPS**, **OpenMM**, and **ASE** are supported via dedicated callbacks
+  (see :doc:`examples` for full code).
 - For **custom simulators**, simply provide a ``get_trajectory`` callable that
   returns a NumPy array.
 - Enable ``dump_trajectory=True`` to save raw data for debugging if convergence

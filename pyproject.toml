@@ -65,4 +65,5 @@ doc = [
     "myst-parser",
     "sphinxcontrib-mermaid",
     "sphinx-design",
+    "ase",
 ]

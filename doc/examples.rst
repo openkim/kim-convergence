@@ -184,7 +184,86 @@ Add these two lines **after** your computes/variables are defined.
 
 See :ref:`lammps-integration` above for Python implementation details.
 
-7. Batch re-analysis of existing files
+.. _ase-integration:
+
+7. ASE Integration
+------------------
+
+The :mod:`kim_convergence.ase` module drives an
+`ASE <https://ase-lib.org/>`_ ``MolecularDynamics`` object until the
+monitored property converges. It requires ASE (``pip install ase``).
+
+.. seealso::
+   Complete working example:
+   :download:`example_equilibration.py <../examples/ase/example_equilibration.py>`
+
+**Basic usage** – equilibrate a Cu system on temperature to 10 % accuracy:
+
+.. code-block:: python
+
+   from ase import units
+   from ase.build import bulk
+   from ase.calculators.emt import EMT
+   from ase.md.langevin import Langevin
+   from ase.md.velocitydistribution import MaxwellBoltzmannDistribution
+
+   from kim_convergence.ase import ASESampler, run_ase_equilibration
+
+   atoms = bulk("Cu", cubic=True) * (4, 4, 4)
+   atoms.calc = EMT()
+   MaxwellBoltzmannDistribution(atoms, temperature_K=600)
+
+   dyn = Langevin(atoms, timestep=5 * units.fs,
+                  temperature_K=500, friction=0.01 / units.fs)
+
+   sampler = ASESampler(dyn, property_names="temperature")
+   result = run_ase_equilibration(
+       sampler,
+       initial_run_length=500,
+       maximum_run_length=20000,
+       relative_accuracy=0.1,          # 10 %
+       confidence_coefficient=0.95)
+
+   if result["converged"]:
+       print(f"Equilibrated in {result['total_run_length']} samples")
+       print(f"Mean temperature : {result['mean']}")
+
+``run_ase_equilibration`` forwards all keyword arguments to
+:func:`kim_convergence.run_length_control` and returns its result dictionary
+(``get_trajectory``, ``fp``, and ``fp_format`` are reserved).
+
+**Multiple observables** – pass a list of property names:
+
+.. code-block:: python
+
+   sampler = ASESampler(dyn, property_names=["energy", "temperature"])
+
+**Sampling less frequently** – ``sample_interval`` collects a value every *N*
+MD steps (so ``initial_run_length`` samples run ``N * initial_run_length``
+steps):
+
+.. code-block:: python
+
+   sampler = ASESampler(dyn, property_names="energy", sample_interval=10)
+
+**Built-in properties:** ``energy`` (or ``potential_energy``),
+``kinetic_energy``, ``total_energy``, ``temperature``, ``volume``,
+``pressure``, ``density``.
+
+**Custom properties** – supply your own extractor (a callable taking an
+``Atoms`` object and returning a float):
+
+.. code-block:: python
+
+   def get_max_force(atoms):
+       return float(np.max(np.abs(atoms.get_forces())))
+
+   sampler = ASESampler(
+       dyn,
+       property_names="max_force",
+       extractors={"max_force": get_max_force})
+
+8. Batch re-analysis of existing files
 --------------------------------------
 
 Treat a long pre-computed series as a synthetic trajectory.
