@@ -34,6 +34,7 @@
    modules/stats
    modules/timeseries
    modules/other_utils
+   modules/ase
 
 .. toctree::
    :maxdepth: 2

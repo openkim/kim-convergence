@@ -68,8 +68,8 @@ Key Features
 - **Time Series Analysis:** Tools for statistical inefficiency, autocorrelation,
   and sampling uncorrelated data.
 
-- **Integration-Friendly:** Works with LAMMPS, OpenMM, and custom simulators via
-  a callback API.
+- **Integration-Friendly:** Works with LAMMPS, OpenMM, ASE, and custom
+  simulators via a callback API.
 
 For installation and basic usage, see :doc:`getting_started`. For scientific
 details, see :doc:`theory` and the Core Modules section.

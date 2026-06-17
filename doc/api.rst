@@ -107,3 +107,10 @@ CRSampleSizeError
 ~~~~~~~~~~~~~~~~~
 
 .. autoexception:: kim_convergence.err.CRSampleSizeError
+
+Optional Integrations
+---------------------
+
+ASE (Atomic Simulation Environment) integration is documented on its own page:
+see :doc:`modules/ase` for the ``ASESampler`` sampler, the
+``run_ase_equilibration`` driver, and the built-in property extractors.

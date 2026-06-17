@@ -121,7 +121,7 @@ Common Pitfalls
 Integration with Simulators
 ---------------------------
 
-* **Callbacks** – Provided for LAMMPS and OpenMM; return an array of shape
+* **Callbacks** – Provided for LAMMPS, OpenMM, and ASE; return an array of shape
   ``(n_variables, n_steps)``.
 * **Custom codes** – Implement ``get_trajectory(step)`` or
   ``get_trajectory(step, args)`` and pass the same signature to
